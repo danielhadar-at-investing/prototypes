@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Investing.com - What's Going On Prototype</title>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --green: #0ECB81;
+  --green-bg: rgba(14, 203, 129, 0.08);
+  --red: #E23636;
+  --red-bg: rgba(226, 54, 54, 0.08);
+  --border: #F0F0F0;
+  --border-dark: #E5E7EB;
+  --chip-active: #1A1A2E;
+  --chip-inactive: #F5F5F5;
+  --header-h: 48px;
+  --tab-h: 56px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+}
+
+html, body {
+  font-family: var(--font);
+  background: #E8E8ED;
+  color: var(--text-primary);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== PHONE FRAME ===== */
+#phone {
+  position: relative;
+  width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 420px) {
+  #phone { width: 100%; max-height: none; box-shadow: none; }
+}
+@media (min-height: 845px) {
+  #phone { margin-top: calc((100vh - 844px) / 2); border-radius: 44px; }
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 6px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.status-time {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.status-icons svg { width: 18px; height: 12px; }
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+}
+.logo-text span { color: var(--text-primary); }
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pro-btn {
+  background: var(--text-primary);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  letter-spacing: 0.1px;
+  cursor: pointer;
+}
+.search-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.search-btn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--text-primary);
+}
+
+/* ===== WHAT'S GOING ON BAR ===== */
+.wgo-container {
+  margin: 4px 16px 8px;
+  flex-shrink: 0;
+}
+.wgo-market-status {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  margin: 6px 0 8px;
+}
+.wgo-market-ticker {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+.wgo-market-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.wgo-market-item .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.wgo-market-item .status-dot.open {
+  background: var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.wgo-market-item .status-dot.countdown {
+  background: var(--text-tertiary);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.wgo-market-item .flag-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.wgo-cards {
+  display: flex;
+  gap: 8px;
+  height: 96px;
+}
+
+/* S&P 500 Card */
+.wgo-card {
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.wgo-sp500 {
+  flex: 0.7;
+  min-width: 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.wgo-sp500-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
+}
+.wgo-sp500-chart {
+  flex: 1;
+  min-height: 0;
+  margin: 2px -4px 2px;
+  position: relative;
+}
+.wgo-sp500-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+.wgo-sp500-bottom {
+  flex-shrink: 0;
+}
+.wgo-sp500-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.wgo-sp500-change {
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.wgo-sp500-change.up { color: var(--green); }
+.wgo-sp500-change.down { color: var(--red); }
+
+/* Article Card */
+.wgo-article {
+  flex: 1.4;
+  min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.wgo-article-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.wgo-article-slide.active {
+  opacity: 1;
+}
+.wgo-article-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.wgo-article-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+}
+.wgo-article-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 8px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+  letter-spacing: 0.05px;
+}
+.wgo-article-dots {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  display: flex;
+  gap: 3px;
+}
+.wgo-article-dots .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transition: background 0.3s;
+}
+.wgo-article-dots .dot.active {
+  background: #fff;
+}
+
+/* Fear & Greed Card */
+.wgo-fng {
+  flex: 0.6;
+  min-width: 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  padding: 8px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.wgo-fng-label {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: center;
+  line-height: 1.2;
+}
+.wgo-fng-gauge {
+  width: 60px;
+  height: 34px;
+  position: relative;
+  margin: 2px 0;
+}
+.wgo-fng-gauge canvas {
+  width: 100%;
+  height: 100%;
+}
+.wgo-fng-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.wgo-fng-sentiment {
+  font-size: 8px;
+  font-weight: 600;
+  color: #E88D00;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== CATEGORY TABS ===== */
+.categories {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  height: 42px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+.categories::-webkit-scrollbar { display: none; }
+.cat-tab {
+  position: relative;
+  padding: 10px 0;
+  margin-right: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+.cat-tab.active {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.cat-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 1px;
+}
+.cat-tab .fire-icon {
+  font-size: 12px;
+  margin-left: 2px;
+}
+
+/* ===== SYMBOL LIST ===== */
+.symbol-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.symbol-list::-webkit-scrollbar { display: none; }
+
+.symbol-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.symbol-row:active { background: #F9FAFB; }
+
+.symbol-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.symbol-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.symbol-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+.symbol-meta .badge {
+  display: inline-flex;
+  align-items: center;
+  background: #E8F5E9;
+  color: #388E3C;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.symbol-meta .clock-icon {
+  color: var(--red);
+  font-size: 11px;
+}
+
+.symbol-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.symbol-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+.symbol-price.tick-up { color: var(--green); }
+.symbol-price.tick-down { color: var(--red); }
+.symbol-change {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.symbol-change.up { color: var(--green); }
+.symbol-change.down { color: var(--red); }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  height: var(--tab-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+}
+.tab-item svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-tertiary);
+}
+.tab-item.active svg { color: #2563EB; }
+.tab-item span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.tab-item.active span { color: #2563EB; }
+
+/* Sale Slide */
+.wgo-article-slide-sale {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+}
+.wgo-article-slide-sale.active { opacity: 1; }
+.wgo-article-slide-sale .sale-sun {
+  font-size: 18px;
+  line-height: 1;
+}
+.wgo-article-slide-sale .sale-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.wgo-article-slide-sale .sale-pct {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin: 2px 0;
+}
+.wgo-article-slide-sale .sale-desc {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
+}
+
+/* ===== ARTICLE IMAGE PLACEHOLDERS (CSS-painted) ===== */
+.article-bg-1 {
+  background: linear-gradient(135deg, #1a2744 0%, #2d4a7a 40%, #1e3b5f 70%, #0f2035 100%);
+}
+.article-bg-2 {
+  background: linear-gradient(135deg, #3a2810 0%, #6b4c1e 30%, #c97e3a 60%, #f4a951 100%);
+}
+.article-bg-3 {
+  background: linear-gradient(135deg, #2c5f8a 0%, #1e4060 30%, #8a8a8a 60%, #c43030 90%);
+}
+</style>
+</head>
+<body>
+
+<div id="phone">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">13:18</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+      <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+      <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="logo-text">Investing.com</div>
+    <div class="top-bar-right">
+      <button class="pro-btn">Upgrade to Pro+</button>
+      <button class="search-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- What's Going On Bar -->
+  <div class="wgo-container">
+    <div class="wgo-market-status">
+      <div class="wgo-market-ticker" id="marketTicker">
+        <div class="wgo-market-item">
+          <span class="status-dot open"></span>
+          <span class="flag-icon">🇮🇱</span>
+          <span>IL Market is open</span>
+        </div>
+        <div class="wgo-market-item">
+          <span class="status-dot countdown"></span>
+          <span class="flag-icon">🇺🇸</span>
+          <span id="usCountdown">US Market open in 2 hrs 26 mins</span>
+        </div>
+      </div>
+    </div>
+    <div class="wgo-cards">
+      <!-- S&P 500 -->
+      <div class="wgo-card wgo-sp500">
+        <div class="wgo-sp500-label">S&P 500</div>
+        <div class="wgo-sp500-chart">
+          <canvas id="sp500Chart"></canvas>
+        </div>
+        <div class="wgo-sp500-bottom">
+          <div class="wgo-sp500-price" id="sp500Price">6,836.17</div>
+          <div class="wgo-sp500-change up" id="sp500Change">+3.41 (+0.05%)</div>
+        </div>
+      </div>
+
+      <!-- Fear & Greed -->
+      <div class="wgo-card wgo-fng">
+        <div class="wgo-fng-label">Fear &<br>Greed</div>
+        <div class="wgo-fng-gauge">
+          <canvas id="fngGauge"></canvas>
+        </div>
+        <div class="wgo-fng-value">36</div>
+        <div class="wgo-fng-sentiment">Fear</div>
+      </div>
+
+      <!-- Articles Carousel -->
+      <div class="wgo-card wgo-article" id="articleCarousel">
+        <div class="wgo-article-slide active" data-index="0">
+          <div class="wgo-article-img article-bg-1" ></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Futures lower; oil climbs; RBA raises rates</div>
+        </div>
+        <div class="wgo-article-slide-sale" data-index="1">
+          <div class="sale-sun">&#9728;&#65039;</div>
+          <div class="sale-title">Summer Sale</div>
+          <div class="sale-pct">60% off</div>
+          <div class="sale-desc">Yearly subscription</div>
+        </div>
+        <div class="wgo-article-slide" data-index="2">
+          <div class="wgo-article-img article-bg-2" ></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Spot the trade on Crude Oil before it happens with AI</div>
+        </div>
+        <div class="wgo-article-slide" data-index="3">
+          <div class="wgo-article-img article-bg-3" ></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Nissan to cut production at Kyushu plant as exports stall</div>
+        </div>
+        <div class="wgo-article-dots">
+          <div class="dot active" data-dot="0"></div>
+          <div class="dot" data-dot="1"></div>
+          <div class="dot" data-dot="2"></div>
+          <div class="dot" data-dot="3"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="categories">
+    <button class="cat-tab active">Popular <span class="fire-icon">🔥</span></button>
+    <button class="cat-tab">Indices</button>
+    <button class="cat-tab">Indices Futures</button>
+    <button class="cat-tab">Stocks</button>
+    <button class="cat-tab">Commodities</button>
+    <button class="cat-tab">Currencies</button>
+    <button class="cat-tab">Crypto</button>
+  </div>
+
+  <!-- Symbol List -->
+  <div class="symbol-list" id="symbolList">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>Markets</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>News</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>Ideas</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>Watchlist</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>Search</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ===== SYMBOL DATA =====
+const symbols = [
+  { name: 'Dow Jones', date: '2/13', ticker: 'DJI', price: 49500.93, change: 48.95, pct: 0.10, badge: null },
+  { name: 'S&P 500', date: '2/13', ticker: 'US500', price: 6836.17, change: 3.41, pct: 0.05, badge: 'Earned' },
+  { name: 'Apple', date: '2/13', ticker: 'AAPL', price: 255.78, change: -5.95, pct: -2.27, badge: null },
+  { name: 'Nasdaq', date: '2/13', ticker: 'IXIC', price: 22546.67, change: -50.48, pct: -0.22, badge: null },
+  { name: 'Tesla', date: '2/13', ticker: 'TSLA', price: 417.44, change: 0.37, pct: 0.09, badge: null },
+  { name: 'Cardano', time: '13:18:47', ticker: 'ADA', price: 0.2810, change: -0.0095, pct: -3.25, badge: null, isCrypto: true },
+  { name: 'Shiba Inu', time: '13:18:39', ticker: 'SHIB', price: 0.00000654, change: -0.00000026, pct: -3.86, badge: null, isCrypto: true },
+  { name: 'Bitcoin', time: '13:19:02', ticker: 'BTC', price: 68559.4, change: 1243.5, pct: 1.85, badge: null, isCrypto: true },
+];
+
+function formatPrice(p) {
+  if (p >= 10000) return p.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+  if (p >= 100) return p.toFixed(2);
+  if (p >= 1) return p.toFixed(4);
+  if (p >= 0.001) return p.toFixed(4);
+  return p.toFixed(8);
+}
+
+function formatChange(c, p) {
+  const sign = c >= 0 ? '+' : '';
+  let cStr;
+  if (Math.abs(c) >= 1) cStr = c.toFixed(2);
+  else if (Math.abs(c) >= 0.001) cStr = c.toFixed(4);
+  else cStr = c.toFixed(8);
+  const pSign = p >= 0 ? '+' : '';
+  return `${sign}${cStr} (${pSign}${p.toFixed(2)}%)`;
+}
+
+const listEl = document.getElementById('symbolList');
+symbols.forEach((s, i) => {
+  const isUp = s.change >= 0;
+  const dateStr = s.time ? `<span class="clock-icon">&#9201;</span> ${s.time}` : `<span class="clock-icon">&#9201;</span> ${s.date}`;
+  const badgeHtml = s.badge ? `<span class="badge">${s.badge}</span>` : '';
+  listEl.innerHTML += `
+    <div class="symbol-row" data-idx="${i}">
+      <div class="symbol-left">
+        <div class="symbol-name">${s.name}</div>
+        <div class="symbol-meta">${dateStr} ${badgeHtml} | ${s.ticker}</div>
+      </div>
+      <div class="symbol-right">
+        <div class="symbol-price" id="price-${i}">${formatPrice(s.price)}</div>
+        <div class="symbol-change ${isUp ? 'up' : 'down'}" id="change-${i}">${formatChange(s.change, s.pct)}</div>
+      </div>
+    </div>
+  `;
+});
+
+// ===== LIVE PRICE TICKING =====
+function tickPrices() {
+  symbols.forEach((s, i) => {
+    if (Math.random() > 0.3) return; // Only some update each tick
+    const variance = s.price * (Math.random() * 0.002 - 0.001);
+    s.price += variance;
+    s.change += variance;
+
+    const priceEl = document.getElementById(`price-${i}`);
+    const changeEl = document.getElementById(`change-${i}`);
+    if (!priceEl) return;
+
+    const oldText = priceEl.textContent;
+    const newText = formatPrice(s.price);
+    priceEl.textContent = newText;
+
+    const isUp = s.change >= 0;
+    changeEl.textContent = formatChange(s.change, s.pct);
+    changeEl.className = `symbol-change ${isUp ? 'up' : 'down'}`;
+
+    // Tick flash
+    if (newText !== oldText) {
+      priceEl.classList.remove('tick-up', 'tick-down');
+      void priceEl.offsetWidth;
+      priceEl.classList.add(variance >= 0 ? 'tick-up' : 'tick-down');
+      setTimeout(() => priceEl.classList.remove('tick-up', 'tick-down'), 600);
+    }
+  });
+}
+setInterval(tickPrices, 1500);
+
+// ===== S&P 500 MINI CHART =====
+function drawSP500Chart() {
+  const canvas = document.getElementById('sp500Chart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+
+  // Generate a gentle uptrend line
+  const points = [];
+  let val = 6810;
+  for (let i = 0; i <= 30; i++) {
+    val += (Math.random() - 0.42) * 8;
+    points.push(val);
+  }
+  const min = Math.min(...points) - 5;
+  const max = Math.max(...points) + 5;
+
+  ctx.beginPath();
+  points.forEach((v, i) => {
+    const x = (i / (points.length - 1)) * w;
+    const y = h - ((v - min) / (max - min)) * h;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#0ECB81';
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Fill below
+  const lastX = w;
+  const lastY = h - ((points[points.length - 1] - min) / (max - min)) * h;
+  ctx.lineTo(lastX, h);
+  ctx.lineTo(0, h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, 'rgba(14, 203, 129, 0.18)');
+  grad.addColorStop(1, 'rgba(14, 203, 129, 0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+setTimeout(drawSP500Chart, 50);
+
+// ===== FEAR & GREED GAUGE =====
+function drawFnGGauge() {
+  const canvas = document.getElementById('fngGauge');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const cx = w / 2, cy = h - 2;
+  const r = Math.min(w / 2 - 4, h - 6);
+
+  // Draw colored arc segments
+  const startAngle = Math.PI;
+  const endAngle = 2 * Math.PI;
+  const segments = [
+    { color: '#E23636', pct: 0.25 },  // Extreme Fear
+    { color: '#F59E0B', pct: 0.25 },  // Fear
+    { color: '#A3A3A3', pct: 0.1 },   // Neutral
+    { color: '#84CC16', pct: 0.2 },   // Greed
+    { color: '#0ECB81', pct: 0.2 },   // Extreme Greed
+  ];
+
+  let currentAngle = startAngle;
+  segments.forEach(seg => {
+    const sweep = seg.pct * Math.PI;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, currentAngle, currentAngle + sweep);
+    ctx.strokeStyle = seg.color;
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    currentAngle += sweep;
+  });
+
+  // Needle at value 36 (0-100 mapped to PI-2PI)
+  const value = 36;
+  const needleAngle = startAngle + (value / 100) * Math.PI;
+  const needleLen = r - 6;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(
+    cx + Math.cos(needleAngle) * needleLen,
+    cy + Math.sin(needleAngle) * needleLen
+  );
+  ctx.strokeStyle = '#1A1A2E';
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#1A1A2E';
+  ctx.fill();
+}
+setTimeout(drawFnGGauge, 50);
+
+// ===== ARTICLE AUTO-SCROLL =====
+let currentArticle = 0;
+const allSlides = document.querySelectorAll('#articleCarousel > [data-index]');
+const dots = document.querySelectorAll('.wgo-article-dots .dot');
+
+function showArticle(index) {
+  allSlides.forEach(s => s.classList.remove('active'));
+  dots.forEach(d => d.classList.remove('active'));
+  allSlides[index].classList.add('active');
+  dots[index].classList.add('active');
+  currentArticle = index;
+}
+
+setInterval(() => {
+  showArticle((currentArticle + 1) % allSlides.length);
+}, 3500);
+
+// ===== CATEGORY TAB SWITCHING =====
+document.querySelectorAll('.cat-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelector('.cat-tab.active').classList.remove('active');
+    tab.classList.add('active');
+  });
+});
+
+// ===== MARKET STATUS VERTICAL TICKER =====
+let currentMarketItem = 0;
+const ticker = document.getElementById('marketTicker');
+const marketItems = ticker.querySelectorAll('.wgo-market-item');
+const itemHeight = 20;
+
+setInterval(() => {
+  currentMarketItem = (currentMarketItem + 1) % marketItems.length;
+  ticker.style.transform = `translateY(-${currentMarketItem * itemHeight}px)`;
+}, 4000);
+</script>
+</body>
+</html>
