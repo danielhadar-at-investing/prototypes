@@ -23,6 +23,7 @@
   --header-h: 48px;
   --tab-h: 56px;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  --blue: #2563EB;
 }
 
 html, body {
@@ -131,6 +132,7 @@ html, body {
 .wgo-container {
   margin: 4px 16px 8px;
   flex-shrink: 0;
+  position: relative;
 }
 .wgo-market-status {
   position: relative;
@@ -558,146 +560,923 @@ html, body {
 .article-bg-3 {
   background: linear-gradient(135deg, #2c5f8a 0%, #1e4060 30%, #8a8a8a 60%, #c43030 90%);
 }
+
+/* ===== SETTINGS GEAR BUTTON ===== */
+.wgo-settings-btn {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.15s;
+  z-index: 2;
+}
+.wgo-settings-btn:active {
+  background: rgba(0,0,0,0.05);
+}
+.wgo-settings-btn svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  transition: color 0.15s;
+}
+.wgo-settings-btn:active svg {
+  color: var(--text-secondary);
+}
+
+/* ===== SCREENS CONTAINER ===== */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 10;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+.screen.active {
+  transform: translateX(0);
+}
+.main-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+}
+.main-screen.pushed {
+  transform: translateX(-30%);
+}
+
+/* ===== CONFIG SCREEN ===== */
+.config-header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+  position: relative;
+}
+.config-back-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.15s;
+  margin-left: -6px;
+  position: relative;
+  z-index: 1;
+}
+.config-back-btn:active {
+  background: rgba(0,0,0,0.05);
+}
+.config-back-btn svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-primary);
+}
+.config-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.config-section-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 20px 16px 8px;
+}
+
+.config-rows {
+  padding: 0 16px;
+}
+.config-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  gap: 12px;
+}
+.config-row:last-child {
+  border-bottom: none;
+}
+.config-row:active {
+  background: #F9FAFB;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.config-row.disabled {
+  cursor: default;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.config-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.config-row-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.config-row-icon.index-icon {
+  background: rgba(14, 203, 129, 0.1);
+  color: var(--green);
+}
+.config-row-icon.fng-icon {
+  background: rgba(232, 141, 0, 0.1);
+  color: #E88D00;
+}
+.config-row-icon.news-icon {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--blue);
+}
+.config-row-icon.market-icon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8B5CF6;
+}
+.config-row-content {
+  flex: 1;
+  min-width: 0;
+}
+.config-row-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.config-row-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  margin-top: 1px;
+}
+.config-row-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+}
+.config-row-lock {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--text-tertiary);
+}
+
+/* ===== BOTTOM SHEET ===== */
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sheet-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.bottom-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  background: var(--bg);
+  border-radius: 18px 18px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+}
+.bottom-sheet.active {
+  transform: translateY(0);
+}
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: #D1D5DB;
+  border-radius: 2px;
+  margin: 8px auto 0;
+  flex-shrink: 0;
+}
+.sheet-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 14px 16px 12px;
+  flex-shrink: 0;
+  letter-spacing: -0.2px;
+}
+.sheet-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 16px;
+}
+.sheet-scroll::-webkit-scrollbar { display: none; }
+
+/* ===== INDEX GRID ===== */
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 16px;
+}
+.index-card {
+  background: #FAFAFA;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 8px 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.index-card:active {
+  background: #F5F5F5;
+}
+.index-card.selected {
+  border-color: var(--blue);
+  background: rgba(37, 99, 235, 0.03);
+}
+.index-card-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.index-card-chart {
+  height: 24px;
+  position: relative;
+}
+.index-card-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+.index-card-price {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.index-card-change {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.index-card-change.up { color: var(--green); }
+.index-card-change.down { color: var(--red); }
+
+.index-search-bar {
+  position: relative;
+  padding: 12px 16px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border);
+}
+.index-search-input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  padding: 0 12px 0 36px;
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background: #F9FAFB;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.index-search-input::placeholder {
+  color: var(--text-tertiary);
+}
+.index-search-input:focus {
+  border-color: var(--blue);
+}
+.index-search-icon {
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+/* ===== NEWS SELECTION ===== */
+.news-option {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 16px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+.news-option:last-child {
+  border-bottom: none;
+}
+.news-option:active {
+  background: #F9FAFB;
+}
+.news-option-radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-dark);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.news-option.selected .news-option-radio {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+.news-option-check {
+  width: 12px;
+  height: 12px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.news-option.selected .news-option-check {
+  opacity: 1;
+}
+.news-option-content {
+  flex: 1;
+  min-width: 0;
+}
+.news-option-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.news-option-title .red-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+}
+.news-option-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ===== MARKET SELECTION ===== */
+.market-option {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+.market-option:active {
+  background: #F9FAFB;
+}
+.market-option-flag {
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.market-option-label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.market-option-radio {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-dark);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+.market-option.selected .market-option-radio {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+.market-option-check {
+  width: 12px;
+  height: 12px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.market-option.selected .market-option-check {
+  opacity: 1;
+}
+
+.market-divider {
+  height: 1px;
+  background: var(--border-dark);
+  margin: 4px 16px;
+}
+.market-toggle-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+}
+.market-toggle-label {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.ios-toggle {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  border-radius: 16px;
+  background: #E5E7EB;
+  cursor: pointer;
+  transition: background 0.3s;
+  flex-shrink: 0;
+  border: none;
+  padding: 0;
+}
+.ios-toggle.on {
+  background: var(--green);
+}
+.ios-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 1px rgba(0,0,0,0.1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ios-toggle.on .ios-toggle-knob {
+  transform: translateX(20px);
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font);
+  padding: 10px 20px;
+  border-radius: 10px;
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== CATEGORIES SCREEN ===== */
+.category-list {
+  padding: 0 16px;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.category-list::-webkit-scrollbar { display: none; }
+.category-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+.category-item:last-child {
+  border-bottom: none;
+}
+.category-drag-handle {
+  width: 20px;
+  height: 20px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  cursor: grab;
+}
+.category-item-label {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
 </style>
 </head>
 <body>
 
 <div id="phone">
-  <!-- Status Bar -->
-  <div class="status-bar">
-    <span class="status-time">13:18</span>
-    <div class="status-icons">
-      <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
-      <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
-      <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
+  <!-- Main Screen Wrapper -->
+  <div class="main-screen" id="mainScreen">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="status-time">13:18</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
     </div>
-  </div>
 
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <div class="logo-text">Investing.com</div>
-    <div class="top-bar-right">
-      <button class="search-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="logo-text">Investing.com</div>
+      <div class="top-bar-right">
+        <button class="search-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- What's Going On Bar -->
+    <div class="wgo-container">
+      <!-- Settings gear button -->
+      <button class="wgo-settings-btn" id="openConfigBtn" aria-label="Customize bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <div class="wgo-market-status">
+        <div class="wgo-market-ticker" id="marketTicker">
+          <div class="wgo-market-item">
+            <span class="status-dot open"></span>
+            <span class="flag-icon">🇮🇱</span>
+            <span>IL Market is open</span>
+          </div>
+          <div class="wgo-market-item">
+            <span class="status-dot countdown"></span>
+            <span class="flag-icon">🇺🇸</span>
+            <span id="usCountdown">US Market open in 2 hrs 26 mins</span>
+          </div>
+          <div class="wgo-market-item">
+            <span class="flag-icon">🔥</span>
+            <span>ProPicks rebalance coming in <span id="propicksCountdown">13:17:59</span> ></span>
+          </div>
+        </div>
+      </div>
+      <div class="wgo-cards">
+        <!-- S&P 500 -->
+        <div class="wgo-card wgo-sp500">
+          <div class="wgo-sp500-label" id="mainIndexLabel">S&P 500</div>
+          <div class="wgo-sp500-chart">
+            <canvas id="sp500Chart"></canvas>
+          </div>
+          <div class="wgo-sp500-bottom">
+            <div class="wgo-sp500-price" id="sp500Price">6,836.17</div>
+            <div class="wgo-sp500-change up" id="sp500Change">+3.41 (+0.05%)</div>
+          </div>
+        </div>
+
+        <!-- Fear & Greed -->
+        <div class="wgo-card wgo-fng">
+          <div class="wgo-fng-label">Fear &<br>Greed</div>
+          <div class="wgo-fng-gauge">
+            <canvas id="fngGauge"></canvas>
+          </div>
+          <div class="wgo-fng-value">36</div>
+          <div class="wgo-fng-sentiment">Fear</div>
+        </div>
+
+        <!-- Articles Carousel -->
+        <div class="wgo-card wgo-article" id="articleCarousel">
+          <div class="wgo-article-slide active" data-index="0">
+            <div class="wgo-article-img article-bg-1" ></div>
+            <div class="wgo-article-gradient"></div>
+            <div class="wgo-article-title">Futures lower; oil climbs; RBA raises rates</div>
+          </div>
+          <div class="wgo-article-slide-sale" data-index="1">
+            <div class="sale-sun">&#9728;&#65039;</div>
+            <div class="sale-title">Summer Sale</div>
+            <div class="sale-pct">60% off</div>
+            <div class="sale-desc">Yearly subscription</div>
+          </div>
+          <div class="wgo-article-slide" data-index="2">
+            <div class="wgo-article-img article-bg-2" ></div>
+            <div class="wgo-article-gradient"></div>
+            <div class="wgo-article-title">Spot the trade on Crude Oil before it happens with AI</div>
+          </div>
+          <div class="wgo-article-slide" data-index="3">
+            <div class="wgo-article-img article-bg-3" ></div>
+            <div class="wgo-article-gradient"></div>
+            <div class="wgo-article-title">Nissan to cut production at Kyushu plant as exports stall</div>
+          </div>
+          <div class="wgo-article-dots">
+            <div class="dot active" data-dot="0"></div>
+            <div class="dot" data-dot="1"></div>
+            <div class="dot" data-dot="2"></div>
+            <div class="dot" data-dot="3"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="categories">
+      <button class="cat-tab active">Popular <span class="fire-icon">🔥</span></button>
+      <button class="cat-tab">Indices</button>
+      <button class="cat-tab">Indices Futures</button>
+      <button class="cat-tab">Stocks</button>
+      <button class="cat-tab">Commodities</button>
+      <button class="cat-tab">Currencies</button>
+      <button class="cat-tab">Crypto</button>
+    </div>
+
+    <!-- Symbol List -->
+    <div class="symbol-list" id="symbolList">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>Markets</span>
+      </button>
+      <button class="tab-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>News</span>
+      </button>
+      <button class="tab-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>Ideas</span>
+      </button>
+      <button class="tab-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>Watchlist</span>
+      </button>
+      <button class="tab-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>Search</span>
       </button>
     </div>
   </div>
 
-  <!-- What's Going On Bar -->
-  <div class="wgo-container">
-    <div class="wgo-market-status">
-      <div class="wgo-market-ticker" id="marketTicker">
-        <div class="wgo-market-item">
-          <span class="status-dot open"></span>
-          <span class="flag-icon">🇮🇱</span>
-          <span>IL Market is open</span>
-        </div>
-        <div class="wgo-market-item">
-          <span class="status-dot countdown"></span>
-          <span class="flag-icon">🇺🇸</span>
-          <span id="usCountdown">US Market open in 2 hrs 26 mins</span>
-        </div>
-        <div class="wgo-market-item">
-          <span class="flag-icon">📈</span>
-          <span>ProPicks rebalance coming in <span id="propicksCountdown">13:17:59</span></span>
-        </div>
+  <!-- Config Screen -->
+  <div class="screen" id="configScreen">
+    <div class="status-bar">
+      <span class="status-time">13:18</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
       </div>
     </div>
-    <div class="wgo-cards">
-      <!-- S&P 500 -->
-      <div class="wgo-card wgo-sp500">
-        <div class="wgo-sp500-label">S&P 500</div>
-        <div class="wgo-sp500-chart">
-          <canvas id="sp500Chart"></canvas>
+
+    <div class="config-header">
+      <button class="config-back-btn" id="configBackBtn" aria-label="Go back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="config-title">Customize Home Screen</div>
+    </div>
+
+    <div class="config-section-label">Top Strip</div>
+
+    <div class="config-rows">
+      <!-- Index Row -->
+      <div class="config-row" id="configIndexRow">
+        <div class="config-row-icon index-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
         </div>
-        <div class="wgo-sp500-bottom">
-          <div class="wgo-sp500-price" id="sp500Price">6,836.17</div>
-          <div class="wgo-sp500-change up" id="sp500Change">+3.41 (+0.05%)</div>
+        <div class="config-row-content">
+          <div class="config-row-label">First Item</div>
+          <div class="config-row-value" id="configIndexValue">S&P 500</div>
         </div>
+        <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
       </div>
 
-      <!-- Fear & Greed -->
-      <div class="wgo-card wgo-fng">
-        <div class="wgo-fng-label">Fear &<br>Greed</div>
-        <div class="wgo-fng-gauge">
-          <canvas id="fngGauge"></canvas>
+      <!-- Fear & Greed Row -->
+      <div class="config-row" id="configFngRow">
+        <div class="config-row-icon fng-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+            <line x1="12" y1="12" x2="18" y2="6"/>
+          </svg>
         </div>
-        <div class="wgo-fng-value">36</div>
-        <div class="wgo-fng-sentiment">Fear</div>
+        <div class="config-row-content">
+          <div class="config-row-label">Second Item</div>
+          <div class="config-row-value">Fear & Greed</div>
+        </div>
+        <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
       </div>
 
-      <!-- Articles Carousel -->
-      <div class="wgo-card wgo-article" id="articleCarousel">
-        <div class="wgo-article-slide active" data-index="0">
-          <div class="wgo-article-img article-bg-1" ></div>
-          <div class="wgo-article-gradient"></div>
-          <div class="wgo-article-title">Futures lower; oil climbs; RBA raises rates</div>
+      <!-- News Row -->
+      <div class="config-row" id="configNewsRow">
+        <div class="config-row-icon news-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+            <line x1="10" y1="6" x2="18" y2="6"/>
+            <line x1="10" y1="10" x2="18" y2="10"/>
+            <line x1="10" y1="14" x2="14" y2="14"/>
+          </svg>
         </div>
-        <div class="wgo-article-slide-sale" data-index="1">
-          <div class="sale-sun">&#9728;&#65039;</div>
-          <div class="sale-title">Summer Sale</div>
-          <div class="sale-pct">60% off</div>
-          <div class="sale-desc">Yearly subscription</div>
+        <div class="config-row-content">
+          <div class="config-row-label">News</div>
+          <div class="config-row-value" id="configNewsValue">Breaking News</div>
         </div>
-        <div class="wgo-article-slide" data-index="2">
-          <div class="wgo-article-img article-bg-2" ></div>
-          <div class="wgo-article-gradient"></div>
-          <div class="wgo-article-title">Spot the trade on Crude Oil before it happens with AI</div>
-        </div>
-        <div class="wgo-article-slide" data-index="3">
-          <div class="wgo-article-img article-bg-3" ></div>
-          <div class="wgo-article-gradient"></div>
-          <div class="wgo-article-title">Nissan to cut production at Kyushu plant as exports stall</div>
-        </div>
-        <div class="wgo-article-dots">
-          <div class="dot active" data-dot="0"></div>
-          <div class="dot" data-dot="1"></div>
-          <div class="dot" data-dot="2"></div>
-          <div class="dot" data-dot="3"></div>
-        </div>
+        <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
       </div>
 
+      <!-- Market Strip Row -->
+      <div class="config-row" id="configMarketRow">
+        <div class="config-row-icon market-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </div>
+        <div class="config-row-content">
+          <div class="config-row-label">Market Strip</div>
+          <div class="config-row-value" id="configMarketValue">US Markets</div>
+        </div>
+        <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="config-section-label">Markets</div>
+
+    <div class="config-rows">
+      <div class="config-row" id="configCategoriesRow" style="border-bottom: none;">
+        <div class="config-row-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </div>
+        <div class="config-row-content">
+          <div class="config-row-label">Customize Market Categories</div>
+        </div>
+        <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="config-section-label">Sales & Promotions</div>
+
+    <div class="config-rows">
+      <div class="config-row" style="cursor: default; border-bottom: none;">
+        <div class="config-row-content">
+          <div class="config-row-label">Notify me about upcoming sales</div>
+        </div>
+        <button class="ios-toggle on" id="saleToggleMain">
+          <div class="ios-toggle-knob"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="configToast"></div>
+
+    <!-- Bottom Sheet Backdrop -->
+    <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+    <!-- Index Selection Sheet -->
+    <div class="bottom-sheet" id="indexSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Select First Item</div>
+      <div class="sheet-scroll" id="indexSheetScroll">
+        <div class="index-grid" id="indexGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="index-search-bar">
+        <svg class="index-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+        </svg>
+        <input type="text" class="index-search-input" id="indexSearchInput" placeholder="Search indices...">
+      </div>
+    </div>
+
+    <!-- News Selection Sheet -->
+    <div class="bottom-sheet" id="newsSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">News Type</div>
+      <div class="sheet-scroll" id="newsSheetScroll">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Market Selection Sheet -->
+    <div class="bottom-sheet" id="marketSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Market Strip</div>
+      <div class="sheet-scroll" id="marketSheetScroll">
+        <!-- Populated by JS -->
+      </div>
     </div>
   </div>
 
-  <!-- Category Tabs -->
-  <div class="categories">
-    <button class="cat-tab active">Popular <span class="fire-icon">🔥</span></button>
-    <button class="cat-tab">Indices</button>
-    <button class="cat-tab">Indices Futures</button>
-    <button class="cat-tab">Stocks</button>
-    <button class="cat-tab">Commodities</button>
-    <button class="cat-tab">Currencies</button>
-    <button class="cat-tab">Crypto</button>
-  </div>
-
-  <!-- Symbol List -->
-  <div class="symbol-list" id="symbolList">
-    <!-- Populated by JS -->
-  </div>
-
-  <!-- Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      <span>Markets</span>
-    </button>
-    <button class="tab-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      <span>News</span>
-    </button>
-    <button class="tab-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      <span>Ideas</span>
-    </button>
-    <button class="tab-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      <span>Watchlist</span>
-    </button>
-    <button class="tab-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-      <span>Search</span>
-    </button>
+  <!-- Categories Screen -->
+  <div class="screen" id="categoriesScreen">
+    <div class="status-bar">
+      <span class="status-time">13:18</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="config-header">
+      <button class="config-back-btn" id="categoriesBackBtn" aria-label="Go back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <div class="config-title">Market Categories</div>
+    </div>
+    <div class="category-list" id="categoryList">
+      <!-- Populated by JS -->
+    </div>
   </div>
 </div>
 
@@ -754,7 +1533,7 @@ symbols.forEach((s, i) => {
 // ===== LIVE PRICE TICKING =====
 function tickPrices() {
   symbols.forEach((s, i) => {
-    if (Math.random() > 0.3) return; // Only some update each tick
+    if (Math.random() > 0.3) return;
     const variance = s.price * (Math.random() * 0.002 - 0.001);
     s.price += variance;
     s.change += variance;
@@ -771,7 +1550,6 @@ function tickPrices() {
     changeEl.textContent = formatChange(s.change, s.pct);
     changeEl.className = `symbol-change ${isUp ? 'up' : 'down'}`;
 
-    // Tick flash
     if (newText !== oldText) {
       priceEl.classList.remove('tick-up', 'tick-down');
       void priceEl.offsetWidth;
@@ -797,7 +1575,6 @@ function drawSP500Chart() {
   ctx.scale(dpr, dpr);
   const w = rect.width, h = rect.height;
 
-  // Generate a gentle uptrend line
   const points = [];
   let val = 6810;
   for (let i = 0; i <= 30; i++) {
@@ -818,9 +1595,7 @@ function drawSP500Chart() {
   ctx.lineJoin = 'round';
   ctx.stroke();
 
-  // Fill below
   const lastX = w;
-  const lastY = h - ((points[points.length - 1] - min) / (max - min)) * h;
   ctx.lineTo(lastX, h);
   ctx.lineTo(0, h);
   ctx.closePath();
@@ -849,15 +1624,13 @@ function drawFnGGauge() {
   const cx = w / 2, cy = h - 2;
   const r = Math.min(w / 2 - 4, h - 6);
 
-  // Draw colored arc segments
   const startAngle = Math.PI;
-  const endAngle = 2 * Math.PI;
   const segments = [
-    { color: '#E23636', pct: 0.25 },  // Extreme Fear
-    { color: '#F59E0B', pct: 0.25 },  // Fear
-    { color: '#A3A3A3', pct: 0.1 },   // Neutral
-    { color: '#84CC16', pct: 0.2 },   // Greed
-    { color: '#0ECB81', pct: 0.2 },   // Extreme Greed
+    { color: '#E23636', pct: 0.25 },
+    { color: '#F59E0B', pct: 0.25 },
+    { color: '#A3A3A3', pct: 0.1 },
+    { color: '#84CC16', pct: 0.2 },
+    { color: '#0ECB81', pct: 0.2 },
   ];
 
   let currentAngle = startAngle;
@@ -872,7 +1645,6 @@ function drawFnGGauge() {
     currentAngle += sweep;
   });
 
-  // Needle at value 36 (0-100 mapped to PI-2PI)
   const value = 36;
   const needleAngle = startAngle + (value / 100) * Math.PI;
   const needleLen = r - 6;
@@ -887,7 +1659,6 @@ function drawFnGGauge() {
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // Center dot
   ctx.beginPath();
   ctx.arc(cx, cy, 2, 0, Math.PI * 2);
   ctx.fillStyle = '#1A1A2E';
@@ -939,6 +1710,437 @@ setInterval(() => {
   if (ppSecs < 0) ppSecs = 59;
   ppEl.textContent = `13:17:${String(ppSecs).padStart(2, '0')}`;
 }, 1000);
+
+
+// ============================================================
+// ===== CONFIGURATION SCREEN LOGIC =====
+// ============================================================
+
+// State
+const configState = {
+  selectedIndex: 'S&P 500',
+  selectedNews: ['Breaking News'],
+  selectedMarkets: ['US Markets', 'Israel (TA)'],
+  saleNotify: true
+};
+
+// Index data
+const indices = [
+  { name: 'S&P 500', price: '6,836.17', change: '+0.05%', up: true, seed: 1 },
+  { name: 'Dow Jones', price: '49,500.93', change: '+0.10%', up: true, seed: 2 },
+  { name: 'Nasdaq', price: '22,546.67', change: '-0.22%', up: false, seed: 3 },
+  { name: 'FTSE 100', price: '8,727.30', change: '+0.34%', up: true, seed: 4 },
+  { name: 'DAX', price: '22,148.60', change: '+0.62%', up: true, seed: 5 },
+  { name: 'Nikkei 225', price: '39,461.47', change: '-0.79%', up: false, seed: 6 },
+  { name: 'Hang Seng', price: '22,976.81', change: '+1.24%', up: true, seed: 7 },
+  { name: 'CAC 40', price: '8,063.12', change: '+0.18%', up: true, seed: 8 },
+  { name: 'TA-35', price: '2,101.54', change: '+0.41%', up: true, seed: 9 },
+  { name: 'ASX 200', price: '8,481.00', change: '-0.15%', up: false, seed: 10 },
+  { name: 'KOSPI', price: '2,624.92', change: '-0.33%', up: false, seed: 11 },
+  { name: 'IBEX 35', price: '13,025.40', change: '+0.27%', up: true, seed: 12 },
+];
+
+// News options
+const newsOptions = [
+  { id: 'breaking', title: 'Breaking News', desc: 'Real-time alerts on major market-moving events', hasRedDot: true },
+  { id: 'watchlist', title: 'Watchlist News', desc: 'Stories related to instruments in your watchlist' },
+  { id: 'editors', title: "Editor's Picks", desc: 'Curated stories selected by our editorial team' },
+  { id: 'all', title: 'All News', desc: 'Full news feed with all categories and sources' },
+];
+
+// Market options
+const marketOptions = [
+  { flag: '🇺🇸', label: 'US Markets' },
+  { flag: '🇮🇱', label: 'Israel (TA)' },
+  { flag: '🇬🇧', label: 'UK (LSE)' },
+  { flag: '🇪🇺', label: 'Europe (Euronext)' },
+  { flag: '🇩🇪', label: 'Germany (XETRA)' },
+  { flag: '🇫🇷', label: 'France (Euronext Paris)' },
+  { flag: '🇪🇸', label: 'Spain (BME)' },
+  { flag: '🇮🇹', label: 'Italy (Borsa Italiana)' },
+  { flag: '🇨🇭', label: 'Switzerland (SIX)' },
+  { flag: '🇳🇱', label: 'Netherlands (AEX)' },
+  { flag: '🇸🇪', label: 'Sweden (Nasdaq Stockholm)' },
+  { flag: '🇳🇴', label: 'Norway (Oslo Bors)' },
+  { flag: '🇩🇰', label: 'Denmark (Nasdaq Copenhagen)' },
+  { flag: '🇫🇮', label: 'Finland (Nasdaq Helsinki)' },
+  { flag: '🇵🇱', label: 'Poland (WSE)' },
+  { flag: '🇦🇹', label: 'Austria (Vienna)' },
+  { flag: '🇧🇪', label: 'Belgium (Euronext Brussels)' },
+  { flag: '🇵🇹', label: 'Portugal (Euronext Lisbon)' },
+  { flag: '🇬🇷', label: 'Greece (ATHEX)' },
+  { flag: '🇹🇷', label: 'Turkey (BIST)' },
+  { flag: '🇯🇵', label: 'Japan (TSE)' },
+  { flag: '🇭🇰', label: 'Hong Kong (HKEX)' },
+  { flag: '🇨🇳', label: 'China (SSE)' },
+  { flag: '🇨🇳', label: 'China (SZSE)' },
+  { flag: '🇰🇷', label: 'South Korea (KRX)' },
+  { flag: '🇹🇼', label: 'Taiwan (TWSE)' },
+  { flag: '🇮🇳', label: 'India (BSE)' },
+  { flag: '🇮🇳', label: 'India (NSE)' },
+  { flag: '🇸🇬', label: 'Singapore (SGX)' },
+  { flag: '🇦🇺', label: 'Australia (ASX)' },
+  { flag: '🇳🇿', label: 'New Zealand (NZX)' },
+  { flag: '🇮🇩', label: 'Indonesia (IDX)' },
+  { flag: '🇲🇾', label: 'Malaysia (Bursa)' },
+  { flag: '🇹🇭', label: 'Thailand (SET)' },
+  { flag: '🇵🇭', label: 'Philippines (PSE)' },
+  { flag: '🇻🇳', label: 'Vietnam (HOSE)' },
+  { flag: '🇧🇷', label: 'Brazil (B3)' },
+  { flag: '🇲🇽', label: 'Mexico (BMV)' },
+  { flag: '🇦🇷', label: 'Argentina (BYMA)' },
+  { flag: '🇨🇱', label: 'Chile (Santiago)' },
+  { flag: '🇨🇴', label: 'Colombia (BVC)' },
+  { flag: '🇿🇦', label: 'South Africa (JSE)' },
+  { flag: '🇸🇦', label: 'Saudi Arabia (Tadawul)' },
+  { flag: '🇦🇪', label: 'UAE (ADX)' },
+  { flag: '🇶🇦', label: 'Qatar (QSE)' },
+  { flag: '🇰🇼', label: 'Kuwait (Boursa)' },
+  { flag: '🇪🇬', label: 'Egypt (EGX)' },
+  { flag: '🇳🇬', label: 'Nigeria (NGX)' },
+  { flag: '🇨🇦', label: 'Canada (TSX)' },
+  { flag: '🇷🇺', label: 'Russia (MOEX)' },
+];
+
+// Screen navigation
+const mainScreen = document.getElementById('mainScreen');
+const configScreen = document.getElementById('configScreen');
+const openConfigBtn = document.getElementById('openConfigBtn');
+const configBackBtn = document.getElementById('configBackBtn');
+
+function openConfig() {
+  configScreen.classList.add('active');
+  mainScreen.classList.add('pushed');
+}
+
+function closeConfig() {
+  configScreen.classList.remove('active');
+  mainScreen.classList.remove('pushed');
+}
+
+openConfigBtn.addEventListener('click', openConfig);
+configBackBtn.addEventListener('click', closeConfig);
+
+// Bottom sheet management
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const indexSheet = document.getElementById('indexSheet');
+const newsSheet = document.getElementById('newsSheet');
+const marketSheet = document.getElementById('marketSheet');
+let activeSheet = null;
+
+function openSheet(sheet) {
+  activeSheet = sheet;
+  sheetBackdrop.classList.add('active');
+  sheet.classList.add('active');
+}
+
+function closeSheet() {
+  if (!activeSheet) return;
+  sheetBackdrop.classList.remove('active');
+  activeSheet.classList.remove('active');
+  activeSheet = null;
+}
+
+sheetBackdrop.addEventListener('click', closeSheet);
+
+// Toast
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('configToast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// Config row handlers
+document.getElementById('configIndexRow').addEventListener('click', () => openSheet(indexSheet));
+document.getElementById('configFngRow').addEventListener('click', () => showToast('Open drawer'));
+document.getElementById('configNewsRow').addEventListener('click', () => openSheet(newsSheet));
+document.getElementById('configMarketRow').addEventListener('click', () => openSheet(marketSheet));
+
+// ===== INDEX GRID =====
+function drawMiniSparkline(canvas, seed, isUp) {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+
+  // Seeded pseudo-random for consistent sparklines
+  let s = seed * 9301 + 49297;
+  function rand() {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  }
+
+  const points = [];
+  let val = 50;
+  const drift = isUp ? 0.6 : -0.6;
+  for (let i = 0; i <= 20; i++) {
+    val += (rand() - 0.5 + drift * 0.15) * 6;
+    points.push(val);
+  }
+  const min = Math.min(...points) - 2;
+  const max = Math.max(...points) + 2;
+  const pad = 1;
+
+  ctx.beginPath();
+  points.forEach((v, i) => {
+    const x = pad + (i / (points.length - 1)) * (w - pad * 2);
+    const y = pad + (h - pad * 2) - ((v - min) / (max - min)) * (h - pad * 2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = isUp ? '#0ECB81' : '#E23636';
+  ctx.lineWidth = 1.2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+function renderIndexGrid() {
+  const grid = document.getElementById('indexGrid');
+  const filtered = indices;
+
+  grid.innerHTML = '';
+  filtered.forEach(idx => {
+    const isSelected = idx.name === configState.selectedIndex;
+    const card = document.createElement('div');
+    card.className = `index-card${isSelected ? ' selected' : ''}`;
+    card.innerHTML = `
+      <div class="index-card-name">${idx.name}</div>
+      <div class="index-card-chart"><canvas></canvas></div>
+      <div class="index-card-price">${idx.price}</div>
+      <div class="index-card-change ${idx.up ? 'up' : 'down'}">${idx.change}</div>
+    `;
+    card.addEventListener('click', () => {
+      configState.selectedIndex = idx.name;
+      document.getElementById('configIndexValue').textContent = idx.name;
+      document.getElementById('mainIndexLabel').textContent = idx.name;
+      renderIndexGrid();
+    });
+    grid.appendChild(card);
+  });
+
+  // Draw sparklines after DOM insertion
+  requestAnimationFrame(() => {
+    const canvases = grid.querySelectorAll('canvas');
+    filtered.forEach((idx, i) => {
+      if (canvases[i]) {
+        drawMiniSparkline(canvases[i], idx.seed, idx.up);
+      }
+    });
+  });
+}
+
+renderIndexGrid();
+
+// Search bar is visual only - no filtering
+
+// ===== NEWS OPTIONS (multi-select) =====
+function updateNewsLabel() {
+  const val = configState.selectedNews.length === 0
+    ? 'None'
+    : configState.selectedNews.length === newsOptions.length
+      ? 'All types'
+      : configState.selectedNews.join(', ');
+  document.getElementById('configNewsValue').textContent = val;
+}
+
+function renderNewsOptions() {
+  const container = document.getElementById('newsSheetScroll');
+  container.innerHTML = '';
+  newsOptions.forEach(opt => {
+    const isSelected = configState.selectedNews.includes(opt.title);
+    const div = document.createElement('div');
+    div.className = `news-option${isSelected ? ' selected' : ''}`;
+    const redDotHtml = opt.hasRedDot ? '<span class="red-dot"></span>' : '';
+    div.innerHTML = `
+      <div class="news-option-radio">
+        <svg class="news-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="news-option-content">
+        <div class="news-option-title">${opt.title}${redDotHtml}</div>
+        <div class="news-option-desc">${opt.desc}</div>
+      </div>
+    `;
+    div.addEventListener('click', () => {
+      const idx = configState.selectedNews.indexOf(opt.title);
+      if (idx >= 0) {
+        configState.selectedNews.splice(idx, 1);
+      } else {
+        configState.selectedNews.push(opt.title);
+      }
+      updateNewsLabel();
+      renderNewsOptions();
+    });
+    container.appendChild(div);
+  });
+}
+
+renderNewsOptions();
+updateNewsLabel();
+
+// ===== MARKET OPTIONS (multi-select) =====
+function updateMarketLabel() {
+  const val = configState.selectedMarkets.length === 0
+    ? 'None'
+    : configState.selectedMarkets.length === marketOptions.length
+      ? 'All markets'
+      : configState.selectedMarkets.join(', ');
+  document.getElementById('configMarketValue').textContent = val;
+}
+
+function renderMarketOptions() {
+  const container = document.getElementById('marketSheetScroll');
+  container.innerHTML = '';
+
+  marketOptions.forEach(opt => {
+    const isSelected = configState.selectedMarkets.includes(opt.label);
+    const div = document.createElement('div');
+    div.className = `market-option${isSelected ? ' selected' : ''}`;
+    div.innerHTML = `
+      <span class="market-option-flag">${opt.flag}</span>
+      <span class="market-option-label">${opt.label}</span>
+      <div class="market-option-radio">
+        <svg class="market-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    `;
+    div.addEventListener('click', () => {
+      const idx = configState.selectedMarkets.indexOf(opt.label);
+      if (idx >= 0) {
+        configState.selectedMarkets.splice(idx, 1);
+      } else {
+        configState.selectedMarkets.push(opt.label);
+      }
+      updateMarketLabel();
+      renderMarketOptions();
+    });
+    container.appendChild(div);
+  });
+
+}
+
+renderMarketOptions();
+updateMarketLabel();
+
+// ===== SALE TOGGLE (on config page) =====
+document.getElementById('saleToggleMain').addEventListener('click', () => {
+  configState.saleNotify = !configState.saleNotify;
+  const btn = document.getElementById('saleToggleMain');
+  btn.classList.toggle('on', configState.saleNotify);
+});
+
+// ===== MARKET CATEGORIES SCREEN =====
+const categoriesScreen = document.getElementById('categoriesScreen');
+
+const marketCategories = [
+  { name: 'Popular', enabled: true },
+  { name: 'Indices', enabled: true },
+  { name: 'Indices Futures', enabled: true },
+  { name: 'Stocks', enabled: true },
+  { name: 'Commodities', enabled: true },
+  { name: 'Currencies', enabled: true },
+  { name: 'Cryptocurrency', enabled: true },
+  { name: 'Bonds', enabled: true },
+  { name: 'ETFs', enabled: true },
+  { name: 'Funds', enabled: true },
+];
+
+function renderCategories() {
+  const list = document.getElementById('categoryList');
+  list.innerHTML = '';
+  marketCategories.forEach((cat, i) => {
+    const item = document.createElement('div');
+    item.className = 'category-item';
+    item.dataset.catIdx = i;
+    item.innerHTML = `
+      <svg class="category-drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <line x1="4" y1="8" x2="20" y2="8"/>
+        <line x1="4" y1="12" x2="20" y2="12"/>
+        <line x1="4" y1="16" x2="20" y2="16"/>
+      </svg>
+      <span class="category-item-label">${cat.name}</span>
+    `;
+    list.appendChild(item);
+  });
+
+  // Drag to reorder
+  let dragItem = null;
+  let dragStartY = 0;
+  let dragOffsetY = 0;
+  const items = list.querySelectorAll('.category-item');
+
+  items.forEach(item => {
+    const handle = item.querySelector('.category-drag-handle');
+    handle.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      dragItem = item;
+      dragStartY = e.clientY;
+      const rect = item.getBoundingClientRect();
+      dragOffsetY = e.clientY - rect.top;
+      item.style.zIndex = '10';
+      item.style.background = '#F5F5F5';
+      item.style.transition = 'none';
+      document.addEventListener('pointermove', onDragMove);
+      document.addEventListener('pointerup', onDragEnd);
+    });
+  });
+
+  function onDragMove(e) {
+    if (!dragItem) return;
+    const listRect = list.getBoundingClientRect();
+    const siblings = [...list.querySelectorAll('.category-item')];
+    const currentIdx = siblings.indexOf(dragItem);
+
+    // Check if we should swap
+    siblings.forEach((sib, i) => {
+      if (sib === dragItem) return;
+      const sibRect = sib.getBoundingClientRect();
+      const sibMid = sibRect.top + sibRect.height / 2;
+      if (i < currentIdx && e.clientY < sibMid) {
+        list.insertBefore(dragItem, sib);
+      } else if (i > currentIdx && e.clientY > sibMid) {
+        list.insertBefore(dragItem, sib.nextSibling);
+      }
+    });
+  }
+
+  function onDragEnd() {
+    if (!dragItem) return;
+    dragItem.style.zIndex = '';
+    dragItem.style.background = '';
+    dragItem.style.transition = '';
+    dragItem = null;
+    document.removeEventListener('pointermove', onDragMove);
+    document.removeEventListener('pointerup', onDragEnd);
+
+    // Update order in data
+    const reordered = [...list.querySelectorAll('.category-item')];
+    const newOrder = reordered.map(el => marketCategories[parseInt(el.dataset.catIdx)]);
+    marketCategories.length = 0;
+    newOrder.forEach(c => marketCategories.push(c));
+  }
+}
+
+renderCategories();
+
+document.getElementById('configCategoriesRow').addEventListener('click', () => {
+  categoriesScreen.classList.add('active');
+});
+
+document.getElementById('categoriesBackBtn').addEventListener('click', () => {
+  categoriesScreen.classList.remove('active');
+});
 </script>
 </body>
 </html>
