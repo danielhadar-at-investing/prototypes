@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Value - Tabbed Content V2</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --card-alt: #1b2a4a;
+    --text-primary: #ffffff;
+    --text-secondary: #8892a0;
+    --text-tertiary: #5a6270;
+    --green: #26a69a;
+    --green-bg: rgba(38,166,154,0.12);
+    --red: #ef5350;
+    --blue: #2962ff;
+    --blue-bg: rgba(41,98,255,0.12);
+    --yellow: #ffab00;
+    --yellow-bg: rgba(255,171,0,0.12);
+    --border: rgba(255,255,255,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: #000;
+    border-radius: 44px;
+    padding: 12px;
+    position: relative;
+    box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .device-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 10;
+    background: var(--bg);
+  }
+  .status-bar .time { font-size: 15px; font-weight: 700; }
+  .status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 12px; }
+
+  /* Notch / Dynamic Island */
+  .dynamic-island {
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+
+  /* Screen container for transitions */
+  .screen-container {
+    position: absolute;
+    top: 54px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+  /* Main screen */
+  .main-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .main-screen.pushed {
+    transform: translateX(-30%);
+    pointer-events: none;
+  }
+
+  /* Stock header */
+  .stock-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 20px 12px;
+    background: var(--bg);
+  }
+  .stock-logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #555, #333);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .stock-info h1 {
+    font-size: 17px; font-weight: 700; color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .stock-info .stock-sub {
+    font-size: 12px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stock-price {
+    margin-left: auto;
+    text-align: right;
+  }
+  .stock-price .price {
+    font-size: 17px; font-weight: 700; color: var(--text-primary);
+  }
+  .stock-price .change {
+    font-size: 12px; color: var(--text-secondary);
+  }
+
+  /* Scrollable content */
+  .scroll-content {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Sticky header */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(26,26,46,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .sticky-header.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .sticky-header .sticky-sep {
+    width: 1px;
+    height: 16px;
+    background: var(--text-tertiary);
+  }
+  .sticky-header .sticky-green { color: var(--green); }
+  .sticky-header .sticky-val { color: var(--text-secondary); font-weight: 400; }
+
+  /* Hero cards */
+  .hero-section {
+    padding: 0 16px 12px;
+    display: flex;
+    gap: 10px;
+  }
+  .hero-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: border-color 0.25s, background 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.25s;
+  }
+  .hero-card.active {
+    border-color: rgba(41,98,255,0.35);
+  }
+  .hero-card.active::before {
+    background: var(--blue);
+  }
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .hero-fv-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 6px;
+    transition: opacity 0.15s;
+  }
+  .hero-fv-value.flash {
+    animation: numFlash 0.35s ease;
+  }
+  @keyframes numFlash {
+    0% { opacity: 0.4; transform: scale(0.97); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .hero-pill {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .hero-pill span {
+    display: inline-block;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    transition: opacity 0.15s;
+  }
+  .hero-certainty {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* Gauge / Speedometer */
+  .gauge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2px;
+  }
+  .gauge-svg {
+    width: 90px;
+    height: 52px;
+  }
+  .gauge-score {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-top: 2px;
+  }
+  .gauge-score small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+  }
+  .gauge-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    margin-top: 1px;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    display: flex;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: relative;
+  }
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.25s;
+  }
+  .tab-item.active {
+    color: var(--text-primary);
+  }
+  .tab-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 2.5px;
+    background: var(--blue);
+    border-radius: 2px 2px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .tab-item.active::after {
+    transform: scaleX(1);
+  }
+
+  /* Tab content */
+  .tab-content {
+    padding: 16px;
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Summary sentence */
+  .summary-sentence {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    padding: 0 2px;
+  }
+  .summary-sentence .green { color: var(--green); font-weight: 600; }
+  .summary-sentence .bold { color: var(--text-primary); font-weight: 700; }
+
+  /* Consensus section */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .consensus-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .consensus-subtitle .bold { color: var(--text-primary); font-weight: 600; }
+  .consensus-bar-wrap {
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 36px;
+    display: flex;
+    margin-bottom: 8px;
+  }
+  .consensus-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    transition: flex-basis 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .consensus-seg.green { background: rgba(38,166,154,0.7); }
+  .consensus-seg.yellow { background: rgba(255,171,0,0.5); }
+  .consensus-seg.red { background: rgba(239,83,80,0.6); }
+  .consensus-legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Model chips */
+  .chips-section {
+    margin-bottom: 16px;
+  }
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .model-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px 6px 10px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    border: 1.5px solid;
+    white-space: nowrap;
+  }
+  .model-chip.on {
+    background: rgba(38,166,154,0.1);
+    border-color: rgba(38,166,154,0.4);
+    color: var(--text-primary);
+  }
+  .model-chip.off {
+    background: transparent;
+    border-color: var(--text-tertiary);
+    border-style: dashed;
+    color: var(--text-tertiary);
+    opacity: 0.55;
+  }
+  .model-chip.off:hover { opacity: 0.75; }
+  .chip-value {
+    color: var(--green);
+    font-weight: 700;
+    margin-left: 2px;
+  }
+  .model-chip.off .chip-value {
+    color: var(--text-tertiary);
+  }
+  .chip-info {
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    margin-left: 2px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .chip-info:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-primary);
+  }
+
+  .calc-note {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+    padding: 8px 0 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+
+  /* Health tab */
+  .health-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .health-row:active { background: rgba(255,255,255,0.03); }
+  .health-row:last-of-type { border-bottom: none; }
+  .health-name {
+    width: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .health-bar-container {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    margin: 0 12px;
+    overflow: hidden;
+  }
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .health-score-val {
+    font-size: 14px;
+    font-weight: 700;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .health-chevron {
+    margin-left: 8px;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Health over time chart */
+  .chart-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .chart-section .section-title {
+    margin-bottom: 12px;
+  }
+  .chart-canvas-wrap {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 12px 12px;
+    margin-bottom: 10px;
+  }
+  .chart-canvas-wrap canvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 0 4px;
+  }
+  .chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: opacity 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .chart-legend-item.off {
+    opacity: 0.35;
+  }
+  .chart-legend-item:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  .chart-legend-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Detail screens */
+  .detail-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 30;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .detail-screen::-webkit-scrollbar { display: none; }
+  .detail-screen.visible {
+    transform: translateX(0);
+  }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(26,26,46,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 5;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-back {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--blue);
+    font-size: 20px;
+    border-radius: 8px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .detail-back:active { background: rgba(255,255,255,0.06); }
+  .detail-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 32px;
+  }
+
+  /* Detail two-cell */
+  .detail-cells {
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+  }
+  .detail-cell {
+    flex: 1;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+  .detail-cell-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .detail-cell-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .detail-cell-value.green { color: var(--green); }
+  .detail-cell-value.red { color: var(--red); }
+
+  /* Detail tables */
+  .detail-section {
+    padding: 0 16px 16px;
+  }
+  .detail-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    padding-top: 8px;
+  }
+  .detail-table {
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .detail-table-header {
+    display: flex;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-table-header span {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .detail-table-row {
+    display: flex;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .detail-table-row:last-child { border-bottom: none; }
+  .detail-table-row span {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+  .detail-table-row .secondary {
+    color: var(--text-secondary);
+  }
+
+  /* Health detail - model selector chips */
+  .health-detail-chips {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .health-detail-chips::-webkit-scrollbar { display: none; }
+  .health-detail-chip {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    text-align: center;
+    min-width: 76px;
+    transition: all 0.2s;
+  }
+  .health-detail-chip.active {
+    border-color: rgba(41,98,255,0.5);
+    background: var(--card-alt);
+  }
+  .health-detail-chip .hdchip-score {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .health-detail-chip .hdchip-name {
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .health-detail-chip .hdchip-check {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  /* Percentile bar */
+  .pct-bar {
+    width: 50px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .pct-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* Bottom padding for scroll */
+  .bottom-pad {
+    height: 40px;
+  }
+</style>
+</head>
+<body>
+
+<div class="device-frame">
+  <div class="device-screen">
+    <div class="dynamic-island"></div>
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.5C9.5 3.5 11.2 4.3 12.5 5.5L14 4C12.3 2.3 10 1.2 7.5 1.2S2.7 2.3 1 4L2.5 5.5C3.8 4.3 5.5 3.5 7.5 3.5zM7.5 6.8C8.8 6.8 10 7.3 10.8 8.2L7.5 12L4.2 8.2C5 7.3 6.2 6.8 7.5 6.8z"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="21" height="10" rx="2" stroke="white" stroke-width="1"/><rect x="22" y="4" width="2" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="2.5" width="15" height="7" rx="1" fill="white"/></svg>
+      </span>
+    </div>
+
+    <div class="screen-container">
+      <!-- Main screen -->
+      <div class="main-screen" id="mainScreen">
+        <!-- Stock header -->
+        <div class="stock-header">
+          <div class="stock-logo">A</div>
+          <div class="stock-info">
+            <h1>Apple Inc.</h1>
+            <div class="stock-sub">AAPL <span style="color:var(--text-tertiary)">-</span> NASDAQ</div>
+          </div>
+          <div class="stock-price">
+            <div class="price">$198.50</div>
+            <div class="change">+1.23 (+0.62%)</div>
+          </div>
+        </div>
+
+        <div class="scroll-content" id="scrollContent">
+          <!-- Sticky header -->
+          <div class="sticky-header" id="stickyHeader">
+            <span>FV: <span id="stickyFV">$234.00</span> <span class="sticky-green" id="stickyUpside">+17.9%</span></span>
+            <span class="sticky-sep"></span>
+            <span>Health: <span id="stickyHealth">4.2/5</span></span>
+          </div>
+
+          <!-- Hero sentinel for intersection detection -->
+          <div id="heroSentinel" style="height:1px;"></div>
+
+          <!-- Hero cards -->
+          <div class="hero-section" id="heroSection">
+            <div class="hero-card active" id="heroFV" onclick="switchTab('fv')">
+              <div class="hero-label">Fair Value</div>
+              <div class="hero-fv-value" id="heroFVValue">$234.00</div>
+              <div class="hero-pill"><span id="heroUpside">+17.9% Upside</span></div>
+              <div class="hero-certainty">High Certainty</div>
+            </div>
+            <div class="hero-card" id="heroHealth" onclick="switchTab('health')">
+              <div class="hero-label">Health Score</div>
+              <div class="gauge-container">
+                <svg class="gauge-svg" viewBox="0 0 100 58">
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#ef5350"/>
+                      <stop offset="35%" stop-color="#ffab00"/>
+                      <stop offset="65%" stop-color="#ffab00"/>
+                      <stop offset="100%" stop-color="#26a69a"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- Track -->
+                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7" stroke-linecap="round"/>
+                  <!-- Filled arc -->
+                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#gaugeGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+                  <!-- Needle - 4.2/5 = 84%, rotation: -90 + 0.84*180 = 61.2deg -->
+                  <line id="gaugeNeedle" x1="50" y1="50" x2="50" y2="14" stroke="#fff" stroke-width="2" stroke-linecap="round" transform="rotate(61.2, 50, 50)"/>
+                  <!-- Center dot -->
+                  <circle cx="50" cy="50" r="3" fill="#fff"/>
+                  <!-- Tick marks -->
+                  <line x1="10" y1="50" x2="14" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                  <line x1="90" y1="50" x2="86" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                </svg>
+                <div class="gauge-score">4.2<small>/5</small></div>
+                <div class="gauge-label">Strong</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab bar -->
+          <div class="tab-bar" id="tabBar">
+            <div class="tab-item active" id="tabFV" onclick="switchTab('fv')">Fair Value</div>
+            <div class="tab-item" id="tabHealth" onclick="switchTab('health')">Health</div>
+          </div>
+
+          <!-- Fair Value tab -->
+          <div class="tab-content active" id="contentFV">
+            <div class="summary-sentence" id="summaryText">
+              AAPL is <span class="green">undervalued</span> by 17.9% with <span class="green">strong</span> financial health. <span class="bold">12 of 14</span> models agree.
+            </div>
+
+            <div class="section-title">Model Consensus</div>
+            <div class="consensus-subtitle" id="consensusSubtitle">
+              <span class="bold" id="uvCount">12</span> of <span class="bold" id="totalCount">14</span> models rate AAPL as Undervalued
+            </div>
+            <div class="consensus-bar-wrap" id="consensusBar">
+              <div class="consensus-seg green" id="segGreen" style="flex-basis:85.7%">12 Undervalued</div>
+              <div class="consensus-seg yellow" id="segYellow" style="flex-basis:14.3%">2 Fair</div>
+            </div>
+            <div class="consensus-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Undervalued <span id="legendUV">12</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Fair <span id="legendFair">2</span></div>
+            </div>
+
+            <div class="chips-section">
+              <div class="section-title">InvestingPro Models</div>
+              <div class="chips-grid" id="chipsGrid"></div>
+            </div>
+
+            <div class="calc-note" id="calcNote">Based on 14 models, Market Range, and Analyst Target</div>
+
+            <div class="bottom-pad"></div>
+          </div>
+
+          <!-- Health tab -->
+          <div class="tab-content" id="contentHealth">
+            <div id="healthRows"></div>
+
+            <div class="chart-section">
+              <div class="section-title">Health Over Time</div>
+              <div class="chart-canvas-wrap">
+                <canvas id="healthChart" width="680" height="360"></canvas>
+              </div>
+              <div class="chart-legend" id="chartLegend"></div>
+            </div>
+
+            <div class="bottom-pad"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Model Detail Screen -->
+      <div class="detail-screen" id="modelDetail">
+        <div class="detail-header">
+          <div class="detail-back" onclick="closeModelDetail()">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="detail-title" id="modelDetailTitle">DCF Growth Exit</div>
+        </div>
+        <div id="modelDetailContent"></div>
+      </div>
+
+      <!-- Health Detail Screen -->
+      <div class="detail-screen" id="healthDetail">
+        <div class="detail-header">
+          <div class="detail-back" onclick="closeHealthDetail()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="detail-title">Financial Health Metrics</div>
+        </div>
+        <div id="healthDetailContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const CURRENT_PRICE = 198.50;
+
+const models = [
+  { name: 'DCF Growth Exit', value: 245, on: true },
+  { name: 'DCF EBITDA Exit', value: 238, on: true },
+  { name: 'DCF Revenue Exit', value: 220, on: true },
+  { name: 'Dividend Discount', value: 215, on: true },
+  { name: 'P/E Multiple', value: 242, on: true },
+  { name: 'EV/EBITDA', value: 230, on: true },
+  { name: 'Price/Sales', value: 248, on: true },
+  { name: 'Price/Book', value: 210, on: true },
+  { name: 'PEG Ratio', value: 235, on: true },
+  { name: 'FCF Yield', value: 240, on: true },
+  { name: 'Earnings Power', value: 225, on: true },
+  { name: 'Graham Number', value: 205, on: true },
+  { name: 'Sum of Parts', value: 252, on: true },
+  { name: 'Residual Income', value: 228, on: true }
+];
+
+const fairModels = ['Graham Number', 'Price/Book'];
+
+const healthModels = [
+  { name: 'Relative Value', score: 3.8, label: 'Good' },
+  { name: 'Price Momentum', score: 4.5, label: 'Excellent' },
+  { name: 'Cash Flow Health', score: 4.6, label: 'Excellent' },
+  { name: 'Profitability', score: 4.9, label: 'Great' },
+  { name: 'Growth', score: 3.2, label: 'Good' }
+];
+
+const healthColors = ['#2962ff', '#26a69a', '#ab47bc', '#ffab00', '#ef5350'];
+
+// Health over time data (fake plausible)
+const healthTimeline = {
+  years: [2021, 2022, 2023, 2024, 2025],
+  data: {
+    'Relative Value': [3.1, 3.4, 3.2, 3.6, 3.8],
+    'Price Momentum': [4.0, 3.2, 3.8, 4.2, 4.5],
+    'Cash Flow Health': [4.2, 4.4, 4.3, 4.5, 4.6],
+    'Profitability': [4.5, 4.6, 4.7, 4.8, 4.9],
+    'Growth': [4.1, 3.8, 3.5, 3.3, 3.2]
+  }
+};
+
+const chartLineVisible = [true, true, true, true, true];
+
+// Model detail data
+const modelDetails = {
+  'DCF Growth Exit': {
+    assumptions: [
+      ['Cost of Capital (WACC)', '8.5% - 10.2%', '9.3%'],
+      ['Terminal Growth Rate', '2.0% - 3.5%', '2.8%'],
+      ['Revenue CAGR (5Y)', '6.0% - 9.0%', '7.4%'],
+      ['Fair Value', '$230 - $260', '$245']
+    ],
+    benchmarks: [
+      ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
+      ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
+      ['Broadcom', 'AVGO', 'NASDAQ:AVGO'],
+      ['Qualcomm', 'QCOM', 'NASDAQ:QCOM'],
+      ['Texas Instruments', 'TXN', 'NASDAQ:TXN']
+    ]
+  },
+  'DCF EBITDA Exit': {
+    assumptions: [
+      ['EV/EBITDA Multiple', '18x - 24x', '21.3x'],
+      ['Cost of Capital (WACC)', '8.2% - 10.0%', '9.1%'],
+      ['EBITDA Margin', '32% - 36%', '34.2%'],
+      ['Fair Value', '$225 - $250', '$238']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Meta Platforms', 'META', 'NASDAQ:META'],
+      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
+      ['Nvidia', 'NVDA', 'NASDAQ:NVDA']
+    ]
+  },
+  'DCF Revenue Exit': {
+    assumptions: [
+      ['EV/Revenue Multiple', '6.5x - 8.5x', '7.2x'],
+      ['Cost of Capital (WACC)', '8.5% - 10.5%', '9.4%'],
+      ['Revenue Growth (5Y)', '5.5% - 8.5%', '6.8%'],
+      ['Fair Value', '$205 - $235', '$220']
+    ],
+    benchmarks: [
+      ['Samsung Electronics', 'SMSN', 'KRX:005930'],
+      ['Sony Group', 'SONY', 'NYSE:SONY'],
+      ['Lenovo', 'LNVGY', 'HKSE:0992'],
+      ['Dell Technologies', 'DELL', 'NYSE:DELL'],
+      ['HP Inc', 'HPQ', 'NYSE:HPQ']
+    ]
+  },
+  'Dividend Discount': {
+    assumptions: [
+      ['Dividend Growth Rate', '5.0% - 8.0%', '6.2%'],
+      ['Cost of Equity', '9.0% - 11.0%', '9.8%'],
+      ['Payout Ratio', '14% - 18%', '15.6%'],
+      ['Fair Value', '$200 - $230', '$215']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Johnson & Johnson', 'JNJ', 'NYSE:JNJ'],
+      ['Procter & Gamble', 'PG', 'NYSE:PG'],
+      ['Coca-Cola', 'KO', 'NYSE:KO'],
+      ['PepsiCo', 'PEP', 'NASDAQ:PEP']
+    ]
+  },
+  'P/E Multiple': {
+    assumptions: [
+      ['Forward P/E Range', '25x - 32x', '28.5x'],
+      ['EPS Estimate (FY)', '$7.80 - $8.90', '$8.49'],
+      ['Earnings Growth', '8% - 14%', '10.8%'],
+      ['Fair Value', '$228 - $256', '$242']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
+      ['Meta Platforms', 'META', 'NASDAQ:META'],
+      ['Nvidia', 'NVDA', 'NASDAQ:NVDA']
+    ]
+  },
+  'EV/EBITDA': {
+    assumptions: [
+      ['EV/EBITDA Multiple', '19x - 25x', '22.1x'],
+      ['EBITDA Estimate', '$128B - $142B', '$135B'],
+      ['Net Debt', '$50B - $58B', '$54B'],
+      ['Fair Value', '$218 - $242', '$230']
+    ],
+    benchmarks: [
+      ['Samsung Electronics', 'SMSN', 'KRX:005930'],
+      ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
+      ['Broadcom', 'AVGO', 'NASDAQ:AVGO'],
+      ['Qualcomm', 'QCOM', 'NASDAQ:QCOM'],
+      ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI']
+    ]
+  },
+  'Price/Sales': {
+    assumptions: [
+      ['P/S Multiple', '6.0x - 8.2x', '7.0x'],
+      ['Revenue Estimate', '$540B - $580B', '$560B'],
+      ['Revenue Growth', '5.5% - 8.5%', '6.9%'],
+      ['Fair Value', '$232 - $264', '$248']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
+      ['Meta Platforms', 'META', 'NASDAQ:META'],
+      ['Salesforce', 'CRM', 'NYSE:CRM']
+    ]
+  },
+  'Price/Book': {
+    assumptions: [
+      ['P/B Multiple', '38x - 52x', '43.5x'],
+      ['Book Value/Share', '$4.40 - $5.10', '$4.83'],
+      ['ROE', '145% - 175%', '160%'],
+      ['Fair Value', '$195 - $225', '$210']
+    ],
+    benchmarks: [
+      ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
+      ['Western Digital', 'WDC', 'NASDAQ:WDC'],
+      ['Lenovo', 'LNVGY', 'HKSE:0992'],
+      ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI'],
+      ['Intel', 'INTC', 'NASDAQ:INTC']
+    ]
+  },
+  'PEG Ratio': {
+    assumptions: [
+      ['PEG Ratio', '1.8x - 2.6x', '2.15x'],
+      ['Earnings Growth', '8% - 14%', '10.8%'],
+      ['Forward P/E', '25x - 30x', '27.5x'],
+      ['Fair Value', '$220 - $250', '$235']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
+      ['Adobe', 'ADBE', 'NASDAQ:ADBE'],
+      ['Salesforce', 'CRM', 'NYSE:CRM']
+    ]
+  },
+  'FCF Yield': {
+    assumptions: [
+      ['FCF Yield', '3.2% - 4.5%', '3.8%'],
+      ['FCF/Share', '$6.80 - $7.90', '$7.35'],
+      ['FCF Growth', '7% - 12%', '9.2%'],
+      ['Fair Value', '$225 - $255', '$240']
+    ],
+    benchmarks: [
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Meta Platforms', 'META', 'NASDAQ:META'],
+      ['Oracle', 'ORCL', 'NYSE:ORCL'],
+      ['Cisco Systems', 'CSCO', 'NASDAQ:CSCO']
+    ]
+  },
+  'Earnings Power': {
+    assumptions: [
+      ['Normalized Earnings', '$7.50 - $8.50', '$8.05'],
+      ['Capitalization Rate', '9% - 11%', '10.2%'],
+      ['Adjustment Factor', '0.85 - 1.0', '0.92'],
+      ['Fair Value', '$210 - $240', '$225']
+    ],
+    benchmarks: [
+      ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
+      ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
+      ['Western Digital', 'WDC', 'NASDAQ:WDC'],
+      ['Intel', 'INTC', 'NASDAQ:INTC'],
+      ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI']
+    ]
+  },
+  'Graham Number': {
+    assumptions: [
+      ['EPS (TTM)', '$6.40 - $7.20', '$6.73'],
+      ['Book Value/Share', '$4.40 - $5.10', '$4.83'],
+      ['Graham Multiplier', '22.5', '22.5'],
+      ['Fair Value', '$190 - $220', '$205']
+    ],
+    benchmarks: [
+      ['Western Digital', 'WDC', 'NASDAQ:WDC'],
+      ['Lenovo', 'LNVGY', 'HKSE:0992'],
+      ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI'],
+      ['Intel', 'INTC', 'NASDAQ:INTC'],
+      ['Corning', 'GLW', 'NYSE:GLW']
+    ]
+  },
+  'Sum of Parts': {
+    assumptions: [
+      ['iPhone Segment Value', '$1.8T - $2.1T', '$1.95T'],
+      ['Services Segment Value', '$1.2T - $1.5T', '$1.35T'],
+      ['Wearables + Other', '$180B - $250B', '$215B'],
+      ['Fair Value', '$238 - $266', '$252']
+    ],
+    benchmarks: [
+      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
+      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
+      ['Samsung Electronics', 'SMSN', 'KRX:005930'],
+      ['Sony Group', 'SONY', 'NYSE:SONY'],
+      ['Berkshire Hathaway', 'BRK.B', 'NYSE:BRK.B']
+    ]
+  },
+  'Residual Income': {
+    assumptions: [
+      ['Cost of Equity', '9.0% - 11.5%', '10.2%'],
+      ['ROE Spread', '140% - 165%', '152%'],
+      ['Growth Rate', '4.0% - 6.0%', '5.1%'],
+      ['Fair Value', '$215 - $240', '$228']
+    ],
+    benchmarks: [
+      ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
+      ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
+      ['Broadcom', 'AVGO', 'NASDAQ:AVGO'],
+      ['Texas Instruments', 'TXN', 'NASDAQ:TXN'],
+      ['Analog Devices', 'ADI', 'NASDAQ:ADI']
+    ]
+  }
+};
+
+// Health detail metrics per model
+const healthMetrics = {
+  'Relative Value': [
+    ['Earnings Yield', '5.2%', 62],
+    ['EV/EBIT', '24.3x', 58],
+    ['EV/EBIT Growth Ratio', '2.1x', 65],
+    ['EV/EBITDA', '21.8x', 55],
+    ['P/E Ratio', '29.4x', 48],
+    ['P/E to Growth', '2.4x', 52],
+    ['Price/Cash Flow', '22.1x', 60],
+    ['Price/Sales', '7.8x', 45],
+    ['Price/Book', '48.2x', 38]
+  ],
+  'Price Momentum': [
+    ['1M Return', '+4.2%', 78],
+    ['3M Return', '+8.7%', 82],
+    ['6M Return', '+15.3%', 85],
+    ['12M Return', '+28.6%', 88],
+    ['RSI (14-Day)', '62.4', 72],
+    ['52-Week High Proximity', '94.2%', 90],
+    ['Moving Avg (50D) Signal', 'Above', 80],
+    ['Moving Avg (200D) Signal', 'Above', 85],
+    ['MACD Signal', 'Bullish', 75]
+  ],
+  'Cash Flow Health': [
+    ['FCF/Share', '$7.35', 88],
+    ['Operating CF Margin', '30.2%', 92],
+    ['Cash Conversion Cycle', '(45) days', 85],
+    ['FCF Yield', '3.8%', 78],
+    ['FCF Growth (3Y)', '+12.4%', 82],
+    ['Debt/FCF', '1.8x', 75],
+    ['CapEx/Revenue', '3.2%', 90],
+    ['Operating CF/Debt', '0.52x', 72]
+  ],
+  'Profitability': [
+    ['Return on Equity', '160.2%', 98],
+    ['Net Margin', '25.3%', 95],
+    ['Operating Margin', '30.8%', 94],
+    ['ROIC', '56.4%', 96],
+    ['Gross Margin', '46.2%', 88],
+    ['Asset Turnover', '1.1x', 72],
+    ['Return on Assets', '28.3%', 92],
+    ['EBITDA Margin', '34.6%', 90],
+    ['Gross Profit/Employee', '$2.1M', 95]
+  ],
+  'Growth': [
+    ['Revenue Growth (YoY)', '+5.4%', 52],
+    ['EPS Growth (YoY)', '+8.2%', 58],
+    ['EBITDA Growth (YoY)', '+7.1%', 55],
+    ['FCF Growth (YoY)', '+9.8%', 62],
+    ['Revenue CAGR (3Y)', '+6.2%', 48],
+    ['EPS CAGR (3Y)', '+10.1%', 60],
+    ['Dividend Growth (5Y)', '+5.8%', 55],
+    ['Book Value Growth', '+3.2%', 42],
+    ['R&D/Revenue', '7.8%', 65]
+  ]
+};
+
+// ===================== STATE =====================
+let activeTab = 'fv';
+
+// ===================== INIT =====================
+function init() {
+  renderChips();
+  renderHealthRows();
+  renderHealthChart();
+  renderChartLegend();
+  setupStickyObserver();
+}
+
+// ===================== TABS =====================
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabFV').classList.toggle('active', tab === 'fv');
+  document.getElementById('tabHealth').classList.toggle('active', tab === 'health');
+  document.getElementById('contentFV').classList.toggle('active', tab === 'fv');
+  document.getElementById('contentHealth').classList.toggle('active', tab === 'health');
+  document.getElementById('heroFV').classList.toggle('active', tab === 'fv');
+  document.getElementById('heroHealth').classList.toggle('active', tab === 'health');
+
+  if (tab === 'health') {
+    // Redraw chart when switching to health tab
+    requestAnimationFrame(() => renderHealthChart());
+  }
+}
+
+// ===================== CHIPS =====================
+function renderChips() {
+  const grid = document.getElementById('chipsGrid');
+  grid.innerHTML = '';
+  models.forEach((m, i) => {
+    const chip = document.createElement('div');
+    chip.className = `model-chip ${m.on ? 'on' : 'off'}`;
+    chip.innerHTML = `
+      <span class="chip-body" onclick="toggleModel(${i})">${m.name} <span class="chip-value">$${m.value}</span></span>
+      <span class="chip-info" onclick="event.stopPropagation(); openModelDetail('${m.name}', ${m.value})">
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+    `;
+    grid.appendChild(chip);
+  });
+}
+
+function toggleModel(idx) {
+  models[idx].on = !models[idx].on;
+
+  // Ensure at least 1 model stays on
+  const onCount = models.filter(m => m.on).length;
+  if (onCount === 0) {
+    models[idx].on = true;
+    return;
+  }
+
+  // Update chip appearance
+  const chips = document.querySelectorAll('.model-chip');
+  chips[idx].className = `model-chip ${models[idx].on ? 'on' : 'off'}`;
+
+  updateCalculations();
+}
+
+// ===================== CALCULATIONS =====================
+function classify(name, val) {
+  if (fairModels.includes(name)) return 'fair';
+  const upside = ((val - CURRENT_PRICE) / CURRENT_PRICE) * 100;
+  if (upside > 5) return 'undervalued';
+  if (upside < -5) return 'overvalued';
+  return 'fair';
+}
+
+function updateCalculations() {
+  const active = models.filter(m => m.on);
+  const count = active.length;
+  if (count === 0) return;
+
+  const avg = active.reduce((s, m) => s + m.value, 0) / count;
+  const upside = ((avg - CURRENT_PRICE) / CURRENT_PRICE) * 100;
+
+  let uv = 0, fair = 0, ov = 0;
+  active.forEach(m => {
+    const c = classify(m.name, m.value);
+    if (c === 'undervalued') uv++;
+    else if (c === 'fair') fair++;
+    else ov++;
+  });
+
+  // Animate hero FV
+  const heroFV = document.getElementById('heroFVValue');
+  heroFV.textContent = '$' + avg.toFixed(2);
+  heroFV.classList.remove('flash');
+  void heroFV.offsetWidth;
+  heroFV.classList.add('flash');
+
+  // Update hero upside pill
+  const heroUpside = document.getElementById('heroUpside');
+  heroUpside.textContent = `+${upside.toFixed(1)}% Upside`;
+
+  // Update sticky
+  document.getElementById('stickyFV').textContent = '$' + avg.toFixed(2);
+  document.getElementById('stickyUpside').textContent = '+' + upside.toFixed(1) + '%';
+
+  // Update summary
+  const summaryEl = document.getElementById('summaryText');
+  const valuation = upside > 5 ? 'undervalued' : upside < -5 ? 'overvalued' : 'fairly valued';
+  const valColor = upside > 5 ? 'green' : upside < -5 ? 'color:var(--red)' : 'color:var(--yellow)';
+  summaryEl.innerHTML = `AAPL is <span class="green">${valuation}</span> by ${upside.toFixed(1)}% with <span class="green">strong</span> financial health. <span class="bold">${uv} of ${count}</span> models agree.`;
+
+  // Update consensus bar
+  const total = count;
+  const greenPct = total > 0 ? (uv / total * 100) : 0;
+  const yellowPct = total > 0 ? (fair / total * 100) : 0;
+  const redPct = total > 0 ? (ov / total * 100) : 0;
+
+  const segGreen = document.getElementById('segGreen');
+  const segYellow = document.getElementById('segYellow');
+
+  segGreen.style.flexBasis = greenPct + '%';
+  segGreen.textContent = uv > 0 ? uv + ' Undervalued' : '';
+  segGreen.style.display = uv > 0 ? 'flex' : 'none';
+
+  segYellow.style.flexBasis = yellowPct + '%';
+  segYellow.textContent = fair > 0 ? fair + ' Fair' : '';
+  segYellow.style.display = fair > 0 ? 'flex' : 'none';
+
+  // Update subtitle
+  document.getElementById('uvCount').textContent = uv;
+  document.getElementById('totalCount').textContent = count;
+  document.getElementById('legendUV').textContent = uv;
+  document.getElementById('legendFair').textContent = fair;
+
+  // Update calc note
+  document.getElementById('calcNote').textContent = `Based on ${count} model${count !== 1 ? 's' : ''}, Market Range, and Analyst Target`;
+}
+
+// ===================== HEALTH ROWS =====================
+function renderHealthRows() {
+  const container = document.getElementById('healthRows');
+  container.innerHTML = '';
+  healthModels.forEach((hm, i) => {
+    const pct = (hm.score / 5) * 100;
+    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const row = document.createElement('div');
+    row.className = 'health-row';
+    row.onclick = () => openHealthDetail(i);
+    row.innerHTML = `
+      <div class="health-name">${hm.name}</div>
+      <div class="health-bar-container">
+        <div class="health-bar-fill" style="width:${pct}%; background:${color}"></div>
+      </div>
+      <div class="health-score-val" style="color:${color}">${hm.score}</div>
+      <div class="health-chevron">
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ===================== HEALTH CHART =====================
+function renderHealthChart() {
+  const canvas = document.getElementById('healthChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 2;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width;
+  const H = rect.height;
+  const padL = 28, padR = 12, padT = 8, padB = 24;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = 0.5;
+  for (let v = 0; v <= 5; v++) {
+    const y = padT + chartH - (v / 5) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + chartW, y);
+    ctx.stroke();
+
+    // Y labels
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toString(), padL - 6, y + 3);
+  }
+
+  // X labels
+  const years = healthTimeline.years;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '9px -apple-system, sans-serif';
+  years.forEach((yr, i) => {
+    const x = padL + (i / (years.length - 1)) * chartW;
+    ctx.fillText(yr.toString(), x, H - 4);
+  });
+
+  // Draw lines
+  const modelNames = Object.keys(healthTimeline.data);
+  modelNames.forEach((name, mi) => {
+    if (!chartLineVisible[mi]) return;
+
+    const data = healthTimeline.data[name];
+    const color = healthColors[mi];
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+
+    data.forEach((val, di) => {
+      const x = padL + (di / (years.length - 1)) * chartW;
+      const y = padT + chartH - (val / 5) * chartH;
+      if (di === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw dots
+    data.forEach((val, di) => {
+      const x = padL + (di / (years.length - 1)) * chartW;
+      const y = padT + chartH - (val / 5) * chartH;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  });
+}
+
+function renderChartLegend() {
+  const container = document.getElementById('chartLegend');
+  container.innerHTML = '';
+  const modelNames = Object.keys(healthTimeline.data);
+  modelNames.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
+    item.innerHTML = `<div class="chart-legend-dot" style="background:${healthColors[i]}"></div>${name}`;
+    item.onclick = () => {
+      chartLineVisible[i] = !chartLineVisible[i];
+      item.classList.toggle('off', !chartLineVisible[i]);
+      renderHealthChart();
+    };
+    container.appendChild(item);
+  });
+}
+
+// ===================== STICKY HEADER =====================
+function setupStickyObserver() {
+  const scrollEl = document.getElementById('scrollContent');
+  const sentinel = document.getElementById('heroSentinel');
+  const stickyEl = document.getElementById('stickyHeader');
+
+  if (!scrollEl || !sentinel) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      stickyEl.classList.toggle('visible', !entry.isIntersecting);
+    });
+  }, {
+    root: scrollEl,
+    threshold: 0
+  });
+  observer.observe(sentinel);
+}
+
+// ===================== MODEL DETAIL =====================
+function openModelDetail(name, value) {
+  const screen = document.getElementById('modelDetail');
+  document.getElementById('modelDetailTitle').textContent = name;
+
+  const detail = modelDetails[name];
+  const upside = ((value - CURRENT_PRICE) / CURRENT_PRICE) * 100;
+  const isAbove = value >= CURRENT_PRICE;
+
+  let html = `
+    <div class="detail-cells">
+      <div class="detail-cell">
+        <div class="detail-cell-label">Current Price</div>
+        <div class="detail-cell-value">$${CURRENT_PRICE.toFixed(2)}</div>
+      </div>
+      <div class="detail-cell">
+        <div class="detail-cell-label">Fair Value</div>
+        <div class="detail-cell-value ${isAbove ? 'green' : 'red'}">$${value.toFixed(2)}</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Key Assumptions</div>
+      <div class="detail-table">
+        <div class="detail-table-header">
+          <span style="flex:1.3">Metric</span>
+          <span style="flex:1">Range</span>
+          <span style="flex:0.7;text-align:right">Conclusion</span>
+        </div>`;
+
+  if (detail && detail.assumptions) {
+    detail.assumptions.forEach(row => {
+      html += `
+        <div class="detail-table-row">
+          <span style="flex:1.3;color:var(--text-secondary);font-size:12px">${row[0]}</span>
+          <span style="flex:1;font-size:12px">${row[1]}</span>
+          <span style="flex:0.7;text-align:right;font-weight:600;font-size:12px">${row[2]}</span>
+        </div>`;
+    });
+  }
+
+  html += `
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Benchmarks</div>
+      <div class="detail-table">
+        <div class="detail-table-header">
+          <span style="flex:1.5">Company</span>
+          <span style="flex:0.6">Ticker</span>
+          <span style="flex:1;text-align:right">Exchange</span>
+        </div>`;
+
+  if (detail && detail.benchmarks) {
+    detail.benchmarks.forEach(row => {
+      html += `
+        <div class="detail-table-row">
+          <span style="flex:1.5;font-size:12px">${row[0]}</span>
+          <span style="flex:0.6;font-size:12px;color:var(--blue)">${row[1]}</span>
+          <span style="flex:1;text-align:right;font-size:11px;color:var(--text-secondary)">${row[2]}</span>
+        </div>`;
+    });
+  }
+
+  html += `
+      </div>
+    </div>
+    <div class="bottom-pad"></div>
+  `;
+
+  document.getElementById('modelDetailContent').innerHTML = html;
+
+  // Animate
+  document.getElementById('mainScreen').classList.add('pushed');
+  screen.classList.add('visible');
+}
+
+function closeModelDetail() {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('modelDetail').classList.remove('visible');
+}
+
+// ===================== HEALTH DETAIL =====================
+let activeHealthModel = 0;
+
+function openHealthDetail(idx) {
+  activeHealthModel = idx;
+  const screen = document.getElementById('healthDetail');
+  renderHealthDetailContent();
+
+  document.getElementById('mainScreen').classList.add('pushed');
+  screen.classList.add('visible');
+}
+
+function closeHealthDetail() {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('healthDetail').classList.remove('visible');
+}
+
+function renderHealthDetailContent() {
+  const container = document.getElementById('healthDetailContent');
+
+  // Chips
+  let chipsHTML = '<div class="health-detail-chips">';
+  healthModels.forEach((hm, i) => {
+    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const active = i === activeHealthModel;
+    chipsHTML += `
+      <div class="health-detail-chip ${active ? 'active' : ''}" onclick="activeHealthModel=${i}; renderHealthDetailContent()">
+        <div class="hdchip-score" style="color:${color}">${hm.label}</div>
+        <div class="hdchip-name">${hm.name}</div>
+        ${active ? '<div class="hdchip-check" style="color:var(--blue)">&#10003;</div>' : ''}
+      </div>`;
+  });
+  chipsHTML += '</div>';
+
+  // Metrics table
+  const hm = healthModels[activeHealthModel];
+  const metrics = healthMetrics[hm.name] || [];
+
+  let tableHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">${hm.name} Metrics</div>
+      <div class="detail-table">
+        <div class="detail-table-header">
+          <span style="flex:1.2">Metric</span>
+          <span style="flex:0.7;text-align:center">Value</span>
+          <span style="flex:1;text-align:right">Percentile</span>
+        </div>`;
+
+  metrics.forEach(row => {
+    const pctColor = row[2] >= 75 ? 'var(--green)' : row[2] >= 50 ? 'var(--yellow)' : 'var(--red)';
+    tableHTML += `
+      <div class="detail-table-row">
+        <span style="flex:1.2;font-size:12px;color:var(--text-secondary)">${row[0]}</span>
+        <span style="flex:0.7;text-align:center;font-size:12px;font-weight:600">${row[1]}</span>
+        <span style="flex:1;text-align:right;font-size:12px;display:flex;align-items:center;justify-content:flex-end;gap:6px">
+          <span class="pct-bar"><span class="pct-bar-fill" style="width:${row[2]}%;background:${pctColor}"></span></span>
+          <span style="color:${pctColor};font-weight:600;min-width:28px">${row[2]}%</span>
+        </span>
+      </div>`;
+  });
+
+  tableHTML += '</div></div><div class="bottom-pad"></div>';
+
+  container.innerHTML = chipsHTML + tableHTML;
+}
+
+// ===================== START =====================
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

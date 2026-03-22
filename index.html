@@ -3,86 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prototypes - Investing.com</title>
+<title>Investing.com Prototypes</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-  background: #F9FAFB;
-  color: #1A1A2E;
-  min-height: 100vh;
-  padding: 48px 24px;
-}
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.subtitle {
-  font-size: 14px;
-  color: #6B7280;
-  margin-bottom: 32px;
-}
-.proto-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-a.proto-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-a.proto-card:hover {
-  border-color: #1A1A2E;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-.proto-name {
-  font-size: 16px;
-  font-weight: 600;
-}
-.proto-desc {
-  font-size: 13px;
-  color: #6B7280;
-  margin-top: 2px;
-}
-.proto-arrow {
-  font-size: 18px;
-  color: #9CA3AF;
-}
+  :root {
+    --bg: #0d0d1a;
+    --card: #16213e;
+    --card-hover: #1b2a4a;
+    --text: #ffffff;
+    --text-secondary: #8892a0;
+    --text-tertiary: #5a6270;
+    --blue: #2962ff;
+    --blue-bg: rgba(41,98,255,0.1);
+    --border: rgba(255,255,255,0.06);
+    --green: #26a69a;
+    --font: -apple-system, 'SF Pro Display', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: var(--font);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 60px 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .header {
+    margin-bottom: 48px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .prototypes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  a.card {
+    display: block;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+  }
+
+  a.card:hover {
+    background: var(--card-hover);
+    border-color: rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+  }
+
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .card-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .card-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-live {
+    background: rgba(38,166,154,0.12);
+    color: var(--green);
+  }
+
+  .badge-local {
+    background: var(--blue-bg);
+    color: var(--blue);
+  }
+
+  .card-arrow {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: var(--text-tertiary);
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    margin-top: 32px;
+    padding-left: 4px;
+  }
+
+  .section-label:first-of-type {
+    margin-top: 0;
+  }
+
+  .footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <h1>Prototypes</h1>
-  <p class="subtitle">Investing.com mobile product prototypes</p>
-  <div class="proto-list">
-    <a class="proto-card" href="whats-going-on-bar/">
-      <div>
-        <div class="proto-name">What's Going On bar</div>
-        <div class="proto-desc">Home screen bar with S&P 500, Fear & Greed, news carousel</div>
+  <div class="header">
+    <h1>Prototypes</h1>
+    <p>Investing.com product prototypes - interactive HTML mockups for iOS mobile features.</p>
+  </div>
+
+  <div class="section-label">Active Prototypes</div>
+
+  <div class="prototypes">
+    <a class="card" href="whats-going-on-bar/">
+      <div class="card-row">
+        <div class="card-info">
+          <div class="card-title">What's Going On Bar</div>
+          <div class="card-desc">Home screen market bar with configurable indices, news, and market strip</div>
+        </div>
+        <span class="card-badge badge-live">Live</span>
+        <svg class="card-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
       </div>
-      <span class="proto-arrow">&rsaquo;</span>
     </a>
-    <a class="proto-card" href="ai-article-hooks-carousel/">
-      <div>
-        <div class="proto-name">AI Article Hooks Carousel</div>
-        <div class="proto-desc">InvestingAI contextual prompts within news articles</div>
+
+    <a class="card" href="ai-article-hooks-carousel/">
+      <div class="card-row">
+        <div class="card-info">
+          <div class="card-title">AI Article Hooks Carousel</div>
+          <div class="card-desc">AI-generated article hook cards in a swipeable carousel format</div>
+        </div>
+        <span class="card-badge badge-live">Live</span>
+        <svg class="card-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
       </div>
-      <span class="proto-arrow">&rsaquo;</span>
+    </a>
+
+    <a class="card" href="fv-tab/">
+      <div class="card-row">
+        <div class="card-info">
+          <div class="card-title">Fair Value Tab</div>
+          <div class="card-desc">Unified Fair Value + Health tab for instrument pages - interactive models, health breakdown, deep dives</div>
+        </div>
+        <span class="card-badge badge-local">WIP</span>
+        <svg class="card-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
+      </div>
+    </a>
+
+    <a class="card" href="warrenai-native/">
+      <div class="card-row">
+        <div class="card-info">
+          <div class="card-title">WarrenAI Native</div>
+          <div class="card-desc">Native WarrenAI chat experience concept</div>
+        </div>
+        <span class="card-badge badge-local">Local</span>
+        <svg class="card-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/></svg>
+      </div>
     </a>
   </div>
+
+  <div class="footer">
+    Investing.com Product Team
+  </div>
 </div>
+
 </body>
 </html>

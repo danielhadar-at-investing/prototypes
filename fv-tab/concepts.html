@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Value Tab - 10 Concepts</title>
+<style>
+  :root {
+    --bg-page: #0d0d1a;
+    --bg-device: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-card-alt: #1b2a4a;
+    --text-primary: #ffffff;
+    --text-secondary: #8892a0;
+    --text-tertiary: #5a6270;
+    --green: #26a69a;
+    --green-bg: rgba(38, 166, 154, 0.12);
+    --red: #ef5350;
+    --red-bg: rgba(239, 83, 80, 0.12);
+    --blue: #2962ff;
+    --blue-bg: rgba(41, 98, 255, 0.12);
+    --yellow: #ffab00;
+    --yellow-bg: rgba(255, 171, 0, 0.12);
+    --border: rgba(255,255,255,0.06);
+    --border-light: rgba(255,255,255,0.1);
+    --radius-card: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --font: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-page);
+    font-family: var(--font);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+  }
+
+  /* Concept switcher */
+  .switcher {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 12px;
+    max-width: 500px;
+  }
+
+  .switcher button {
+    width: 40px;
+    height: 36px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    border-radius: var(--radius-xs);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .switcher button:hover {
+    border-color: var(--blue);
+    color: var(--text-primary);
+  }
+
+  .switcher button.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
+  .concept-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .concept-desc {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+    text-align: center;
+    max-width: 400px;
+  }
+
+  /* Device frame */
+  .device {
+    width: 390px;
+    height: 844px;
+    background: var(--bg-device);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 3px #2a2a3e, 0 0 0 6px #1a1a28, 0 30px 80px rgba(0,0,0,0.6);
+  }
+
+  .device-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 34px;
+    background: #000;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  .device-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+
+  .device-screen::-webkit-scrollbar { display: none; }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 24px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg-device);
+  }
+
+  .status-time { font-size: 15px; font-weight: 700; }
+  .status-icons { display: flex; gap: 5px; align-items: center; font-size: 12px; }
+
+  /* Nav header */
+  .nav-header {
+    display: flex;
+    align-items: center;
+    padding: 4px 16px 12px;
+    gap: 12px;
+  }
+
+  .nav-back {
+    font-size: 22px;
+    color: var(--blue);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .nav-title-block { flex: 1; }
+  .nav-stock { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .nav-company { font-size: 12px; color: var(--text-secondary); }
+  .nav-price-block { text-align: right; }
+  .nav-price { font-size: 18px; font-weight: 700; }
+  .nav-change { font-size: 12px; color: var(--green); font-weight: 500; }
+
+  /* Tab bar for FV tab */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    margin-bottom: 16px;
+    gap: 20px;
+  }
+
+  .tab-bar span {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    padding-bottom: 10px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .tab-bar span.active {
+    color: var(--blue);
+    border-bottom: 2px solid var(--blue);
+    font-weight: 600;
+  }
+
+  /* Screen content area */
+  .screen-content {
+    padding: 0 16px 30px;
+  }
+
+  /* Concept container */
+  .concept { display: none; }
+  .concept.active { display: block; }
+
+  /* --- Shared card styles --- */
+  .card {
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .badge-green {
+    display: inline-block;
+    background: var(--green-bg);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .badge-blue {
+    display: inline-block;
+    background: var(--blue-bg);
+    color: var(--blue);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Health bar shared */
+  .health-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .health-row:last-child { margin-bottom: 0; }
+
+  .health-label {
+    width: 110px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .health-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    margin: 0 10px;
+    overflow: hidden;
+  }
+
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .health-val {
+    font-size: 12px;
+    font-weight: 600;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Model row shared */
+  .model-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .model-row:last-child { border-bottom: none; }
+
+  .model-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .model-price {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-right: 12px;
+  }
+
+  /* Toggle switch */
+  .toggle {
+    width: 42px;
+    height: 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.12);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--blue); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #fff;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+  }
+
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* Utility */
+  .fv-big { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+  .fv-medium { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .section-gap { margin-top: 16px; }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-blue { color: var(--blue); }
+  .text-yellow { color: var(--yellow); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-xs { font-size: 11px; }
+  .text-sm { font-size: 13px; }
+  .text-md { font-size: 15px; }
+  .fw-600 { font-weight: 600; }
+  .fw-700 { font-weight: 700; }
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mb-4 { margin-bottom: 4px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+
+  /* ===== CONCEPT 1: Smart Summary ===== */
+  .c1-hero {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--text-primary);
+  }
+
+  .c1-hero strong { color: var(--green); font-weight: 700; }
+  .c1-hero .health-strong { color: var(--blue); }
+
+  .c1-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  .c1-toggle-header .arrow {
+    transition: transform 0.3s;
+    color: var(--text-tertiary);
+    font-size: 14px;
+  }
+
+  .c1-toggle-header .arrow.open { transform: rotate(180deg); }
+
+  .c1-model-list { overflow: hidden; transition: max-height 0.4s ease; max-height: 0; }
+  .c1-model-list.open { max-height: 800px; }
+
+  /* ===== CONCEPT 2: Number Line ===== */
+  .c2-range-container {
+    padding: 20px 0 16px;
+    position: relative;
+  }
+
+  .c2-range-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    position: relative;
+    margin: 30px 0 36px;
+  }
+
+  .c2-range-zone {
+    position: absolute;
+    height: 100%;
+    border-radius: 4px;
+    top: 0;
+  }
+
+  .c2-market-zone {
+    background: rgba(255,255,255,0.08);
+  }
+
+  .c2-analyst-zone {
+    background: rgba(41, 98, 255, 0.2);
+  }
+
+  .c2-pin {
+    position: absolute;
+    top: -24px;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+
+  .c2-pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    margin: 0 auto 2px;
+    border: 2px solid;
+  }
+
+  .c2-pin-label {
+    position: absolute;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .c2-range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .c2-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .c2-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .c2-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ===== CONCEPT 3: Live Calculator ===== */
+  .c3-sticky {
+    position: sticky;
+    top: 54px;
+    z-index: 40;
+    background: var(--bg-device);
+    padding: 12px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin: -16px -16px 16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .c3-fv-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .c3-fv-price {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    transition: color 0.3s;
+  }
+
+  .c3-fv-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .c3-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .c3-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 0;
+  }
+
+  .c3-chip.on {
+    border-color: var(--blue);
+    background: var(--blue-bg);
+  }
+
+  .c3-chip-name {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+
+  .c3-chip.on .c3-chip-name { color: var(--blue); }
+
+  .c3-chip-price {
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .c3-chip.on .c3-chip-price { color: var(--blue); }
+
+  .c3-count {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 8px;
+  }
+
+  /* ===== CONCEPT 4: Dashboard ===== */
+  .c4-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .c4-hero-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .c4-ring {
+    width: 72px;
+    height: 72px;
+    margin: 8px auto;
+    position: relative;
+  }
+
+  .c4-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .c4-ring-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  .c4-model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  .c4-model-cell {
+    background: var(--bg-card);
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .c4-model-cell .model-name { font-size: 11px; }
+  .c4-model-cell .model-price { font-size: 12px; margin-right: 0; }
+
+  .c4-mini-bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .c4-mini-bar-row:last-child { margin-bottom: 0; }
+
+  .c4-mini-label {
+    width: 100px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .c4-mini-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin: 0 8px;
+    overflow: hidden;
+  }
+
+  .c4-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  .c4-mini-val {
+    font-size: 11px;
+    font-weight: 600;
+    width: 24px;
+    text-align: right;
+  }
+
+  .c4-trend {
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
+  /* ===== CONCEPT 5: Bottom Sheet ===== */
+  .c5-clean-card {
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .c5-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .c5-row:active { background: var(--bg-card-alt); }
+
+  .c5-row-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .c5-row-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .c5-chevron {
+    color: var(--text-tertiary);
+    font-size: 18px;
+  }
+
+  .c5-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 60;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .c5-backdrop.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .c5-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border-radius: 20px 20px 0 0;
+    z-index: 70;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 70%;
+    overflow-y: auto;
+    padding: 12px 16px 30px;
+  }
+
+  .c5-sheet.visible { transform: translateY(0); }
+
+  .c5-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .c5-sheet-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* ===== CONCEPT 6: Radar Chart ===== */
+  .c6-radar-container {
+    display: flex;
+    justify-content: center;
+    padding: 8px 0 16px;
+  }
+
+  .c6-fv-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .c6-bar-track {
+    flex: 1;
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 5px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .c6-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    position: relative;
+  }
+
+  .c6-bar-marker {
+    position: absolute;
+    top: -5px;
+    width: 4px;
+    height: 20px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+  }
+
+  .c6-pill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .c6-pill {
+    background: var(--bg-card-alt);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .c6-pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+  }
+
+  /* ===== CONCEPT 7: Thermometer ===== */
+  .c7-layout {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .c7-thermo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .c7-thermo {
+    width: 40px;
+    height: 300px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .c7-mercury {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0 0 20px 20px;
+    transition: height 0.6s ease;
+  }
+
+  .c7-thermo-label {
+    position: absolute;
+    left: 50px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .c7-thermo-tick {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+  }
+
+  .c7-side-col { flex: 1; }
+
+  .c7-health-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+
+  .c7-health-pill:last-child { margin-bottom: 0; }
+
+  .c7-pill-score {
+    font-size: 14px;
+    font-weight: 700;
+    width: 32px;
+    text-align: center;
+  }
+
+  .c7-pill-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex: 1;
+  }
+
+  .c7-pill-bar {
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .c7-pill-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  /* ===== CONCEPT 8: Card Carousel ===== */
+  .c8-carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 0 12px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .c8-carousel::-webkit-scrollbar { display: none; }
+
+  .c8-model-card {
+    flex: 0 0 160px;
+    scroll-snap-align: start;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px;
+    position: relative;
+  }
+
+  .c8-model-card.on {
+    border-color: var(--blue);
+  }
+
+  .c8-mc-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .c8-mc-price {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .c8-mc-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: visible;
+  }
+
+  .c8-mc-bar-marker {
+    position: absolute;
+    top: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    transform: translateX(-50%);
+  }
+
+  .c8-mc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .c8-mc-toggle-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .c8-accordion {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  .c8-acc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    cursor: pointer;
+  }
+
+  .c8-acc-header:not(:first-child) {
+    border-top: 1px solid var(--border);
+  }
+
+  .c8-acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: var(--bg-card-alt);
+  }
+
+  .c8-acc-body.open { max-height: 400px; }
+
+  .c8-acc-body-inner { padding: 12px 16px; }
+
+  /* ===== CONCEPT 9: X-Ray ===== */
+  .c9-verdict {
+    text-align: center;
+    padding: 20px 16px;
+  }
+
+  .c9-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: var(--blue-bg);
+    border: none;
+    font-family: var(--font);
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+
+  .c9-expand-btn:hover { background: rgba(41, 98, 255, 0.2); }
+
+  .c9-layers {
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s;
+    max-height: 0;
+    opacity: 0;
+  }
+
+  .c9-layers.open {
+    max-height: 1200px;
+    opacity: 1;
+  }
+
+  .c9-layer {
+    margin-bottom: 12px;
+  }
+
+  .c9-layer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-card-alt);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .c9-layer-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease;
+  }
+
+  .c9-layer-body.open { max-height: 600px; }
+
+  .c9-layer-body-inner { padding: 8px 14px; }
+
+  .c9-range-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .c9-range-row:last-child { border-bottom: none; }
+
+  /* ===== CONCEPT 10: Consensus View ===== */
+  .c10-consensus-bar {
+    display: flex;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .c10-consensus-bar > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    transition: flex 0.3s;
+  }
+
+  .c10-legend {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .c10-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .c10-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+  }
+
+  .c10-verdict-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .c10-model-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .c10-model-row:last-child { border-bottom: none; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    animation: fadeUp 0.4s ease forwards;
+  }
+
+  @keyframes numberChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .number-pop {
+    animation: numberChange 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Fair Value Tab Concepts</div>
+<div class="page-subtitle">AAPL - 10 design explorations</div>
+
+<div class="switcher" id="switcher"></div>
+
+<div class="concept-label" id="conceptLabel">Concept 1: Smart Summary</div>
+<div class="concept-desc" id="conceptDesc">Words first, visuals support - plain-English verdict with expandable detail</div>
+
+<div class="device">
+  <div class="device-notch"></div>
+  <div class="device-screen" id="screen">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <span class="status-icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.2" y="0" width="2.8" height="12" rx="1" opacity="0.3"/></svg>
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.6C9.3 3.6 10.9 4.3 12 5.5L13.4 4.1C11.9 2.5 9.8 1.5 7.5 1.5S3.1 2.5 1.6 4.1L3 5.5C4.1 4.3 5.7 3.6 7.5 3.6Z" opacity="0.5"/><path d="M7.5 6.8C8.6 6.8 9.7 7.2 10.5 7.9L11.9 6.5C10.7 5.4 9.2 4.8 7.5 4.8S4.3 5.4 3.1 6.5L4.5 7.9C5.3 7.2 6.4 6.8 7.5 6.8Z" opacity="0.7"/><circle cx="7.5" cy="10.5" r="1.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="21" height="10" rx="2.5" stroke="white" stroke-width="1" fill="none"/><rect x="22" y="4" width="2" height="4" rx="1" opacity="0.4"/><rect x="1.5" y="2.5" width="14" height="7" rx="1.5" fill="white"/></svg>
+      </span>
+    </div>
+
+    <div class="nav-header">
+      <span class="nav-back">&lsaquo;</span>
+      <div class="nav-title-block">
+        <div class="nav-stock">AAPL</div>
+        <div class="nav-company">Apple Inc.</div>
+      </div>
+      <div class="nav-price-block">
+        <div class="nav-price">$198.50</div>
+        <div class="nav-change">+1.24 (+0.63%)</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <span>Overview</span>
+      <span>Financials</span>
+      <span class="active">Fair Value</span>
+      <span>News</span>
+    </div>
+
+    <div class="screen-content" id="conceptContainer">
+      <!-- Concepts injected by JS -->
+    </div>
+  </div>
+
+  <!-- Concept 5 bottom sheet elements (positioned within device) -->
+  <div class="c5-backdrop" id="c5Backdrop"></div>
+  <div class="c5-sheet" id="c5Sheet">
+    <div class="c5-sheet-handle"></div>
+    <div class="c5-sheet-title" id="c5SheetTitle"></div>
+    <div id="c5SheetBody"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const DATA = {
+  stock: 'AAPL',
+  company: 'Apple Inc.',
+  price: 198.50,
+  fv: 234.00,
+  upside: 17.9,
+  certainty: 'High',
+  healthScore: 4,
+  healthPrecise: 4.2,
+  health: [
+    { name: 'Relative Value', score: 3.8 },
+    { name: 'Price Momentum', score: 4.5 },
+    { name: 'Cash Flow Health', score: 4.6 },
+    { name: 'Profitability', score: 4.9 },
+    { name: 'Growth', score: 3.2 },
+  ],
+  models: [
+    { name: 'DCF Growth Exit', price: 245, on: true },
+    { name: 'DCF EBITDA Exit', price: 238, on: true },
+    { name: 'DCF Revenue Exit', price: 220, on: true },
+    { name: 'Dividend Discount', price: 215, on: true },
+    { name: 'P/E Multiple', price: 242, on: true },
+    { name: 'EV/EBITDA', price: 230, on: true },
+    { name: 'Price/Sales', price: 248, on: true },
+    { name: 'Price/Book', price: 210, on: true },
+    { name: 'PEG Ratio', price: 235, on: true },
+    { name: 'FCF Yield', price: 240, on: true },
+    { name: 'Earnings Power', price: 225, on: true },
+    { name: 'Graham Number', price: 205, on: true },
+    { name: 'Sum of Parts', price: 252, on: true },
+    { name: 'Residual Income', price: 228, on: true },
+  ],
+  marketRange: [195, 260],
+  analystRange: [210, 255],
+  analystAvg: 232,
+};
+
+function getHealthColor(score) {
+  if (score >= 4.0) return 'var(--green)';
+  if (score >= 3.0) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function getHealthBg(score) {
+  if (score >= 4.0) return 'var(--green-bg)';
+  if (score >= 3.0) return 'var(--yellow-bg)';
+  return 'var(--red-bg)';
+}
+
+function modelVerdict(price) {
+  if (price > DATA.price * 1.05) return { text: 'Undervalued', color: 'var(--green)', bg: 'var(--green-bg)' };
+  if (price < DATA.price * 0.95) return { text: 'Overvalued', color: 'var(--red)', bg: 'var(--red-bg)' };
+  return { text: 'Fair Value', color: 'var(--yellow)', bg: 'var(--yellow-bg)' };
+}
+
+function healthBars(prefix, compact) {
+  return DATA.health.map(h => {
+    const pct = (h.score / 5) * 100;
+    const col = getHealthColor(h.score);
+    if (compact) {
+      return `<div class="c4-mini-bar-row">
+        <span class="c4-mini-label">${h.name}</span>
+        <div class="c4-mini-track"><div class="c4-mini-fill" style="width:${pct}%;background:${col}"></div></div>
+        <span class="c4-mini-val" style="color:${col}">${h.score}</span>
+        <span class="c4-trend" style="color:${h.score >= 4 ? 'var(--green)' : h.score >= 3 ? 'var(--yellow)' : 'var(--red)'}">${h.score >= 4 ? '&#9650;' : h.score >= 3 ? '&#9654;' : '&#9660;'}</span>
+      </div>`;
+    }
+    return `<div class="health-row">
+      <span class="health-label">${h.name}</span>
+      <div class="health-bar-track"><div class="health-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <span class="health-val" style="color:${col}">${h.score}</span>
+    </div>`;
+  }).join('');
+}
+
+function modelList(prefix, withToggle) {
+  return DATA.models.map((m, i) => {
+    const v = modelVerdict(m.price);
+    return `<div class="model-row">
+      <span class="model-name">${m.name}</span>
+      <span class="model-price">$${m.price}</span>
+      ${withToggle ? `<div class="toggle ${m.on ? 'on' : ''}" data-model="${prefix}-${i}" onclick="toggleModel(this, '${prefix}', ${i})"></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ===== CONCEPT BUILDERS =====
+const concepts = {};
+
+// --- Concept 1: Smart Summary ---
+concepts[1] = {
+  label: 'Smart Summary',
+  desc: 'Words first, visuals support - plain-English verdict with expandable detail',
+  build() {
+    const aboveFV = DATA.models.filter(m => m.price > DATA.price).length;
+    return `
+      <div class="card fade-up" style="animation-delay:0.05s">
+        <div class="c1-hero">
+          AAPL is <strong>undervalued by ${DATA.upside}%</strong> with <strong class="health-strong" style="color:var(--blue)">strong</strong> financial health (${DATA.healthScore}/5). ${aboveFV} of ${DATA.models.length} models agree.
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.1s">
+        <div class="text-secondary text-sm mb-4">InvestingPro Fair Value</div>
+        <div class="flex items-center gap-8">
+          <span class="fv-big">$${DATA.fv.toFixed(2)}</span>
+          <span class="badge-green">+${DATA.upside}% Upside</span>
+        </div>
+        <div class="text-secondary text-xs mt-4">Certainty: ${DATA.certainty}</div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.15s">
+        <div class="card-title">Financial Health Score</div>
+        <div class="flex items-center gap-8 mb-12">
+          <span class="fv-medium" style="color:var(--green)">${DATA.healthPrecise}</span>
+          <span class="text-secondary text-sm">/ 5</span>
+        </div>
+        ${healthBars('c1')}
+      </div>
+      <div class="card fade-up" style="animation-delay:0.2s">
+        <div class="c1-toggle-header" onclick="toggleC1Models()">
+          <span class="card-title" style="margin-bottom:0">InvestingPro Models (${DATA.models.length})</span>
+          <span class="arrow" id="c1Arrow">&#9660;</span>
+        </div>
+        <div class="c1-model-list" id="c1ModelList">
+          ${modelList('c1', false)}
+        </div>
+      </div>`;
+  }
+};
+
+function toggleC1Models() {
+  const list = document.getElementById('c1ModelList');
+  const arrow = document.getElementById('c1Arrow');
+  list.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// --- Concept 2: Number Line ---
+concepts[2] = {
+  label: 'Number Line',
+  desc: 'See the gap spatially - price, FV, and ranges on a horizontal scale',
+  build() {
+    const min = 190;
+    const max = 265;
+    const range = max - min;
+    const pctOf = v => ((v - min) / range * 100);
+    const mktL = pctOf(DATA.marketRange[0]);
+    const mktW = pctOf(DATA.marketRange[1]) - mktL;
+    const anlL = pctOf(DATA.analystRange[0]);
+    const anlW = pctOf(DATA.analystRange[1]) - anlL;
+    const pricePos = pctOf(DATA.price);
+    const fvPos = pctOf(DATA.fv);
+
+    return `
+      <div class="card fade-up">
+        <div class="card-title">Price vs Fair Value</div>
+        <div class="c2-range-container">
+          <div class="c2-range-track">
+            <div class="c2-range-zone c2-market-zone" style="left:${mktL}%;width:${mktW}%"></div>
+            <div class="c2-range-zone c2-analyst-zone" style="left:${anlL}%;width:${anlW}%"></div>
+            <div class="c2-pin" style="left:${pricePos}%">
+              <div class="c2-pin-dot" style="background:var(--red);border-color:var(--red)"></div>
+              <div class="c2-pin-label" style="color:var(--red)">$${DATA.price}</div>
+            </div>
+            <div class="c2-pin" style="left:${fvPos}%">
+              <div class="c2-pin-dot" style="background:var(--green);border-color:var(--green)"></div>
+              <div class="c2-pin-label" style="color:var(--green)">$${DATA.fv}</div>
+            </div>
+          </div>
+          <div class="c2-range-labels">
+            <span>$${min}</span>
+            <span>$${max}</span>
+          </div>
+          <div class="c2-legend">
+            <div class="c2-legend-item"><div class="c2-legend-dot" style="background:var(--red)"></div> Current Price</div>
+            <div class="c2-legend-item"><div class="c2-legend-dot" style="background:var(--green)"></div> InvPro FV</div>
+            <div class="c2-legend-item"><div class="c2-legend-dot" style="background:rgba(255,255,255,0.2)"></div> 52w Market</div>
+            <div class="c2-legend-item"><div class="c2-legend-dot" style="background:rgba(41,98,255,0.4)"></div> Analyst Range</div>
+          </div>
+        </div>
+        <div class="flex justify-between mt-8">
+          <div>
+            <div class="text-secondary text-xs">Analyst Avg</div>
+            <div class="text-md fw-600">$${DATA.analystAvg}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="text-secondary text-xs">Upside to FV</div>
+            <div class="text-md fw-600 text-green">+${DATA.upside}%</div>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.1s">
+        <div class="card-title">Financial Health</div>
+        <div class="flex items-center gap-8 mb-12">
+          <span class="fv-medium" style="color:var(--green)">${DATA.healthPrecise}</span>
+          <span class="text-secondary text-sm">/ 5</span>
+        </div>
+        ${healthBars('c2')}
+      </div>
+      <div class="card fade-up" style="animation-delay:0.15s">
+        <div class="card-title">Model Estimates</div>
+        ${modelList('c2', false)}
+      </div>`;
+  }
+};
+
+// --- Concept 3: Live Calculator ---
+let c3ModelStates = DATA.models.map(m => ({ ...m }));
+
+function c3Recalc() {
+  const active = c3ModelStates.filter(m => m.on);
+  const avg = active.length > 0 ? active.reduce((s, m) => s + m.price, 0) / active.length : 0;
+  const upside = active.length > 0 ? ((avg - DATA.price) / DATA.price * 100).toFixed(1) : '0.0';
+  const el = document.getElementById('c3FvPrice');
+  const upEl = document.getElementById('c3Upside');
+  const countEl = document.getElementById('c3Count');
+  if (el) {
+    el.textContent = '$' + avg.toFixed(2);
+    el.classList.remove('number-pop');
+    void el.offsetWidth;
+    el.classList.add('number-pop');
+    el.style.color = upside > 0 ? 'var(--green)' : upside < 0 ? 'var(--red)' : 'var(--text-primary)';
+  }
+  if (upEl) {
+    upEl.textContent = (upside > 0 ? '+' : '') + upside + '% ' + (upside > 0 ? 'Upside' : upside < 0 ? 'Downside' : 'Fair');
+    upEl.style.background = upside > 0 ? 'var(--green-bg)' : upside < 0 ? 'var(--red-bg)' : 'var(--yellow-bg)';
+    upEl.style.color = upside > 0 ? 'var(--green)' : upside < 0 ? 'var(--red)' : 'var(--yellow)';
+  }
+  if (countEl) {
+    countEl.textContent = active.length + ' of ' + DATA.models.length + ' models active';
+  }
+}
+
+concepts[3] = {
+  label: 'Live Calculator',
+  desc: 'Toggle models on/off - the FV price recalculates in real time',
+  build() {
+    c3ModelStates = DATA.models.map(m => ({ ...m, on: true }));
+    const chips = c3ModelStates.map((m, i) => `
+      <div class="c3-chip ${m.on ? 'on' : ''}" id="c3chip${i}" onclick="toggleC3Chip(${i})">
+        <div class="c3-chip-name">${m.name}</div>
+        <div class="c3-chip-price">$${m.price}</div>
+      </div>`).join('');
+
+    return `
+      <div class="c3-sticky">
+        <div class="c3-fv-label">InvestingPro Fair Value</div>
+        <div class="c3-fv-row">
+          <span class="c3-fv-price" id="c3FvPrice" style="color:var(--green)">$${DATA.fv.toFixed(2)}</span>
+          <span class="badge-green" id="c3Upside">+${DATA.upside}% Upside</span>
+        </div>
+      </div>
+      <div class="section-gap">
+        <div class="c3-count" id="c3Count">${DATA.models.length} of ${DATA.models.length} models active</div>
+        <div class="c3-chip-grid">${chips}</div>
+      </div>
+      <div class="card mt-12 fade-up" style="animation-delay:0.1s">
+        <div class="card-title">Financial Health - ${DATA.healthPrecise}/5</div>
+        ${healthBars('c3')}
+      </div>`;
+  }
+};
+
+function toggleC3Chip(i) {
+  c3ModelStates[i].on = !c3ModelStates[i].on;
+  const chip = document.getElementById('c3chip' + i);
+  if (chip) chip.classList.toggle('on');
+  c3Recalc();
+}
+
+// --- Concept 4: Dashboard ---
+concepts[4] = {
+  label: 'Dashboard',
+  desc: 'Data-dense layout - everything visible at a glance, minimal scrolling',
+  build() {
+    const ring = `<svg width="72" height="72" viewBox="0 0 72 72">
+      <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+      <circle cx="36" cy="36" r="30" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="${(DATA.healthPrecise/5)*188.5} 188.5" stroke-linecap="round"/>
+    </svg>`;
+
+    const modelGrid = DATA.models.map(m => `
+      <div class="c4-model-cell">
+        <span class="model-name">${m.name}</span>
+        <span class="model-price">$${m.price}</span>
+      </div>`).join('');
+
+    return `
+      <div class="c4-hero-grid fade-up">
+        <div class="c4-hero-card">
+          <div class="text-secondary text-xs">Fair Value</div>
+          <div class="fv-medium mt-4">$${DATA.fv}</div>
+          <div class="badge-green mt-8">+${DATA.upside}%</div>
+          <div class="text-secondary text-xs mt-8">Certainty: ${DATA.certainty}</div>
+        </div>
+        <div class="c4-hero-card">
+          <div class="text-secondary text-xs">Health Score</div>
+          <div class="c4-ring">${ring}<div class="c4-ring-text" style="color:var(--green)">${DATA.healthPrecise}</div></div>
+          <div class="text-secondary text-xs">out of 5</div>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.08s">
+        <div class="card-title">Health Breakdown</div>
+        ${DATA.health.map(h => {
+          const pct = (h.score / 5) * 100;
+          const col = getHealthColor(h.score);
+          return `<div class="c4-mini-bar-row">
+            <span class="c4-mini-label">${h.name}</span>
+            <div class="c4-mini-track"><div class="c4-mini-fill" style="width:${pct}%;background:${col}"></div></div>
+            <span class="c4-mini-val" style="color:${col}">${h.score}</span>
+            <span class="c4-trend" style="color:${h.score >= 4 ? 'var(--green)' : h.score >= 3 ? 'var(--yellow)' : 'var(--red)'}">${h.score >= 4 ? '&#9650;' : h.score >= 3 ? '&#9654;' : '&#9660;'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="fade-up" style="animation-delay:0.14s">
+        <div class="card-title" style="padding:0 4px 8px">Model Estimates (${DATA.models.length})</div>
+        <div class="c4-model-grid">${modelGrid}</div>
+      </div>`;
+  }
+};
+
+// --- Concept 5: Bottom Sheet ---
+concepts[5] = {
+  label: 'Bottom Sheet',
+  desc: 'Clean surface with progressive disclosure - tap rows to reveal detail sheets',
+  build() {
+    return `
+      <div class="card c5-clean-card fade-up">
+        <div class="text-secondary text-sm mb-4">InvestingPro Fair Value</div>
+        <div class="fv-big">$${DATA.fv.toFixed(2)}</div>
+        <div class="badge-green mt-8">+${DATA.upside}% Upside</div>
+        <div class="flex justify-between mt-12" style="padding:0 20px">
+          <div>
+            <div class="text-secondary text-xs">Health</div>
+            <div class="text-md fw-700" style="color:var(--green)">${DATA.healthScore}/5</div>
+          </div>
+          <div>
+            <div class="text-secondary text-xs">Certainty</div>
+            <div class="text-md fw-700">${DATA.certainty}</div>
+          </div>
+          <div>
+            <div class="text-secondary text-xs">Models</div>
+            <div class="text-md fw-700">${DATA.models.length}</div>
+          </div>
+        </div>
+      </div>
+      <div class="c5-row fade-up" style="animation-delay:0.08s" onclick="openC5Sheet('models')">
+        <div class="c5-row-left">
+          <div class="c5-row-icon" style="background:var(--blue-bg);color:var(--blue)">&#9881;</div>
+          <div>
+            <div class="text-sm fw-600">Fair Value Models</div>
+            <div class="text-xs text-secondary">${DATA.models.length} valuation models</div>
+          </div>
+        </div>
+        <span class="c5-chevron">&#8250;</span>
+      </div>
+      <div class="c5-row fade-up" style="animation-delay:0.12s" onclick="openC5Sheet('health')">
+        <div class="c5-row-left">
+          <div class="c5-row-icon" style="background:var(--green-bg);color:var(--green)">&#9829;</div>
+          <div>
+            <div class="text-sm fw-600">Health Breakdown</div>
+            <div class="text-xs text-secondary">5 health dimensions</div>
+          </div>
+        </div>
+        <span class="c5-chevron">&#8250;</span>
+      </div>
+      <div class="c5-row fade-up" style="animation-delay:0.16s" onclick="openC5Sheet('range')">
+        <div class="c5-row-left">
+          <div class="c5-row-icon" style="background:var(--yellow-bg);color:var(--yellow)">&#8596;</div>
+          <div>
+            <div class="text-sm fw-600">Market & Analyst Range</div>
+            <div class="text-xs text-secondary">52-week and analyst targets</div>
+          </div>
+        </div>
+        <span class="c5-chevron">&#8250;</span>
+      </div>`;
+  }
+};
+
+function openC5Sheet(type) {
+  const backdrop = document.getElementById('c5Backdrop');
+  const sheet = document.getElementById('c5Sheet');
+  const title = document.getElementById('c5SheetTitle');
+  const body = document.getElementById('c5SheetBody');
+
+  if (type === 'models') {
+    title.textContent = 'Fair Value Models';
+    body.innerHTML = modelList('c5', true);
+  } else if (type === 'health') {
+    title.textContent = 'Health Breakdown';
+    body.innerHTML = `<div class="flex items-center gap-8 mb-12"><span class="fv-medium" style="color:var(--green)">${DATA.healthPrecise}</span><span class="text-secondary text-sm">/ 5</span></div>${healthBars('c5')}`;
+  } else if (type === 'range') {
+    title.textContent = 'Market & Analyst Range';
+    body.innerHTML = `
+      <div class="model-row"><span class="model-name">52w Market Low</span><span class="model-price">$${DATA.marketRange[0]}</span></div>
+      <div class="model-row"><span class="model-name">52w Market High</span><span class="model-price">$${DATA.marketRange[1]}</span></div>
+      <div class="model-row"><span class="model-name">Analyst Low</span><span class="model-price">$${DATA.analystRange[0]}</span></div>
+      <div class="model-row"><span class="model-name">Analyst Avg</span><span class="model-price">$${DATA.analystAvg}</span></div>
+      <div class="model-row"><span class="model-name">Analyst High</span><span class="model-price">$${DATA.analystRange[1]}</span></div>`;
+  }
+
+  backdrop.classList.add('visible');
+  sheet.classList.add('visible');
+}
+
+function closeC5Sheet() {
+  document.getElementById('c5Backdrop').classList.remove('visible');
+  document.getElementById('c5Sheet').classList.remove('visible');
+}
+
+// --- Concept 6: Radar Chart ---
+concepts[6] = {
+  label: 'Radar Chart',
+  desc: 'The shape tells the story - pentagon health chart with model pills',
+  build() {
+    const cx = 130, cy = 120, r = 90;
+    const labels = DATA.health.map(h => h.name);
+    const scores = DATA.health.map(h => h.score);
+
+    function polarX(i, val) { return cx + (val/5)*r * Math.sin(2*Math.PI*i/5); }
+    function polarY(i, val) { return cy - (val/5)*r * Math.cos(2*Math.PI*i/5); }
+
+    // Grid rings
+    let gridLines = '';
+    for (let ring = 1; ring <= 5; ring++) {
+      let pts = [];
+      for (let i = 0; i < 5; i++) pts.push(`${polarX(i,ring)},${polarY(i,ring)}`);
+      gridLines += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    }
+
+    // Axis lines
+    let axes = '';
+    for (let i = 0; i < 5; i++) {
+      axes += `<line x1="${cx}" y1="${cy}" x2="${polarX(i,5)}" y2="${polarY(i,5)}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    }
+
+    // Data polygon
+    let dataPts = [];
+    for (let i = 0; i < 5; i++) dataPts.push(`${polarX(i,scores[i])},${polarY(i,scores[i])}`);
+
+    // Labels
+    const labelOffsets = [
+      { dx: 0, dy: -12, anchor: 'middle' },
+      { dx: 10, dy: 0, anchor: 'start' },
+      { dx: 6, dy: 10, anchor: 'start' },
+      { dx: -6, dy: 10, anchor: 'end' },
+      { dx: -10, dy: 0, anchor: 'end' },
+    ];
+
+    let labelEls = labels.map((l, i) => {
+      const x = polarX(i, 5.8) + labelOffsets[i].dx;
+      const y = polarY(i, 5.8) + labelOffsets[i].dy;
+      return `<text x="${x}" y="${y}" text-anchor="${labelOffsets[i].anchor}" fill="var(--text-secondary)" font-size="10" font-family="var(--font)">${l}</text>
+        <text x="${x}" y="${y + 13}" text-anchor="${labelOffsets[i].anchor}" fill="${getHealthColor(scores[i])}" font-size="11" font-weight="700" font-family="var(--font)">${scores[i]}</text>`;
+    }).join('');
+
+    const svg = `<svg width="260" height="260" viewBox="0 0 260 260">
+      ${gridLines}${axes}
+      <polygon points="${dataPts.join(' ')}" fill="rgba(41,98,255,0.15)" stroke="var(--blue)" stroke-width="2"/>
+      ${dataPts.map((pt, i) => `<circle cx="${pt.split(',')[0]}" cy="${pt.split(',')[1]}" r="4" fill="var(--blue)" stroke="var(--bg-card)" stroke-width="2"/>`).join('')}
+      ${labelEls}
+    </svg>`;
+
+    const pills = DATA.models.map(m => `
+      <div class="c6-pill">
+        <span style="font-weight:600">$${m.price}</span>
+        <span style="color:var(--text-tertiary)">${m.name}</span>
+      </div>`).join('');
+
+    const barMin = 190, barMax = 265, barRange = barMax - barMin;
+    const pricePct = ((DATA.price - barMin) / barRange * 100);
+    const fvPct = ((DATA.fv - barMin) / barRange * 100);
+
+    return `
+      <div class="card fade-up">
+        <div class="card-title">Financial Health Shape</div>
+        <div class="c6-radar-container">${svg}</div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-secondary">Overall Score</span>
+          <span class="text-md fw-700" style="color:var(--green)">${DATA.healthPrecise}/5</span>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.1s">
+        <div class="card-title">Fair Value</div>
+        <div class="flex items-center gap-12 mb-12">
+          <div>
+            <div class="fv-medium">$${DATA.fv}</div>
+            <span class="badge-green mt-4">+${DATA.upside}%</span>
+          </div>
+        </div>
+        <div class="c6-fv-bar">
+          <span class="text-xs text-secondary">$${barMin}</span>
+          <div class="c6-bar-track">
+            <div class="c6-bar-fill" style="width:${fvPct}%;background:linear-gradient(90deg, rgba(41,98,255,0.3), rgba(38,166,154,0.3))"></div>
+            <div class="c6-bar-marker" style="left:${pricePct}%;background:var(--red)"></div>
+            <div class="c6-bar-marker" style="left:${fvPct}%;background:var(--green)"></div>
+          </div>
+          <span class="text-xs text-secondary">$${barMax}</span>
+        </div>
+        <div class="flex justify-between mt-8">
+          <span class="text-xs" style="color:var(--red)">&#9679; Current $${DATA.price}</span>
+          <span class="text-xs" style="color:var(--green)">&#9679; FV $${DATA.fv}</span>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.15s">
+        <div class="card-title">Model Estimates</div>
+        <div class="c6-pill-grid">${pills}</div>
+      </div>`;
+  }
+};
+
+// --- Concept 7: Thermometer ---
+concepts[7] = {
+  label: 'Thermometer',
+  desc: 'Intuitive metaphor - vertical gauge shows where the stock sits on the value spectrum',
+  build() {
+    const min = 180, max = 270;
+    const range = max - min;
+    const pricePct = ((DATA.price - min) / range * 100);
+    const fvPct = ((DATA.fv - min) / range * 100);
+
+    // Gradient from red (bottom/overvalued) to green (top/undervalued)
+    const mercuryHeight = Math.max(pricePct, 10);
+
+    const healthPills = DATA.health.map(h => {
+      const col = getHealthColor(h.score);
+      const pct = (h.score / 5) * 100;
+      return `<div class="c7-health-pill">
+        <div class="c7-pill-score" style="color:${col}">${h.score}</div>
+        <div class="c7-pill-name">${h.name}</div>
+        <div class="c7-pill-bar"><div class="c7-pill-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="card fade-up">
+        <div class="card-title">Valuation Gauge</div>
+        <div class="c7-layout">
+          <div class="c7-thermo-col">
+            <div class="text-xs text-secondary mb-8" style="text-align:center">Bullish</div>
+            <div class="c7-thermo" style="position:relative">
+              <div class="c7-mercury" style="height:${mercuryHeight}%;background:linear-gradient(to top, var(--red), var(--yellow), var(--green))"></div>
+              <!-- Price marker -->
+              <div style="position:absolute;bottom:${pricePct}%;left:0;right:0;">
+                <div style="height:2px;background:var(--red);position:relative;">
+                  <div class="c7-thermo-label" style="color:var(--red);">
+                    <span style="font-size:8px">&#9654;</span> $${DATA.price}
+                  </div>
+                </div>
+              </div>
+              <!-- FV marker -->
+              <div style="position:absolute;bottom:${fvPct}%;left:0;right:0;">
+                <div style="height:2px;background:var(--green);position:relative;">
+                  <div class="c7-thermo-label" style="color:var(--green);">
+                    <span style="font-size:8px">&#9654;</span> $${DATA.fv} FV
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-xs text-secondary mt-8" style="text-align:center">Bearish</div>
+          </div>
+          <div class="c7-side-col">
+            <div class="text-sm fw-600 mb-8">Health Score: <span style="color:var(--green)">${DATA.healthPrecise}/5</span></div>
+            ${healthPills}
+          </div>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.1s">
+        <div class="flex items-center justify-between mb-8">
+          <span class="card-title" style="margin-bottom:0">Fair Value</span>
+          <span class="badge-green">+${DATA.upside}% Upside</span>
+        </div>
+        <div class="fv-medium mb-4">$${DATA.fv.toFixed(2)}</div>
+        <div class="text-xs text-secondary">Based on ${DATA.models.length} valuation models - Certainty: ${DATA.certainty}</div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.15s">
+        <div class="card-title">Model Breakdown</div>
+        ${modelList('c7', false)}
+      </div>`;
+  }
+};
+
+// --- Concept 8: Card Carousel ---
+concepts[8] = {
+  label: 'Card Carousel',
+  desc: 'Each model gets its own browsable card - horizontally swipeable',
+  build() {
+    const min = 200, max = 255, range = max - min;
+    const cards = DATA.models.map((m, i) => {
+      const pos = Math.min(100, Math.max(0, ((m.price - min) / range * 100)));
+      return `<div class="c8-model-card ${m.on ? 'on' : ''}" id="c8card${i}">
+        <div class="c8-mc-name">${m.name}</div>
+        <div class="c8-mc-price" style="color:${m.price > DATA.price ? 'var(--green)' : 'var(--red)'}">$${m.price}</div>
+        <div class="c8-mc-bar">
+          <div style="position:absolute;top:0;left:0;right:0;height:100%;background:linear-gradient(90deg, var(--red), var(--yellow), var(--green));border-radius:2px;opacity:0.3"></div>
+          <div class="c8-mc-bar-marker" style="left:${pos}%;background:var(--blue)"></div>
+        </div>
+        <div class="c8-mc-toggle">
+          <span class="c8-mc-toggle-label">Include</span>
+          <div class="toggle ${m.on ? 'on' : ''}" onclick="toggleC8(${i}, this)"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const accItems = DATA.health.map((h, i) => {
+      const col = getHealthColor(h.score);
+      const pct = (h.score / 5) * 100;
+      return `<div class="c8-acc-header" onclick="toggleC8Acc(${i})">
+        <span class="text-sm fw-600">${h.name}</span>
+        <div class="flex items-center gap-8">
+          <span class="text-sm fw-700" style="color:${col}">${h.score}</span>
+          <span class="text-xs text-secondary" id="c8AccArrow${i}">&#9660;</span>
+        </div>
+      </div>
+      <div class="c8-acc-body" id="c8AccBody${i}">
+        <div class="c8-acc-body-inner">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div>
+            </div>
+            <span class="text-sm fw-600" style="color:${col}">${h.score}/5</span>
+          </div>
+          <div class="text-xs text-secondary mt-8">${h.score >= 4 ? 'Strong performance in this category' : h.score >= 3 ? 'Average performance' : 'Below average - area for concern'}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="card fade-up">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-secondary text-xs">Fair Value</div>
+            <div class="fv-medium">$${DATA.fv}</div>
+          </div>
+          <div style="text-align:right">
+            <span class="badge-green">+${DATA.upside}%</span>
+            <div class="text-xs text-secondary mt-4">Health: ${DATA.healthPrecise}/5</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-title fade-up" style="animation-delay:0.08s;padding:4px 0 8px">Model Estimates</div>
+      <div class="c8-carousel fade-up" style="animation-delay:0.1s">${cards}</div>
+      <div class="card-title fade-up" style="animation-delay:0.15s;padding:4px 0 8px">Health Breakdown</div>
+      <div class="c8-accordion fade-up" style="animation-delay:0.18s">${accItems}</div>`;
+  }
+};
+
+function toggleC8(i, el) {
+  el.classList.toggle('on');
+  const card = document.getElementById('c8card' + i);
+  if (card) card.classList.toggle('on');
+}
+
+function toggleC8Acc(i) {
+  const body = document.getElementById('c8AccBody' + i);
+  if (body) body.classList.toggle('open');
+}
+
+// --- Concept 9: X-Ray ---
+concepts[9] = {
+  label: 'X-Ray',
+  desc: 'Progressive layers - start with the verdict, peel back to understand how it was calculated',
+  build() {
+    return `
+      <div class="card c9-verdict fade-up">
+        <div class="text-secondary text-sm mb-4">InvestingPro Fair Value</div>
+        <div class="fv-big">$${DATA.fv.toFixed(2)}</div>
+        <div class="flex items-center justify-between mt-12" style="padding:0 8px">
+          <div>
+            <span class="badge-green">+${DATA.upside}% Upside</span>
+          </div>
+          <div>
+            <span class="text-sm fw-600" style="color:var(--green)">${DATA.healthScore}/5 Health</span>
+          </div>
+        </div>
+        <button class="c9-expand-btn" id="c9ExpandBtn" onclick="toggleC9Layers()">
+          How is this calculated? <span id="c9ExpandArrow">&#9660;</span>
+        </button>
+      </div>
+      <div class="c9-layers" id="c9Layers">
+        <div class="c9-layer card fade-up">
+          <div class="c9-layer-header" onclick="toggleC9Layer(0)">
+            <span>Sources & Ranges</span>
+            <span class="text-xs text-secondary" id="c9LayerArrow0">&#9660;</span>
+          </div>
+          <div class="c9-layer-body" id="c9LayerBody0">
+            <div class="c9-layer-body-inner">
+              <div class="c9-range-row">
+                <span class="text-sm">52w Market Range</span>
+                <span class="text-sm fw-600">$${DATA.marketRange[0]} - $${DATA.marketRange[1]}</span>
+              </div>
+              <div class="c9-range-row">
+                <span class="text-sm">Analyst Target Range</span>
+                <span class="text-sm fw-600">$${DATA.analystRange[0]} - $${DATA.analystRange[1]}</span>
+              </div>
+              <div class="c9-range-row">
+                <span class="text-sm">Analyst Average</span>
+                <span class="text-sm fw-600">$${DATA.analystAvg}</span>
+              </div>
+              <div class="c9-range-row">
+                <span class="text-sm">InvestingPro FV</span>
+                <span class="text-sm fw-700" style="color:var(--green)">$${DATA.fv}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="c9-layer card fade-up" style="animation-delay:0.1s">
+          <div class="c9-layer-header" onclick="toggleC9Layer(1)">
+            <span>InvestingPro Models (${DATA.models.length})</span>
+            <span class="text-xs text-secondary" id="c9LayerArrow1">&#9660;</span>
+          </div>
+          <div class="c9-layer-body" id="c9LayerBody1">
+            <div class="c9-layer-body-inner">
+              ${DATA.models.map(m => `<div class="c9-range-row">
+                <span class="text-sm">${m.name}</span>
+                <span class="text-sm fw-600">$${m.price}</span>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="c9-layer card fade-up" style="animation-delay:0.15s">
+          <div class="c9-layer-header" onclick="toggleC9Layer(2)">
+            <span>Health Breakdown (${DATA.healthPrecise}/5)</span>
+            <span class="text-xs text-secondary" id="c9LayerArrow2">&#9660;</span>
+          </div>
+          <div class="c9-layer-body" id="c9LayerBody2">
+            <div class="c9-layer-body-inner">
+              ${healthBars('c9')}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+};
+
+function toggleC9Layers() {
+  const layers = document.getElementById('c9Layers');
+  const btn = document.getElementById('c9ExpandBtn');
+  const arrow = document.getElementById('c9ExpandArrow');
+  layers.classList.toggle('open');
+  if (layers.classList.contains('open')) {
+    btn.innerHTML = 'Hide details <span>&#9650;</span>';
+  } else {
+    btn.innerHTML = 'How is this calculated? <span>&#9660;</span>';
+  }
+}
+
+function toggleC9Layer(i) {
+  const body = document.getElementById('c9LayerBody' + i);
+  if (body) body.classList.toggle('open');
+}
+
+// --- Concept 10: Consensus View ---
+concepts[10] = {
+  label: 'Consensus View',
+  desc: 'Social proof - see how many models agree the stock is undervalued',
+  build() {
+    let under = 0, fair = 0, over = 0;
+    DATA.models.forEach(m => {
+      const v = modelVerdict(m.price);
+      if (v.text === 'Undervalued') under++;
+      else if (v.text === 'Overvalued') over++;
+      else fair++;
+    });
+    const total = DATA.models.length;
+    const underPct = (under / total * 100);
+    const fairPct = (fair / total * 100);
+    const overPct = (over / total * 100);
+
+    const modelRows = DATA.models.map((m, i) => {
+      const v = modelVerdict(m.price);
+      return `<div class="c10-model-row">
+        <span class="model-name" style="flex:1">${m.name}</span>
+        <span class="c10-verdict-badge" style="background:${v.bg};color:${v.color};margin-right:10px">${v.text}</span>
+        <span class="model-price" style="margin-right:12px">$${m.price}</span>
+        <div class="toggle ${m.on ? 'on' : ''}" onclick="this.classList.toggle('on')"></div>
+      </div>`;
+    }).join('');
+
+    return `
+      <div class="card fade-up">
+        <div class="card-title">Model Consensus</div>
+        <div class="c10-consensus-bar">
+          <div style="flex:${under};background:var(--green)">${under}</div>
+          ${fair > 0 ? `<div style="flex:${fair};background:var(--yellow)">${fair}</div>` : ''}
+          ${over > 0 ? `<div style="flex:${over};background:var(--red)">${over}</div>` : ''}
+        </div>
+        <div class="c10-legend">
+          <div class="c10-legend-item"><div class="c10-legend-dot" style="background:var(--green)"></div> Undervalued (${under})</div>
+          ${fair > 0 ? `<div class="c10-legend-item"><div class="c10-legend-dot" style="background:var(--yellow)"></div> Fair (${fair})</div>` : ''}
+          ${over > 0 ? `<div class="c10-legend-item"><div class="c10-legend-dot" style="background:var(--red)"></div> Overvalued (${over})</div>` : ''}
+        </div>
+        <div class="text-sm" style="color:var(--green);text-align:center;font-weight:600">
+          ${under} of ${total} models say AAPL is undervalued
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.08s">
+        <div class="flex justify-between items-center">
+          <div>
+            <div class="text-secondary text-xs">Fair Value</div>
+            <div class="fv-medium">$${DATA.fv}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="text-secondary text-xs">Health</div>
+            <div class="text-md fw-700" style="color:var(--green)">${DATA.healthPrecise}/5</div>
+          </div>
+        </div>
+        <div class="flex justify-between mt-8">
+          <span class="badge-green">+${DATA.upside}% Upside</span>
+          <span class="badge-blue">${DATA.certainty} Certainty</span>
+        </div>
+      </div>
+      <div class="card fade-up" style="animation-delay:0.14s">
+        <div class="card-title">Individual Models</div>
+        ${modelRows}
+      </div>`;
+  }
+};
+
+// ===== SWITCHER + RENDERING =====
+const conceptMeta = {
+  1: { label: 'Smart Summary', desc: 'Words first, visuals support - plain-English verdict with expandable detail' },
+  2: { label: 'Number Line', desc: 'See the gap spatially - price, FV, and ranges on a horizontal scale' },
+  3: { label: 'Live Calculator', desc: 'Toggle models on/off - the FV price recalculates in real time' },
+  4: { label: 'Dashboard', desc: 'Data-dense layout - everything visible at a glance, minimal scrolling' },
+  5: { label: 'Bottom Sheet', desc: 'Clean surface with progressive disclosure - tap rows to reveal detail sheets' },
+  6: { label: 'Radar Chart', desc: 'The shape tells the story - pentagon health chart with model pills' },
+  7: { label: 'Thermometer', desc: 'Intuitive metaphor - vertical gauge shows where the stock sits' },
+  8: { label: 'Card Carousel', desc: 'Each model gets its own browsable card - horizontally swipeable' },
+  9: { label: 'X-Ray', desc: 'Progressive layers - start simple, peel back to understand' },
+  10: { label: 'Consensus View', desc: 'Social proof - see how many models agree on the verdict' },
+};
+
+let activeConcept = 1;
+
+function renderSwitcher() {
+  const sw = document.getElementById('switcher');
+  let html = '';
+  for (let i = 1; i <= 10; i++) {
+    html += `<button id="swBtn${i}" class="${i === 1 ? 'active' : ''}" onclick="switchConcept(${i})">${i}</button>`;
+  }
+  sw.innerHTML = html;
+}
+
+function switchConcept(n) {
+  // Close any open bottom sheet
+  closeC5Sheet();
+
+  activeConcept = n;
+
+  // Update switcher
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.getElementById('swBtn' + i);
+    btn.classList.toggle('active', i === n);
+  }
+
+  // Update label
+  const meta = conceptMeta[n];
+  document.getElementById('conceptLabel').textContent = 'Concept ' + n + ': ' + meta.label;
+  document.getElementById('conceptDesc').textContent = meta.desc;
+
+  // Render concept
+  const container = document.getElementById('conceptContainer');
+  container.innerHTML = concepts[n].build();
+
+  // Scroll screen to top
+  document.getElementById('screen').scrollTop = 0;
+
+  // Show/hide bottom sheet elements based on concept
+  document.getElementById('c5Backdrop').style.display = n === 5 ? '' : 'none';
+  document.getElementById('c5Sheet').style.display = n === 5 ? '' : 'none';
+}
+
+function toggleModel(el, prefix, idx) {
+  el.classList.toggle('on');
+}
+
+// Init
+renderSwitcher();
+switchConcept(1);
+
+// Backdrop click to close sheet
+document.getElementById('c5Backdrop').addEventListener('click', closeC5Sheet);
+</script>
+</body>
+</html>

@@ -1,0 +1,3192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WarrenAI Native Prototype</title>
+<style>
+/* ===== CSS RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --accent: #2563EB;
+  --user-bubble: #F3F4F6;
+  --chip-bg: #F3F4F6;
+  --locked-text: #D1D5DB;
+  --locked-bg: #F9FAFB;
+  --summary-bg: #F0F9FF;
+  --summary-border: #2563EB;
+  --overlay: rgba(0,0,0,0.4);
+  --header-h: 56px;
+  --input-h: 48px;
+  --sidebar-w: 300px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+}
+
+html, body {
+  font-family: var(--font);
+  background: #E5E7EB;
+  color: var(--text-primary);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== PHONE FRAME ===== */
+#phone {
+  position: relative;
+  width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 60px rgba(0,0,0,0.15);
+}
+@media (max-width: 420px) {
+  #phone { width: 100%; max-height: none; box-shadow: none; }
+}
+@media (min-height: 845px) {
+  #phone { margin-top: calc((100vh - 844px) / 2); border-radius: 20px; }
+}
+
+/* ===== SCREENS ===== */
+.screen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 1;
+}
+.screen.active { display: flex; z-index: 2; }
+
+/* ===== HEADER ===== */
+.header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid #F3F4F6;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+.header-left, .header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#catHeaderTitle {
+  font-size: 14px;
+}
+.header-center .ai-badge {
+  color: #F57C00;
+}
+
+/* ===== ICON BUTTONS ===== */
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+  color: var(--text-primary);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:active { background: var(--chip-bg); }
+.icon-btn svg { width: 22px; height: 22px; }
+
+/* ===== BODY AREA ===== */
+.body-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+/* ===== INPUT BAR ===== */
+.input-bar-wrap {
+  flex-shrink: 0;
+  padding: 8px 16px 0;
+  background: var(--bg);
+  border-top: 1px solid #F3F4F6;
+}
+.credits-line {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 4px 0 6px;
+  letter-spacing: 0.01em;
+}
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--chip-bg);
+  border-radius: 24px;
+  padding: 4px 4px 4px 16px;
+  min-height: var(--input-h);
+}
+.input-bar textarea {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  outline: none;
+  resize: none;
+  overflow-y: hidden;
+  line-height: 1.4;
+  padding: 10px 0;
+  min-height: 20px;
+  max-height: 160px;
+}
+.input-bar textarea::placeholder { color: var(--text-secondary); }
+.input-bar textarea:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--locked-text);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.send-btn.active { background: #F57C00; }
+.send-btn.stop { background: #EF4444; }
+.send-btn svg { width: 20px; height: 20px; }
+
+/* ===== DISCLAIMER ===== */
+.disclaimer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 4px 16px 12px;
+  line-height: 1.4;
+}
+.disclaimer a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ===== HOME: CATEGORY CHIPS ===== */
+.chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px 16px;
+  justify-content: center;
+  align-content: flex-start;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--chip-bg);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  user-select: none;
+  border: none;
+  font-family: var(--font);
+}
+.chip:active { background: #E5E7EB; transform: scale(0.97); }
+.chip .chip-icon { font-size: 15px; }
+
+/* ===== CATEGORY MENU ===== */
+.cat-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 8px;
+}
+.cat-header-row .cat-icon { font-size: 20px; }
+.cat-header-row .cat-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.sub-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.sub-item:active { background: #F9FAFB; }
+.sub-item.locked {
+  color: var(--locked-text);
+  cursor: default;
+}
+.sub-item.locked:active { background: transparent; }
+.sub-item .sub-name {
+  font-size: 14px;
+  flex: 1;
+}
+.sub-item .sub-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--locked-text);
+}
+.sub-item .lock-icon { font-size: 14px; }
+.sub-item .chevron { font-size: 14px; }
+
+/* ===== STOCK INPUT SHEET ===== */
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 50;
+  display: none;
+  align-items: flex-end;
+}
+.sheet-overlay.visible { display: flex; }
+.sheet {
+  width: 100%;
+  background: var(--bg);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px 32px;
+  max-height: 70%;
+  display: flex;
+  flex-direction: column;
+  animation: sheetUp 0.3s ease-out;
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: #D1D5DB;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.sheet h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.sheet .sheet-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+.sheet .stock-input-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.sheet .stock-input {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.sheet .stock-input:focus { border-color: var(--accent); }
+.stock-suggestions {
+  position: absolute;
+  top: 48px;
+  left: 0; right: 0;
+  background: var(--bg);
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  display: none;
+}
+.stock-suggestions.visible { display: block; }
+.stock-sug-item {
+  padding: 10px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.stock-sug-item:hover, .stock-sug-item:active { background: var(--chip-bg); }
+.stock-sug-item .ticker { font-weight: 600; }
+.stock-sug-item .name { color: var(--text-secondary); margin-left: 6px; }
+.no-results {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.sheet .submit-btn {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  margin-top: 4px;
+}
+.sheet .submit-btn.disabled {
+  background: var(--chip-bg);
+  color: var(--locked-text);
+  cursor: default;
+}
+.sheet .submit-btn.enabled {
+  background: var(--accent);
+  color: white;
+}
+
+/* ===== CONVERSATION ===== */
+.new-chat-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px auto 8px;
+  padding: 8px 20px;
+  background: var(--chip-bg);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font);
+  color: var(--text-primary);
+  transition: background 0.15s;
+}
+.new-chat-pill:active { background: #E5E7EB; }
+
+.msg-thread {
+  padding: 0 16px 16px;
+}
+.msg {
+  margin-bottom: 16px;
+  animation: msgIn 0.3s ease-out;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msg-user .msg-bubble {
+  background: var(--user-bubble);
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  display: inline-block;
+  max-width: 85%;
+}
+.msg-user { text-align: left; }
+
+/* Collapsible pre-built prompt */
+.msg-prebuilt .msg-bubble {
+  background: var(--user-bubble);
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 85%;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+.msg-prebuilt .prompt-collapsed { display: block; }
+.msg-prebuilt .prompt-full { display: none; }
+.msg-prebuilt.expanded .prompt-collapsed { display: none; }
+.msg-prebuilt.expanded .prompt-full { display: block; }
+.msg-prebuilt .expand-chevron {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-left: 4px;
+  transition: transform 0.2s;
+}
+.msg-prebuilt.expanded .expand-chevron { transform: rotate(180deg); }
+
+/* AI response */
+.msg-ai {
+  font-size: 14px;
+  line-height: 1.65;
+}
+.msg-ai h2 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
+.msg-ai h3 { font-size: 15px; font-weight: 600; margin: 14px 0 6px; }
+.msg-ai p { margin: 0 0 10px; }
+.msg-ai ul { margin: 0 0 10px; padding-left: 20px; }
+.msg-ai li { margin-bottom: 4px; }
+.msg-ai em { font-style: italic; color: var(--text-secondary); font-size: 13px; }
+.msg-ai strong { font-weight: 600; }
+.msg-ai .stat-line {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.msg-ai .deeplink {
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-block;
+  margin: 4px 0;
+}
+.msg-ai .deeplink:active { opacity: 0.7; }
+
+/* Summary block */
+.summary-block {
+  background: var(--summary-bg);
+  border-left: 3px solid var(--summary-border);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin: 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.summary-block .share-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  float: right;
+}
+.summary-block .share-cta:active { opacity: 0.7; }
+
+/* Chart container */
+.chart-wrap {
+  margin: 12px 0;
+  background: #FAFBFC;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 12px;
+  position: relative;
+}
+.chart-wrap .chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+.chart-wrap canvas {
+  width: 100%;
+  height: 180px;
+  display: block;
+}
+.chart-tooltip {
+  position: absolute;
+  background: var(--text-primary);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.chart-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chart-legend .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Loading skeleton */
+.loading-indicator {
+  padding: 4px 0;
+}
+.loading-indicator .answering-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #E5E7EB 25%, #F3F4F6 50%, #E5E7EB 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+.skeleton-line:nth-child(2) { width: 100%; }
+.skeleton-line:nth-child(3) { width: 90%; }
+.skeleton-line:nth-child(4) { width: 75%; }
+.skeleton-line:nth-child(5) { width: 60%; }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Scroll-to-bottom button */
+#scrollBottomBtn {
+  position: absolute;
+  bottom: 90px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 15;
+  color: var(--text-secondary);
+}
+#scrollBottomBtn.visible { display: flex; }
+.scroll-bottom-btn svg { width: 18px; height: 18px; }
+
+/* ===== SIDEBAR ===== */
+.sidebar-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 100;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.sidebar-overlay.visible { display: block; opacity: 1; }
+.sidebar {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--bg);
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+}
+.sidebar.open { transform: translateX(0); }
+.sidebar-header {
+  padding: 12px 12px 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #F3F4F6;
+  min-height: 56px;
+}
+.sidebar-search-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--chip-bg);
+  border-radius: 24px;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+.sidebar-search-bar svg {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.sidebar-search-bar input {
+  flex: 1;
+  border: none;
+  background: none;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  outline: none;
+}
+.sidebar-search-bar input::placeholder { color: var(--text-secondary); }
+.sidebar-new-chat-circle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--chip-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+.sidebar-new-chat-circle:active { background: #E5E7EB; }
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.sidebar-section-header button {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer;
+  color: var(--text-secondary); border-radius: 50%; font-size: 16px;
+}
+.sidebar-section-header button:active { background: var(--chip-bg); }
+.sidebar-date-label {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.sidebar-item:active { background: #F9FAFB; }
+.sidebar-item .si-name {
+  font-size: 14px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 8px;
+}
+.sidebar-item .si-name input {
+  font-size: 14px;
+  font-family: var(--font);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 2px 6px;
+  outline: none;
+  width: 100%;
+}
+.sidebar-item .si-menu-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer;
+  color: var(--text-secondary); border-radius: 50%; font-size: 16px;
+  flex-shrink: 0;
+}
+.sidebar-item .si-menu-btn:active { background: var(--chip-bg); }
+
+/* Context menu */
+.ctx-menu {
+  position: absolute;
+  right: 16px;
+  top: 36px;
+  background: var(--bg);
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 110;
+  min-width: 160px;
+  display: none;
+}
+.ctx-menu.visible { display: block; }
+.ctx-menu-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ctx-menu-item:active { background: var(--chip-bg); }
+.ctx-menu-item.danger { color: #EF4444; }
+
+/* Sidebar search mode */
+
+/* Folder items */
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.folder-item:active { background: #F9FAFB; }
+.folder-item .folder-icon { color: var(--text-secondary); }
+.folder-input {
+  margin: 4px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  width: calc(100% - 32px);
+}
+
+/* ===== SHARE MODAL ===== */
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+.modal-overlay.visible { display: flex; }
+.modal {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 340px;
+  animation: modalIn 0.25s ease-out;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.modal h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.modal .modal-preview {
+  background: var(--summary-bg);
+  border-left: 3px solid var(--summary-border);
+  padding: 10px 12px;
+  border-radius: 0 6px 6px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.4;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.social-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.social-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #E5E7EB;
+  background: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background 0.15s;
+}
+.social-btn:active { background: var(--chip-bg); }
+.modal .divider {
+  height: 1px;
+  background: #E5E7EB;
+  margin-bottom: 16px;
+}
+.url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.url-row input {
+  flex: 1;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--text-secondary);
+  outline: none;
+}
+.url-row .copy-btn {
+  padding: 8px 14px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+.url-row .copy-btn:active { opacity: 0.85; }
+
+/* ===== ADD TEMPLATE MODAL ===== */
+.template-modal .field-label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+.template-modal input,
+.template-modal textarea {
+  width: 100%;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.template-modal input:focus,
+.template-modal textarea:focus { border-color: var(--accent); }
+.template-modal textarea {
+  height: 100px;
+  resize: none;
+  line-height: 1.5;
+}
+.var-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.var-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #DBEAFE;
+  color: var(--accent);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.var-tag .remove-var {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.7;
+}
+.var-tag .remove-var:hover { opacity: 1; }
+.template-modal .save-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.template-modal .save-btn.disabled {
+  background: var(--chip-bg);
+  color: var(--locked-text);
+}
+.template-modal .save-btn.enabled {
+  background: var(--accent);
+  color: white;
+}
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  pointer-events: none;
+}
+.toast {
+  background: var(--text-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2s forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ===== LOCKED TOOLTIP ===== */
+.locked-tooltip {
+  position: absolute;
+  background: var(--text-primary);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 60;
+  animation: toastIn 0.2s ease-out, toastOut 0.3s ease-in 1.5s forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  white-space: nowrap;
+}
+
+/* ===== PROTOTYPE STATE TOGGLE ===== */
+.proto-state-btn {
+  display: block;
+  margin: 8px auto 0;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid #D1D5DB;
+  background: #fff;
+  font-size: 11px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.15s;
+}
+.proto-state-btn:active { background: #F3F4F6; }
+
+/* ===== HR in AI responses ===== */
+.msg-ai hr {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 16px 0;
+}
+
+/* ===== SIDEBAR EMPTY STATE ===== */
+.sidebar-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.sidebar-signup-btn {
+  background: #F57C00;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+/* ===== HOME H1 + SUBTITLE ===== */
+.home-h1 {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  padding: 24px 16px 16px;
+  line-height: 1.3;
+}
+.home-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 4px 16px 8px;
+}
+
+/* ===== CREDITS UPGRADE LINK ===== */
+.credits-line a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+.credits-line a:active { opacity: 0.7; }
+.credits-upgrade-link { font-weight: 600; }
+
+/* ===== CONFIRMATION DIALOG ===== */
+.confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 250;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.confirm-overlay.visible { display: flex; }
+.confirm-dialog {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  animation: modalIn 0.2s ease-out;
+}
+.confirm-dialog p {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.confirm-btns {
+  display: flex;
+  gap: 10px;
+}
+.confirm-btns button {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.btn-cancel {
+  border: 1.5px solid #D1D5DB;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.btn-cancel:active { background: #F9FAFB; }
+.btn-leave {
+  border: none;
+  background: var(--accent);
+  color: white;
+}
+.btn-leave:active { opacity: 0.85; }
+
+/* ===== SIDEBAR CLOSE BTN ===== */
+/* ===== SIDEBAR SECTION DIVIDERS ===== */
+.sidebar-divider {
+  height: 1px;
+  background: #E5E7EB;
+  margin: 8px 16px;
+}
+
+/* ===== CREATE FOLDER MODAL ===== */
+.folder-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+.folder-modal-overlay.visible { display: flex; }
+.folder-modal {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 0;
+  width: 100%;
+  max-width: 340px;
+  animation: modalIn 0.25s ease-out;
+  overflow: hidden;
+}
+.folder-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 16px;
+  border-bottom: 1px solid #F3F4F6;
+}
+.folder-modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.folder-modal-header .fm-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer;
+  color: var(--text-secondary); border-radius: 50%;
+}
+.folder-modal-header .fm-close:active { background: var(--chip-bg); }
+.folder-modal-body {
+  padding: 20px 16px;
+}
+.folder-modal-body input {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 20px;
+}
+.folder-modal-body input:focus { border-color: var(--accent); }
+.folder-modal-btns {
+  display: flex;
+  gap: 10px;
+}
+.folder-modal-btns button {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.folder-modal-btns .fm-cancel {
+  border: 1.5px solid #D1D5DB;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.folder-modal-btns .fm-cancel:active { background: #F9FAFB; }
+.folder-modal-btns .fm-create {
+  border: none;
+  color: white;
+}
+.folder-modal-btns .fm-create.disabled {
+  background: var(--chip-bg);
+  color: var(--locked-text);
+  cursor: default;
+}
+.folder-modal-btns .fm-create.enabled {
+  background: var(--accent);
+}
+.folder-modal-btns .fm-create.enabled:active { opacity: 0.85; }
+
+/* ===== CTX MENU ICONS ===== */
+.ctx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ctx-menu-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.ctx-menu-item .ctx-chevron {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.ctx-submenu {
+  display: none;
+  border-top: 1px solid #F3F4F6;
+}
+.ctx-submenu.visible { display: block; }
+.ctx-submenu-item {
+  padding: 9px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ctx-submenu-item:active { background: var(--chip-bg); }
+.ctx-submenu-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.ctx-submenu-item .folder-sub-icon {
+  font-size: 14px;
+}
+
+/* ===== RENAME MODAL ===== */
+.rename-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 260;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.rename-modal-overlay.visible { display: flex; }
+.rename-modal {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 300px;
+  animation: modalIn 0.2s ease-out;
+}
+.rename-modal h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.rename-modal input {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 4px;
+}
+.rename-modal input:focus { border-color: var(--accent); }
+.rename-modal .char-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+  margin-bottom: 16px;
+}
+.rename-modal-btns {
+  display: flex;
+  gap: 10px;
+}
+.rename-modal-btns button {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.rename-modal-btns .rm-cancel {
+  border: 1.5px solid #D1D5DB;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.rename-modal-btns .rm-cancel:active { background: #F9FAFB; }
+.rename-modal-btns .rm-ok {
+  border: none;
+  background: var(--accent);
+  color: white;
+}
+.rename-modal-btns .rm-ok:active { opacity: 0.85; }
+
+/* ===== DELETE CONFIRM DIALOG ===== */
+.delete-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 260;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.delete-overlay.visible { display: flex; }
+.delete-dialog {
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  animation: modalIn 0.2s ease-out;
+}
+.delete-dialog p {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.delete-dialog-btns {
+  display: flex;
+  gap: 10px;
+}
+.delete-dialog-btns button {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.delete-dialog-btns .dd-cancel {
+  border: 1.5px solid #D1D5DB;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+.delete-dialog-btns .dd-cancel:active { background: #F9FAFB; }
+.delete-dialog-btns .dd-delete {
+  border: none;
+  background: #EF4444;
+  color: white;
+}
+.delete-dialog-btns .dd-delete:active { opacity: 0.85; }
+
+/* ===== SIDEBAR SHOW MORE ===== */
+.sidebar-show-more {
+  padding: 6px 16px 6px 44px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+.sidebar-show-more:active { opacity: 0.7; }
+
+/* Folders popover */
+.folders-popover-overlay {
+  position: fixed; top:0; left:0; right:0; bottom:0; z-index: 500;
+}
+.folders-popover {
+  position: absolute;
+  left: 16px;
+  top: 0;
+  width: 260px;
+  background: var(--bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  border: 1px solid #E5E7EB;
+  padding: 8px 0;
+  z-index: 501;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.folders-popover-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  position: relative;
+}
+.folders-popover-item:active { background: #F3F4F6; }
+.folders-popover-item svg.folder-icon { flex-shrink:0; width:18px; height:18px; color: var(--text-secondary); }
+.folders-popover-item .fp-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.folders-popover-item .si-menu-btn {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none; cursor: pointer;
+  color: var(--text-secondary); border-radius: 50%; font-size: 16px;
+  flex-shrink: 0;
+}
+.folders-popover-item .si-menu-btn:active { background: var(--chip-bg); }
+
+/* ===== FOLDER DETAIL SCREEN ===== */
+.folder-header-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.folder-header-title .folder-icon-sm {
+  font-size: 16px;
+}
+.folder-header-title span {
+  font-size: 16px;
+  font-weight: 600;
+}
+.folder-convo-list {
+  padding: 8px 0;
+}
+.folder-convo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.folder-convo-item:active { background: #F9FAFB; }
+.folder-convo-item .fci-left {
+  flex: 1;
+  overflow: hidden;
+}
+.folder-convo-item .fci-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-convo-item .fci-preview {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-convo-item .fci-chevron {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-left: 8px;
+  font-size: 14px;
+}
+.folder-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<div id="phone">
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div class="screen active" id="screenHome">
+    <div class="header">
+      <div class="header-left">
+        <button class="icon-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
+      </div>
+      <div class="header-center">Warren<span class="ai-badge">AI</span></div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="closeWarren()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="body-area" style="display:flex;flex-direction:column;justify-content:center;">
+      <div class="home-h1">Doing investment research?</div>
+      <div class="home-subtitle">Explore what WarrenAI can do:</div>
+      <div class="chips-grid" id="chipsGrid"></div>
+    </div>
+    <div class="input-bar-wrap">
+      <div class="input-bar" onclick="handleInputTap()">
+        <textarea id="homeInput" rows="1" placeholder="Ask WarrenAI" oninput="autoGrow(this);updateSendBtn('homeInput','homeSend')" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFromHome()}" onclick="handleInputTap()"></textarea>
+        <button class="send-btn" id="homeSend" onclick="sendFromHome()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="credits-line" id="homeCredits">3/5 credits used this month</div>
+    </div>
+    <div class="disclaimer">WarrenAI may provide incorrect information and is never financial advice. More in our <a onclick="showToast('Would open Terms & Conditions')">T&Cs</a></div>
+  </div>
+
+  <!-- ===== CATEGORY MENU SCREEN ===== -->
+  <div class="screen" id="screenCategory">
+    <div class="header">
+      <div class="header-left">
+        <button class="icon-btn" onclick="goHome()" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="header-center" id="catHeaderTitle"></div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="closeWarren()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="body-area">
+      <div style="padding:8px 12px 0;">
+        <button class="icon-btn" onclick="toggleSidebar()" aria-label="Menu" style="margin-bottom:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
+      </div>
+      <div id="catSubItems"></div>
+    </div>
+    <div class="input-bar-wrap">
+      <div class="input-bar" onclick="handleInputTap()">
+        <textarea id="catInput" rows="1" placeholder="Ask WarrenAI" oninput="autoGrow(this);updateSendBtn('catInput','catSend')" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFromCategory()}" onclick="handleInputTap()"></textarea>
+        <button class="send-btn" id="catSend" onclick="sendFromCategory()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="credits-line" id="catCredits">3/5 credits used this month</div>
+    </div>
+    <!-- Stock Input Sheet -->
+    <div class="sheet-overlay" id="stockSheet" onclick="if(event.target===this)closeSheet()">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <h3 id="sheetTitle">Select a stock</h3>
+        <p class="sheet-desc" id="sheetDesc">Get a comprehensive analysis for any stock</p>
+        <div class="stock-input-wrap">
+          <input type="text" class="stock-input" id="stockSearchInput" placeholder="Select stock" oninput="filterStocks()" autocomplete="off">
+          <div class="stock-suggestions" id="stockSuggestions"></div>
+        </div>
+        <button class="submit-btn disabled" id="sheetSubmit" onclick="submitStock()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CONVERSATION SCREEN ===== -->
+  <div class="screen" id="screenConvo">
+    <div class="header">
+      <div class="header-left">
+        <button class="icon-btn" onclick="toggleSidebar()" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
+      </div>
+      <div class="header-center">Warren<span class="ai-badge">AI</span></div>
+      <div class="header-right">
+        <button class="icon-btn" onclick="handleNewChatTap()" aria-label="New chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        </button>
+        <button class="icon-btn" onclick="closeWarren()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="body-area" id="convoBody" onscroll="checkScroll()">
+      <div class="msg-thread" id="msgThread"></div>
+    </div>
+    <button id="scrollBottomBtn" onclick="scrollToBottom()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="input-bar-wrap">
+      <div class="input-bar" onclick="handleInputTap()">
+        <textarea id="convoInput" rows="1" placeholder="Ask WarrenAI" oninput="autoGrow(this);updateSendBtn('convoInput','convoSend')" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFromConvo()}" onclick="handleInputTap()"></textarea>
+        <button class="send-btn" id="convoSend" onclick="sendFromConvo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="credits-line" id="convoCredits">3/5 credits used this month</div>
+    </div>
+  </div>
+
+  <!-- ===== FOLDER DETAIL SCREEN ===== -->
+  <div class="screen" id="screenFolder">
+    <div class="header">
+      <div class="header-left">
+        <button class="icon-btn" onclick="goBackFromFolder()" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="header-center">
+        <div class="folder-header-title">
+          <span class="folder-icon-sm">&#128193;</span>
+          <span id="folderDetailTitle">Folder</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="folderDetailMenuBtn" onclick="toggleFolderDetailMenu()" aria-label="Options">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        </button>
+        <div class="ctx-menu" id="folderDetailCtx" style="top:48px;right:4px;">
+          <div class="ctx-menu-item" onclick="event.stopPropagation();closeFolderDetailMenu();openRenameModal('folderDetail',currentFolder?currentFolder.id:'')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename</div>
+          <div class="ctx-menu-item danger" onclick="event.stopPropagation();closeFolderDetailMenu();openDeleteDialog('folderDetail',currentFolder?currentFolder.id:'',currentFolder?currentFolder.name:'')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete</div>
+        </div>
+      </div>
+    </div>
+    <div class="body-area" id="folderDetailBody">
+      <div class="folder-convo-list" id="folderConvoList"></div>
+    </div>
+    <div class="input-bar-wrap">
+      <div class="input-bar" onclick="handleInputTap()">
+        <textarea id="folderInput" rows="1" placeholder="Message Tech Analysis..." oninput="autoGrow(this);updateSendBtn('folderInput','folderSend')" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFromFolder()}" onclick="handleInputTap()"></textarea>
+        <button class="send-btn" id="folderSend" onclick="sendFromFolder()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+      <div class="credits-line" id="folderCredits">3/5 credits used this month</div>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="sidebarSearchInput" placeholder="Search" oninput="filterSidebarConvos()">
+      </div>
+      <button class="sidebar-new-chat-circle" onclick="closeSidebar();newChat();" aria-label="New Chat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+      </button>
+    </div>
+    <div class="sidebar-body" id="sidebarBody"></div>
+  </div>
+
+  <!-- ===== SHARE MODAL ===== -->
+  <div class="modal-overlay" id="shareModal" onclick="if(event.target===this)closeShareModal()">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="margin:0;">Share Chat?</h3>
+        <button class="icon-btn" onclick="closeShareModal()" style="width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-preview">Apple remains a strong hold with balanced risk-reward. The bull case relies on continued iPhone demand and services growth, while bears point to China weakness and premium valuation. Current price reflects fair value with limited near-term upside.</div>
+      <div class="social-row">
+        <button class="social-btn" onclick="showToast('Would open X (Twitter)')">&#120143;</button>
+        <button class="social-btn" onclick="showToast('Would open Reddit')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.066 13.71c.147.047.235.197.187.343a4.648 4.648 0 01-1.1 1.855c-1.36 1.401-3.378 2.164-5.153 2.164s-3.793-.763-5.153-2.164a4.648 4.648 0 01-1.1-1.855.269.269 0 01.187-.343.269.269 0 01.343.187 4.108 4.108 0 00.973 1.64c1.215 1.252 3.042 1.997 4.75 1.997s3.535-.745 4.75-1.997a4.11 4.11 0 00.973-1.64.269.269 0 01.343-.187zM8.5 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm7 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
+        </button>
+        <button class="social-btn" onclick="showToast('Would open LinkedIn')">in</button>
+        <button class="social-btn" onclick="showToast('Would open Facebook')">f</button>
+      </div>
+      <div class="divider"></div>
+      <div class="url-row">
+        <input type="text" value="https://www.investing.com/warrenai/shared/abc123" readonly id="shareUrl">
+        <button class="copy-btn" id="copyBtn" onclick="copyShareUrl()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADD TEMPLATE MODAL ===== -->
+  <div class="modal-overlay template-modal" id="templateModal" onclick="if(event.target===this)closeTemplateModal()">
+    <div class="modal template-modal">
+      <h3>Add Template</h3>
+      <div class="field-label">Template name</div>
+      <input type="text" id="tmplName" placeholder="e.g. Quick Stock Analysis" oninput="updateTemplateSave()">
+      <div class="field-label">Prompt</div>
+      <textarea id="tmplPrompt" placeholder="Prompt content. Use {{}} to denote a variable. Ex: {{name}} is {{adjective}} {{noun}}" oninput="updateTemplateSave();parseTemplateVars()"></textarea>
+      <div class="var-tags" id="tmplVarTags"></div>
+      <button class="save-btn disabled" id="tmplSaveBtn" onclick="saveTemplate()">Save</button>
+    </div>
+  </div>
+
+  <!-- ===== CONFIRMATION DIALOG ===== -->
+  <div class="confirm-overlay" id="confirmDialog" onclick="if(event.target===this)closeConfirmDialog()">
+    <div class="confirm-dialog">
+      <p>Are you sure you want to leave?</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:-12px;margin-bottom:20px;">All your conversations will be saved</p>
+      <div class="confirm-btns">
+        <button class="btn-cancel" onclick="closeConfirmDialog()">Cancel</button>
+        <button class="btn-leave" onclick="confirmLeave()">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREATE FOLDER MODAL ===== -->
+  <div class="folder-modal-overlay" id="folderModal" onclick="if(event.target===this)closeFolderModal()">
+    <div class="folder-modal">
+      <div class="folder-modal-header">
+        <h3>New Folder</h3>
+        <button class="fm-close" onclick="closeFolderModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="folder-modal-body">
+        <input type="text" id="folderNameInput" placeholder="Folder name" oninput="updateFolderCreate()">
+        <div class="folder-modal-btns">
+          <button class="fm-cancel" onclick="closeFolderModal()">Cancel</button>
+          <button class="fm-create disabled" id="folderCreateBtn" onclick="createFolder()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RENAME MODAL ===== -->
+  <div class="rename-modal-overlay" id="renameModal" onclick="if(event.target===this)closeRenameModal()">
+    <div class="rename-modal">
+      <h3>Rename</h3>
+      <input type="text" id="renameInput" maxlength="100" oninput="updateRenameCharCount()">
+      <div class="char-count" id="renameCharCount">0/100</div>
+      <div class="rename-modal-btns">
+        <button class="rm-cancel" onclick="closeRenameModal()">Cancel</button>
+        <button class="rm-ok" onclick="confirmRename()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRMATION ===== -->
+  <div class="delete-overlay" id="deleteDialog" onclick="if(event.target===this)closeDeleteDialog()">
+    <div class="delete-dialog">
+      <p id="deleteDialogText">Are you sure you want to delete this item?</p>
+      <div class="delete-dialog-btns">
+        <button class="dd-cancel" onclick="closeDeleteDialog()">Cancel</button>
+        <button class="dd-delete" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PROTOTYPE STATE TOGGLE (outside phone frame) ===== -->
+<button class="proto-state-btn" id="protoStateBtn" onclick="cycleProtoState()">Guest</button>
+
+<script>
+// ===== DATA =====
+const CATEGORIES = [
+  { name: "Stock Picks & Analysis", icon: "\uD83D\uDCC8", items: [
+    { name: "Bull or Bear", type: "input", desc: "Get a comprehensive bull and bear case analysis for any stock" },
+    { name: "Top Growth Stocks", type: "direct" },
+    { name: "Dividend Champions", type: "direct" },
+    { name: "Financial Health Check", type: "locked" },
+    { name: "Sector Leaders", type: "direct" }
+  ]},
+  { name: "Market Trends", icon: "\uD83D\uDCC9", items: [
+    { name: "Market Volatility", type: "direct" },
+    { name: "Trending Sectors", type: "direct" },
+    { name: "Interest Rate Impact", type: "direct" },
+    { name: "Global Market Overview", type: "direct" }
+  ]},
+  { name: "Earnings & Fundamentals", icon: "\uD83D\uDCCA", items: [
+    { name: "Earnings Calendar", type: "direct" },
+    { name: "Revenue Analysis", type: "input", desc: "Deep dive into a company's revenue trends and projections" },
+    { name: "Valuation Check", type: "input", desc: "Evaluate whether a stock is overvalued or undervalued" },
+    { name: "Peer Comparison", type: "input", desc: "Compare a stock against its industry peers" }
+  ]},
+  { name: "Technical Insights", icon: "\uD83D\uDD0D", items: [
+    { name: "Support & Resistance", type: "input", desc: "Find key support and resistance levels for a stock" },
+    { name: "Moving Averages", type: "input", desc: "Analyze moving average trends for any stock" },
+    { name: "RSI Analysis", type: "input", desc: "Get RSI analysis and momentum indicators" },
+    { name: "Chart Patterns", type: "direct" }
+  ]},
+  { name: "Watchlist Insights", icon: "\u2B50", items: [
+    { name: "Watchlist Movers", type: "direct" },
+    { name: "Watchlist Alerts", type: "direct" },
+    { name: "Portfolio Correlation", type: "locked" }
+  ]},
+  { name: "Screener", icon: "\u2699\uFE0F", items: [
+    { name: "Value Stocks", type: "direct" },
+    { name: "Growth Stocks", type: "direct" },
+    { name: "Dividend Stocks", type: "direct" },
+    { name: "Custom Screen", type: "direct" }
+  ]},
+  { name: "News", icon: "\uD83D\uDCF0", items: [
+    { name: "Breaking News", type: "direct" },
+    { name: "Earnings News", type: "direct" },
+    { name: "Market Sentiment", type: "direct" },
+    { name: "Sector News", type: "direct" }
+  ]}
+];
+
+const STOCKS = [
+  { ticker: "AAPL", name: "Apple Inc." },
+  { ticker: "AMZN", name: "Amazon.com" },
+  { ticker: "MSFT", name: "Microsoft Corp." },
+  { ticker: "TSLA", name: "Tesla Inc." },
+  { ticker: "GOOGL", name: "Alphabet Inc." }
+];
+
+const MOCK_RESPONSES = {
+  freeText: {
+    prompt: null,
+    html: `<h2>Top Tech Stocks to Watch This Week</h2>
+<p>Based on current market conditions and recent earnings, here are the key tech stocks to monitor:</p>
+<h3>1. Apple (AAPL)</h3>
+<p>Trading near $185. Strong iPhone 16 demand continues to drive revenue.</p>
+<p><span class="deeplink" onclick="showToast('Would navigate to AAPL instrument page')">View AAPL on Investing.com \u2192</span></p>
+<h3>2. NVIDIA (NVDA)</h3>
+<p>AI chip demand remains robust. Next earnings report on March 15.</p>
+<p><span class="deeplink" onclick="showToast('Would navigate to NVDA instrument page')">View NVDA on Investing.com \u2192</span></p>
+<h3>3. Microsoft (MSFT)</h3>
+<p>Cloud revenue growth accelerating. Azure market share expanding.</p>
+<p><span class="deeplink" onclick="showToast('Would navigate to MSFT instrument page')">View MSFT on Investing.com \u2192</span></p>
+<p><em>These are AI-generated insights, not financial advice.</em></p>`
+  },
+  marketVolatility: {
+    prompt: "Provide a comprehensive analysis of current market volatility including VIX trends, sector rotation, and key risk factors affecting market stability in the current economic environment",
+    html: `<h2>Market Volatility Analysis</h2>
+<p class="stat-line">Current VIX: 18.45 (-2.3% from last week)</p>
+<h3>Overview</h3>
+<p>Market volatility has decreased over the past week as investors digest positive earnings from major tech companies. The VIX is trending below its 50-day moving average, suggesting relative calm.</p>
+<div class="chart-wrap">
+  <div class="chart-title">VIX 30-Day Trend</div>
+  <canvas id="chartVIX" width="330" height="180"></canvas>
+  <div class="chart-tooltip" id="tooltipVIX"></div>
+</div>
+<h3>Sector Rotation</h3>
+<ul>
+<li><strong>Technology:</strong> +3.2% (leading)</li>
+<li><strong>Healthcare:</strong> +1.8%</li>
+<li><strong>Financials:</strong> +0.9%</li>
+<li><strong>Energy:</strong> -1.2% (lagging)</li>
+</ul>
+<h3>Key Risk Factors</h3>
+<ul>
+<li>Federal Reserve meeting next week</li>
+<li>Ongoing geopolitical tensions</li>
+<li>Q1 earnings season approaching</li>
+</ul>
+<p><span class="deeplink" onclick="showToast('Would navigate to Market Overview')">View Market Overview \u2192</span></p>`
+  },
+  bullBearAAPL: {
+    prompt: "Provide a comprehensive bull and bear case analysis for Apple Inc. (AAPL), including key financial metrics, growth drivers, risks, and a balanced verdict on the stock's current valuation and outlook",
+    html: `<h2>Bull vs Bear: Apple Inc. (AAPL)</h2>
+<p class="stat-line">Bull vs Bear: What's Really Priced In?</p>
+<h3>The Bull Case</h3>
+<ul>
+<li>iPhone 16 super cycle driving record revenue</li>
+<li>Services revenue growing 15% YoY</li>
+<li>India market expansion on track</li>
+<li>Share buyback program reducing float</li>
+</ul>
+<h3>The Bear Case</h3>
+<ul>
+<li>China sales declining 8% YoY</li>
+<li>AI features lagging behind competitors</li>
+<li>Valuation premium at 28x forward P/E</li>
+<li>Regulatory pressure in EU and US</li>
+</ul>
+<div class="chart-wrap">
+  <div class="chart-title">AAPL - Price & Dividend Yield</div>
+  <canvas id="chartAAPL" width="330" height="180"></canvas>
+  <div class="chart-tooltip" id="tooltipAAPL"></div>
+  <div class="chart-legend">
+    <span><span class="dot" style="background:#2563EB"></span>Price ($)</span>
+    <span><span class="dot" style="background:#10B981"></span>Div. Yield (%)</span>
+  </div>
+</div>
+<hr>
+<div class="summary-block">
+<strong>Summary:</strong> Apple remains a strong hold with balanced risk-reward. The bull case relies on continued iPhone demand and services growth, while bears point to China weakness and premium valuation. Current price reflects fair value with limited near-term upside.
+<div class="share-cta" onclick="openShareModal()">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+  Share this analysis
+</div>
+</div>`
+  },
+  followUp: {
+    prompt: null,
+    html: `<h2>Apple vs Google: AI Strategy Comparison</h2>
+<p>Apple's approach to AI differs significantly from Google's. While Google has been aggressively pushing AI across all products with Gemini, Apple has taken a more measured approach with Apple Intelligence.</p>
+<h3>Key Differences</h3>
+<ul>
+<li><strong>Privacy focus:</strong> Apple processes AI on-device where possible, while Google relies heavily on cloud processing</li>
+<li><strong>Product integration:</strong> Apple Intelligence is deeply embedded in iOS, while Google offers AI as standalone products (Gemini, Bard)</li>
+<li><strong>Developer ecosystem:</strong> Google provides more open AI APIs; Apple keeps its AI stack relatively closed</li>
+</ul>
+<p>For investors, Google appears better positioned in the AI race today, but Apple's privacy-first approach may prove more sustainable long-term as regulations tighten.</p>
+<p><em>These are AI-generated insights, not financial advice.</em></p>`
+  },
+  generic: {
+    prompt: null,
+    html: `<h2>Analysis Results</h2>
+<p>Based on current market data and recent trends, here is a brief overview:</p>
+<ul>
+<li>Market conditions remain favorable for growth-oriented positions</li>
+<li>Key indicators suggest moderate volatility ahead</li>
+<li>Sector rotation continues to favor technology and healthcare</li>
+</ul>
+<p>Consider reviewing your portfolio allocation in light of these trends.</p>
+<p><em>These are AI-generated insights, not financial advice.</em></p>`
+  }
+};
+
+// Sidebar conversation data
+let sidebarConvos = [
+  { id: "c1", title: "What are the top tech stocks to...", date: "Today", responseKey: "freeText", userMsg: "What are the top tech stocks to watch this week?" },
+  { id: "c2", title: "Bull vs Bear analysis for AAPL", date: "Today", responseKey: "bullBearAAPL", userMsg: null, isPrebuilt: true },
+  { id: "c3", title: "Market volatility overview", date: "Yesterday", responseKey: "marketVolatility", userMsg: null, isPrebuilt: true },
+  { id: "c4", title: "NVIDIA earnings preview", date: "Yesterday", responseKey: "generic", userMsg: "What should I expect from NVIDIA earnings?" },
+  { id: "c5", title: "Dividend stocks for Q1", date: "Last 7 days", responseKey: "generic", userMsg: "What are the best dividend stocks for Q1?" },
+  { id: "c6", title: "S&P 500 support levels", date: "Last 7 days", responseKey: "generic", userMsg: "Where are the key support levels for S&P 500?" }
+];
+let sidebarFolders = [
+  { id: "f1", name: "Tech Analysis", convos: [
+    { id: "fc1", title: "NVDA earnings analysis", preview: "NVIDIA reported Q4 revenue of $22.1B, up 265% YoY...", responseKey: "generic" },
+    { id: "fc2", title: "Semiconductor sector outlook", preview: "The semiconductor sector is poised for continued growth...", responseKey: "generic" }
+  ]},
+  { id: "f2", name: "Watchlist Research", convos: [] },
+  { id: "f3", name: "Earnings Reports", convos: [] },
+  { id: "f4", name: "Macro Research", convos: [] },
+  { id: "f5", name: "Crypto Analysis", convos: [] },
+  { id: "f6", name: "Portfolio Ideas", convos: [] }
+];
+let foldersExpanded = false;
+let sidebarTemplates = [
+  { id: "t1", name: "Quick Stock Analysis", prompt: "Give me a {{timeframe}} analysis of {{stock}} focusing on {{metric}}" },
+  { id: "t2", name: "Earnings Preview", prompt: "Preview upcoming earnings for {{stock}}" }
+];
+
+// ===== STATE =====
+let currentScreen = "home";
+let currentCategory = null;
+let currentSubItem = null;
+let selectedStock = null;
+let isGenerating = false;
+let generationTimer = null;
+let convoHistory = []; // for current conversation
+let previousScreen = "home";
+let isGuest = false;
+let isMaxCredits = false;
+let currentFolder = null;
+let protoStateIndex = 1; // Start at Free 3/10
+let pendingDeleteType = null; // 'convo', 'folder', 'template', 'folderDetail'
+let pendingDeleteId = null;
+let pendingDeleteName = '';
+let pendingRenameType = null; // 'convo', 'folder', 'template', 'folderDetail'
+let pendingRenameId = null;
+const PROTO_STATES = [
+  { key: 'guest',     label: 'Guest',                    isGuest: true,  isBlocked: true,  credits: '',                              upgradeLink: '',  blockToast: 'Would open sign up screen', placeholder: 'Sign up to start chatting' },
+  { key: 'free3',     label: 'Free with extra credits',   isGuest: false, isBlocked: false, credits: '3/10 credits used this month',  upgradeLink: '',  blockToast: '',                          placeholder: 'Ask WarrenAI' },
+  { key: 'free10',    label: 'Free without credits',      isGuest: false, isBlocked: true,  credits: '10/10 credits used.',  upgradeCta: 'Upgrade to Pro >', upgradeDest: 'Would open subscription screen',  upgradeLink: '',  blockToast: 'Would open subscription screen', placeholder: 'Upgrade to continue chatting' },
+  { key: 'pro25',     label: 'Pro with extra credits',    isGuest: false, isBlocked: false, credits: '25/50 credits used this month', upgradeLink: '',  blockToast: '',                          placeholder: 'Ask WarrenAI' },
+  { key: 'pro50',     label: 'Pro without credits',       isGuest: false, isBlocked: true,  credits: '50/50 credits used.',  upgradeCta: 'Upgrade to Pro+ >', upgradeDest: 'Would open upgrade subscription screen',  upgradeLink: '',  blockToast: 'Would open upgrade subscription screen', placeholder: 'Upgrade to continue chatting' },
+  { key: 'proplus150',label: 'Pro+ with extra credits',   isGuest: false, isBlocked: false, credits: '150/500 credits used this month',upgradeLink: '', blockToast: '',                          placeholder: 'Ask WarrenAI' },
+  { key: 'proplus500',label: 'Pro+ without credits',      isGuest: false, isBlocked: true,  credits: '500/500 credits used',          upgradeLink: '',  blockToast: 'Credit limit reached',      placeholder: "You've reached your monthly limit, renews Apr 1st" }
+];
+
+// ===== INIT =====
+function init() {
+  renderChips();
+  renderSidebar();
+  // Set initial state display
+  document.getElementById('protoStateBtn').textContent = PROTO_STATES[protoStateIndex].label;
+  updateAllCredits();
+}
+
+// ===== SCREEN NAVIGATION =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + id).classList.add('active');
+  currentScreen = id.toLowerCase();
+  // Update folder credits too
+  if (id === 'Folder') updateAllCredits();
+}
+
+function goHome() {
+  showScreen('Home');
+  previousScreen = 'home';
+}
+
+function goBackFromConvo() {
+  if (previousScreen === 'folder' && currentFolder) {
+    showScreen('Folder');
+    renderFolderConvos();
+  } else if (previousScreen === 'category' && currentCategory) {
+    showScreen('Category');
+  } else {
+    showScreen('Home');
+  }
+}
+
+function newChat() {
+  closeSidebar();
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  const hi = document.getElementById('homeInput');
+  const ci = document.getElementById('convoInput');
+  hi.value = ''; hi.style.height = 'auto';
+  ci.value = ''; ci.style.height = 'auto';
+  updateSendBtn('homeInput', 'homeSend');
+  showScreen('Home');
+  previousScreen = 'home';
+}
+
+function closeWarren() {
+  document.getElementById('confirmDialog').classList.add('visible');
+}
+
+function closeConfirmDialog() {
+  document.getElementById('confirmDialog').classList.remove('visible');
+}
+
+function confirmLeave() {
+  closeConfirmDialog();
+  showToast('Would close WarrenAI');
+  setTimeout(() => newChat(), 500);
+}
+
+// ===== CHIPS =====
+function renderChips() {
+  const grid = document.getElementById('chipsGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach((cat, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="chip-icon">${cat.icon}</span>${cat.name}`;
+    chip.onclick = () => {
+      const st = PROTO_STATES[protoStateIndex];
+      if (st.isBlocked) {
+        showToast(st.blockToast);
+        return;
+      }
+      openCategory(i);
+    };
+    grid.appendChild(chip);
+  });
+}
+
+// ===== CATEGORY MENU =====
+function openCategory(index) {
+  currentCategory = CATEGORIES[index];
+  document.getElementById('catHeaderTitle').innerHTML = `<span style="margin-right:6px">${currentCategory.icon}</span>${currentCategory.name}`;
+  renderSubItems();
+  showScreen('Category');
+  previousScreen = 'category';
+  document.getElementById('catInput').value = '';
+  updateSendBtn('catInput', 'catSend');
+}
+
+function renderSubItems() {
+  const container = document.getElementById('catSubItems');
+  container.innerHTML = '';
+  currentCategory.items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'sub-item' + (item.type === 'locked' ? ' locked' : '');
+    div.innerHTML = `
+      <span class="sub-name">${item.type === 'locked' ? '<span class="lock-icon">\uD83D\uDD12</span> ' : ''}${item.name}</span>
+      <span class="sub-right"><span class="chevron">\u203A</span></span>
+    `;
+    if (item.type === 'locked') {
+      div.onclick = (e) => showLockedTooltip(e);
+    } else if (item.type === 'input') {
+      div.onclick = () => openStockSheet(item);
+    } else {
+      div.onclick = () => handleDirectItem(item);
+    }
+    container.appendChild(div);
+  });
+}
+
+function showLockedTooltip(e) {
+  const existing = document.querySelector('.locked-tooltip');
+  if (existing) existing.remove();
+  const tip = document.createElement('div');
+  tip.className = 'locked-tooltip';
+  tip.textContent = 'Available for Pro subscribers';
+  const rect = e.currentTarget.getBoundingClientRect();
+  const phone = document.getElementById('phone').getBoundingClientRect();
+  tip.style.top = (rect.top - phone.top - 40) + 'px';
+  tip.style.left = '50%';
+  tip.style.transform = 'translateX(-50%)';
+  document.getElementById('screenCategory').appendChild(tip);
+  setTimeout(() => tip.remove(), 2000);
+}
+
+// ===== STOCK INPUT SHEET =====
+function openStockSheet(item) {
+  currentSubItem = item;
+  document.getElementById('sheetTitle').textContent = item.name;
+  document.getElementById('sheetDesc').textContent = item.desc || 'Get a comprehensive analysis for any stock';
+  document.getElementById('stockSearchInput').value = '';
+  document.getElementById('stockSuggestions').classList.remove('visible');
+  document.getElementById('stockSuggestions').innerHTML = '';
+  selectedStock = null;
+  document.getElementById('sheetSubmit').className = 'submit-btn disabled';
+  document.getElementById('stockSheet').classList.add('visible');
+}
+
+function closeSheet() {
+  document.getElementById('stockSheet').classList.remove('visible');
+}
+
+function filterStocks() {
+  const val = document.getElementById('stockSearchInput').value.trim().toUpperCase();
+  const container = document.getElementById('stockSuggestions');
+  if (!val) {
+    container.classList.remove('visible');
+    container.innerHTML = '';
+    selectedStock = null;
+    document.getElementById('sheetSubmit').className = 'submit-btn disabled';
+    return;
+  }
+  const matches = STOCKS.filter(s => s.ticker.includes(val) || s.name.toUpperCase().includes(val));
+  container.innerHTML = '';
+  if (matches.length === 0) {
+    container.innerHTML = '<div class="no-results">No results found</div>';
+  } else {
+    matches.forEach(s => {
+      const div = document.createElement('div');
+      div.className = 'stock-sug-item';
+      div.innerHTML = `<span class="ticker">${s.ticker}</span><span class="name">- ${s.name}</span>`;
+      div.onclick = () => selectStock(s);
+      container.appendChild(div);
+    });
+  }
+  container.classList.add('visible');
+}
+
+function selectStock(stock) {
+  selectedStock = stock;
+  document.getElementById('stockSearchInput').value = `${stock.ticker} - ${stock.name}`;
+  document.getElementById('stockSuggestions').classList.remove('visible');
+  document.getElementById('sheetSubmit').className = 'submit-btn enabled';
+}
+
+function submitStock() {
+  if (!selectedStock) return;
+  closeSheet();
+  // Build the conversation
+  let respKey = 'generic';
+  let prompt = `Provide a comprehensive ${currentSubItem.name.toLowerCase()} analysis for ${selectedStock.name} (${selectedStock.ticker})`;
+  if (currentSubItem.name === 'Bull or Bear' && selectedStock.ticker === 'AAPL') {
+    respKey = 'bullBearAAPL';
+    prompt = MOCK_RESPONSES.bullBearAAPL.prompt;
+  }
+  startConversation(prompt, respKey, true);
+}
+
+// ===== DIRECT ITEM =====
+function handleDirectItem(item) {
+  let respKey = 'generic';
+  let prompt = `Provide a comprehensive ${item.name.toLowerCase()} analysis with key data points, trends, and actionable insights for the current market`;
+  if (item.name === 'Market Volatility') {
+    respKey = 'marketVolatility';
+    prompt = MOCK_RESPONSES.marketVolatility.prompt;
+  }
+  startConversation(prompt, respKey, true);
+}
+
+// ===== SEND FROM SCREENS =====
+function sendFromHome() {
+  if (PROTO_STATES[protoStateIndex].isBlocked) return;
+  const input = document.getElementById('homeInput');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = ''; input.style.height = 'auto';
+  updateSendBtn('homeInput', 'homeSend');
+  previousScreen = 'home';
+  startConversation(val, 'freeText', false);
+}
+
+function sendFromCategory() {
+  if (PROTO_STATES[protoStateIndex].isBlocked) return;
+  const input = document.getElementById('catInput');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = ''; input.style.height = 'auto';
+  updateSendBtn('catInput', 'catSend');
+  startConversation(val, 'freeText', false);
+}
+
+function sendFromConvo() {
+  if (isGenerating) {
+    stopGeneration();
+    return;
+  }
+  const input = document.getElementById('convoInput');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = ''; input.style.height = 'auto';
+  updateSendBtn('convoInput', 'convoSend');
+  addUserMsg(val);
+  generateResponse('followUp');
+}
+
+// ===== CONVERSATION =====
+function startConversation(prompt, responseKey, isPrebuilt) {
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  showScreen('Convo');
+
+  if (isPrebuilt) {
+    addPrebuiltMsg(prompt);
+  } else {
+    addUserMsg(prompt);
+  }
+  generateResponse(responseKey);
+}
+
+function addUserMsg(text) {
+  const thread = document.getElementById('msgThread');
+  const div = document.createElement('div');
+  div.className = 'msg msg-user';
+  div.innerHTML = `<div class="msg-bubble">${escapeHtml(text)}</div>`;
+  thread.appendChild(div);
+  convoHistory.push({ type: 'user', text });
+  scrollToBottom();
+}
+
+function addPrebuiltMsg(text) {
+  const thread = document.getElementById('msgThread');
+  const div = document.createElement('div');
+  div.className = 'msg msg-prebuilt';
+  const short = text.length > 80 ? text.substring(0, 80) + '...' : text;
+  div.innerHTML = `<div class="msg-bubble" onclick="this.parentElement.classList.toggle('expanded')">
+    <span class="prompt-collapsed">${escapeHtml(short)} <span class="expand-chevron">\u25BC</span></span>
+    <span class="prompt-full">${escapeHtml(text)} <span class="expand-chevron">\u25BC</span></span>
+  </div>`;
+  thread.appendChild(div);
+  convoHistory.push({ type: 'prebuilt', text });
+  scrollToBottom();
+}
+
+function generateResponse(responseKey) {
+  isGenerating = true;
+  const sendBtn = document.getElementById('convoSend');
+  sendBtn.className = 'send-btn stop';
+  sendBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`;
+
+  const thread = document.getElementById('msgThread');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'msg msg-ai';
+  loadingDiv.id = 'loadingMsg';
+  loadingDiv.innerHTML = `<div class="loading-indicator">
+    <div class="answering-text">Answering...</div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line"></div>
+  </div>`;
+  thread.appendChild(loadingDiv);
+  scrollToBottom();
+
+  generationTimer = setTimeout(() => {
+    const loading = document.getElementById('loadingMsg');
+    if (loading) loading.remove();
+
+    const resp = MOCK_RESPONSES[responseKey] || MOCK_RESPONSES.generic;
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'msg msg-ai';
+    aiDiv.innerHTML = resp.html;
+    thread.appendChild(aiDiv);
+    convoHistory.push({ type: 'ai', key: responseKey });
+
+    isGenerating = false;
+    sendBtn.className = 'send-btn';
+    sendBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+    updateSendBtn('convoInput', 'convoSend');
+    scrollToBottom();
+
+    // Render charts after insertion
+    setTimeout(() => {
+      if (responseKey === 'marketVolatility') renderVIXChart();
+      if (responseKey === 'bullBearAAPL') renderAAPLChart();
+    }, 50);
+  }, 2000);
+}
+
+function stopGeneration() {
+  if (generationTimer) {
+    clearTimeout(generationTimer);
+    generationTimer = null;
+  }
+  const loading = document.getElementById('loadingMsg');
+  if (loading) {
+    loading.innerHTML = `<p><em>Generation stopped.</em></p>`;
+    loading.id = '';
+  }
+  isGenerating = false;
+  const sendBtn = document.getElementById('convoSend');
+  sendBtn.className = 'send-btn';
+  sendBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`;
+  updateSendBtn('convoInput', 'convoSend');
+}
+
+// ===== CHARTS =====
+function renderVIXChart() {
+  const canvas = document.getElementById('chartVIX');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 24;
+  const h = 180;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+
+  const data = [
+    { label: "Feb 1", val: 21.3 },
+    { label: "Feb 5", val: 20.1 },
+    { label: "Feb 10", val: 19.8 },
+    { label: "Feb 15", val: 19.2 },
+    { label: "Feb 20", val: 18.9 },
+    { label: "Feb 25", val: 18.5 },
+    { label: "Mar 1", val: 18.4 }
+  ];
+
+  const pad = { top: 20, right: 10, bottom: 30, left: 36 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const minV = 17.5, maxV = 22;
+
+  // Grid
+  ctx.strokeStyle = '#E5E7EB';
+  ctx.lineWidth = 0.5;
+  for (let v = 18; v <= 22; v++) {
+    const y = pad.top + ch - ((v - minV) / (maxV - minV)) * ch;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toString(), pad.left - 6, y + 4);
+  }
+
+  // X labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9CA3AF';
+  data.forEach((d, i) => {
+    const x = pad.left + (i / (data.length - 1)) * cw;
+    ctx.fillText(d.label, x, h - 6);
+  });
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = '#2563EB';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  data.forEach((d, i) => {
+    const x = pad.left + (i / (data.length - 1)) * cw;
+    const y = pad.top + ch - ((d.val - minV) / (maxV - minV)) * ch;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots
+  data.forEach((d, i) => {
+    const x = pad.left + (i / (data.length - 1)) * cw;
+    const y = pad.top + ch - ((d.val - minV) / (maxV - minV)) * ch;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563EB';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+  });
+
+  // Click handler
+  canvas.onclick = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left);
+    const my = (e.clientY - rect.top);
+    let closest = null, minDist = 999;
+    data.forEach((d, i) => {
+      const x = pad.left + (i / (data.length - 1)) * cw;
+      const y = pad.top + ch - ((d.val - minV) / (maxV - minV)) * ch;
+      const dist = Math.sqrt((mx - x) ** 2 + (my - y) ** 2);
+      if (dist < minDist) { minDist = dist; closest = { d, x, y }; }
+    });
+    if (closest && minDist < 30) {
+      const tooltip = document.getElementById('tooltipVIX');
+      tooltip.textContent = `${closest.d.label}: VIX ${closest.d.val}`;
+      tooltip.style.left = (closest.x + 12) + 'px';
+      tooltip.style.top = (closest.y - 10) + 'px';
+      tooltip.style.display = 'block';
+      setTimeout(() => tooltip.style.display = 'none', 2500);
+    }
+  };
+}
+
+function renderAAPLChart() {
+  const canvas = document.getElementById('chartAAPL');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.parentElement.clientWidth - 24;
+  const h = 180;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+
+  const priceData = [
+    { label: "Feb 1", val: 178 },
+    { label: "Feb 5", val: 180 },
+    { label: "Feb 10", val: 182 },
+    { label: "Feb 15", val: 181 },
+    { label: "Feb 20", val: 184 },
+    { label: "Feb 25", val: 185 },
+    { label: "Mar 1", val: 186 }
+  ];
+  const divData = [0.55, 0.54, 0.53, 0.54, 0.52, 0.52, 0.51];
+
+  const pad = { top: 20, right: 40, bottom: 30, left: 36 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const pMin = 176, pMax = 188;
+  const dMin = 0.48, dMax = 0.58;
+
+  // Grid
+  ctx.strokeStyle = '#E5E7EB';
+  ctx.lineWidth = 0.5;
+  for (let v = 178; v <= 186; v += 2) {
+    const y = pad.top + ch - ((v - pMin) / (pMax - pMin)) * ch;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'right';
+    ctx.fillText('$' + v, pad.left - 4, y + 4);
+  }
+
+  // Right axis labels for div yield
+  ctx.textAlign = 'left';
+  for (let v = 0.50; v <= 0.56; v += 0.02) {
+    const y = pad.top + ch - ((v - dMin) / (dMax - dMin)) * ch;
+    ctx.fillStyle = '#9CA3AF';
+    ctx.fillText(v.toFixed(2) + '%', w - pad.right + 6, y + 4);
+  }
+
+  // X labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#9CA3AF';
+  priceData.forEach((d, i) => {
+    const x = pad.left + (i / (priceData.length - 1)) * cw;
+    ctx.fillText(d.label, x, h - 6);
+  });
+
+  // Price line
+  ctx.beginPath();
+  ctx.strokeStyle = '#2563EB';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  priceData.forEach((d, i) => {
+    const x = pad.left + (i / (priceData.length - 1)) * cw;
+    const y = pad.top + ch - ((d.val - pMin) / (pMax - pMin)) * ch;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Div line
+  ctx.beginPath();
+  ctx.strokeStyle = '#10B981';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 3]);
+  divData.forEach((v, i) => {
+    const x = pad.left + (i / (divData.length - 1)) * cw;
+    const y = pad.top + ch - ((v - dMin) / (dMax - dMin)) * ch;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Price dots
+  priceData.forEach((d, i) => {
+    const x = pad.left + (i / (priceData.length - 1)) * cw;
+    const y = pad.top + ch - ((d.val - pMin) / (pMax - pMin)) * ch;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#2563EB';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+  });
+
+  // Click
+  canvas.onclick = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    let closest = null, minDist = 999;
+    priceData.forEach((d, i) => {
+      const x = pad.left + (i / (priceData.length - 1)) * cw;
+      const dist = Math.abs(mx - x);
+      if (dist < minDist) { minDist = dist; closest = { d, i, x }; }
+    });
+    if (closest && minDist < 30) {
+      const py = pad.top + ch - ((closest.d.val - pMin) / (pMax - pMin)) * ch;
+      const tooltip = document.getElementById('tooltipAAPL');
+      tooltip.textContent = `${closest.d.label}: $${closest.d.val} | Yield: ${divData[closest.i].toFixed(2)}%`;
+      tooltip.style.left = Math.min(closest.x + 12, w - 170) + 'px';
+      tooltip.style.top = (py - 10) + 'px';
+      tooltip.style.display = 'block';
+      setTimeout(() => tooltip.style.display = 'none', 2500);
+    }
+  };
+}
+
+// ===== SCROLL =====
+function scrollToBottom() {
+  const body = document.getElementById('convoBody');
+  setTimeout(() => {
+    body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+  }, 50);
+}
+
+function checkScroll() {
+  const body = document.getElementById('convoBody');
+  const btn = document.getElementById('scrollBottomBtn');
+  const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
+  btn.classList.toggle('visible', !atBottom);
+}
+
+// ===== INPUT =====
+function updateSendBtn(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+  if (isGenerating && btnId === 'convoSend') return; // don't change stop btn
+  const hasText = input.value.trim().length > 0;
+  btn.classList.toggle('active', hasText);
+}
+
+function autoGrow(el) {
+  el.style.height = 'auto';
+  const maxH = 160; // ~8 lines
+  el.style.height = Math.min(el.scrollHeight, maxH) + 'px';
+  el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
+}
+
+// ===== SIDEBAR =====
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+function openSidebar() {
+  document.getElementById('sidebarOverlay').classList.add('visible');
+  document.getElementById('sidebar').classList.add('open');
+  renderSidebar();
+}
+
+function closeSidebar() {
+  document.getElementById('sidebarOverlay').classList.remove('visible');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarSearchInput').value = '';
+  filterSidebarConvos();
+  closeFoldersPopover();
+}
+
+function openFoldersPopover(e) {
+  closeFoldersPopover();
+  const rect = e.target.getBoundingClientRect();
+  const sidebar = document.getElementById('sidebar');
+  const sidebarRect = sidebar.getBoundingClientRect();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'folders-popover-overlay';
+  overlay.id = 'foldersPopoverOverlay';
+  overlay.onclick = function() { closeFoldersPopover(); };
+
+  const pop = document.createElement('div');
+  pop.className = 'folders-popover';
+  pop.id = 'foldersPopover';
+  pop.style.top = (rect.top - sidebarRect.top) + 'px';
+  pop.onclick = function(ev) { ev.stopPropagation(); };
+
+  const folderSvg = '<svg class="folder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>';
+  const menuSvg = '<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>';
+
+  const pencilSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  const trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+
+  sidebarFolders.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'folders-popover-item';
+    item.innerHTML = folderSvg + '<span class="fp-name">' + escapeHtml(f.name) + '</span>' +
+      '<button class="si-menu-btn" onclick="event.stopPropagation();togglePopoverFolderMenu(this,\'' + f.id + '\',\'' + escapeHtml(f.name) + '\')">\u22EF</button>';
+    item.onclick = function() { closeFoldersPopover(); openFolderDetail(f.id); };
+    pop.appendChild(item);
+  });
+
+  overlay.appendChild(pop);
+  sidebar.appendChild(overlay);
+}
+
+function closeFoldersPopover() {
+  const el = document.getElementById('foldersPopoverOverlay');
+  if (el) el.remove();
+}
+
+function togglePopoverFolderMenu(btn, folderId, folderName) {
+  const existing = btn.parentElement.querySelector('.ctx-menu');
+  if (existing) { existing.remove(); return; }
+  // Close any other open menus in the popover
+  document.querySelectorAll('#foldersPopover .ctx-menu').forEach(m => m.remove());
+  const pencilSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  const trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu visible';
+  menu.style.cssText = 'position:absolute;right:0;top:100%;z-index:600;';
+  menu.innerHTML = '<div class="ctx-menu-item" onclick="event.stopPropagation();closeFoldersPopover();openRenameModal(\'folder\',\'' + folderId + '\')">' + pencilSvg + 'Rename</div>' +
+    '<div class="ctx-menu-item danger" onclick="event.stopPropagation();closeFoldersPopover();openDeleteDialog(\'folder\',\'' + folderId + '\',\'' + folderName + '\')">' + trashSvg + 'Delete</div>';
+  btn.parentElement.style.position = 'relative';
+  btn.parentElement.appendChild(menu);
+}
+
+function renderSidebar() {
+  const body = document.getElementById('sidebarBody');
+  let html = '';
+  const pencilSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  const trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+  const shareSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+  const folderMenuSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>';
+
+  if (isGuest) {
+    html = '<div class="sidebar-empty">Sign up to see conversation history, folders, and templates.<br><br><button class="sidebar-signup-btn" onclick="showToast(\'Would open sign up screen\')">Sign Up</button></div>';
+    body.innerHTML = html;
+    return;
+  }
+
+  // Folders (no divider above - starts at top)
+  html += `<div class="sidebar-section-header"><span>FOLDERS</span><button onclick="openFolderModal()">+</button></div>`;
+  const maxFolders = foldersExpanded ? sidebarFolders.length : 5;
+  sidebarFolders.slice(0, maxFolders).forEach(f => {
+    html += `<div class="sidebar-item" data-id="${f.id}">
+      <span class="si-name" onclick="openFolderDetail('${f.id}')" style="display:flex;align-items:center;gap:8px;"><span class="folder-icon" style="color:var(--text-secondary)">\uD83D\uDCC1</span>${escapeHtml(f.name)}</span>
+      <button class="si-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('${f.id}',this)">\u22EF</button>
+      <div class="ctx-menu" id="ctx-${f.id}">
+        <div class="ctx-menu-item" onclick="event.stopPropagation();openRenameModal('folder','${f.id}')">${pencilSvg}Rename</div>
+        <div class="ctx-menu-item danger" onclick="event.stopPropagation();openDeleteDialog('folder','${f.id}','${escapeHtml(f.name)}')">${trashSvg}Delete</div>
+      </div>
+    </div>`;
+  });
+  if (!foldersExpanded && sidebarFolders.length > 5) {
+    html += `<div class="sidebar-show-more" onclick="openFoldersPopover(event)">Show more ></div>`;
+  }
+
+  // Conversations grouped by date
+  html += `<div class="sidebar-divider"></div>`;
+  html += `<div class="sidebar-section-header"><span>CHATS</span></div>`;
+  const dates = [...new Set(sidebarConvos.map(c => c.date))];
+  dates.forEach(date => {
+    html += `<div class="sidebar-date-label">${date}</div>`;
+    sidebarConvos.filter(c => c.date === date).forEach(c => {
+      // Build folder submenu items
+      let folderSubItems = '';
+      sidebarFolders.forEach(f => {
+        folderSubItems += `<div class="ctx-submenu-item" onclick="event.stopPropagation();moveToFolder('${c.id}','${f.id}')"><span class="folder-sub-icon">\uD83D\uDCC1</span>${escapeHtml(f.name)}</div>`;
+      });
+      folderSubItems += `<div class="ctx-submenu-item" onclick="event.stopPropagation();closeAllMenus();openFolderModal('${c.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add New Folder</div>`;
+
+      html += `<div class="sidebar-item" data-id="${c.id}" onclick="resumeConvo('${c.id}')">
+        <span class="si-name">${escapeHtml(c.title)}</span>
+        <button class="si-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('${c.id}',this)">\u22EF</button>
+        <div class="ctx-menu" id="ctx-${c.id}">
+          <div class="ctx-menu-item" onclick="event.stopPropagation();openShareModal();closeAllMenus()">${shareSvg}Share</div>
+          <div class="ctx-menu-item" onclick="event.stopPropagation();toggleFolderSubmenu('${c.id}')">${folderMenuSvg}Add to folder<span class="ctx-chevron">></span></div>
+          <div class="ctx-submenu" id="sub-${c.id}">${folderSubItems}</div>
+          <div class="ctx-menu-item" onclick="event.stopPropagation();openRenameModal('convo','${c.id}')">${pencilSvg}Rename</div>
+          <div class="ctx-menu-item danger" onclick="event.stopPropagation();openDeleteDialog('convo','${c.id}','${escapeHtml(c.title)}')">${trashSvg}Delete</div>
+        </div>
+      </div>`;
+    });
+  });
+
+  // Templates
+  html += `<div class="sidebar-divider"></div>`;
+  html += `<div class="sidebar-section-header"><span>TEMPLATES</span><button onclick="openTemplateModal()">+</button></div>`;
+  sidebarTemplates.forEach(t => {
+    html += `<div class="sidebar-item" data-id="${t.id}">
+      <span class="si-name" onclick="useTemplate('${t.id}')">${escapeHtml(t.name)}</span>
+      <button class="si-menu-btn" onclick="event.stopPropagation();toggleCtxMenu('${t.id}',this)">\u22EF</button>
+      <div class="ctx-menu" id="ctx-${t.id}">
+        <div class="ctx-menu-item" onclick="event.stopPropagation();openShareModal();closeAllMenus()">${shareSvg}Share</div>
+        <div class="ctx-menu-item" onclick="event.stopPropagation();openRenameModal('template','${t.id}')">${pencilSvg}Rename</div>
+        <div class="ctx-menu-item danger" onclick="event.stopPropagation();openDeleteDialog('template','${t.id}','${escapeHtml(t.name)}')">${trashSvg}Delete</div>
+      </div>
+    </div>`;
+  });
+
+  body.innerHTML = html;
+}
+
+function toggleFolderSubmenu(convoId) {
+  const sub = document.getElementById('sub-' + convoId);
+  if (sub) sub.classList.toggle('visible');
+}
+
+function moveToFolder(convoId, folderId) {
+  const folder = sidebarFolders.find(f => f.id === folderId);
+  const convo = sidebarConvos.find(c => c.id === convoId);
+  if (!folder || !convo) return;
+  // Add to folder convos
+  folder.convos.push({ id: 'fc' + Date.now(), title: convo.title, preview: convo.userMsg || convo.title, responseKey: convo.responseKey });
+  closeAllMenus();
+  showToast('Moved to ' + folder.name);
+}
+
+function toggleCtxMenu(id, btn) {
+  closeAllMenus();
+  const menu = document.getElementById('ctx-' + id);
+  if (menu) menu.classList.add('visible');
+}
+
+function closeAllMenus() {
+  document.querySelectorAll('.ctx-menu').forEach(m => m.classList.remove('visible'));
+}
+
+// Close menus when tapping elsewhere
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.si-menu-btn') && !e.target.closest('.ctx-menu') && !e.target.closest('#folderDetailMenuBtn')) {
+    closeAllMenus();
+    const fdm = document.getElementById('folderDetailCtx');
+    if (fdm) fdm.classList.remove('visible');
+  }
+});
+
+function resumeConvo(id) {
+  const convo = sidebarConvos.find(c => c.id === id);
+  if (!convo) return;
+  closeSidebar();
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  showScreen('Convo');
+  previousScreen = 'home';
+
+  if (convo.isPrebuilt) {
+    const resp = MOCK_RESPONSES[convo.responseKey];
+    if (resp && resp.prompt) addPrebuiltMsg(resp.prompt);
+  } else if (convo.userMsg) {
+    addUserMsg(convo.userMsg);
+  }
+  generateResponse(convo.responseKey);
+}
+
+// ===== DELETE CONFIRMATION =====
+function openDeleteDialog(type, id, name) {
+  closeAllMenus();
+  pendingDeleteType = type;
+  pendingDeleteId = id;
+  pendingDeleteName = name;
+  document.getElementById('deleteDialogText').textContent = 'Are you sure you want to delete "' + name + '"?';
+  document.getElementById('deleteDialog').classList.add('visible');
+}
+
+function closeDeleteDialog() {
+  document.getElementById('deleteDialog').classList.remove('visible');
+  pendingDeleteType = null;
+  pendingDeleteId = null;
+  pendingDeleteName = '';
+}
+
+function confirmDelete() {
+  if (pendingDeleteType === 'convo') {
+    sidebarConvos = sidebarConvos.filter(c => c.id !== pendingDeleteId);
+  } else if (pendingDeleteType === 'template') {
+    sidebarTemplates = sidebarTemplates.filter(t => t.id !== pendingDeleteId);
+  } else if (pendingDeleteType === 'folder') {
+    sidebarFolders = sidebarFolders.filter(f => f.id !== pendingDeleteId);
+  } else if (pendingDeleteType === 'folderDetail') {
+    sidebarFolders = sidebarFolders.filter(f => f.id !== pendingDeleteId);
+    currentFolder = null;
+    closeDeleteDialog();
+    showScreen('Home');
+    showToast('Folder deleted');
+    return;
+  }
+  closeDeleteDialog();
+  renderSidebar();
+  showToast('Deleted');
+}
+
+// ===== RENAME MODAL =====
+function openRenameModal(type, id) {
+  closeAllMenus();
+  pendingRenameType = type;
+  pendingRenameId = id;
+  let currentName = '';
+  if (type === 'convo') {
+    const c = sidebarConvos.find(x => x.id === id);
+    if (c) currentName = c.title;
+  } else if (type === 'template') {
+    const t = sidebarTemplates.find(x => x.id === id);
+    if (t) currentName = t.name;
+  } else if (type === 'folder') {
+    const f = sidebarFolders.find(x => x.id === id);
+    if (f) currentName = f.name;
+  } else if (type === 'folderDetail') {
+    if (currentFolder) currentName = currentFolder.name;
+  }
+  const inp = document.getElementById('renameInput');
+  inp.value = currentName;
+  updateRenameCharCount();
+  document.getElementById('renameModal').classList.add('visible');
+  setTimeout(() => { inp.focus(); inp.select(); }, 100);
+}
+
+function closeRenameModal() {
+  document.getElementById('renameModal').classList.remove('visible');
+  pendingRenameType = null;
+  pendingRenameId = null;
+}
+
+function updateRenameCharCount() {
+  const len = document.getElementById('renameInput').value.length;
+  document.getElementById('renameCharCount').textContent = len + '/100';
+}
+
+function confirmRename() {
+  const newVal = document.getElementById('renameInput').value.trim();
+  if (!newVal) { closeRenameModal(); return; }
+  if (pendingRenameType === 'convo') {
+    const c = sidebarConvos.find(x => x.id === pendingRenameId);
+    if (c) c.title = newVal;
+  } else if (pendingRenameType === 'template') {
+    const t = sidebarTemplates.find(x => x.id === pendingRenameId);
+    if (t) t.name = newVal;
+  } else if (pendingRenameType === 'folder') {
+    const f = sidebarFolders.find(x => x.id === pendingRenameId);
+    if (f) f.name = newVal;
+  } else if (pendingRenameType === 'folderDetail') {
+    if (currentFolder) {
+      currentFolder.name = newVal;
+      document.getElementById('folderDetailTitle').textContent = newVal;
+      document.getElementById('folderInput').placeholder = 'Message ' + newVal + '...';
+    }
+  }
+  closeRenameModal();
+  renderSidebar();
+  showToast('Renamed');
+}
+
+let pendingFolderConvoId = null;
+function openFolderModal(convoId) {
+  pendingFolderConvoId = convoId || null;
+  closeSidebar();
+  document.getElementById('folderNameInput').value = '';
+  document.getElementById('folderCreateBtn').className = 'fm-create disabled';
+  document.getElementById('folderModal').classList.add('visible');
+  setTimeout(() => document.getElementById('folderNameInput').focus(), 100);
+}
+
+function closeFolderModal() {
+  document.getElementById('folderModal').classList.remove('visible');
+  // Re-open sidebar after closing folder modal
+  setTimeout(() => openSidebar(), 150);
+}
+
+function updateFolderCreate() {
+  const val = document.getElementById('folderNameInput').value.trim();
+  const btn = document.getElementById('folderCreateBtn');
+  btn.className = val ? 'fm-create enabled' : 'fm-create disabled';
+}
+
+function createFolder() {
+  const val = document.getElementById('folderNameInput').value.trim();
+  if (!val) return;
+  const newFolder = { id: 'f' + Date.now(), name: val, convos: [] };
+  sidebarFolders.push(newFolder);
+  // If triggered from "Add to folder" submenu, move the convo into the new folder
+  if (pendingFolderConvoId) {
+    moveToFolder(pendingFolderConvoId, newFolder.id);
+    pendingFolderConvoId = null;
+  }
+  document.getElementById('folderModal').classList.remove('visible');
+  setTimeout(() => openSidebar(), 150);
+}
+
+// ===== SIDEBAR SEARCH =====
+function filterSidebarConvos() {
+  const query = document.getElementById('sidebarSearchInput').value.toLowerCase().trim();
+  const body = document.getElementById('sidebarBody');
+  if (!query) { renderSidebar(); return; }
+
+  const matches = sidebarConvos.filter(c => c.title.toLowerCase().includes(query));
+  let html = '';
+  if (matches.length === 0) {
+    html = '<div style="padding:24px 16px;text-align:center;color:var(--text-secondary);font-size:14px;">No conversations found</div>';
+  } else {
+    matches.forEach(c => {
+      html += `<div class="sidebar-item" onclick="resumeConvo('${c.id}')">
+        <span class="si-name">${escapeHtml(c.title)}</span>
+      </div>`;
+    });
+  }
+  body.innerHTML = html;
+}
+
+// ===== TEMPLATES =====
+function openTemplateModal() {
+  closeSidebar();
+  document.getElementById('tmplName').value = '';
+  document.getElementById('tmplPrompt').value = '';
+  document.getElementById('tmplVarTags').innerHTML = '';
+  document.getElementById('tmplSaveBtn').className = 'save-btn disabled';
+  document.getElementById('templateModal').classList.add('visible');
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').classList.remove('visible');
+}
+
+function updateTemplateSave() {
+  const name = document.getElementById('tmplName').value.trim();
+  const prompt = document.getElementById('tmplPrompt').value.trim();
+  const btn = document.getElementById('tmplSaveBtn');
+  btn.className = (name && prompt) ? 'save-btn enabled' : 'save-btn disabled';
+}
+
+function parseTemplateVars() {
+  const text = document.getElementById('tmplPrompt').value;
+  const matches = text.match(/\{\{(\w+)\}\}/g) || [];
+  const vars = [...new Set(matches.map(m => m.replace(/\{|\}/g, '')))];
+  const container = document.getElementById('tmplVarTags');
+  container.innerHTML = vars.map(v =>
+    `<span class="var-tag">${v} <span class="remove-var" onclick="removeVar('${v}')">\u00D7</span></span>`
+  ).join('');
+}
+
+function removeVar(name) {
+  const textarea = document.getElementById('tmplPrompt');
+  textarea.value = textarea.value.replace(new RegExp(`\\{\\{${name}\\}\\}`, 'g'), name);
+  parseTemplateVars();
+}
+
+function saveTemplate() {
+  const name = document.getElementById('tmplName').value.trim();
+  const prompt = document.getElementById('tmplPrompt').value.trim();
+  if (!name || !prompt) return;
+  sidebarTemplates.push({
+    id: 't' + Date.now(),
+    name,
+    prompt
+  });
+  closeTemplateModal();
+  showToast('Template saved');
+}
+
+function useTemplate(id) {
+  const tmpl = sidebarTemplates.find(t => t.id === id);
+  if (!tmpl) return;
+  closeSidebar();
+
+  // Fill prompt into textarea with variables as placeholders
+  const prompt = tmpl.prompt.replace(/\{\{(\w+)\}\}/g, '[$1]');
+  showScreen('Convo');
+  previousScreen = 'home';
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  const ci = document.getElementById('convoInput');
+  ci.value = prompt;
+  ci.style.height = 'auto';
+  autoGrow(ci);
+  updateSendBtn('convoInput', 'convoSend');
+  ci.focus();
+}
+
+// ===== SHARE MODAL =====
+function openShareModal() {
+  closeAllMenus();
+  document.getElementById('shareModal').classList.add('visible');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('visible');
+}
+
+function copyShareUrl() {
+  const btn = document.getElementById('copyBtn');
+  const url = document.getElementById('shareUrl');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url.value);
+  }
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+
+// ===== TOAST =====
+function showToast(message) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+
+// ===== PROTOTYPE STATE TOGGLE =====
+function cycleProtoState() {
+  protoStateIndex = (protoStateIndex + 1) % PROTO_STATES.length;
+  applyProtoState();
+}
+
+function applyProtoState() {
+  const s = PROTO_STATES[protoStateIndex];
+  isGuest = s.isGuest;
+  isMaxCredits = s.isBlocked && !s.isGuest;
+  document.getElementById('protoStateBtn').textContent = s.label;
+  applyBlockedState();
+  showToast(s.label);
+}
+
+function applyBlockedState() {
+  const s = PROTO_STATES[protoStateIndex];
+  const homeInput = document.getElementById('homeInput');
+  const catInput = document.getElementById('catInput');
+  const convoInput = document.getElementById('convoInput');
+  const folderInput = document.getElementById('folderInput');
+  const blocked = s.isBlocked;
+
+  const inputs = [homeInput, catInput, convoInput, folderInput];
+  const ph = s.placeholder || 'Ask WarrenAI';
+  inputs.forEach(inp => { if (inp) inp.placeholder = ph; });
+  if (!blocked && folderInput && currentFolder) folderInput.placeholder = 'Message ' + currentFolder.name + '...';
+
+  homeInput.disabled = blocked;
+  homeInput.value = '';
+  catInput.disabled = blocked;
+  catInput.value = '';
+  if (blocked) { convoInput.disabled = true; convoInput.value = ''; if (folderInput) { folderInput.disabled = true; folderInput.value = ''; } }
+  else { convoInput.disabled = false; if (folderInput) folderInput.disabled = false; }
+
+  // Reset textarea heights, then auto-size for placeholder if blocked
+  inputs.forEach(inp => {
+    if (!inp) return;
+    inp.style.height = 'auto';
+    if (blocked) {
+      // Temporarily set value to placeholder to measure needed height
+      inp.value = ph;
+      inp.style.height = Math.min(inp.scrollHeight, 160) + 'px';
+      inp.value = '';
+    }
+  });
+
+  updateSendBtn('homeInput', 'homeSend');
+  updateSendBtn('catInput', 'catSend');
+  updateSendBtn('convoInput', 'convoSend');
+  updateSendBtn('folderInput', 'folderSend');
+  updateAllCredits();
+  renderSidebar();
+}
+
+function getBlockToast() {
+  return PROTO_STATES[protoStateIndex].blockToast;
+}
+
+function handleInputTap() {
+  const s = PROTO_STATES[protoStateIndex];
+  if (s.isBlocked) { showToast(s.blockToast); return; }
+}
+
+function handleNewChatTap() {
+  const s = PROTO_STATES[protoStateIndex];
+  if (s.isBlocked) { showToast(s.blockToast); return; }
+  newChat();
+}
+
+function updateAllCredits() {
+  const s = PROTO_STATES[protoStateIndex];
+  const ids = ['homeCredits', 'catCredits', 'convoCredits', 'folderCredits'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (s.isGuest) {
+      el.innerHTML = '';
+    } else if (s.upgradeCta) {
+      el.innerHTML = escapeHtml(s.credits) + ' <a class="credits-upgrade-link" onclick="showToast(\'' + escapeHtml(s.upgradeDest) + '\')">' + escapeHtml(s.upgradeCta) + '</a>';
+    } else {
+      el.textContent = s.credits;
+    }
+  });
+}
+
+// ===== FOLDER DETAIL =====
+function openFolderDetail(folderId) {
+  const folder = sidebarFolders.find(f => f.id === folderId);
+  if (!folder) return;
+  closeSidebar();
+  currentFolder = folder;
+  document.getElementById('folderDetailTitle').textContent = folder.name;
+  document.getElementById('folderInput').placeholder = 'Message ' + folder.name + '...';
+  renderFolderConvos();
+  showScreen('Folder');
+}
+
+function renderFolderConvos() {
+  const list = document.getElementById('folderConvoList');
+  if (!currentFolder || currentFolder.convos.length === 0) {
+    list.innerHTML = '<div class="folder-empty">No conversations in this folder yet.<br>Send a message to start one.</div>';
+    return;
+  }
+  let html = '';
+  currentFolder.convos.forEach(c => {
+    html += `<div class="folder-convo-item" onclick="openFolderConvo('${c.id}')">
+      <div class="fci-left">
+        <div class="fci-title">${escapeHtml(c.title)}</div>
+        <div class="fci-preview">${escapeHtml(c.preview)}</div>
+      </div>
+      <span class="fci-chevron">\u203A</span>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function openFolderConvo(convoId) {
+  if (!currentFolder) return;
+  const convo = currentFolder.convos.find(c => c.id === convoId);
+  if (!convo) return;
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  showScreen('Convo');
+  previousScreen = 'folder';
+  addUserMsg(convo.title);
+  generateResponse(convo.responseKey);
+}
+
+function goBackFromFolder() {
+  showScreen('Home');
+}
+
+function sendFromFolder() {
+  if (PROTO_STATES[protoStateIndex].isBlocked) return;
+  const input = document.getElementById('folderInput');
+  const val = input.value.trim();
+  if (!val) return;
+  input.value = ''; input.style.height = 'auto';
+  updateSendBtn('folderInput', 'folderSend');
+  // Start a convo in the folder context
+  convoHistory = [];
+  document.getElementById('msgThread').innerHTML = '';
+  showScreen('Convo');
+  previousScreen = 'folder';
+  addUserMsg(val);
+  generateResponse('freeText');
+}
+
+function toggleFolderDetailMenu() {
+  const menu = document.getElementById('folderDetailCtx');
+  menu.classList.toggle('visible');
+}
+
+function closeFolderDetailMenu() {
+  document.getElementById('folderDetailCtx').classList.remove('visible');
+}
+
+// Old folder detail actions now use rename/delete modals (see openRenameModal/openDeleteDialog)
+
+// ===== UTIL =====
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Init
+init();
+</script>
+</body>
+</html>

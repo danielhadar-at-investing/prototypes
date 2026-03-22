@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Value Tab - Refined Concepts</title>
+<style>
+  :root {
+    --bg-screen: #1a1a2e;
+    --card-bg: #16213e;
+    --card-alt: #1b2a4a;
+    --text-primary: #ffffff;
+    --text-secondary: #8892a0;
+    --text-tertiary: #5a6270;
+    --green: #26a69a;
+    --green-bg: rgba(38, 166, 154, 0.12);
+    --red: #ef5350;
+    --red-bg: rgba(239, 83, 80, 0.12);
+    --blue: #2962ff;
+    --blue-bg: rgba(41, 98, 255, 0.12);
+    --yellow: #ffab00;
+    --yellow-bg: rgba(255, 171, 0, 0.12);
+    --border: rgba(255,255,255,0.06);
+    --border-strong: rgba(255,255,255,0.10);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d0d1a;
+    font-family: var(--font);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Page header */
+  .page-header {
+    text-align: center;
+    margin-bottom: 28px;
+    max-width: 600px;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+  }
+
+  /* Concept switcher */
+  .concept-switcher {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .concept-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    min-width: 140px;
+  }
+  .concept-btn:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .concept-btn.active {
+    background: var(--blue-bg);
+    border-color: var(--blue);
+  }
+  .concept-btn .letter {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .concept-btn.active .letter { color: var(--blue); }
+  .concept-btn .subtitle {
+    font-size: 10px;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+  .concept-btn.active .subtitle { color: rgba(41,98,255,0.7); }
+
+  /* Concept label */
+  .concept-label {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    height: 18px;
+    transition: opacity 0.2s;
+  }
+
+  /* Phone frame */
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--bg-screen);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.08),
+      0 0 0 6px rgba(0,0,0,0.4),
+      0 20px 60px rgba(0,0,0,0.5),
+      0 0 120px rgba(41,98,255,0.04);
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 8px;
+    background: var(--bg-screen);
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .status-bar .time {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .status-bar .icons {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .status-bar .icons svg { width: 16px; height: 16px; fill: white; }
+
+  /* Dynamic island */
+  .dynamic-island {
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: var(--bg-screen);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 90;
+  }
+  .nav-back {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-back svg { width: 20px; height: 20px; fill: var(--blue); }
+  .nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .nav-right {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-right svg { width: 20px; height: 20px; fill: var(--text-secondary); }
+
+  /* Tab bar under nav */
+  .tab-bar {
+    display: flex;
+    padding: 0 16px;
+    background: var(--bg-screen);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 80;
+  }
+  .tab-item {
+    padding: 10px 0;
+    margin-right: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    position: relative;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tab-item.active {
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--blue);
+    border-radius: 1px 1px 0 0;
+  }
+
+  /* Scrollable content area */
+  .screen-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 16px 32px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+
+  /* Concept screens */
+  .concept-screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+  }
+  .concept-screen.active { display: flex; }
+
+  /* ======================== */
+  /* SHARED COMPONENTS        */
+  /* ======================== */
+
+  /* Dual hero cards */
+  .hero-cards {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .hero-card {
+    flex: 1;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1px solid var(--border-strong);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+  .hero-card.fv-card::before {
+    background: linear-gradient(90deg, var(--green), rgba(38,166,154,0.2));
+  }
+  .hero-card.health-card::before {
+    background: linear-gradient(90deg, var(--blue), rgba(41,98,255,0.2));
+  }
+  .hero-card-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 8px;
+  }
+  .hero-fv-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    transition: all 0.4s ease;
+  }
+  .hero-upside-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    transition: all 0.4s ease;
+  }
+  .hero-upside-pill svg { width: 10px; height: 10px; fill: var(--green); }
+  .hero-certainty {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .hero-health-score {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .hero-health-score .score-denom {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-tertiary);
+  }
+  .hero-health-visual {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 6px;
+  }
+  .health-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-tertiary);
+    opacity: 0.3;
+    transition: all 0.3s;
+  }
+  .health-dot.filled {
+    opacity: 1;
+    background: var(--green);
+  }
+  .health-dot.partial {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--green) 40%, var(--text-tertiary) 40%);
+  }
+  .hero-health-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  /* Card wrapper */
+  .section-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  /* Summary sentence */
+  .summary-text {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding: 0 2px;
+  }
+  .summary-text .hl-green {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .summary-text .hl-white {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Consensus bar */
+  .consensus-bar-wrap {
+    display: flex;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 32px;
+    transition: all 0.4s ease;
+  }
+  .consensus-bar-wrap.tall { height: 40px; }
+  .consensus-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: flex 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .consensus-seg.undervalued { background: var(--green); color: #fff; }
+  .consensus-seg.fair { background: var(--yellow); color: #1a1a2e; }
+  .consensus-seg.overvalued { background: var(--red); color: #fff; }
+  .consensus-seg.empty { flex: 0 !important; padding: 0; }
+  .consensus-subtitle {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  /* Model rows */
+  .model-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    transition: opacity 0.3s ease;
+    gap: 10px;
+  }
+  .model-row:last-child { border-bottom: none; }
+  .model-row.inactive { opacity: 0.4; }
+  .model-toggle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .model-toggle.active {
+    border-color: var(--green);
+    background: var(--green);
+  }
+  .model-toggle.active::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  .model-name {
+    flex: 1;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 400;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .model-estimate {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    width: 48px;
+    text-align: right;
+  }
+  .model-range-bar {
+    width: 60px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .model-range-dot {
+    position: absolute;
+    top: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+  }
+  .model-range-dot.undervalued { background: var(--green); }
+  .model-range-dot.fair { background: var(--yellow); }
+  .model-range-dot.overvalued { background: var(--red); }
+
+  /* Health bars */
+  .health-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .health-row:last-child { border-bottom: none; }
+  .health-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 100px;
+    flex-shrink: 0;
+  }
+  .health-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .health-bar-fill.high { background: var(--green); }
+  .health-bar-fill.mid { background: var(--yellow); }
+  .health-bar-fill.low { background: var(--red); }
+  .health-score-val {
+    font-size: 12px;
+    font-weight: 600;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .health-score-val.high { color: var(--green); }
+  .health-score-val.mid { color: var(--yellow); }
+  .health-score-val.low { color: var(--red); }
+
+  /* ======================== */
+  /* CONCEPT B - Bar chart    */
+  /* ======================== */
+  .bar-chart-container {
+    position: relative;
+    padding-left: 0;
+  }
+  .bar-chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 8px;
+    transition: opacity 0.3s ease;
+  }
+  .bar-chart-row.inactive { opacity: 0.35; }
+  .bar-chart-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bar-chart-track {
+    flex: 1;
+    height: 18px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 3px;
+    position: relative;
+    overflow: visible;
+  }
+  .bar-chart-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  .bar-chart-fill.undervalued { background: rgba(38,166,154,0.6); }
+  .bar-chart-fill.fair { background: rgba(255,171,0,0.5); }
+  .bar-chart-fill.overvalued { background: rgba(239,83,80,0.5); }
+  .bar-chart-price {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translate(100%, -50%);
+    padding-left: 4px;
+    white-space: nowrap;
+  }
+  .bar-chart-current-line {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 1.5px;
+    background: var(--text-secondary);
+    z-index: 5;
+    opacity: 0.6;
+  }
+  .bar-chart-current-label {
+    position: absolute;
+    top: -16px;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .b-toggle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-tertiary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .b-toggle.active {
+    border-color: var(--green);
+    background: var(--green);
+  }
+  .b-toggle.active::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  /* ======================== */
+  /* CONCEPT C - Chips        */
+  /* ======================== */
+  .chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .model-chip {
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--green);
+    background: var(--green-bg);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .model-chip.fair-chip {
+    border-color: var(--yellow);
+    background: var(--yellow-bg);
+  }
+  .model-chip.inactive-chip {
+    border-color: var(--text-tertiary);
+    border-style: dashed;
+    background: transparent;
+    opacity: 0.45;
+  }
+  .chip-name {
+    font-size: 10px;
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .chip-price {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+  .chip-calc-text {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  /* Expandable model rows (Concept C) */
+  .expandable-row {
+    border-bottom: 1px solid var(--border);
+    transition: opacity 0.3s;
+  }
+  .expandable-row.inactive { opacity: 0.4; }
+  .expandable-row:last-child { border-bottom: none; }
+  .expandable-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    gap: 8px;
+  }
+  .expand-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s;
+  }
+  .expand-icon svg { fill: var(--text-tertiary); width: 10px; height: 10px; }
+  .expandable-row.open .expand-icon { transform: rotate(90deg); }
+  .expandable-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    padding-left: 24px;
+  }
+  .expandable-row.open .expandable-detail { max-height: 80px; }
+  .detail-text {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    padding-bottom: 10px;
+    line-height: 1.5;
+  }
+  .detail-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+  .detail-range-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    position: relative;
+  }
+  .detail-range-marker {
+    position: absolute;
+    top: -4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-screen);
+    transform: translateX(-50%);
+  }
+  .detail-range-lo, .detail-range-hi {
+    font-size: 9px;
+    color: var(--text-tertiary);
+  }
+
+  /* Sticky header for Concept C */
+  .sticky-fv-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg-screen);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .sticky-fv-header.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .sticky-fv-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sticky-fv-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .sticky-fv-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .sticky-fv-upside {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  /* Number animation helper */
+  .animate-num {
+    transition: all 0.4s ease;
+  }
+
+  /* Pill for certainty inline */
+  .certainty-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-left: 4px;
+  }
+  .certainty-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Fair Value Tab - Refined Concepts</h1>
+  <p>3 refined designs combining the best elements from the initial exploration. All models are interactive - toggle them on/off to see the Fair Value recalculate.</p>
+</div>
+
+<div class="concept-switcher">
+  <button class="concept-btn active" onclick="switchConcept('A')">
+    <span class="letter">A</span>
+    <span class="subtitle">Summary + Dashboard</span>
+  </button>
+  <button class="concept-btn" onclick="switchConcept('B')">
+    <span class="letter">B</span>
+    <span class="subtitle">Consensus-Led</span>
+  </button>
+  <button class="concept-btn" onclick="switchConcept('C')">
+    <span class="letter">C</span>
+    <span class="subtitle">Calculator-Forward</span>
+  </button>
+</div>
+
+<div class="concept-label" id="conceptLabel">Concept A: Summary + Dashboard</div>
+
+<!-- Phone frame -->
+<div class="phone-frame">
+  <div class="dynamic-island"></div>
+
+  <!-- ===================== -->
+  <!-- CONCEPT A             -->
+  <!-- ===================== -->
+  <div class="concept-screen active" id="screenA">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg viewBox="0 0 16 16"><path d="M1 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-3zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-6zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-9zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-12z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm3.354 1.646a.5.5 0 0 1 0 .708l-1.414 1.414a.5.5 0 1 1-.708-.708l1.414-1.414a.5.5 0 0 1 .708 0zM14 7.5a.5.5 0 0 1 .5.5 .5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2zM3.5 8a.5.5 0 0 1 .5-.5h.01a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/><path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M2 6h12v6H2z" fill="none" stroke="white" stroke-width="1.2"/><path d="M14.5 8.5v1" stroke="white" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="7" width="10" height="4" rx="0.5" fill="#26a69a"/></svg>
+      </span>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-back"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="var(--blue)"/></svg></div>
+      <div class="nav-title">AAPL</div>
+      <div class="nav-right"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="var(--text-secondary)"/></svg></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">Overview</div>
+      <div class="tab-item active">Fair Value</div>
+      <div class="tab-item">Financials</div>
+      <div class="tab-item">Analysis</div>
+    </div>
+    <div class="screen-content" id="contentA">
+      <!-- Hero cards -->
+      <div class="hero-cards">
+        <div class="hero-card fv-card">
+          <div class="hero-card-label">Fair Value</div>
+          <div class="hero-fv-price" id="fvPriceA">$234.00</div>
+          <div class="hero-upside-pill" id="upsidePillA">
+            <svg viewBox="0 0 10 10"><path d="M5 1L9 7H1z"/></svg>
+            <span id="upsideTextA">+17.9% Upside</span>
+          </div>
+          <div class="hero-certainty">High Certainty</div>
+        </div>
+        <div class="hero-card health-card">
+          <div class="hero-card-label">Health Score</div>
+          <div class="hero-health-score">4.2<span class="score-denom">/5</span></div>
+          <div class="hero-health-visual">
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot partial"></div>
+          </div>
+          <div class="hero-health-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-text" id="summaryA">
+        AAPL is <span class="hl-green">undervalued</span> by <span class="hl-green">17.9%</span> with <span class="hl-green">strong</span> financial health. <span class="hl-white" id="summaryCountA">12 of 14</span> models agree.
+      </div>
+
+      <!-- Consensus bar -->
+      <div class="section-card">
+        <div class="section-title">Model Consensus</div>
+        <div class="consensus-bar-wrap" id="consensusBarA">
+          <div class="consensus-seg undervalued" id="segUnderA" style="flex:12">12 Undervalued</div>
+          <div class="consensus-seg fair" id="segFairA" style="flex:2">2 Fair</div>
+          <div class="consensus-seg overvalued empty" id="segOverA" style="flex:0"></div>
+        </div>
+      </div>
+
+      <!-- Models -->
+      <div class="section-card">
+        <div class="section-title">InvestingPro Models</div>
+        <div id="modelListA"></div>
+      </div>
+
+      <!-- Health breakdown -->
+      <div class="section-card">
+        <div class="section-title">Health Breakdown</div>
+        <div id="healthListA"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== -->
+  <!-- CONCEPT B             -->
+  <!-- ===================== -->
+  <div class="concept-screen" id="screenB">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg viewBox="0 0 16 16"><path d="M1 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-3zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-6zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-9zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-12z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm3.354 1.646a.5.5 0 0 1 0 .708l-1.414 1.414a.5.5 0 1 1-.708-.708l1.414-1.414a.5.5 0 0 1 .708 0zM14 7.5a.5.5 0 0 1 .5.5 .5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2zM3.5 8a.5.5 0 0 1 .5-.5h.01a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/><path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M2 6h12v6H2z" fill="none" stroke="white" stroke-width="1.2"/><path d="M14.5 8.5v1" stroke="white" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="7" width="10" height="4" rx="0.5" fill="#26a69a"/></svg>
+      </span>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-back"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="var(--blue)"/></svg></div>
+      <div class="nav-title">AAPL</div>
+      <div class="nav-right"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="var(--text-secondary)"/></svg></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">Overview</div>
+      <div class="tab-item active">Fair Value</div>
+      <div class="tab-item">Financials</div>
+      <div class="tab-item">Analysis</div>
+    </div>
+    <div class="screen-content" id="contentB">
+      <!-- Hero cards -->
+      <div class="hero-cards">
+        <div class="hero-card fv-card">
+          <div class="hero-card-label">Fair Value</div>
+          <div class="hero-fv-price" id="fvPriceB">$234.00</div>
+          <div class="hero-upside-pill" id="upsidePillB">
+            <svg viewBox="0 0 10 10"><path d="M5 1L9 7H1z"/></svg>
+            <span id="upsideTextB">+17.9% Upside</span>
+          </div>
+          <div class="hero-certainty">High Certainty</div>
+        </div>
+        <div class="hero-card health-card">
+          <div class="hero-card-label">Health Score</div>
+          <div class="hero-health-score">4.2<span class="score-denom">/5</span></div>
+          <div class="hero-health-visual">
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot partial"></div>
+          </div>
+          <div class="hero-health-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- Consensus bar - bigger -->
+      <div class="section-card">
+        <div class="section-title">Model Consensus</div>
+        <div class="consensus-bar-wrap tall" id="consensusBarB">
+          <div class="consensus-seg undervalued" id="segUnderB" style="flex:12">12 Undervalued</div>
+          <div class="consensus-seg fair" id="segFairB" style="flex:2">2 Fair</div>
+          <div class="consensus-seg overvalued empty" id="segOverB" style="flex:0"></div>
+        </div>
+        <div class="consensus-subtitle" id="consensusSubB">12 of 14 models rate AAPL as Undervalued</div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="section-card">
+        <div class="section-title">Model Estimates vs Current Price</div>
+        <div class="bar-chart-container" id="barChartB"></div>
+      </div>
+
+      <!-- Health breakdown -->
+      <div class="section-card">
+        <div class="section-title">Health Breakdown</div>
+        <div id="healthListB"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== -->
+  <!-- CONCEPT C             -->
+  <!-- ===================== -->
+  <div class="concept-screen" id="screenC">
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg viewBox="0 0 16 16"><path d="M1 11.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-3zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-6zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-9zm4-3a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v12a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-12z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M8 1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 1zm3.354 1.646a.5.5 0 0 1 0 .708l-1.414 1.414a.5.5 0 1 1-.708-.708l1.414-1.414a.5.5 0 0 1 .708 0zM14 7.5a.5.5 0 0 1 .5.5 .5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2zM3.5 8a.5.5 0 0 1 .5-.5h.01a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.5-.5z"/><path d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M2 6h12v6H2z" fill="none" stroke="white" stroke-width="1.2"/><path d="M14.5 8.5v1" stroke="white" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="7" width="10" height="4" rx="0.5" fill="#26a69a"/></svg>
+      </span>
+    </div>
+    <div class="nav-bar">
+      <div class="nav-back"><svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="var(--blue)"/></svg></div>
+      <div class="nav-title">AAPL</div>
+      <div class="nav-right"><svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" fill="var(--text-secondary)"/></svg></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab-item">Overview</div>
+      <div class="tab-item active">Fair Value</div>
+      <div class="tab-item">Financials</div>
+      <div class="tab-item">Analysis</div>
+    </div>
+    <div class="screen-content" id="contentC">
+      <!-- Sticky FV header (hidden by default) -->
+      <div class="sticky-fv-header" id="stickyHeaderC">
+        <div class="sticky-fv-left">
+          <span class="sticky-fv-label">Fair Value</span>
+          <span class="sticky-fv-price" id="stickyPriceC">$234.00</span>
+        </div>
+        <span class="sticky-fv-upside" id="stickyUpsideC">+17.9%</span>
+      </div>
+
+      <!-- Hero cards -->
+      <div class="hero-cards" id="heroCardsC">
+        <div class="hero-card fv-card">
+          <div class="hero-card-label">Fair Value</div>
+          <div class="hero-fv-price" id="fvPriceC">$234.00</div>
+          <div class="hero-upside-pill" id="upsidePillC">
+            <svg viewBox="0 0 10 10"><path d="M5 1L9 7H1z"/></svg>
+            <span id="upsideTextC">+17.9% Upside</span>
+          </div>
+          <div class="hero-certainty">High Certainty</div>
+        </div>
+        <div class="hero-card health-card">
+          <div class="hero-card-label">Health Score</div>
+          <div class="hero-health-score">4.2<span class="score-denom">/5</span></div>
+          <div class="hero-health-visual">
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot filled"></div>
+            <div class="health-dot partial"></div>
+          </div>
+          <div class="hero-health-label">Strong</div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-text" id="summaryC">
+        AAPL is <span class="hl-green">undervalued</span> by <span class="hl-green">17.9%</span> with <span class="hl-green">strong</span> financial health. <span class="hl-white" id="summaryCountC">12 of 14</span> models agree.
+      </div>
+
+      <!-- Chip grid -->
+      <div class="section-card">
+        <div class="section-title">Adjust Fair Value</div>
+        <div class="chip-grid" id="chipGridC"></div>
+        <div class="chip-calc-text" id="chipCalcC">Based on 14 active models, Market Range, and Analyst Target</div>
+      </div>
+
+      <!-- Consensus bar (compact) -->
+      <div class="section-card">
+        <div class="section-title">Consensus</div>
+        <div class="consensus-bar-wrap" id="consensusBarC">
+          <div class="consensus-seg undervalued" id="segUnderC" style="flex:12">12 Undervalued</div>
+          <div class="consensus-seg fair" id="segFairC" style="flex:2">2 Fair</div>
+          <div class="consensus-seg overvalued empty" id="segOverC" style="flex:0"></div>
+        </div>
+      </div>
+
+      <!-- Expandable model list -->
+      <div class="section-card">
+        <div class="section-title">Model Details</div>
+        <div id="expandableListC"></div>
+      </div>
+
+      <!-- Health breakdown -->
+      <div class="section-card">
+        <div class="section-title">Health Breakdown</div>
+        <div id="healthListC"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========================
+// DATA
+// ========================
+const CURRENT_PRICE = 198.50;
+const MARKET_MID = 227.50;
+const ANALYST_AVG = 232;
+const SCALE_MIN = 195;
+const SCALE_MAX = 260;
+
+const models = [
+  { name: 'DCF Growth Exit', estimate: 245, desc: 'Discounted cash flow model using perpetual growth rate for terminal value' },
+  { name: 'DCF EBITDA Exit', estimate: 238, desc: 'Discounted cash flow model using EBITDA exit multiple for terminal value' },
+  { name: 'DCF Revenue Exit', estimate: 220, desc: 'Discounted cash flow model using revenue exit multiple for terminal value' },
+  { name: 'Dividend Discount', estimate: 215, desc: 'Values the stock based on the present value of expected future dividends' },
+  { name: 'P/E Multiple', estimate: 242, desc: 'Valuation based on price-to-earnings ratio relative to sector peers' },
+  { name: 'EV/EBITDA', estimate: 230, desc: 'Enterprise value to EBITDA comparison against industry benchmarks' },
+  { name: 'Price/Sales', estimate: 248, desc: 'Revenue-based valuation relative to comparable companies' },
+  { name: 'Price/Book', estimate: 210, desc: 'Book value-based valuation comparing assets to market price' },
+  { name: 'PEG Ratio', estimate: 235, desc: 'Growth-adjusted P/E ratio for companies with high earnings growth' },
+  { name: 'FCF Yield', estimate: 240, desc: 'Free cash flow yield model based on sustainable cash generation' },
+  { name: 'Earnings Power', estimate: 225, desc: 'Normalized earnings model estimating sustainable earnings capacity' },
+  { name: 'Graham Number', estimate: 205, desc: 'Benjamin Graham formula using EPS and book value per share' },
+  { name: 'Sum of Parts', estimate: 252, desc: 'Segment-by-segment valuation of individual business units' },
+  { name: 'Residual Income', estimate: 228, desc: 'Excess returns model based on equity charge above cost of capital' }
+];
+
+const healthModels = [
+  { name: 'Relative Value', score: 3.8 },
+  { name: 'Price Momentum', score: 4.5 },
+  { name: 'Cash Flow Health', score: 4.6 },
+  { name: 'Profitability', score: 4.9 },
+  { name: 'Growth', score: 3.2 }
+];
+
+function classify(estimate, name) {
+  // Graham Number and Price/Book are close enough to current price to classify as Fair
+  if (name === 'Graham Number' || name === 'Price/Book') return 'fair';
+  if (estimate > CURRENT_PRICE * 1.05) return 'undervalued';
+  if (estimate < CURRENT_PRICE * 0.95) return 'overvalued';
+  return 'fair';
+}
+
+// State per concept
+const state = {
+  A: models.map(() => true),
+  B: models.map(() => true),
+  C: models.map(() => true)
+};
+
+// ========================
+// CALCULATIONS
+// ========================
+function calcFV(concept) {
+  const active = state[concept];
+  const activeEstimates = models.filter((_, i) => active[i]).map(m => m.estimate);
+  if (activeEstimates.length === 0) {
+    // Only market range and analyst
+    return (MARKET_MID + ANALYST_AVG) / 2;
+  }
+  const sum = activeEstimates.reduce((a, b) => a + b, 0) + MARKET_MID + ANALYST_AVG;
+  return sum / (activeEstimates.length + 2);
+}
+
+function calcConsensus(concept) {
+  const active = state[concept];
+  let under = 0, fair = 0, over = 0;
+  models.forEach((m, i) => {
+    if (!active[i]) return;
+    const c = classify(m.estimate, m.name);
+    if (c === 'undervalued') under++;
+    else if (c === 'fair') fair++;
+    else over++;
+  });
+  return { under, fair, over, total: under + fair + over };
+}
+
+// ========================
+// UPDATE FUNCTIONS
+// ========================
+function animateValue(el, newText) {
+  el.style.opacity = '0.5';
+  el.style.transform = 'scale(0.97)';
+  setTimeout(() => {
+    el.textContent = newText;
+    el.style.opacity = '1';
+    el.style.transform = 'scale(1)';
+  }, 150);
+}
+
+function updateConcept(concept) {
+  const fv = calcFV(concept);
+  const upside = ((fv - CURRENT_PRICE) / CURRENT_PRICE * 100);
+  const upsideStr = (upside >= 0 ? '+' : '') + upside.toFixed(1) + '%';
+  const consensus = calcConsensus(concept);
+  const activeCount = state[concept].filter(Boolean).length;
+
+  // FV price
+  const priceEl = document.getElementById('fvPrice' + concept);
+  animateValue(priceEl, '$' + fv.toFixed(2));
+
+  // Upside pill
+  const pillEl = document.getElementById('upsidePill' + concept);
+  const upsideTextEl = document.getElementById('upsideText' + concept);
+  if (upside >= 0) {
+    pillEl.style.background = 'var(--green-bg)';
+    pillEl.style.color = 'var(--green)';
+    upsideTextEl.textContent = upsideStr + ' Upside';
+  } else {
+    pillEl.style.background = 'var(--red-bg)';
+    pillEl.style.color = 'var(--red)';
+    upsideTextEl.textContent = upsideStr + ' Downside';
+  }
+
+  // Consensus bars
+  const segUnder = document.getElementById('segUnder' + concept);
+  const segFair = document.getElementById('segFair' + concept);
+  const segOver = document.getElementById('segOver' + concept);
+
+  if (consensus.total === 0) {
+    segUnder.style.flex = '0';
+    segFair.style.flex = '0';
+    segOver.style.flex = '0';
+    segUnder.textContent = '';
+    segFair.textContent = '';
+    segOver.textContent = '';
+    segUnder.classList.add('empty');
+    segFair.classList.add('empty');
+    segOver.classList.add('empty');
+  } else {
+    segUnder.style.flex = consensus.under;
+    segFair.style.flex = consensus.fair;
+    segOver.style.flex = consensus.over;
+    segUnder.classList.toggle('empty', consensus.under === 0);
+    segFair.classList.toggle('empty', consensus.fair === 0);
+    segOver.classList.toggle('empty', consensus.over === 0);
+    segUnder.textContent = consensus.under > 0 ? consensus.under + ' Undervalued' : '';
+    segFair.textContent = consensus.fair > 0 ? consensus.fair + ' Fair' : '';
+    segOver.textContent = consensus.over > 0 ? consensus.over + ' Overvalued' : '';
+  }
+
+  // Concept-specific updates
+  if (concept === 'A') {
+    // Summary
+    const summaryCountA = document.getElementById('summaryCountA');
+    summaryCountA.textContent = consensus.under + ' of ' + activeCount;
+    const summaryA = document.getElementById('summaryA');
+    // Update upside in summary
+    const hlGreens = summaryA.querySelectorAll('.hl-green');
+    if (hlGreens[1]) hlGreens[1].textContent = Math.abs(upside).toFixed(1) + '%';
+    // Update model row states
+    document.querySelectorAll('#modelListA .model-row').forEach((row, i) => {
+      row.classList.toggle('inactive', !state.A[i]);
+      row.querySelector('.model-toggle').classList.toggle('active', state.A[i]);
+    });
+  }
+
+  if (concept === 'B') {
+    // Subtitle
+    const subB = document.getElementById('consensusSubB');
+    if (consensus.total > 0) {
+      const majorLabel = consensus.under >= consensus.fair && consensus.under >= consensus.over ? 'Undervalued' :
+                          consensus.fair >= consensus.over ? 'Fairly Valued' : 'Overvalued';
+      const majorCount = Math.max(consensus.under, consensus.fair, consensus.over);
+      subB.textContent = majorCount + ' of ' + activeCount + ' models rate AAPL as ' + majorLabel;
+    } else {
+      subB.textContent = 'No models active';
+    }
+    // Bar chart row states
+    document.querySelectorAll('#barChartB .bar-chart-row').forEach((row, i) => {
+      row.classList.toggle('inactive', !state.B[i]);
+      row.querySelector('.b-toggle').classList.toggle('active', state.B[i]);
+    });
+  }
+
+  if (concept === 'C') {
+    // Summary
+    const summaryCountC = document.getElementById('summaryCountC');
+    summaryCountC.textContent = consensus.under + ' of ' + activeCount;
+    const summaryC = document.getElementById('summaryC');
+    const hlGreensC = summaryC.querySelectorAll('.hl-green');
+    if (hlGreensC[1]) hlGreensC[1].textContent = Math.abs(upside).toFixed(1) + '%';
+
+    // Chip states
+    document.querySelectorAll('#chipGridC .model-chip').forEach((chip, i) => {
+      if (state.C[i]) {
+        chip.classList.remove('inactive-chip');
+        const cls = classify(models[i].estimate, models[i].name);
+        chip.classList.toggle('fair-chip', cls === 'fair');
+      } else {
+        chip.classList.add('inactive-chip');
+        chip.classList.remove('fair-chip');
+      }
+    });
+
+    // Calc text
+    document.getElementById('chipCalcC').textContent = 'Based on ' + activeCount + ' active model' + (activeCount !== 1 ? 's' : '') + ', Market Range, and Analyst Target';
+
+    // Expandable row states
+    document.querySelectorAll('#expandableListC .expandable-row').forEach((row, i) => {
+      row.classList.toggle('inactive', !state.C[i]);
+    });
+
+    // Sticky header
+    const stickyPrice = document.getElementById('stickyPriceC');
+    const stickyUpside = document.getElementById('stickyUpsideC');
+    stickyPrice.textContent = '$' + fv.toFixed(2);
+    stickyUpside.textContent = upsideStr;
+    if (upside >= 0) {
+      stickyUpside.style.color = 'var(--green)';
+    } else {
+      stickyUpside.style.color = 'var(--red)';
+    }
+  }
+}
+
+// ========================
+// TOGGLE HANDLERS
+// ========================
+function toggleModel(concept, index) {
+  state[concept][index] = !state[concept][index];
+  updateConcept(concept);
+}
+
+// ========================
+// RENDER FUNCTIONS
+// ========================
+function renderModelListA() {
+  const container = document.getElementById('modelListA');
+  container.innerHTML = '';
+  models.forEach((m, i) => {
+    const cls = classify(m.estimate, m.name);
+    const pct = ((m.estimate - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
+    const row = document.createElement('div');
+    row.className = 'model-row';
+    row.innerHTML = `
+      <div class="model-toggle active" onclick="toggleModel('A', ${i})"></div>
+      <span class="model-name">${m.name}</span>
+      <div class="model-range-bar">
+        <div class="model-range-dot ${cls}" style="left:${pct}%"></div>
+      </div>
+      <span class="model-estimate">$${m.estimate}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderBarChartB() {
+  const container = document.getElementById('barChartB');
+  container.innerHTML = '';
+  // Current price line position
+  const currentPct = ((CURRENT_PRICE - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
+
+  models.forEach((m, i) => {
+    const cls = classify(m.estimate, m.name);
+    const barPct = ((m.estimate - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
+    const row = document.createElement('div');
+    row.className = 'bar-chart-row';
+    row.innerHTML = `
+      <div class="b-toggle active" onclick="toggleModel('B', ${i})"></div>
+      <span class="bar-chart-label">${m.name}</span>
+      <div class="bar-chart-track">
+        <div class="bar-chart-fill ${cls}" style="width:${barPct}%">
+          <span class="bar-chart-price">$${m.estimate}</span>
+        </div>
+        ${i === 0 ? `<div class="bar-chart-current-line" style="left:${currentPct}%"><span class="bar-chart-current-label">$${CURRENT_PRICE}</span></div>` : `<div class="bar-chart-current-line" style="left:${currentPct}%"></div>`}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderChipsC() {
+  const container = document.getElementById('chipGridC');
+  container.innerHTML = '';
+  models.forEach((m, i) => {
+    const cls = classify(m.estimate, m.name);
+    const chip = document.createElement('div');
+    chip.className = 'model-chip' + (cls === 'fair' ? ' fair-chip' : '');
+    chip.onclick = () => toggleModel('C', i);
+    chip.innerHTML = `<span class="chip-name">${m.name}</span><span class="chip-price">$${m.estimate}</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function renderExpandableListC() {
+  const container = document.getElementById('expandableListC');
+  container.innerHTML = '';
+  models.forEach((m, i) => {
+    const cls = classify(m.estimate, m.name);
+    const pct = ((m.estimate - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100;
+    const row = document.createElement('div');
+    row.className = 'expandable-row';
+    row.innerHTML = `
+      <div class="expandable-header" onclick="toggleExpand(this.parentElement)">
+        <div class="expand-icon"><svg viewBox="0 0 10 10"><path d="M3 1l5 4-5 4z"/></svg></div>
+        <span class="model-name">${m.name}</span>
+        <span class="model-estimate" style="color: var(--${cls === 'undervalued' ? 'green' : cls === 'fair' ? 'yellow' : 'red'})">$${m.estimate}</span>
+      </div>
+      <div class="expandable-detail">
+        <div class="detail-text">${m.desc}</div>
+        <div class="detail-range">
+          <span class="detail-range-lo">$${SCALE_MIN}</span>
+          <div class="detail-range-bar">
+            <div class="detail-range-marker" style="left:${pct}%; background: var(--${cls === 'undervalued' ? 'green' : cls === 'fair' ? 'yellow' : 'red'})"></div>
+          </div>
+          <span class="detail-range-hi">$${SCALE_MAX}</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function toggleExpand(rowEl) {
+  rowEl.classList.toggle('open');
+}
+
+function renderHealthBars(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  healthModels.forEach(h => {
+    const pct = (h.score / 5) * 100;
+    const level = h.score >= 4 ? 'high' : h.score >= 3 ? 'mid' : 'low';
+    const row = document.createElement('div');
+    row.className = 'health-row';
+    row.innerHTML = `
+      <span class="health-label">${h.name}</span>
+      <div class="health-bar-track"><div class="health-bar-fill ${level}" style="width:${pct}%"></div></div>
+      <span class="health-score-val ${level}">${h.score}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ========================
+// CONCEPT SWITCHING
+// ========================
+const conceptNames = {
+  A: 'Concept A: Summary + Dashboard',
+  B: 'Concept B: Consensus-Led',
+  C: 'Concept C: Calculator-Forward'
+};
+
+function switchConcept(c) {
+  document.querySelectorAll('.concept-screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + c).classList.add('active');
+  document.querySelectorAll('.concept-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['A','B','C'][i] === c);
+  });
+  document.getElementById('conceptLabel').textContent = conceptNames[c];
+}
+
+// ========================
+// STICKY HEADER (Concept C)
+// ========================
+function setupStickyC() {
+  const contentC = document.getElementById('contentC');
+  const heroCards = document.getElementById('heroCardsC');
+  const stickyHeader = document.getElementById('stickyHeaderC');
+
+  contentC.addEventListener('scroll', () => {
+    const heroRect = heroCards.getBoundingClientRect();
+    const contentRect = contentC.getBoundingClientRect();
+    const heroBottom = heroRect.bottom - contentRect.top;
+    if (heroBottom < 0) {
+      stickyHeader.classList.add('visible');
+    } else {
+      stickyHeader.classList.remove('visible');
+    }
+  });
+}
+
+// ========================
+// INIT
+// ========================
+function init() {
+  renderModelListA();
+  renderBarChartB();
+  renderChipsC();
+  renderExpandableListC();
+  renderHealthBars('healthListA');
+  renderHealthBars('healthListB');
+  renderHealthBars('healthListC');
+  setupStickyC();
+}
+
+init();
+</script>
+</body>
+</html>
