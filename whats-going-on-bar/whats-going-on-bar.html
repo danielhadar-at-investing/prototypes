@@ -872,6 +872,91 @@ html, body {
 .index-card-change.up { color: var(--green); }
 .index-card-change.down { color: var(--red); }
 
+/* Second item card variants */
+.si-card {
+  background: #FAFAFA;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 6px 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 76px;
+}
+.si-card:active { background: #F5F5F5; }
+.si-card.selected {
+  border-color: var(--blue);
+  background: rgba(37, 99, 235, 0.03);
+}
+.si-card-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.si-card-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.si-preview-gauge {
+  width: 44px;
+  height: 24px;
+}
+.si-preview-number {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.si-preview-number.up { color: var(--green); }
+.si-preview-number.down { color: var(--red); }
+.si-preview-number.neutral { color: var(--text-primary); }
+.si-preview-label {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.si-preview-label.green { background: var(--green-bg); color: var(--green); }
+.si-preview-label.red { background: var(--red-bg); color: var(--red); }
+.si-preview-label.amber { background: rgba(245, 158, 11, 0.08); color: #F59E0B; }
+.si-preview-heatmap {
+  display: grid;
+  grid-template-columns: repeat(4, 10px);
+  grid-template-rows: repeat(3, 10px);
+  gap: 2px;
+}
+.si-hm-cell {
+  border-radius: 2px;
+}
+.si-card-change {
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.si-card-change.up { color: var(--green); }
+.si-card-change.down { color: var(--red); }
+.si-card-subtitle {
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
 .index-search-bar {
   position: relative;
   padding: 12px 16px;
@@ -1334,7 +1419,7 @@ html, body {
         </div>
         <div class="config-row-content">
           <div class="config-row-label">Second Item</div>
-          <div class="config-row-value">Fear & Greed</div>
+          <div class="config-row-value" id="configFngValue">Fear & Greed</div>
         </div>
         <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
@@ -1400,9 +1485,17 @@ html, body {
       </div>
     </div>
 
-    <div class="config-section-label">Sales & Promotions</div>
+    <div class="config-section-label">General</div>
 
     <div class="config-rows">
+      <div class="config-row" style="cursor: default;">
+        <div class="config-row-content">
+          <div class="config-row-label">Show Top Strip</div>
+        </div>
+        <button class="ios-toggle on" id="stripToggle">
+          <div class="ios-toggle-knob"></div>
+        </button>
+      </div>
       <div class="config-row" style="cursor: default; border-bottom: none;">
         <div class="config-row-content">
           <div class="config-row-label">Notify me about upcoming sales</div>
@@ -1434,6 +1527,17 @@ html, body {
           <line x1="16.5" y1="16.5" x2="21" y2="21"/>
         </svg>
         <input type="text" class="index-search-input" id="indexSearchInput" placeholder="Search indices...">
+      </div>
+    </div>
+
+    <!-- Second Item Selection Sheet -->
+    <div class="bottom-sheet" id="secondItemSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Select Second Item</div>
+      <div class="sheet-scroll" id="secondItemGrid">
+        <div class="index-grid" id="secondItemGridInner">
+          <!-- Populated by JS -->
+        </div>
       </div>
     </div>
 
@@ -1719,9 +1823,11 @@ setInterval(() => {
 // State
 const configState = {
   selectedIndex: 'S&P 500',
+  selectedSecondItem: 'Fear & Greed',
   selectedNews: ['Breaking News'],
   selectedMarkets: ['US Markets', 'Israel (TA)'],
-  saleNotify: true
+  saleNotify: true,
+  showStrip: true
 };
 
 // Index data
@@ -1824,6 +1930,7 @@ configBackBtn.addEventListener('click', closeConfig);
 // Bottom sheet management
 const sheetBackdrop = document.getElementById('sheetBackdrop');
 const indexSheet = document.getElementById('indexSheet');
+const secondItemSheet = document.getElementById('secondItemSheet');
 const newsSheet = document.getElementById('newsSheet');
 const marketSheet = document.getElementById('marketSheet');
 let activeSheet = null;
@@ -1855,7 +1962,7 @@ function showToast(msg) {
 
 // Config row handlers
 document.getElementById('configIndexRow').addEventListener('click', () => openSheet(indexSheet));
-document.getElementById('configFngRow').addEventListener('click', () => showToast('Open drawer'));
+document.getElementById('configFngRow').addEventListener('click', () => openSheet(secondItemSheet));
 document.getElementById('configNewsRow').addEventListener('click', () => openSheet(newsSheet));
 document.getElementById('configMarketRow').addEventListener('click', () => openSheet(marketSheet));
 
@@ -1939,6 +2046,116 @@ function renderIndexGrid() {
 }
 
 renderIndexGrid();
+
+// ===== SECOND ITEM GRID =====
+const secondItems = [
+  { name: 'Fear & Greed', type: 'gauge', value: 36, label: 'Fear', color: 'red' },
+  { name: 'VIX', type: 'number', value: '18.42', change: '-1.2%', up: false, subtitle: 'Volatility Index' },
+  { name: 'Market Breadth', type: 'number', value: '72%', change: 'Bullish', up: true, subtitle: '% above 50-day MA' },
+  { name: 'Advance/Decline', type: 'number', value: '2.4:1', change: 'Bullish', up: true, subtitle: 'NYSE ratio' },
+  { name: 'Put/Call Ratio', type: 'number', value: '0.82', change: 'Neutral', up: null, subtitle: 'Options sentiment' },
+  { name: 'Sector Heatmap', type: 'heatmap', subtitle: '11 GICS sectors' },
+  { name: 'Market Regime', type: 'label', value: 'Risk On', color: 'green', subtitle: 'Algo-derived' },
+  { name: 'DXY', type: 'number', value: '104.32', change: '+0.3%', up: true, subtitle: 'Dollar Index' },
+  { name: 'Bitcoin', type: 'number', value: '68,559', change: '+1.9%', up: true, subtitle: 'BTC/USD' },
+  { name: 'Gold', type: 'number', value: '2,024', change: '-0.4%', up: false, subtitle: 'XAU/USD' },
+  { name: '10Y Yield', type: 'number', value: '4.28%', change: '+2bp', up: true, subtitle: 'US Treasury' },
+  { name: 'Money Flow', type: 'label', value: '$2.1B in', color: 'green', subtitle: 'Net inflows today' },
+];
+
+const heatmapColors = [
+  '#0ECB81','#E23636','#0ECB81','#E23636',
+  '#0ECB81','#0ECB81','#E23636','#F59E0B',
+  '#0ECB81','#0ECB81','#E23636','#0ECB81'
+];
+
+function renderSecondItemPreview(item) {
+  if (item.type === 'gauge') {
+    return `<div class="si-card-preview">
+      <svg class="si-preview-gauge" viewBox="0 0 44 26">
+        <path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="#E5E7EB" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="url(#siGaugeGrad)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="56.5" stroke-dashoffset="${56.5 - (item.value / 100) * 56.5}"/>
+        <defs><linearGradient id="siGaugeGrad"><stop offset="0%" stop-color="#E23636"/><stop offset="50%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#0ECB81"/></linearGradient></defs>
+      </svg>
+    </div>`;
+  }
+  if (item.type === 'number') {
+    const cls = item.up === true ? 'up' : item.up === false ? 'down' : 'neutral';
+    return `<div class="si-card-preview"><span class="si-preview-number ${cls}">${item.value}</span></div>`;
+  }
+  if (item.type === 'label') {
+    return `<div class="si-card-preview"><span class="si-preview-label ${item.color}">${item.value}</span></div>`;
+  }
+  if (item.type === 'heatmap') {
+    let cells = heatmapColors.map(c => `<div class="si-hm-cell" style="background:${c}"></div>`).join('');
+    return `<div class="si-card-preview"><div class="si-preview-heatmap">${cells}</div></div>`;
+  }
+  return '<div class="si-card-preview"></div>';
+}
+
+function renderSecondItemGrid() {
+  const grid = document.getElementById('secondItemGridInner');
+  grid.innerHTML = '';
+  secondItems.forEach(item => {
+    const isSelected = item.name === configState.selectedSecondItem;
+    const card = document.createElement('div');
+    card.className = `si-card${isSelected ? ' selected' : ''}`;
+    const subtitleHtml = item.subtitle ? `<div class="si-card-subtitle">${item.subtitle}</div>` : '';
+    const changeCls = item.up === true ? 'up' : item.up === false ? 'down' : '';
+    const changeHtml = item.change ? `<div class="si-card-change ${changeCls}">${item.change}</div>` : '';
+    card.innerHTML = `
+      <div class="si-card-name">${item.name}</div>
+      ${renderSecondItemPreview(item)}
+      ${changeHtml}
+      ${subtitleHtml}
+    `;
+    card.addEventListener('click', () => {
+      configState.selectedSecondItem = item.name;
+      document.getElementById('configFngValue').textContent = item.name;
+      renderSecondItemGrid();
+      updateWgoSecondItem(item);
+    });
+    grid.appendChild(card);
+  });
+}
+
+function updateWgoSecondItem(item) {
+  const fngCard = document.querySelector('.wgo-fng');
+  if (!fngCard) return;
+  if (item.type === 'gauge') {
+    fngCard.innerHTML = `
+      <div class="wgo-fng-label">${item.name.replace(' & ', ' &<br>')}</div>
+      <div class="wgo-fng-gauge"><canvas id="fngGauge"></canvas></div>
+      <div class="wgo-fng-value">${item.value}</div>
+      <div class="wgo-fng-sentiment">${item.label}</div>
+    `;
+    requestAnimationFrame(drawFnGGauge);
+  } else if (item.type === 'number') {
+    const cls = item.up ? 'up' : 'down';
+    fngCard.innerHTML = `
+      <div class="wgo-fng-label">${item.name}</div>
+      <div style="font-size:20px;font-weight:700;margin:6px 0 2px;text-align:center;color:var(--text-primary)">${item.value}</div>
+      ${item.change ? `<div style="font-size:11px;font-weight:600;text-align:center" class="${cls}">${item.change}</div>` : ''}
+      <div class="wgo-fng-sentiment" style="margin-top:2px">${item.subtitle || ''}</div>
+    `;
+  } else if (item.type === 'label') {
+    const colorVar = item.color === 'green' ? 'var(--green)' : item.color === 'red' ? 'var(--red)' : '#F59E0B';
+    fngCard.innerHTML = `
+      <div class="wgo-fng-label">${item.name}</div>
+      <div style="font-size:14px;font-weight:700;margin:8px 0 2px;text-align:center;color:${colorVar}">${item.value}</div>
+      <div class="wgo-fng-sentiment" style="margin-top:2px">${item.subtitle || ''}</div>
+    `;
+  } else if (item.type === 'heatmap') {
+    let cells = heatmapColors.map(c => `<div style="border-radius:2px;background:${c}"></div>`).join('');
+    fngCard.innerHTML = `
+      <div class="wgo-fng-label">${item.name}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,14px);grid-template-rows:repeat(3,14px);gap:2px;justify-content:center;margin:8px 0 4px">${cells}</div>
+      <div class="wgo-fng-sentiment">${item.subtitle || ''}</div>
+    `;
+  }
+}
+
+renderSecondItemGrid();
 
 // Search bar is visual only - no filtering
 
@@ -2032,6 +2249,26 @@ function renderMarketOptions() {
 
 renderMarketOptions();
 updateMarketLabel();
+
+// ===== SHOW TOP STRIP TOGGLE =====
+document.getElementById('stripToggle').addEventListener('click', () => {
+  configState.showStrip = !configState.showStrip;
+  const btn = document.getElementById('stripToggle');
+  btn.classList.toggle('on', configState.showStrip);
+
+  // Show/hide the WGO bar on main screen
+  const wgoContainer = document.querySelector('.wgo-container');
+  if (wgoContainer) {
+    wgoContainer.style.display = configState.showStrip ? '' : 'none';
+  }
+
+  // Gray out / enable Top Strip config rows
+  const topStripRows = document.querySelectorAll('#configIndexRow, #configFngRow, #configNewsRow, #configMarketRow');
+  topStripRows.forEach(row => {
+    row.classList.toggle('disabled', !configState.showStrip);
+    row.style.pointerEvents = configState.showStrip ? '' : 'none';
+  });
+});
 
 // ===== SALE TOGGLE (on config page) =====
 document.getElementById('saleToggleMain').addEventListener('click', () => {

@@ -6,28 +6,32 @@
 <title>Fair Value - Tabbed Content V2</title>
 <style>
   :root {
-    --bg: #1a1a2e;
-    --card: #16213e;
-    --card-alt: #1b2a4a;
-    --text-primary: #ffffff;
-    --text-secondary: #8892a0;
-    --text-tertiary: #5a6270;
-    --green: #26a69a;
-    --green-bg: rgba(38,166,154,0.12);
-    --red: #ef5350;
-    --blue: #2962ff;
-    --blue-bg: rgba(41,98,255,0.12);
+    --bg: #FFFFFF;
+    --bg-page: #E8E8ED;
+    --bg-card: #FAFAFA;
+    --card: #FAFAFA;
+    --card-alt: #E5E7EB;
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-tertiary: #9CA3AF;
+    --green: #0ECB81;
+    --green-bg: rgba(14, 203, 129, 0.08);
+    --red: #E23636;
+    --red-bg: rgba(226, 54, 54, 0.08);
+    --blue: #2563EB;
+    --blue-bg: rgba(37, 99, 235, 0.08);
     --yellow: #ffab00;
     --yellow-bg: rgba(255,171,0,0.12);
-    --border: rgba(255,255,255,0.06);
+    --border: #F0F0F0;
+    --border-dark: #E5E7EB;
     --radius: 12px;
     --radius-sm: 8px;
-    --font: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    background: #0d0d1a;
+    background: #E8E8ED;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,11 +43,12 @@
   .device-frame {
     width: 390px;
     height: 844px;
-    background: #000;
+    background: #E0E0E0;
     border-radius: 44px;
     padding: 12px;
     position: relative;
-    box-shadow: 0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.6);
+    box-shadow: 0 0 80px rgba(0,0,0,0.12);
+    border: 1px solid #D0D0D0;
   }
 
   .device-screen {
@@ -138,7 +143,7 @@
     font-size: 17px; font-weight: 700; color: var(--text-primary);
   }
   .stock-price .change {
-    font-size: 12px; color: var(--text-secondary);
+    font-size: 12px; color: var(--green);
   }
 
   /* Scrollable content */
@@ -155,7 +160,7 @@
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgba(26,26,46,0.92);
+    background: rgba(255,255,255,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 10px 20px;
@@ -193,11 +198,11 @@
   }
   .hero-card {
     flex: 1;
-    background: var(--card);
+    background: var(--bg-card);
     border-radius: var(--radius);
     padding: 14px;
     cursor: pointer;
-    border: 1.5px solid transparent;
+    border: 1.5px solid var(--border);
     transition: border-color 0.25s, background 0.25s;
     position: relative;
     overflow: hidden;
@@ -210,11 +215,12 @@
     background: transparent;
     transition: background 0.25s;
   }
+  /* Change 1: active card border and top accent to black */
   .hero-card.active {
-    border-color: rgba(41,98,255,0.35);
+    border-color: rgba(0,0,0,0.2);
   }
   .hero-card.active::before {
-    background: var(--blue);
+    background: #1A1A2E;
   }
   .hero-label {
     font-size: 11px;
@@ -224,11 +230,14 @@
     letter-spacing: 0.5px;
     margin-bottom: 10px;
   }
+  /* Change 2: center FV hero content */
+  .hero-fv-content {
+    text-align: center;
+  }
   .hero-fv-value {
     font-size: 28px;
     font-weight: 800;
     color: var(--text-primary);
-    text-align: center;
     line-height: 1.1;
     margin-bottom: 6px;
     transition: opacity 0.15s;
@@ -247,7 +256,7 @@
   }
   .hero-pill span {
     display: inline-block;
-    background: var(--green-bg);
+    background: rgba(14,203,129,0.1);
     color: var(--green);
     font-size: 13px;
     font-weight: 700;
@@ -258,40 +267,40 @@
   .hero-certainty {
     text-align: center;
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     margin-top: 2px;
   }
 
-  /* Gauge / Speedometer */
-  .gauge-container {
+  /* Change 5: Ring gauge (replaces speedometer) */
+  .ring-gauge-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 4px auto 6px;
+  }
+  .ring-gauge-svg {
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .ring-gauge-inner {
+    position: absolute;
+    inset: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding-top: 2px;
+    justify-content: center;
   }
-  .gauge-svg {
-    width: 90px;
-    height: 52px;
-  }
-  .gauge-score {
+  .ring-gauge-score {
     font-size: 20px;
     font-weight: 800;
-    color: var(--text-primary);
-    margin-top: 2px;
+    color: #1A1A2E;
   }
-  .gauge-score small {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-tertiary);
-  }
-  .gauge-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--green);
-    margin-top: 1px;
+  .ring-gauge-label {
+    font-size: 11px;
+    color: #6B7280;
+    text-align: center;
   }
 
-  /* Tab bar */
+  /* Change 1: Tab bar indicator to black */
   .tab-bar {
     display: flex;
     padding: 0 16px;
@@ -311,7 +320,7 @@
     transition: color 0.25s;
   }
   .tab-item.active {
-    color: var(--text-primary);
+    color: #1A1A2E;
   }
   .tab-item::after {
     content: '';
@@ -320,7 +329,7 @@
     left: 20%;
     right: 20%;
     height: 2.5px;
-    background: var(--blue);
+    background: #1A1A2E;
     border-radius: 2px 2px 0 0;
     transform: scaleX(0);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -338,12 +347,26 @@
     display: block;
   }
 
+  /* Change 3: Section card wrapper */
+  .section-card {
+    background: #FAFAFA;
+    border: 1px solid #F0F0F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
   /* Summary sentence */
+  .summary-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 6px;
+  }
   .summary-sentence {
     font-size: 14px;
     line-height: 1.55;
     color: var(--text-secondary);
-    margin-bottom: 20px;
     padding: 0 2px;
   }
   .summary-sentence .green { color: var(--green); font-weight: 600; }
@@ -358,14 +381,8 @@
     letter-spacing: 1px;
     margin-bottom: 6px;
   }
-  .consensus-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
-  }
-  .consensus-subtitle .bold { color: var(--text-primary); font-weight: 600; }
   .consensus-bar-wrap {
-    background: rgba(255,255,255,0.04);
+    background: rgba(0,0,0,0.04);
     border-radius: var(--radius-sm);
     overflow: hidden;
     height: 36px;
@@ -383,13 +400,12 @@
     white-space: nowrap;
     overflow: hidden;
   }
-  .consensus-seg.green { background: rgba(38,166,154,0.7); }
-  .consensus-seg.yellow { background: rgba(255,171,0,0.5); }
-  .consensus-seg.red { background: rgba(239,83,80,0.6); }
+  .consensus-seg.green { background: rgba(14,203,129,0.75); }
+  .consensus-seg.yellow { background: rgba(255,171,0,0.65); }
+  .consensus-seg.red { background: rgba(226,54,54,0.65); }
   .consensus-legend {
     display: flex;
     gap: 16px;
-    margin-bottom: 20px;
   }
   .legend-item {
     display: flex;
@@ -405,7 +421,7 @@
 
   /* Model chips */
   .chips-section {
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
   .chips-grid {
     display: flex;
@@ -428,14 +444,14 @@
     white-space: nowrap;
   }
   .model-chip.on {
-    background: rgba(38,166,154,0.1);
-    border-color: rgba(38,166,154,0.4);
+    background: rgba(14,203,129,0.08);
+    border-color: rgba(14,203,129,0.35);
     color: var(--text-primary);
   }
   .model-chip.off {
     background: transparent;
-    border-color: var(--text-tertiary);
-    border-style: dashed;
+    border-color: var(--border-dark);
+    border-style: solid;
     color: var(--text-tertiary);
     opacity: 0.55;
   }
@@ -448,30 +464,22 @@
   .model-chip.off .chip-value {
     color: var(--text-tertiary);
   }
+
+  /* Change 4: Info button replacing chevron */
   .chip-info {
-    width: 18px; height: 18px;
+    width: 20px; height: 20px;
     display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
-    margin-left: 2px;
-    color: var(--text-secondary);
-    font-size: 11px;
+    border: 1px solid rgba(0,0,0,0.15);
+    margin-left: 4px;
+    color: #6B7280;
+    font-size: 12px;
+    font-style: normal;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
     flex-shrink: 0;
+    background: rgba(0,0,0,0.04);
   }
-  .chip-info:hover {
-    background: rgba(255,255,255,0.08);
-    color: var(--text-primary);
-  }
-
-  .calc-note {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    text-align: center;
-    padding: 8px 0 12px;
-    border-top: 1px solid var(--border);
-    margin-top: 4px;
-  }
+  .chip-info:hover { background: rgba(0,0,0,0.08); }
 
   /* Health tab */
   .health-row {
@@ -482,7 +490,7 @@
     cursor: pointer;
     transition: background 0.15s;
   }
-  .health-row:active { background: rgba(255,255,255,0.03); }
+  .health-row:active { background: rgba(0,0,0,0.02); }
   .health-row:last-of-type { border-bottom: none; }
   .health-name {
     width: 100px;
@@ -494,7 +502,7 @@
   .health-bar-container {
     flex: 1;
     height: 6px;
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.06);
     border-radius: 3px;
     margin: 0 12px;
     overflow: hidden;
@@ -528,8 +536,9 @@
     margin-bottom: 12px;
   }
   .chart-canvas-wrap {
-    background: var(--card);
+    background: var(--bg-card);
     border-radius: var(--radius);
+    border: 1px solid var(--border);
     padding: 16px 12px 12px;
     margin-bottom: 10px;
   }
@@ -560,7 +569,7 @@
     opacity: 0.35;
   }
   .chart-legend-item:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(0,0,0,0.04);
   }
   .chart-legend-dot {
     width: 7px; height: 7px;
@@ -589,7 +598,7 @@
     padding: 12px 16px;
     position: sticky;
     top: 0;
-    background: rgba(26,26,46,0.95);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     z-index: 5;
@@ -605,7 +614,7 @@
     transition: background 0.15s;
     flex-shrink: 0;
   }
-  .detail-back:active { background: rgba(255,255,255,0.06); }
+  .detail-back:active { background: rgba(0,0,0,0.04); }
   .detail-title {
     flex: 1;
     text-align: center;
@@ -615,7 +624,7 @@
     margin-right: 32px;
   }
 
-  /* Detail two-cell */
+  /* Change 6: Detail two-cell — left-aligned */
   .detail-cells {
     display: flex;
     gap: 10px;
@@ -623,56 +632,58 @@
   }
   .detail-cell {
     flex: 1;
-    background: var(--card);
+    background: var(--bg-card);
     border-radius: var(--radius);
+    border: 1px solid var(--border);
     padding: 14px;
-    text-align: center;
+    text-align: left;
   }
   .detail-cell-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 4px;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .detail-cell-value {
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--text-primary);
   }
   .detail-cell-value.green { color: var(--green); }
   .detail-cell-value.red { color: var(--red); }
 
-  /* Detail tables */
+  /* Change 6: Detail tables — larger section titles, gray header */
   .detail-section {
     padding: 0 16px 16px;
   }
   .detail-section-title {
-    font-size: 12px;
+    font-size: 17px;
     font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-    padding-top: 8px;
+    color: #1A1A2E;
+    margin-bottom: 10px;
+    padding-top: 12px;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .detail-table {
-    background: var(--card);
+    background: var(--bg-card);
     border-radius: var(--radius);
+    border: 1px solid var(--border);
     overflow: hidden;
   }
   .detail-table-header {
     display: flex;
     padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
+    background: #F5F5F5;
     border-bottom: 1px solid var(--border);
   }
   .detail-table-header span {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1A1A2E;
+    text-transform: none;
+    letter-spacing: 0;
   }
   .detail-table-row {
     display: flex;
@@ -702,15 +713,15 @@
     flex-shrink: 0;
     padding: 8px 12px;
     border-radius: var(--radius);
-    background: var(--card);
-    border: 1.5px solid transparent;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
     cursor: pointer;
     text-align: center;
     min-width: 76px;
     transition: all 0.2s;
   }
   .health-detail-chip.active {
-    border-color: rgba(41,98,255,0.5);
+    border-color: rgba(37,99,235,0.4);
     background: var(--card-alt);
   }
   .health-detail-chip .hdchip-score {
@@ -732,7 +743,7 @@
   .pct-bar {
     width: 50px;
     height: 4px;
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.06);
     border-radius: 2px;
     overflow: hidden;
     display: inline-block;
@@ -758,9 +769,9 @@
     <div class="status-bar">
       <span class="time">9:41</span>
       <span class="icons">
-        <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
-        <svg width="15" height="12" viewBox="0 0 15 12" fill="white"><path d="M7.5 3.5C9.5 3.5 11.2 4.3 12.5 5.5L14 4C12.3 2.3 10 1.2 7.5 1.2S2.7 2.3 1 4L2.5 5.5C3.8 4.3 5.5 3.5 7.5 3.5zM7.5 6.8C8.8 6.8 10 7.3 10.8 8.2L7.5 12L4.2 8.2C5 7.3 6.2 6.8 7.5 6.8z"/></svg>
-        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="21" height="10" rx="2" stroke="white" stroke-width="1"/><rect x="22" y="4" width="2" height="4" rx="1" fill="white" opacity="0.4"/><rect x="1.5" y="2.5" width="15" height="7" rx="1" fill="white"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="#1A1A2E"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="#1A1A2E"><path d="M7.5 3.5C9.5 3.5 11.2 4.3 12.5 5.5L14 4C12.3 2.3 10 1.2 7.5 1.2S2.7 2.3 1 4L2.5 5.5C3.8 4.3 5.5 3.5 7.5 3.5zM7.5 6.8C8.8 6.8 10 7.3 10.8 8.2L7.5 12L4.2 8.2C5 7.3 6.2 6.8 7.5 6.8z"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="21" height="10" rx="2" stroke="#1A1A2E" stroke-width="1"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#1A1A2E" opacity="0.4"/><rect x="1.5" y="2.5" width="15" height="7" rx="1" fill="#1A1A2E"/></svg>
       </span>
     </div>
 
@@ -795,37 +806,29 @@
           <div class="hero-section" id="heroSection">
             <div class="hero-card active" id="heroFV" onclick="switchTab('fv')">
               <div class="hero-label">Fair Value</div>
-              <div class="hero-fv-value" id="heroFVValue">$234.00</div>
-              <div class="hero-pill"><span id="heroUpside">+17.9% Upside</span></div>
-              <div class="hero-certainty">High Certainty</div>
+              <div class="hero-fv-content">
+                <div class="hero-fv-value" id="heroFVValue">$234.00</div>
+                <div class="hero-pill"><span id="heroUpside">+17.9% Upside</span></div>
+                <div class="hero-certainty">High Certainty</div>
+              </div>
             </div>
             <div class="hero-card" id="heroHealth" onclick="switchTab('health')">
               <div class="hero-label">Health Score</div>
-              <div class="gauge-container">
-                <svg class="gauge-svg" viewBox="0 0 100 58">
-                  <defs>
-                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#ef5350"/>
-                      <stop offset="35%" stop-color="#ffab00"/>
-                      <stop offset="65%" stop-color="#ffab00"/>
-                      <stop offset="100%" stop-color="#26a69a"/>
-                    </linearGradient>
-                  </defs>
+              <!-- Change 5: Ring gauge replaces speedometer -->
+              <div class="ring-gauge-container">
+                <svg class="ring-gauge-svg" viewBox="0 0 80 80" width="80" height="80">
                   <!-- Track -->
-                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7" stroke-linecap="round"/>
-                  <!-- Filled arc -->
-                  <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#gaugeGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="125.66" stroke-dashoffset="0"/>
-                  <!-- Needle - 4.2/5 = 84%, rotation: -90 + 0.84*180 = 61.2deg -->
-                  <line id="gaugeNeedle" x1="50" y1="50" x2="50" y2="14" stroke="#fff" stroke-width="2" stroke-linecap="round" transform="rotate(61.2, 50, 50)"/>
-                  <!-- Center dot -->
-                  <circle cx="50" cy="50" r="3" fill="#fff"/>
-                  <!-- Tick marks -->
-                  <line x1="10" y1="50" x2="14" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-                  <line x1="90" y1="50" x2="86" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#F0F0F0" stroke-width="6" stroke-linecap="round"/>
+                  <!-- Progress: circumference = 2*π*32 ≈ 201.06. 84% = 168.9 filled -->
+                  <circle cx="40" cy="40" r="32" fill="none" stroke="#0ECB81" stroke-width="6" stroke-linecap="round"
+                    stroke-dasharray="168.9 201.06"
+                    transform="rotate(-90, 40, 40)"/>
                 </svg>
-                <div class="gauge-score">4.2<small>/5</small></div>
-                <div class="gauge-label">Strong</div>
+                <div class="ring-gauge-inner">
+                  <div class="ring-gauge-score">4.2</div>
+                </div>
               </div>
+              <div class="ring-gauge-label">out of 5</div>
             </div>
           </div>
 
@@ -837,29 +840,35 @@
 
           <!-- Fair Value tab -->
           <div class="tab-content active" id="contentFV">
-            <div class="summary-sentence" id="summaryText">
-              AAPL is <span class="green">undervalued</span> by 17.9% with <span class="green">strong</span> financial health. <span class="bold">12 of 14</span> models agree.
+
+            <!-- Change 3: Card 1 — Analysis -->
+            <div class="section-card">
+              <div class="summary-title">Analysis</div>
+              <div class="summary-sentence" id="summaryText">
+                AAPL is <span class="green">undervalued</span> by 17.9% with <span class="green">strong</span> financial health. <span class="bold">12 of 14</span> models agree.
+              </div>
             </div>
 
-            <div class="section-title">Model Consensus</div>
-            <div class="consensus-subtitle" id="consensusSubtitle">
-              <span class="bold" id="uvCount">12</span> of <span class="bold" id="totalCount">14</span> models rate AAPL as Undervalued
-            </div>
-            <div class="consensus-bar-wrap" id="consensusBar">
-              <div class="consensus-seg green" id="segGreen" style="flex-basis:85.7%">12 Undervalued</div>
-              <div class="consensus-seg yellow" id="segYellow" style="flex-basis:14.3%">2 Fair</div>
-            </div>
-            <div class="consensus-legend">
-              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Undervalued <span id="legendUV">12</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Fair <span id="legendFair">2</span></div>
-            </div>
-
-            <div class="chips-section">
-              <div class="section-title">InvestingPro Models</div>
-              <div class="chips-grid" id="chipsGrid"></div>
+            <!-- Change 3: Card 2 — Model Consensus (no subtitle row) -->
+            <div class="section-card">
+              <div class="section-title">Model Consensus</div>
+              <div class="consensus-bar-wrap" id="consensusBar">
+                <div class="consensus-seg green" id="segGreen" style="flex-basis:85.7%">12 Undervalued</div>
+                <div class="consensus-seg yellow" id="segYellow" style="flex-basis:14.3%">2 Fair</div>
+              </div>
+              <div class="consensus-legend">
+                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Undervalued <span id="legendUV">12</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Fair <span id="legendFair">2</span></div>
+              </div>
             </div>
 
-            <div class="calc-note" id="calcNote">Based on 14 models, Market Range, and Analyst Target</div>
+            <!-- Change 3: Card 3 — InvestingPro Models -->
+            <div class="section-card">
+              <div class="chips-section">
+                <div class="section-title">InvestingPro Models</div>
+                <div class="chips-grid" id="chipsGrid"></div>
+              </div>
+            </div>
 
             <div class="bottom-pad"></div>
           </div>
@@ -1253,6 +1262,21 @@ function switchTab(tab) {
   }
 }
 
+// ===================== TOAST =====================
+function showToast(name) {
+  let toast = document.getElementById('proto-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'proto-toast';
+    toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1A2E;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = name + ' — detail view';
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
 // ===================== CHIPS =====================
 function renderChips() {
   const grid = document.getElementById('chipsGrid');
@@ -1262,9 +1286,7 @@ function renderChips() {
     chip.className = `model-chip ${m.on ? 'on' : 'off'}`;
     chip.innerHTML = `
       <span class="chip-body" onclick="toggleModel(${i})">${m.name} <span class="chip-value">$${m.value}</span></span>
-      <span class="chip-info" onclick="event.stopPropagation(); openModelDetail('${m.name}', ${m.value})">
-        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
+      <span class="chip-info" onclick="event.stopPropagation(); showToast('${m.name}')">ⓘ</span>
     `;
     grid.appendChild(chip);
   });
@@ -1330,14 +1352,12 @@ function updateCalculations() {
   // Update summary
   const summaryEl = document.getElementById('summaryText');
   const valuation = upside > 5 ? 'undervalued' : upside < -5 ? 'overvalued' : 'fairly valued';
-  const valColor = upside > 5 ? 'green' : upside < -5 ? 'color:var(--red)' : 'color:var(--yellow)';
   summaryEl.innerHTML = `AAPL is <span class="green">${valuation}</span> by ${upside.toFixed(1)}% with <span class="green">strong</span> financial health. <span class="bold">${uv} of ${count}</span> models agree.`;
 
   // Update consensus bar
   const total = count;
   const greenPct = total > 0 ? (uv / total * 100) : 0;
   const yellowPct = total > 0 ? (fair / total * 100) : 0;
-  const redPct = total > 0 ? (ov / total * 100) : 0;
 
   const segGreen = document.getElementById('segGreen');
   const segYellow = document.getElementById('segYellow');
@@ -1350,14 +1370,8 @@ function updateCalculations() {
   segYellow.textContent = fair > 0 ? fair + ' Fair' : '';
   segYellow.style.display = fair > 0 ? 'flex' : 'none';
 
-  // Update subtitle
-  document.getElementById('uvCount').textContent = uv;
-  document.getElementById('totalCount').textContent = count;
   document.getElementById('legendUV').textContent = uv;
   document.getElementById('legendFair').textContent = fair;
-
-  // Update calc note
-  document.getElementById('calcNote').textContent = `Based on ${count} model${count !== 1 ? 's' : ''}, Market Range, and Analyst Target`;
 }
 
 // ===================== HEALTH ROWS =====================
@@ -1405,7 +1419,7 @@ function renderHealthChart() {
   ctx.clearRect(0, 0, W, H);
 
   // Grid lines
-  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
   ctx.lineWidth = 0.5;
   for (let v = 0; v <= 5; v++) {
     const y = padT + chartH - (v / 5) * chartH;
@@ -1415,7 +1429,7 @@ function renderHealthChart() {
     ctx.stroke();
 
     // Y labels
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.font = '9px -apple-system, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(v.toString(), padL - 6, y + 3);
@@ -1424,7 +1438,7 @@ function renderHealthChart() {
   // X labels
   const years = healthTimeline.years;
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.font = '9px -apple-system, sans-serif';
   years.forEach((yr, i) => {
     const x = padL + (i / (years.length - 1)) * chartW;

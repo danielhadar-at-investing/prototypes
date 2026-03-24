@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WGO - 3 Quotes Variant</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --green: #0ECB81;
+  --red: #E23636;
+  --border: #F0F0F0;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+}
+html, body {
+  font-family: var(--font);
+  background: #E8E8ED;
+  color: var(--text-primary);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+#phone {
+  position: relative;
+  width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 420px) { #phone { width: 100%; max-height: none; box-shadow: none; } }
+@media (min-height: 845px) { #phone { margin-top: calc((100vh - 844px) / 2); border-radius: 44px; } }
+
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 6px;
+  flex-shrink: 0;
+}
+.status-time { font-size: 16px; font-weight: 600; }
+.status-icons { display: flex; align-items: center; gap: 5px; }
+.status-icons svg { width: 18px; height: 12px; }
+
+.top-bar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+.logo-text { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+
+/* WGO Container */
+.wgo-container {
+  padding: 0 12px 8px;
+  flex-shrink: 0;
+}
+.wgo-market-status {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  margin: 6px 0 8px;
+}
+.wgo-market-ticker {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+.wgo-market-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.news-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+  animation: newsPulse 2s ease-in-out infinite;
+}
+@keyframes newsPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* 3 Quote Cards */
+.wgo-cards {
+  display: flex;
+  gap: 8px;
+  height: 96px;
+}
+.quote-card {
+  flex: 1;
+  min-width: 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+.quote-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
+}
+.quote-chart {
+  flex: 1;
+  min-height: 0;
+  margin: 2px -4px 2px;
+  position: relative;
+}
+.quote-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+.quote-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.quote-change {
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.quote-change.up { color: var(--green); }
+.quote-change.down { color: var(--red); }
+.quote-price.flash-up { color: var(--green); transition: color 0.15s; }
+.quote-price.flash-down { color: var(--red); transition: color 0.15s; }
+
+/* Categories */
+.categories {
+  display: flex;
+  gap: 6px;
+  padding: 6px 12px 8px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.categories::-webkit-scrollbar { display: none; }
+.cat-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  background: #F5F5F5;
+  color: var(--text-secondary);
+}
+.cat-tab.active {
+  background: #1A1A2E;
+  color: #fff;
+}
+
+/* Symbol list */
+.symbol-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px;
+}
+.symbol-list::-webkit-scrollbar { display: none; }
+.symbol-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.symbol-name { font-size: 15px; font-weight: 600; }
+.symbol-meta { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.symbol-price { font-size: 15px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.symbol-change { font-size: 11px; font-weight: 500; text-align: right; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.symbol-change.up { color: var(--green); }
+.symbol-change.down { color: var(--red); }
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0 22px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  font-size: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.tab-item.active { color: var(--text-primary); }
+.tab-item svg { width: 22px; height: 22px; }
+</style>
+</head>
+<body>
+
+<div id="phone">
+  <div class="status-bar">
+    <span class="status-time">13:18</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 18 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor"/></svg>
+      <svg viewBox="0 0 16 12" fill="none"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+      <svg viewBox="0 0 28 13" fill="none"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="17" height="9" rx="1.5" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <div class="logo-text">Investing.com</div>
+  </div>
+
+  <div class="wgo-container">
+    <div class="wgo-market-status">
+      <div class="wgo-market-ticker" id="newsTicker">
+        <div class="wgo-market-item"><span class="news-dot"></span><span>Fed signals potential rate cut in June as inflation cools</span></div>
+        <div class="wgo-market-item"><span class="news-dot"></span><span>NVIDIA surges 8% after record datacenter revenue beats estimates</span></div>
+        <div class="wgo-market-item"><span class="news-dot"></span><span>Oil drops below $70 as OPEC+ considers easing output cuts</span></div>
+      </div>
+    </div>
+    <div class="wgo-cards">
+      <div class="quote-card" id="card0">
+        <div class="quote-label">S&P 500</div>
+        <div class="quote-chart"><canvas id="chart0"></canvas></div>
+        <div class="quote-price" id="price0">6,836.17</div>
+        <div class="quote-change up" id="change0">+3.41 (+0.05%)</div>
+      </div>
+      <div class="quote-card" id="card1">
+        <div class="quote-label">QQQ</div>
+        <div class="quote-chart"><canvas id="chart1"></canvas></div>
+        <div class="quote-price" id="price1">498.72</div>
+        <div class="quote-change up" id="change1">+2.15 (+0.43%)</div>
+      </div>
+      <div class="quote-card" id="card2">
+        <div class="quote-label">VIX</div>
+        <div class="quote-chart"><canvas id="chart2"></canvas></div>
+        <div class="quote-price" id="price2">18.42</div>
+        <div class="quote-change down" id="change2">-0.58 (-3.05%)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="categories">
+    <button class="cat-tab active">My Watchlist</button>
+    <button class="cat-tab">Tech</button>
+    <button class="cat-tab">Crypto</button>
+    <button class="cat-tab">Indices</button>
+    <button class="cat-tab">Commodities</button>
+  </div>
+
+  <div class="symbol-list" id="symbolList"></div>
+
+  <div class="tab-bar">
+    <button class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Markets</span></button>
+    <button class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>News</span></button>
+    <button class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Ideas</span></button>
+    <button class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Watchlist</span></button>
+    <button class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>More</span></button>
+  </div>
+</div>
+
+<script>
+// Quotes data - mutable for streaming
+const quotes = [
+  { label: 'S&P 500', basePrice: 6836.17, price: 6836.17, change: 3.41, pct: 0.05, up: true, points: [], decimals: 2 },
+  { label: 'QQQ', basePrice: 498.72, price: 498.72, change: 2.15, pct: 0.43, up: true, points: [], decimals: 2 },
+  { label: 'VIX', basePrice: 18.42, price: 18.42, change: -0.58, pct: -3.05, up: false, points: [], decimals: 2 },
+];
+
+// Initialize chart points with historical data
+function initPoints(q, seed) {
+  let s = seed * 9301 + 49297;
+  function rand() { s = (s * 9301 + 49297) % 233280; return s / 233280; }
+  let val = q.basePrice;
+  const drift = q.up ? 0.0003 : -0.0003;
+  for (let i = 0; i < 40; i++) {
+    val += val * (rand() - 0.5 + drift) * 0.002;
+    q.points.push(val);
+  }
+  q.price = q.points[q.points.length - 1];
+}
+
+initPoints(quotes[0], 1);
+initPoints(quotes[1], 2);
+initPoints(quotes[2], 3);
+
+// Draw sparkline from points array
+function drawChart(idx) {
+  const canvas = document.getElementById('chart' + idx);
+  if (!canvas) return;
+  const q = quotes[idx];
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const pts = q.points;
+  const min = Math.min(...pts) - 0.5;
+  const max = Math.max(...pts) + 0.5;
+  const range = max - min || 1;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.beginPath();
+  pts.forEach((v, i) => {
+    const x = (i / (pts.length - 1)) * w;
+    const y = 1 + (h - 2) - ((v - min) / range) * (h - 2);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  const isUp = q.price >= q.basePrice;
+  const color = isUp ? '#0ECB81' : '#E23636';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+}
+
+function formatPrice(p, decimals) {
+  return p.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function updateQuoteUI(idx) {
+  const q = quotes[idx];
+  const priceEl = document.getElementById('price' + idx);
+  const changeEl = document.getElementById('change' + idx);
+  if (!priceEl || !changeEl) return;
+
+  const oldPrice = parseFloat(priceEl.textContent.replace(/,/g, ''));
+  const newPrice = q.price;
+  priceEl.textContent = formatPrice(newPrice, q.decimals);
+
+  // Flash on change
+  if (Math.abs(newPrice - oldPrice) > 0.001) {
+    const flashClass = newPrice > oldPrice ? 'flash-up' : 'flash-down';
+    priceEl.classList.add(flashClass);
+    setTimeout(() => priceEl.classList.remove(flashClass), 400);
+  }
+
+  const diff = q.price - q.basePrice;
+  const pctDiff = (diff / q.basePrice) * 100;
+  const sign = diff >= 0 ? '+' : '';
+  const isUp = diff >= 0;
+  changeEl.textContent = `${sign}${diff.toFixed(2)} (${sign}${pctDiff.toFixed(2)}%)`;
+  changeEl.className = `quote-change ${isUp ? 'up' : 'down'}`;
+}
+
+// Stream: tick prices every 1.5s, add point, redraw
+function tickQuote(idx) {
+  const q = quotes[idx];
+  const volatility = idx === 2 ? 0.004 : 0.0008; // VIX is more volatile
+  const drift = (Math.random() - 0.48) * volatility;
+  q.price += q.price * drift;
+  q.points.push(q.price);
+  if (q.points.length > 60) q.points.shift(); // rolling window
+  drawChart(idx);
+  updateQuoteUI(idx);
+}
+
+// Initial draw
+requestAnimationFrame(() => {
+  quotes.forEach((_, i) => {
+    drawChart(i);
+    updateQuoteUI(i);
+  });
+});
+
+// Staggered streaming - each quote ticks at slightly different intervals
+setInterval(() => tickQuote(0), 1200);
+setInterval(() => tickQuote(1), 1500);
+setInterval(() => tickQuote(2), 1800);
+
+// Vertical news ticker (like original)
+let currentNewsItem = 0;
+const newsTicker = document.getElementById('newsTicker');
+const newsItems = newsTicker.querySelectorAll('.wgo-market-item');
+setInterval(() => {
+  currentNewsItem = (currentNewsItem + 1) % newsItems.length;
+  newsTicker.style.transform = `translateY(-${currentNewsItem * 20}px)`;
+}, 4000);
+
+// Symbol list
+const symbols = [
+  { name: 'Apple', ticker: 'AAPL', price: 255.78, change: -5.95, pct: -2.27 },
+  { name: 'NVIDIA', ticker: 'NVDA', price: 924.50, change: 68.30, pct: 7.98 },
+  { name: 'Tesla', ticker: 'TSLA', price: 417.44, change: 0.37, pct: 0.09 },
+  { name: 'Microsoft', ticker: 'MSFT', price: 425.22, change: 3.18, pct: 0.75 },
+  { name: 'Amazon', ticker: 'AMZN', price: 186.40, change: -1.22, pct: -0.65 },
+  { name: 'Meta', ticker: 'META', price: 502.30, change: 8.45, pct: 1.71 },
+  { name: 'Google', ticker: 'GOOGL', price: 153.81, change: -0.94, pct: -0.61 },
+  { name: 'Bitcoin', ticker: 'BTC', price: 68559.40, change: 1243.50, pct: 1.85 },
+];
+
+const listEl = document.getElementById('symbolList');
+symbols.forEach(s => {
+  const isUp = s.change >= 0;
+  const sign = isUp ? '+' : '';
+  listEl.innerHTML += `
+    <div class="symbol-row">
+      <div>
+        <div class="symbol-name">${s.name}</div>
+        <div class="symbol-meta">${s.ticker}</div>
+      </div>
+      <div>
+        <div class="symbol-price">${s.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+        <div class="symbol-change ${isUp ? 'up' : 'down'}">${sign}${s.change.toFixed(2)} (${sign}${s.pct.toFixed(2)}%)</div>
+      </div>
+    </div>
+  `;
+});
+</script>
+</body>
+</html>
