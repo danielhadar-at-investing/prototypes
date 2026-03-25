@@ -699,12 +699,6 @@
       <div class="section-card" style="margin: 20px 16px 0;">
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" id="pwCurrent" type="password" placeholder="Current password" oninput="checkPwBtn()">
-            <svg class="eye-toggle" viewBox="0 0 22 22" onclick="togglePw(this)"><path d="M1 11s4-7 10-7 10 7 10 7-4 7-10 7S1 11 1 11z"/><circle cx="11" cy="11" r="3"/></svg>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="field-input-row">
             <input class="field-input" id="pwNew" type="password" placeholder="New password" oninput="checkPwBtn()">
             <svg class="eye-toggle" viewBox="0 0 22 22" onclick="togglePw(this)"><path d="M1 11s4-7 10-7 10 7 10 7-4 7-10 7S1 11 1 11z"/><circle cx="11" cy="11" r="3"/></svg>
           </div>
@@ -798,16 +792,15 @@
   <h3 class="email-only">Change Password</h3>
   <ul class="email-only">
     <li>Tapping "Change Password" opens a page sheet modal</li>
-    <li>Sheet has three fields: Current password, New password, Confirm password - all masked with eye toggle</li>
+    <li>Sheet has two fields: New password, Confirm password - both masked with eye toggle</li>
     <li>Password requirements shown below the fields: "Your password must contain: / At least 2 letters / At least 2 numbers / Maximum 15 characters / Passwords match"</li>
     <li>Each condition lights up green (with filled checkmark) only when met; gray otherwise</li>
     <li>"Maximum 15 characters" turns green as soon as the field has 1+ character (valid range is 1-15)</li>
     <li>"Passwords match" turns green only when both New password and Confirm password are non-empty and identical</li>
-    <li>Update Password button is disabled until current password is non-empty AND new password matches retype password (both non-empty)</li>
-    <li>Enable Password AutoFill on the update password screen (current, new, and retype fields)</li>
+    <li>Update Password button is disabled until new password and retype password are both non-empty and match</li>
+    <li>Enable Password AutoFill on the update password screen (new and retype fields)</li>
     <li>Closing the sheet (X or backdrop) clears all fields and resets the password conditions to their unmet state</li>
     <li>Tapping Update Password replaces the button with an activity indicator; on completion the sheet dismisses and a toast is shown</li>
-    <li>If the current password is incorrect, show a native alert with a single "OK" button that dismisses the alert. Alert message: "Current password is incorrect"</li>
   </ul>
   <div class="note email-only"><strong>Copy - update password success toast:</strong> "Password updated"</div>
   <div class="note email-only"><strong>Copy - update password failure toast:</strong> "Couldn't update password. Please try again"</div>
@@ -861,7 +854,7 @@
   function closePasswordSheet() {
     document.getElementById('pwSheet').classList.remove('visible');
     document.getElementById('pwSheetOverlay').classList.remove('visible');
-    ['pwCurrent','pwNew','pwConfirm'].forEach(function(id) {
+    ['pwNew','pwConfirm'].forEach(function(id) {
       document.getElementById(id).value = '';
     });
     checkPwBtn();
@@ -881,10 +874,9 @@
     document.getElementById('condMax').classList.toggle('met', len >= 1 && len <= 15);
     var newVal = document.getElementById('pwNew').value;
     var retypeVal = document.getElementById('pwConfirm').value;
-    var currentFilled = document.getElementById('pwCurrent').value.length > 0;
     var match = newVal.length > 0 && retypeVal.length > 0 && newVal === retypeVal;
     document.getElementById('condMatch').classList.toggle('met', match);
-    document.getElementById('pwUpdateBtn').disabled = !(currentFilled && match);
+    document.getElementById('pwUpdateBtn').disabled = !match;
   }
 
   // Save button: enable only when values differ from originals
