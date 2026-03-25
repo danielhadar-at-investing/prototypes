@@ -38,13 +38,54 @@
     font-family: var(--font);
     background: #E5E5EA;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     padding: 40px 20px;
     min-height: 100vh;
+    gap: 24px;
+  }
+
+  /* Variant toggle */
+  .variant-toggle {
+    display: flex;
+    background: rgba(118,118,128,0.2);
+    border-radius: 9px;
+    padding: 2px;
+    gap: 0;
+  }
+  .toggle-btn {
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 20px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .toggle-btn.active {
+    background: #FFFFFF;
+    color: var(--text-primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+
+  /* Frames row */
+  .frames-row {
+    display: flex;
+    align-items: flex-start;
     gap: 40px;
     flex-wrap: nowrap;
   }
+
+  /* Variant visibility */
+  #framesWrapper.variant-email .social-only { display: none !important; }
+  #framesWrapper.variant-social .email-only { display: none !important; }
+
+  /* Fix Display Name border in Email mode (email row is hidden but still last DOM child) */
+  #framesWrapper.variant-email #personalInfoCard .form-field:nth-child(3) { border-bottom: none; }
+  #framesWrapper.variant-social #personalInfoCard .form-field:nth-child(3) { border-bottom: 0.5px solid var(--separator); }
 
   /* iPhone Frame */
   .phone-frame {
@@ -536,7 +577,16 @@
 </head>
 <body>
 
-<!-- ==================== STATE 1: Default (Logged In) ==================== -->
+<!-- Variant Toggle -->
+<div class="variant-toggle">
+  <button class="toggle-btn active" id="btnEmail" onclick="setVariant('email')">Email</button>
+  <button class="toggle-btn" id="btnSocial" onclick="setVariant('social')">Social</button>
+</div>
+
+<div class="frames-row">
+
+<!-- ==================== Phone Frame ==================== -->
+<div id="framesWrapper" class="variant-email">
 <div class="phone-frame">
   <div class="status-bar">
     <span class="time">9:41</span>
@@ -592,12 +642,25 @@
             </button>
           </div>
         </div>
+        <!-- Social only: email as 4th row -->
+        <div class="form-field-inline social-only">
+          <span class="field-label-inline" style="color:var(--text-disabled);">Email</span>
+          <div class="field-value-inline" style="color:var(--text-disabled);">
+            <span>daniel@inv.com</span>
+            <svg width="16" height="16" viewBox="0 0 20 20">
+              <path d="M14.6 10.2c0-.4 0-.7-.1-1H10v1.9h2.6c-.1.6-.5 1.1-1 1.4v1.2h1.6c1-.9 1.5-2.2 1.5-3.5z" fill="#4285F4"/>
+              <path d="M10 15c1.4 0 2.5-.5 3.3-1.3l-1.6-1.2c-.4.3-1 .5-1.7.5-1.3 0-2.4-.9-2.8-2h-1.6v1.2C6.5 13.8 8.1 15 10 15z" fill="#34A853"/>
+              <path d="M7.2 11c-.1-.3-.2-.7-.2-1s.1-.7.2-1V7.8H5.6C5.2 8.5 5 9.2 5 10s.2 1.5.6 2.2L7.2 11z" fill="#FBBC05"/>
+              <path d="M10 7c.7 0 1.4.2 1.9.7l1.4-1.4C12.5 5.5 11.4 5 10 5 8.1 5 6.5 6.2 5.6 7.8L7.2 9c.4-1.1 1.5-2 2.8-2z" fill="#EA4335"/>
+            </svg>
+          </div>
+        </div>
       </div>
       <button class="action-btn btn-primary" id="saveBtn" disabled>Save</button>
     </div>
 
-    <!-- Login Information -->
-    <div class="section">
+    <!-- Login Information (Email only) -->
+    <div class="section email-only">
       <div class="section-header">Login information</div>
       <div class="section-card">
         <div class="form-field-inline">
@@ -628,9 +691,9 @@
     </div>
   </div>
 
-  <!-- ==================== Change Password Sheet ==================== -->
-  <div class="sheet-overlay" id="pwSheetOverlay" onclick="closePasswordSheet()"></div>
-  <div class="sheet" id="pwSheet">
+  <!-- ==================== Change Password Sheet (Email only) ==================== -->
+  <div class="sheet-overlay email-only" id="pwSheetOverlay" onclick="closePasswordSheet()"></div>
+  <div class="sheet email-only" id="pwSheet">
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <span class="sheet-title">Change password</span>
@@ -675,11 +738,16 @@
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="currentColor"/><polyline points="6.5,11 9.5,14 15.5,8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Maximum 15 characters
         </div>
+        <div class="condition" id="condMatch">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="11" fill="currentColor"/><polyline points="6.5,11 9.5,14 15.5,8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Passwords match
+        </div>
       </div>
       <button class="action-btn btn-primary" id="pwUpdateBtn" disabled>Update Password</button>
     </div>
   </div>
 </div>
+</div><!-- end framesWrapper -->
 
 
 <!-- ==================== Annotations Panel ==================== -->
@@ -711,6 +779,7 @@
   <h3>Personal Information</h3>
   <ul>
     <li>First name, Last name, Display name - all editable</li>
+    <li class="social-only">Email - read-only, shown as 4th row in the same card; rendered in a disabled/muted style with the login method icon (Google / Facebook / Apple / Email) to the right</li>
     <li>Pre-populated from user profile</li>
     <li>Display name helper: "The name displayed on your comments"</li>
     <li>Save button is disabled by default; enabled only when at least one field differs from the last saved value - re-disables if user manually restores the original content</li>
@@ -720,29 +789,36 @@
   <div class="note"><strong>Copy - save success toast:</strong> "Your changes have been saved."</div>
   <div class="note"><strong>Copy - save failure toast:</strong> "Failed to save changes, please try again."</div>
 
-  <h3>Email and Password (Read-only)</h3>
+  <h3>Login method</h3>
   <ul>
+    <li>Users log in either via email/password or through a social provider (Apple, Google, or Facebook)</li>
+    <li>Social login users have no password associated with their account - the Login information section and Change Password option are not shown for them</li>
+    <li>The login method is determined at registration and cannot be changed from this screen</li>
+  </ul>
+
+  <h3 class="email-only">Email and Password (Read-only)</h3>
+  <ul class="email-only">
     <li>Both fields are non-interactive and rendered in a disabled/muted style</li>
     <li>Email shows the login method icon (Google / Facebook / Apple / Email) to the right of the address</li>
     <li>Password always shows exactly 8 dots regardless of actual password length - it is a fixed placeholder, not a reflection of the real value</li>
   </ul>
 
-  <h3>Change Password</h3>
-  <ul>
+  <h3 class="email-only">Change Password</h3>
+  <ul class="email-only">
     <li>Tapping "Change Password" opens a page sheet modal</li>
     <li>Sheet has three fields: Current password, New password, Confirm password - all masked with eye toggle</li>
-    <li>Password requirements shown below the fields - reuse UI and copy from the sign-up screen: "Your password must contain: / At least 2 letters / At least 2 numbers / Maximum 15 characters"</li>
+    <li>Password requirements shown below the fields: "Your password must contain: / At least 2 letters / At least 2 numbers / Maximum 15 characters / Passwords match"</li>
     <li>Each condition lights up green (with filled checkmark) only when met; gray otherwise</li>
     <li>"Maximum 15 characters" turns green as soon as the field has 1+ character (valid range is 1-15)</li>
+    <li>"Passwords match" turns green only when both New password and Confirm password are non-empty and identical</li>
     <li>Update Password button is disabled until current password is non-empty AND new password matches retype password (both non-empty)</li>
     <li>Enable Password AutoFill on the update password screen (current, new, and retype fields)</li>
     <li>Closing the sheet (X or backdrop) clears all fields and resets the password conditions to their unmet state</li>
     <li>Tapping Update Password replaces the button with an activity indicator; on completion the sheet dismisses and a toast is shown</li>
+    <li>If the current password is incorrect, show a native alert with a single "OK" button that dismisses the alert. Alert message: "Current password is incorrect"</li>
   </ul>
-  <div class="note"><strong>Copy - update password success toast:</strong> "Password updated."</div>
-  <div class="note"><strong>Copy - update password failure toast:</strong> "Couldn't update password. Please try again."</div>
-  <ul>
-  </ul>
+  <div class="note email-only"><strong>Copy - update password success toast:</strong> "Password updated."</div>
+  <div class="note email-only"><strong>Copy - update password failure toast:</strong> "Couldn't update password. Please try again."</div>
 
   <h3>Delete Account</h3>
   <ul>
@@ -753,7 +829,18 @@
 
 </div>
 
+</div><!-- end frames-row -->
+
 <script>
+  function setVariant(v) {
+    var wrapper = document.getElementById('framesWrapper');
+    wrapper.className = v === 'email' ? 'variant-email' : 'variant-social';
+    document.getElementById('btnEmail').classList.toggle('active', v === 'email');
+    document.getElementById('btnSocial').classList.toggle('active', v === 'social');
+    // Close password sheet when switching away from email
+    if (v === 'social') closePasswordSheet();
+  }
+
   function syncClearBtn(input) {
     var btn = input.parentElement.querySelector('.clear-btn');
     if (!btn) return;
@@ -804,6 +891,7 @@
     var retypeVal = document.getElementById('pwConfirm').value;
     var currentFilled = document.getElementById('pwCurrent').value.length > 0;
     var match = newVal.length > 0 && retypeVal.length > 0 && newVal === retypeVal;
+    document.getElementById('condMatch').classList.toggle('met', match);
     document.getElementById('pwUpdateBtn').disabled = !(currentFilled && match);
   }
 
