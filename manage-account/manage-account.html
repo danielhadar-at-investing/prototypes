@@ -495,6 +495,14 @@
     border-radius: 50%;
     background: var(--tint);
   }
+  /* Field validation error */
+  .field-error {
+    font-size: 13px;
+    color: var(--destructive);
+    padding: 6px 32px 0;
+    line-height: 1.4;
+  }
+
   .note {
     font-family: var(--font);
     font-size: 12px;
@@ -620,7 +628,7 @@
       <div class="section-card" id="personalInfoCard">
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" type="text" value="Daniel" placeholder="First name" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputFirstName" type="text" value="Daniel" placeholder="First name" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -628,7 +636,7 @@
         </div>
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" type="text" value="Hadar" placeholder="Last name" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputLastName" type="text" value="Hadar" placeholder="Last name" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -655,6 +663,10 @@
             </svg>
           </div>
         </div>
+      </div>
+      <div id="nameErrors">
+        <div id="firstNameError" class="field-error" style="display:none;">First name can't include symbols or numbers</div>
+        <div id="lastNameError" class="field-error" style="display:none;">Last name can't include symbols or numbers</div>
       </div>
       <button class="action-btn btn-primary" id="saveBtn" disabled>Save</button>
     </div>
@@ -874,7 +886,21 @@
     document.getElementById('pwUpdateBtn').disabled = !match;
   }
 
-  // Save button: enable only when values differ from originals
+  // Name validation
+  function hasInvalidChars(val) {
+    return /[^a-zA-ZÀ-ÿ\s\-']/.test(val);
+  }
+  function validateNames() {
+    var firstInvalid = hasInvalidChars(document.getElementById('inputFirstName').value);
+    var lastInvalid = hasInvalidChars(document.getElementById('inputLastName').value);
+    document.getElementById('firstNameError').style.display = firstInvalid ? 'block' : 'none';
+    document.getElementById('lastNameError').style.display = lastInvalid ? 'block' : 'none';
+    return !firstInvalid && !lastInvalid;
+  }
+  document.getElementById('inputFirstName').addEventListener('input', validateNames);
+  document.getElementById('inputLastName').addEventListener('input', validateNames);
+
+  // Save button: enable only when values differ from originals and names are valid
   var saveBtn = document.getElementById('saveBtn');
   var personalInputs = document.querySelectorAll('#personalInfoCard .field-input');
   var origValues = Array.from(personalInputs).map(function(i) { return i.value; });
@@ -883,7 +909,7 @@
     var dirty = Array.from(personalInputs).some(function(inp, idx) {
       return inp.value !== origValues[idx];
     });
-    saveBtn.disabled = !dirty;
+    saveBtn.disabled = !dirty || !validateNames();
   }
 
   personalInputs.forEach(function(input) {
