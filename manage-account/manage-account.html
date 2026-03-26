@@ -794,13 +794,9 @@
 
   <h4>Name validation</h4>
   <ul>
-    <li>First name and Last name: letters only, 1-30 characters</li>
-    <li>Save is disabled if either field is empty, contains symbols, or contains numbers</li>
-    <li>Invalid characters trigger a red error below the card: "First/Last name should only include letters". Only one error shown at a time - First name takes priority</li>
-    <li>Display name: letters and numbers only, 4-16 characters, no symbols or spaces</li>
-    <li>Save is disabled if Display name is empty, contains symbols or spaces, or is fewer than 4 characters</li>
-    <li>Invalid input triggers a red error: "Display name should only include letters and numbers". Only one error shown at a time across all three fields - priority order: First name > Last name > Display name</li>
-    <li>Display name is capped at 16 characters - further input is blocked silently (no error text)</li>
+    <li>First name / Last name: letters only, 1-30 chars. Save disabled if empty or invalid</li>
+    <li>Display name: letters and numbers only, 4-16 chars, no symbols or spaces. Save disabled if empty, invalid, or under 4 chars. Input blocked at 16 chars (no error)</li>
+    <li>One red error shown at a time below the card. Priority: First name > Last name > Display name</li>
   </ul>
   <div class="note"><strong>Copy - save success toast:</strong> "Your changes have been saved"</div>
   <div class="note"><strong>Copy - save failure alert:</strong> "Failed to save changes, please try again"</div>
