@@ -790,7 +790,7 @@
         </div>
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" id="inputDisplayName" type="text" value="Daniel HH" placeholder="Display name" maxlength="16" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputDisplayName" type="text" value="DanielHH" placeholder="Display name" maxlength="16" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -955,15 +955,14 @@
     <li>First name, Last name, Display name - all editable</li>
     <li class="social-only">Email - read-only, shown as 4th row in the same card; rendered in a disabled/muted style with the social provider icon (Apple / Google / Facebook) to the right of the address</li>
     <li>Pre-populated from user profile</li>
-    <li>Display name helper: "The name displayed on your comments"</li>
     <li>Save button is disabled by default; enabled only when at least one field differs from the last saved value - re-disables if user manually restores the original content</li>
     <li>Tapping Save replaces the button with an activity indicator until the operation completes, then shows a toast</li>
-    <li>On failure, the button is restored and a failure toast is shown</li>
+    <li>On failure, the button is restored and a failure alert is shown</li>
   </ul>
 
   <h4>Name validation</h4>
   <ul>
-    <li>First name / Last name: letters only, 1-30 chars. Save disabled if empty or invalid</li>
+    <li>First name / Last name: letters and spaces only, 1-30 chars. Save disabled if empty or invalid</li>
     <li>Display name: letters and numbers only, 4-16 chars, no symbols or spaces. Save disabled if empty, invalid, or under 4 chars. Input blocked at 16 chars (no error)</li>
     <li>One red error shown at a time below the card. Priority: First name > Last name > Display name. Errors: "First name should only include letters" / "Last name should only include letters" / "Display name should only include letters and numbers"</li>
   </ul>
@@ -1070,12 +1069,13 @@
     var retypeVal = document.getElementById('pwConfirm').value;
     var match = newVal.length > 0 && retypeVal.length > 0 && newVal === retypeVal;
     document.getElementById('condMatch').classList.toggle('met', match);
-    document.getElementById('pwUpdateBtn').disabled = !match;
+    var allMet = letters >= 2 && numbers >= 2 && len >= 1 && len <= 15 && match;
+    document.getElementById('pwUpdateBtn').disabled = !allMet;
   }
 
   // Name validation
   function hasInvalidChars(val) {
-    return /[^a-zA-ZÀ-ÿ\s\-']/.test(val);
+    return /[^a-zA-ZÀ-ÿ\s]/.test(val);
   }
   function hasInvalidDisplayChars(val) {
     return /[^a-zA-Z0-9]/.test(val);
