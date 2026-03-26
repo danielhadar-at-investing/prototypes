@@ -654,7 +654,7 @@
         </div>
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" type="text" value="Daniel HH" placeholder="Display name" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputDisplayName" type="text" value="Daniel HH" placeholder="Display name" maxlength="16" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -677,6 +677,7 @@
       <div id="nameErrors">
         <div id="firstNameError" class="field-error" style="display:none;">First name should only include letters</div>
         <div id="lastNameError" class="field-error" style="display:none;">Last name should only include letters</div>
+        <div id="displayNameError" class="field-error" style="display:none;">Display name should only include letters and numbers</div>
       </div>
       <button class="action-btn btn-primary" id="saveBtn" disabled>Save</button>
     </div>
@@ -796,6 +797,10 @@
     <li>First name and Last name: letters only, 1-30 characters</li>
     <li>Save is disabled if either field is empty, contains symbols, or contains numbers</li>
     <li>Invalid characters trigger a red error below the card: "First/Last name should only include letters". Only one error shown at a time - First name takes priority</li>
+    <li>Display name: letters and numbers only, 4-16 characters, no symbols or spaces</li>
+    <li>Save is disabled if Display name is empty, contains symbols or spaces, or is fewer than 4 characters</li>
+    <li>Invalid input triggers a red error: "Display name should only include letters and numbers". Only one error shown at a time across all three fields - priority order: First name > Last name > Display name</li>
+    <li>Display name is capped at 16 characters - further input is blocked silently (no error text)</li>
   </ul>
   <div class="note"><strong>Copy - save success toast:</strong> "Your changes have been saved"</div>
   <div class="note"><strong>Copy - save failure alert:</strong> "Failed to save changes, please try again"</div>
@@ -907,15 +912,23 @@
   function hasInvalidChars(val) {
     return /[^a-zA-ZÀ-ÿ\s\-']/.test(val);
   }
+  function hasInvalidDisplayChars(val) {
+    return /[^a-zA-Z0-9]/.test(val);
+  }
   function validateNames() {
     var firstInvalid = hasInvalidChars(document.getElementById('inputFirstName').value);
     var lastInvalid = hasInvalidChars(document.getElementById('inputLastName').value);
+    var displayVal = document.getElementById('inputDisplayName').value;
+    var displayInvalid = displayVal.length > 0 && (hasInvalidDisplayChars(displayVal) || displayVal.length < 4);
+    // One error at a time: First name > Last name > Display name
     document.getElementById('firstNameError').style.display = firstInvalid ? 'block' : 'none';
     document.getElementById('lastNameError').style.display = (!firstInvalid && lastInvalid) ? 'block' : 'none';
-    return !firstInvalid && !lastInvalid;
+    document.getElementById('displayNameError').style.display = (!firstInvalid && !lastInvalid && displayInvalid) ? 'block' : 'none';
+    return !firstInvalid && !lastInvalid && !displayInvalid;
   }
   document.getElementById('inputFirstName').addEventListener('input', validateNames);
   document.getElementById('inputLastName').addEventListener('input', validateNames);
+  document.getElementById('inputDisplayName').addEventListener('input', validateNames);
 
   // Save button: enable only when values differ from originals and names are valid
   var saveBtn = document.getElementById('saveBtn');
@@ -928,7 +941,9 @@
     });
     var namesNonEmpty = document.getElementById('inputFirstName').value.length > 0
       && document.getElementById('inputLastName').value.length > 0;
-    saveBtn.disabled = !dirty || !namesNonEmpty || !validateNames();
+    var displayVal = document.getElementById('inputDisplayName').value;
+    var displayValid = displayVal.length >= 4 && !hasInvalidDisplayChars(displayVal);
+    saveBtn.disabled = !dirty || !namesNonEmpty || !displayValid || !validateNames();
   }
 
   personalInputs.forEach(function(input) {
