@@ -773,6 +773,8 @@
   <h3>Personal Information</h3>
   <ul>
     <li>First name, Last name, Display name - all editable</li>
+    <li>First name and Last name: letters only, 1-30 characters. Save is disabled if either is empty or contains symbols or numbers</li>
+    <li>If a name field contains invalid characters, a red error appears below the card. Only one error shown at a time - First name takes priority</li>
     <li class="social-only">Email - read-only, shown as 4th row in the same card; rendered in a disabled/muted style with the social provider icon (Apple / Google / Facebook) to the right of the address</li>
     <li>Pre-populated from user profile</li>
     <li>Display name helper: "The name displayed on your comments"</li>
@@ -894,7 +896,7 @@
     var firstInvalid = hasInvalidChars(document.getElementById('inputFirstName').value);
     var lastInvalid = hasInvalidChars(document.getElementById('inputLastName').value);
     document.getElementById('firstNameError').style.display = firstInvalid ? 'block' : 'none';
-    document.getElementById('lastNameError').style.display = lastInvalid ? 'block' : 'none';
+    document.getElementById('lastNameError').style.display = (!firstInvalid && lastInvalid) ? 'block' : 'none';
     return !firstInvalid && !lastInvalid;
   }
   document.getElementById('inputFirstName').addEventListener('input', validateNames);
