@@ -628,7 +628,7 @@
       <div class="section-card" id="personalInfoCard">
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" id="inputFirstName" type="text" value="Daniel" placeholder="First name" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputFirstName" type="text" value="Daniel" placeholder="First name" maxlength="30" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -636,7 +636,7 @@
         </div>
         <div class="form-field">
           <div class="field-input-row">
-            <input class="field-input" id="inputLastName" type="text" value="Hadar" placeholder="Last name" oninput="syncClearBtn(this)">
+            <input class="field-input" id="inputLastName" type="text" value="Hadar" placeholder="Last name" maxlength="30" oninput="syncClearBtn(this)">
             <button class="clear-btn hidden" tabindex="-1" onmousedown="event.preventDefault()" onclick="clearField(this)">
               <svg viewBox="0 0 8 8" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><line x1="1.5" y1="1.5" x2="6.5" y2="6.5"/><line x1="6.5" y1="1.5" x2="1.5" y2="6.5"/></svg>
             </button>
@@ -909,7 +909,9 @@
     var dirty = Array.from(personalInputs).some(function(inp, idx) {
       return inp.value !== origValues[idx];
     });
-    saveBtn.disabled = !dirty || !validateNames();
+    var namesNonEmpty = document.getElementById('inputFirstName').value.length > 0
+      && document.getElementById('inputLastName').value.length > 0;
+    saveBtn.disabled = !dirty || !namesNonEmpty || !validateNames();
   }
 
   personalInputs.forEach(function(input) {
