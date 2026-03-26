@@ -591,6 +591,142 @@
     padding-bottom: 34px;
   }
   .sheet-body::-webkit-scrollbar { display: none; }
+
+  /* Toast */
+  .toast {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.82);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 20px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 300;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* iOS Alert */
+  .ios-alert-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .ios-alert-overlay.show { opacity: 1; pointer-events: auto; }
+  .ios-alert {
+    width: 270px;
+    background: rgba(242,242,247,0.97);
+    backdrop-filter: blur(20px);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .ios-alert-body {
+    padding: 20px 16px 16px;
+    text-align: center;
+  }
+  .ios-alert-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .ios-alert-msg {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .ios-alert-actions {
+    border-top: 0.5px solid var(--separator);
+    display: flex;
+  }
+  .ios-alert-btn {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    font-size: 17px;
+    color: var(--tint);
+    cursor: pointer;
+    font-family: var(--font);
+    font-weight: 600;
+  }
+
+  /* Mock Outcome Popup */
+  .mock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .mock-overlay.show { opacity: 1; pointer-events: auto; }
+  .mock-card {
+    width: 300px;
+    background: #1C1C1E;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mock-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #FF9F0A;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .mock-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+  }
+  .mock-subtitle {
+    font-size: 12px;
+    color: #8E8E93;
+    text-align: center;
+    margin-top: -6px;
+  }
+  .mock-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .mock-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+  }
+  .mock-btn-success { background: #30D158; color: #fff; }
+  .mock-btn-fail { background: #FF3B30; color: #fff; }
 </style>
 </head>
 <body>
@@ -629,7 +765,7 @@
       <div class="avatar-container" style="border:none; background: linear-gradient(135deg, #E07A52 0%, #7B4FA6 100%);">
         <span style="color:white; font-size:34px; font-weight:700; font-family:-apple-system,'SF Pro Display',system-ui,sans-serif; letter-spacing:1px;">JS</span>
       </div>
-      <span class="change-photo">Update photo</span>
+      <span class="change-photo" onclick="openPhotoMock()">Update photo</span>
     </div>
 
     <!-- Personal Information -->
@@ -698,6 +834,35 @@
     <div class="section">
       <div class="section-card">
         <div class="form-action" style="color: var(--destructive);">Delete Account</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Toast ==================== -->
+  <div class="toast" id="photoToast"></div>
+
+  <!-- ==================== iOS Alert ==================== -->
+  <div class="ios-alert-overlay" id="photoAlertOverlay">
+    <div class="ios-alert">
+      <div class="ios-alert-body">
+        <div class="ios-alert-title">Upload Failed</div>
+        <div class="ios-alert-msg">Failed to upload photo, please try again</div>
+      </div>
+      <div class="ios-alert-actions">
+        <button class="ios-alert-btn" onclick="closePhotoAlert()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Mock Outcome Popup ==================== -->
+  <div class="mock-overlay" id="photoMockOverlay">
+    <div class="mock-card">
+      <div class="mock-label">Prototype only - not in final product</div>
+      <div class="mock-title">Simulate photo upload result</div>
+      <div class="mock-subtitle">Choose the API response to preview</div>
+      <div class="mock-actions">
+        <button class="mock-btn mock-btn-success" onclick="photoMockSuccess()">Did succeed</button>
+        <button class="mock-btn mock-btn-fail" onclick="photoMockFail()">Did fail</button>
       </div>
     </div>
   </div>
@@ -780,6 +945,12 @@
   </ul>
   <div class="note"><strong>Copy - wrong file type:</strong><br>Title: "Invalid file type"<br>Message: "Please upload a JPG or PNG only"<br>Button: "Got it"</div>
   <div class="note"><strong>Copy - file too large:</strong><br>Title: "Photo too large"<br>Message: "Please upload a photo smaller than 10 MB"<br>Button: "Got it"</div>
+
+  <h4>Photo API response</h4>
+  <ul>
+    <li>Success: toast - "Photo successfully updated"</li>
+    <li>Failure: alert - "Failed to upload photo, please try again"</li>
+  </ul>
 
   <h3>Personal Information</h3>
   <ul>
@@ -945,6 +1116,33 @@
   personalInputs.forEach(function(input) {
     input.addEventListener('input', checkDirty);
   });
+
+  // Photo mock popup
+  function openPhotoMock() {
+    document.getElementById('photoMockOverlay').classList.add('show');
+  }
+  function closePhotoMock() {
+    document.getElementById('photoMockOverlay').classList.remove('show');
+  }
+  function photoMockSuccess() {
+    closePhotoMock();
+    showToast('Photo successfully updated');
+  }
+  function photoMockFail() {
+    closePhotoMock();
+    document.getElementById('photoAlertOverlay').classList.add('show');
+  }
+  function closePhotoAlert() {
+    document.getElementById('photoAlertOverlay').classList.remove('show');
+  }
+
+  // Toast
+  function showToast(msg) {
+    var t = document.getElementById('photoToast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2500);
+  }
 </script>
 </body>
 </html>
