@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Account — Translation Context</title>
+<style>
+  :root {
+    --bg-grouped: #F2F2F7;
+    --bg-cell: #FFFFFF;
+    --bg-nav: rgba(249,249,249,0.97);
+    --text-primary: #000000;
+    --text-secondary: #3C3C43;
+    --text-tertiary: #8E8E93;
+    --text-placeholder: #C7C7CC;
+    --separator: #C6C6C8;
+    --tint: #007AFF;
+    --text-disabled: #8E8E93;
+    --system-green: #34C759;
+    --cell-radius: 10px;
+    --font: -apple-system, 'SF Pro Text', system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font); background: #E8E8ED; padding: 52px 28px 80px; color: var(--text-primary); }
+
+  .page-header { max-width: 1000px; margin: 0 auto 40px; }
+  .page-header h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .page-header p { font-size: 15px; color: var(--text-secondary); line-height: 1.6; max-width: 620px; }
+
+  .section-label { max-width: 1000px; margin: 36px auto 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-tertiary); padding-left: 4px; }
+
+  .cards { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+  .card { background: #fff; border-radius: 18px; box-shadow: 0 2px 16px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06); display: grid; grid-template-columns: 1fr 300px; overflow: hidden; }
+  .card-meta { padding: 26px 28px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid rgba(0,0,0,0.05); }
+  .define-badge { align-self: flex-start; font-size: 11px; font-weight: 600; color: #007AFF; background: rgba(0,122,255,0.1); border-radius: 6px; padding: 3px 9px; font-family: 'SF Mono','Menlo',monospace; letter-spacing: 0.3px; }
+  .en-text { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; line-height: 1.3; }
+  .meta-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+  .pill { font-size: 12px; color: #555; background: #f2f2f7; border-radius: 20px; padding: 3px 10px; font-weight: 500; }
+  .pill.toast { background: #FFF3E0; color: #BF5600; }
+  .pill.alert { background: #FFF0F0; color: #C0392B; }
+  .context-note { margin-top: auto; padding-top: 14px; border-top: 1px solid #f0f0f4; font-size: 13px; color: var(--text-tertiary); line-height: 1.5; }
+
+  .card-preview { background: var(--bg-grouped); border-left: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; padding: 22px 18px; }
+
+  /* Highlight */
+  .hl { background: rgba(255,196,0,0.38); border-radius: 3px; padding: 1px 2px; margin: -1px -2px; outline: 1.5px solid rgba(220,160,0,0.55); outline-offset: 1px; }
+
+  /* ── Mini phone UI ── */
+  .mini-ui { width: 256px; background: var(--bg-grouped); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.1); }
+  .mini-nav { background: var(--bg-nav); border-bottom: 0.5px solid var(--separator); padding: 10px 14px; display: flex; align-items: center; justify-content: center; position: relative; min-height: 44px; }
+  .mini-nav .back { position: absolute; left: 10px; font-size: 13px; color: var(--tint); display: flex; align-items: center; gap: 3px; }
+  .mini-nav .title { font-size: 15px; font-weight: 600; }
+  .mini-photo { display: flex; flex-direction: column; align-items: center; padding: 14px 0 8px; gap: 5px; }
+  .mini-avatar { width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg,#E07A52,#7B4FA6); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 700; }
+  .mini-update-photo { font-size: 12px; color: var(--tint); }
+  .mini-section-header { font-size: 12px; color: var(--text-secondary); padding: 12px 14px 5px; }
+  .mini-card { background: var(--bg-cell); margin: 0 10px; border-radius: var(--cell-radius); overflow: hidden; }
+  .mini-row { padding: 9px 13px; font-size: 13px; color: var(--text-primary); border-bottom: 0.5px solid var(--separator); }
+  .mini-row:last-child { border-bottom: none; }
+  .mini-row.placeholder { color: var(--text-placeholder); }
+  .mini-row.muted { color: var(--text-disabled); }
+  .mini-row.action { color: var(--tint); }
+  .mini-row.inline { display: flex; justify-content: space-between; align-items: center; }
+  .mini-helper { font-size: 11px; color: var(--text-tertiary); padding: 4px 14px 8px; }
+  .mini-gap { height: 10px; }
+  .mini-save-btn { margin: 10px; display: block; background: var(--tint); color: #fff; font-size: 13px; font-weight: 600; text-align: center; padding: 9px; border-radius: 10px; }
+  .mini-save-btn.disabled { background: #C7C7CC; }
+  .mini-error { font-size: 11px; color: #FF3B30; padding: 5px 14px 8px; line-height: 1.4; }
+
+  /* ── Mini alert ── */
+  .mini-alert-scene { width: 256px; height: 180px; background: rgba(0,0,0,0.3); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 24px rgba(0,0,0,0.2); }
+  .mini-alert { width: 210px; background: rgba(242,242,247,0.97); border-radius: 13px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+  .mini-alert-body { padding: 16px 14px 10px; text-align: center; }
+  .mini-alert-title { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .mini-alert-msg { font-size: 11.5px; color: var(--text-primary); line-height: 1.4; }
+  .mini-alert-divider { height: 0.5px; background: var(--separator); }
+  .mini-alert-btn { width: 100%; padding: 10px; text-align: center; color: var(--tint); font-size: 13px; font-weight: 600; font-family: var(--font); background: none; border: none; cursor: default; }
+
+  /* ── Mini toast ── */
+  .mini-toast-scene { width: 256px; background: var(--bg-grouped); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.1); position: relative; }
+  .mini-toast-content { padding: 10px 0 44px; }
+  .mini-toast-pill { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.82); color: #fff; font-size: 10.5px; font-weight: 500; padding: 6px 12px; border-radius: 16px; white-space: nowrap; max-width: 230px; text-align: center; line-height: 1.35; }
+
+  /* ── Mini sheet ── */
+  .mini-sheet { width: 256px; background: var(--bg-cell); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.1); }
+  .mini-sheet-handle { width: 28px; height: 4px; background: rgba(0,0,0,0.15); border-radius: 2px; margin: 8px auto 4px; }
+  .mini-sheet-title { font-size: 14px; font-weight: 600; text-align: center; padding: 4px 16px 10px; border-bottom: 0.5px solid var(--separator); }
+  .mini-sheet-body { padding: 10px; background: var(--bg-grouped); }
+  .mini-conditions { margin: 8px 2px 0; }
+  .mini-cond-label { font-size: 11px; color: var(--text-secondary); padding: 6px 4px 4px; }
+  .mini-cond { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-tertiary); padding: 3px 4px; }
+  .mini-cond.met { color: var(--system-green); }
+  .mini-update-btn { display: block; margin: 10px 0 0; background: #C7C7CC; color: #fff; font-size: 13px; font-weight: 600; text-align: center; padding: 9px; border-radius: 10px; font-family: var(--font); }
+  .mini-update-btn.active { background: var(--tint); }
+
+  .back-chev { display: inline-block; vertical-align: middle; margin-right: 2px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Manage Account — Translation Context</h1>
+  <p>Each card shows a translatable string, its define key, character limit, and where it appears in the interface. The <span style="background:rgba(255,196,0,0.38);padding:1px 4px;border-radius:3px;outline:1.5px solid rgba(220,160,0,0.55);outline-offset:1px;font-size:13px;">highlighted text</span> is the string to translate.</p>
+</div>
+
+<!-- ═══════════════ SCREEN LABELS & NAVIGATION ═══════════════ -->
+<div class="section-label">Screen labels &amp; navigation</div>
+<div class="cards">
+
+  <!-- manage_account_title -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_title</span>
+      <div class="en-text">"Manage Account"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 18</span><span class="pill">1 line</span></div>
+      <div class="context-note">Navigation bar title shown at the top of the screen whenever the user opens this section.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title"><span class="hl">Manage Account</span></div>
+        </div>
+        <div class="mini-photo"><div class="mini-avatar">JS</div><div class="mini-update-photo">Update photo</div></div>
+        <div class="mini-section-header">Personal information</div>
+        <div class="mini-card"><div class="mini-row">Daniel</div><div class="mini-row">Hadar</div></div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- change_photo -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">change_photo</span>
+      <div class="en-text">"Update photo"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Tappable link below the user's profile photo. Opens the native image picker (camera roll).</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-photo"><div class="mini-avatar">JS</div><div class="mini-update-photo"><span class="hl">Update photo</span></div></div>
+        <div class="mini-section-header">Personal information</div>
+        <div class="mini-card"><div class="mini-row">Daniel</div><div class="mini-row">Hadar</div></div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- change_password -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">change_password</span>
+      <div class="en-text">"Change Password"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Tappable row in the Login information card. Opens the Change Password sheet. Shown for email-registered users only.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Login information</div>
+        <div class="mini-card">
+          <div class="mini-row inline muted"><span>Email</span><span>daniel@inv.com</span></div>
+          <div class="mini-row action"><span class="hl">Change Password</span></div>
+        </div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ SECTION HEADERS ═══════════════ -->
+<div class="section-label">Section headers</div>
+<div class="cards">
+
+  <!-- personal_information -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">personal_information</span>
+      <div class="en-text">"Personal information"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Section header above the card containing First name, Last name, and Display name fields.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-photo"><div class="mini-avatar">JS</div><div class="mini-update-photo">Update photo</div></div>
+        <div class="mini-section-header"><span class="hl">Personal information</span></div>
+        <div class="mini-card"><div class="mini-row">Daniel</div><div class="mini-row">Hadar</div><div class="mini-row">DanielHH</div></div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- login_credentials -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">login_credentials</span>
+      <div class="en-text">"Login information"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Section header above the login details card. Shown for email-registered users only (not social login).</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;"><span class="hl">Login information</span></div>
+        <div class="mini-card">
+          <div class="mini-row inline muted"><span>Email</span><span>daniel@inv.com</span></div>
+          <div class="mini-row action">Change Password</div>
+        </div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ INPUT FIELD PLACEHOLDERS ═══════════════ -->
+<div class="section-label">Input field placeholders</div>
+<div class="cards">
+
+  <!-- first_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">first_name</span>
+      <div class="en-text">"First name"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Placeholder inside the First name input field. Visible only when the field is empty.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row placeholder"><span class="hl">First name</span></div>
+          <div class="mini-row placeholder">Last name</div>
+          <div class="mini-row placeholder">Display name</div>
+        </div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- last_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">last_name</span>
+      <div class="en-text">"Last name"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Placeholder inside the Last name input field. Visible only when the field is empty.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row placeholder">First name</div>
+          <div class="mini-row placeholder"><span class="hl">Last name</span></div>
+          <div class="mini-row placeholder">Display name</div>
+        </div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- display_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">display_name</span>
+      <div class="en-text">"Display name"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Placeholder inside the Display name input field. Visible only when the field is empty.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row placeholder">First name</div>
+          <div class="mini-row placeholder">Last name</div>
+          <div class="mini-row placeholder"><span class="hl">Display name</span></div>
+        </div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- display_name_description -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">display_name_description</span>
+      <div class="en-text">"The name displayed on your comments"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 38</span><span class="pill">1 line</span></div>
+      <div class="context-note">Helper text below the Display name field. Explains to the user where this name will appear in the app.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row">Daniel</div>
+          <div class="mini-row">Hadar</div>
+          <div class="mini-row">DanielHH</div>
+        </div>
+        <div class="mini-helper"><span class="hl">The name displayed on your comments</span></div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- new_password -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">new_password</span>
+      <div class="en-text">"New password"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Placeholder inside the New password input field in the Change Password sheet. Field is masked by default. Visible only when empty.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-card">
+            <div class="mini-row placeholder"><span class="hl">New password</span></div>
+            <div class="mini-row placeholder">Retype password</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- retype_password -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">retype_password</span>
+      <div class="en-text">"Retype password"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Placeholder inside the Confirm password input field in the Change Password sheet. Field is masked by default. Visible only when empty.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-card">
+            <div class="mini-row placeholder">New password</div>
+            <div class="mini-row placeholder"><span class="hl">Retype password</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ BUTTONS ═══════════════ -->
+<div class="section-label">Buttons</div>
+<div class="cards">
+
+  <!-- save_profile -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">save_profile</span>
+      <div class="en-text">"Save"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 8</span><span class="pill">1 line</span></div>
+      <div class="context-note">Primary action button below the Personal information card. Disabled by default — enabled only when at least one field has changed and all fields are valid.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row">Daniel</div>
+          <div class="mini-row">Hadar</div>
+          <div class="mini-row">DanielHH</div>
+        </div>
+        <div class="mini-save-btn"><span class="hl">Save</span></div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- update_password -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">update_password</span>
+      <div class="en-text">"Update Password"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Primary action button in the Change Password sheet. Disabled until all four password requirements are met.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-card">
+            <div class="mini-row placeholder">New password</div>
+            <div class="mini-row placeholder">Retype password</div>
+          </div>
+          <div class="mini-conditions">
+            <div class="mini-cond-label">Your password must contain:</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 letters</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 numbers</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Maximum 15 characters</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Passwords match</div>
+          </div>
+          <div class="mini-update-btn active"><span class="hl">Update Password</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- got_it -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">got_it</span>
+      <div class="en-text">"Got it"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 10</span><span class="pill">1 line</span></div>
+      <div class="context-note">Dismiss button in error alert dialogues — used in both the "Invalid file type" and "Photo too large" alerts.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title">Photo too large</div>
+            <div class="mini-alert-msg">Please upload a photo smaller than 10 MB</div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn"><span class="hl">Got it</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ PASSWORD REQUIREMENTS CHECKLIST ═══════════════ -->
+<div class="section-label">Password requirements checklist</div>
+<div class="cards">
+
+  <!-- password_must_contain -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">password_must_contain</span>
+      <div class="en-text">"Your password must contain:"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 30</span><span class="pill">1 line</span></div>
+      <div class="context-note">Header label above the requirements checklist in the Change Password sheet.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-card"><div class="mini-row placeholder">New password</div><div class="mini-row placeholder">Retype password</div></div>
+          <div class="mini-conditions">
+            <div class="mini-cond-label"><span class="hl">Your password must contain:</span></div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 letters</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 numbers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- pass_rule_2_letters -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">pass_rule_2_letters</span>
+      <div class="en-text">"At least 2 letters"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Checklist item. Turns green with a checkmark when the new password contains at least 2 letters.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-conditions" style="margin-top:0;">
+            <div class="mini-cond-label">Your password must contain:</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="hl">At least 2 letters</span></div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 numbers</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Maximum 15 characters</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Passwords match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- pass_rule_2_numbers -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">pass_rule_2_numbers</span>
+      <div class="en-text">"At least 2 numbers"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Checklist item. Turns green with a checkmark when the new password contains at least 2 numbers.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-conditions" style="margin-top:0;">
+            <div class="mini-cond-label">Your password must contain:</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 letters</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="hl">At least 2 numbers</span></div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Maximum 15 characters</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Passwords match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- pass_rule_max_15 -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">pass_rule_max_15</span>
+      <div class="en-text">"Maximum 15 characters"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span></div>
+      <div class="context-note">Checklist item. Turns green as soon as the new password has at least 1 character (valid range is 1-15).</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-conditions" style="margin-top:0;">
+            <div class="mini-cond-label">Your password must contain:</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 letters</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 numbers</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="hl">Maximum 15 characters</span></div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Passwords match</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- passwords_match -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">passwords_match</span>
+      <div class="en-text">"Passwords match"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span></div>
+      <div class="context-note">Checklist item. Turns green when both password fields are non-empty and identical.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-sheet">
+        <div class="mini-sheet-handle"></div>
+        <div class="mini-sheet-title">Change Password</div>
+        <div class="mini-sheet-body">
+          <div class="mini-conditions" style="margin-top:0;">
+            <div class="mini-cond-label">Your password must contain:</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 letters</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>At least 2 numbers</div>
+            <div class="mini-cond"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#C7C7CC"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Maximum 15 characters</div>
+            <div class="mini-cond met"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="7" fill="#34C759"/><polyline points="4,7 6,9 10,5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="hl">Passwords match</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ VALIDATION ERRORS ═══════════════ -->
+<div class="section-label">Validation errors</div>
+<div class="cards">
+
+  <!-- manage_account_validation_first_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_validation_first_name</span>
+      <div class="en-text">"First name should only include letters and spaces"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 40</span><span class="pill">1 line</span></div>
+      <div class="context-note">Inline error shown below the Personal information card when the First name field contains invalid characters (numbers or symbols).</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row" style="color:#FF3B30;">Daniel123</div>
+          <div class="mini-row">Hadar</div>
+          <div class="mini-row">DanielHH</div>
+        </div>
+        <div class="mini-error"><span class="hl">First name should only include letters and spaces</span></div>
+        <div class="mini-save-btn disabled">Save</div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_validation_last_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_validation_last_name</span>
+      <div class="en-text">"Last name should only include letters and spaces"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 40</span><span class="pill">1 line</span></div>
+      <div class="context-note">Inline error shown below the Personal information card when the Last name field contains invalid characters. Only shown if First name is valid.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row">Daniel</div>
+          <div class="mini-row" style="color:#FF3B30;">Hadar99</div>
+          <div class="mini-row">DanielHH</div>
+        </div>
+        <div class="mini-error"><span class="hl">Last name should only include letters and spaces</span></div>
+        <div class="mini-save-btn disabled">Save</div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_validation_display_name -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_validation_display_name</span>
+      <div class="en-text">"Display name should only include letters and numbers, minimum 4 characters"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 60</span><span class="pill">2 lines</span></div>
+      <div class="context-note">Inline error shown below the Personal information card when the Display name contains symbols or spaces, or is fewer than 4 characters. Only shown if First name and Last name are valid.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-ui">
+        <div class="mini-nav">
+          <div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div>
+          <div class="title">Manage Account</div>
+        </div>
+        <div class="mini-section-header" style="margin-top:10px;">Personal information</div>
+        <div class="mini-card">
+          <div class="mini-row">Daniel</div>
+          <div class="mini-row">Hadar</div>
+          <div class="mini-row" style="color:#FF3B30;">D@n!</div>
+        </div>
+        <div class="mini-error"><span class="hl">Display name should only include letters and numbers, minimum 4 characters</span></div>
+        <div class="mini-save-btn disabled">Save</div>
+        <div class="mini-gap"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ TOASTS ═══════════════ -->
+<div class="section-label">Toast messages</div>
+<div class="cards">
+
+  <!-- your_changes_have_been_saved -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">your_changes_have_been_saved</span>
+      <div class="en-text">"Your changes have been saved"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 28</span><span class="pill">1 line</span><span class="pill toast">Toast</span></div>
+      <div class="context-note">Brief toast shown at the bottom of the screen after profile changes are saved successfully.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-toast-scene">
+        <div class="mini-toast-content">
+          <div class="mini-nav" style="border-radius:0;"><div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div><div class="title">Manage Account</div></div>
+          <div class="mini-section-header" style="margin-top:8px;">Personal information</div>
+          <div class="mini-card"><div class="mini-row">Daniel</div><div class="mini-row">Hadar</div></div>
+        </div>
+        <div class="mini-toast-pill"><span class="hl">Your changes have been saved</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_image_upload_success -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_image_upload_success</span>
+      <div class="en-text">"Photo successfully updated"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 28</span><span class="pill">1 line</span><span class="pill toast">Toast</span></div>
+      <div class="context-note">Brief toast shown after the user successfully uploads a new profile photo.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-toast-scene">
+        <div class="mini-toast-content">
+          <div class="mini-nav" style="border-radius:0;"><div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div><div class="title">Manage Account</div></div>
+          <div class="mini-photo"><div class="mini-avatar">JS</div><div class="mini-update-photo">Update photo</div></div>
+        </div>
+        <div class="mini-toast-pill"><span class="hl">Photo successfully updated</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- password_updated -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">password_updated</span>
+      <div class="en-text">"Password updated"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 24</span><span class="pill">1 line</span><span class="pill toast">Toast</span></div>
+      <div class="context-note">Brief toast shown after the Change Password sheet closes, confirming the password was updated successfully.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-toast-scene">
+        <div class="mini-toast-content">
+          <div class="mini-nav" style="border-radius:0;"><div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div><div class="title">Manage Account</div></div>
+          <div class="mini-section-header" style="margin-top:8px;">Login information</div>
+          <div class="mini-card"><div class="mini-row inline muted"><span>Email</span><span>daniel@inv.com</span></div><div class="mini-row action">Change Password</div></div>
+        </div>
+        <div class="mini-toast-pill"><span class="hl">Password updated</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- error_updating_password -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">error_updating_password</span>
+      <div class="en-text">"Couldn't update password. Please try again"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 44</span><span class="pill">2 lines</span><span class="pill toast">Toast</span></div>
+      <div class="context-note">Toast shown when the password update request fails. Appears at the bottom of the Change Password sheet.</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-toast-scene">
+        <div class="mini-toast-content">
+          <div class="mini-nav" style="border-radius:0;"><div class="back"><svg class="back-chev" width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#007AFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6,1 1,6 6,11"/></svg>Back</div><div class="title">Manage Account</div></div>
+          <div class="mini-sheet-body" style="background:var(--bg-grouped);padding-top:8px;"><div class="mini-card"><div class="mini-row placeholder">New password</div><div class="mini-row placeholder">Retype password</div></div></div>
+        </div>
+        <div class="mini-toast-pill"><span class="hl">Couldn't update password. Please try again</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ ALERTS ═══════════════ -->
+<div class="section-label">Alert titles &amp; messages</div>
+<div class="cards">
+
+  <!-- manage_account_invalid_file_type (title) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_invalid_file_type</span>
+      <div class="en-text">"Invalid file type"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 28</span><span class="pill">1 line</span><span class="pill alert">Alert title</span></div>
+      <div class="context-note">Title of the alert shown when the user selects a file that is not a JPG or PNG. Shown alongside message: "Please upload a JPG or PNG only".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title"><span class="hl">Invalid file type</span></div>
+            <div class="mini-alert-msg">Please upload a JPG or PNG only</div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- invalid_image_format (message) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">invalid_image_format</span>
+      <div class="en-text">"Please upload a JPG or PNG only"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 40</span><span class="pill">2 lines</span><span class="pill alert">Alert message</span></div>
+      <div class="context-note">Body text of the alert when the user selects an unsupported file type. Shown with title: "Invalid file type".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title">Invalid file type</div>
+            <div class="mini-alert-msg"><span class="hl">Please upload a JPG or PNG only</span></div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_image_too_large (title) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_image_too_large</span>
+      <div class="en-text">"Photo too large"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 28</span><span class="pill">1 line</span><span class="pill alert">Alert title</span></div>
+      <div class="context-note">Title of the alert shown when the user selects a photo larger than 10 MB. Shown alongside message: "Please upload a photo smaller than 10 MB".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title"><span class="hl">Photo too large</span></div>
+            <div class="mini-alert-msg">Please upload a photo smaller than 10 MB</div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- image_too_large (message) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">image_too_large</span>
+      <div class="en-text">"Please upload a photo smaller than 10 MB"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 40</span><span class="pill">2 lines</span><span class="pill alert">Alert message</span></div>
+      <div class="context-note">Body text of the alert when the selected photo exceeds 10 MB. Shown with title: "Photo too large".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title">Photo too large</div>
+            <div class="mini-alert-msg"><span class="hl">Please upload a photo smaller than 10 MB</span></div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_upload_error (title) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_upload_error</span>
+      <div class="en-text">"Upload Failed"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 20</span><span class="pill">1 line</span><span class="pill alert">Alert title</span></div>
+      <div class="context-note">Title of the alert shown when a photo upload fails. Shown alongside message: "Failed to upload photo, please try again".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title"><span class="hl">Upload Failed</span></div>
+            <div class="mini-alert-msg">Failed to upload photo, please try again</div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- manage_account_image_upload_error (message) -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">manage_account_image_upload_error</span>
+      <div class="en-text">"Failed to upload photo, please try again"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 44</span><span class="pill">2 lines</span><span class="pill alert">Alert message</span></div>
+      <div class="context-note">Body text of the alert when a photo upload fails. Shown with title: "Upload Failed".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title">Upload Failed</div>
+            <div class="mini-alert-msg"><span class="hl">Failed to upload photo, please try again</span></div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- failed_to_save_changes -->
+  <div class="card">
+    <div class="card-meta">
+      <span class="define-badge">failed_to_save_changes</span>
+      <div class="en-text">"Failed to save changes, please try again"</div>
+      <div class="meta-pills"><span class="pill">Char limit: 40</span><span class="pill">2 lines</span><span class="pill alert">Alert message</span></div>
+      <div class="context-note">Body text of the alert when saving profile changes fails. Shown with title: "Save Failed" and button: "Got it".</div>
+    </div>
+    <div class="card-preview">
+      <div class="mini-alert-scene">
+        <div class="mini-alert">
+          <div class="mini-alert-body">
+            <div class="mini-alert-title">Save Failed</div>
+            <div class="mini-alert-msg"><span class="hl">Failed to save changes, please try again</span></div>
+          </div>
+          <div class="mini-alert-divider"></div>
+          <button class="mini-alert-btn">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
