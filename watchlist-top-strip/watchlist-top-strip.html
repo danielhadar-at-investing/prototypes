@@ -156,6 +156,8 @@ html, body {
 }
 .strip-item-price.tick-up { color: var(--green); }
 .strip-item-price.tick-down { color: var(--red); }
+.strip-item-price.tick-up { color: var(--green); }
+.strip-item-price.tick-down { color: var(--red); }
 .strip-item-change {
   font-size: 9px;
   font-weight: 600;
@@ -864,20 +866,20 @@ html, body {
 </div>
 
 <script>
-// ===== STRIP ITEMS DATA =====
+// ===== INSTRUMENT DATA =====
 const allInstruments = [
-  { id: 'sp500',   name: 'S&P 500',   ticker: 'US500', price: '5,611', change: '-0.22%', up: false, seed: 1  },
-  { id: 'ta35',    name: 'TA-35',     ticker: 'TA35',  price: '2,101', change: '+0.41%', up: true,  seed: 9  },
-  { id: 'gold',    name: 'Gold',      ticker: 'XAU',   price: '3,084', change: '-0.18%', up: false, seed: 14 },
-  { id: 'btc',     name: 'Bitcoin',   ticker: 'BTC',   price: '87,234',change: '+1.45%', up: true,  seed: 15 },
-  { id: 'dji',     name: 'Dow Jones', ticker: 'DJI',   price: '41,583',change: '+0.10%', up: true,  seed: 2  },
-  { id: 'nvda',    name: 'NVDA',      ticker: 'NVDA',  price: '875.35',change: '+2.14%', up: true,  seed: 13 },
-  { id: 'nasdaq',  name: 'Nasdaq',    ticker: 'IXIC',  price: '17,680',change: '-0.35%', up: false, seed: 3  },
-  { id: 'eth',     name: 'Ethereum',  ticker: 'ETH',   price: '1,978', change: '-2.08%', up: false, seed: 16 },
-  { id: 'oil',     name: 'Crude Oil', ticker: 'WTI',   price: '69.42', change: '-0.55%', up: false, seed: 17 },
-  { id: 'silver',  name: 'Silver',    ticker: 'XAG',   price: '33.12', change: '+0.32%', up: true,  seed: 18 },
-  { id: 'aapl',    name: 'Apple',     ticker: 'AAPL',  price: '221.53',change: '-0.96%', up: false, seed: 19 },
-  { id: 'eurusd',  name: 'EUR/USD',   ticker: 'EURUSD',price: '1.0821',change: '+0.12%', up: true,  seed: 20 },
+  { id: 'sp500',  name: 'S&P 500',   ticker: 'US500',  basePrice: 5611.85, pct: -0.22, up: false, seed: 1  },
+  { id: 'ta35',   name: 'TA-35',     ticker: 'TA35',   basePrice: 2101.54, pct:  0.41, up: true,  seed: 9  },
+  { id: 'gold',   name: 'Gold',      ticker: 'XAU',    basePrice: 3084.20, pct: -0.18, up: false, seed: 14 },
+  { id: 'btc',    name: 'Bitcoin',   ticker: 'BTC',    basePrice: 87234.1, pct:  1.45, up: true,  seed: 15 },
+  { id: 'dji',    name: 'Dow Jones', ticker: 'DJI',    basePrice: 41583.0, pct:  0.10, up: true,  seed: 2  },
+  { id: 'nvda',   name: 'NVDA',      ticker: 'NVDA',   basePrice: 875.35,  pct:  2.14, up: true,  seed: 13 },
+  { id: 'nasdaq', name: 'Nasdaq',    ticker: 'IXIC',   basePrice: 17680.0, pct: -0.35, up: false, seed: 3  },
+  { id: 'eth',    name: 'Ethereum',  ticker: 'ETH',    basePrice: 1978.34, pct: -2.08, up: false, seed: 16 },
+  { id: 'oil',    name: 'Crude Oil', ticker: 'WTI',    basePrice: 69.42,   pct: -0.55, up: false, seed: 17 },
+  { id: 'silver', name: 'Silver',    ticker: 'XAG',    basePrice: 33.12,   pct:  0.32, up: true,  seed: 18 },
+  { id: 'aapl',   name: 'Apple',     ticker: 'AAPL',   basePrice: 221.53,  pct: -0.96, up: false, seed: 19 },
+  { id: 'eurusd', name: 'EUR/USD',   ticker: 'EURUSD', basePrice: 1.0821,  pct:  0.12, up: true,  seed: 20 },
 ];
 
 let activeIds = ['sp500', 'ta35', 'gold', 'btc', 'dji', 'nvda'];
@@ -885,6 +887,17 @@ let showStrip = true;
 
 function getActive() { return activeIds.map(id => allInstruments.find(i => i.id === id)); }
 function getAvailable() { return allInstruments.filter(i => !activeIds.includes(i.id)); }
+
+// Live price state
+const livePrices = {};
+allInstruments.forEach(i => { livePrices[i.id] = i.basePrice; });
+
+function formatStripPrice(p) {
+  if (p >= 10000) return p.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (p >= 1000)  return p.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  if (p >= 10)    return p.toFixed(2);
+  return p.toFixed(4);
+}
 
 // ===== ROLLING CHART STATE =====
 const rollingPoints = {};
@@ -900,6 +913,17 @@ function initRolling(seed, isUp, count) {
     pts.push(val);
   }
   rollingPoints[seed] = { pts, isUp, s };
+}
+
+function advanceRolling(seed) {
+  const st = rollingPoints[seed];
+  if (!st) return;
+  st.s = (st.s * 9301 + 49297) % 233280;
+  const r = st.s / 233280;
+  let val = st.pts[st.pts.length - 1] + (r - 0.5 + (st.isUp ? 0.35 : -0.35) * 0.12) * 5;
+  val = Math.max(8, Math.min(92, val));
+  st.pts.shift();
+  st.pts.push(val);
 }
 
 function drawChart(canvas, seed, isUp) {
@@ -939,6 +963,46 @@ function drawChart(canvas, seed, isUp) {
   ctx.fill();
 }
 
+// ===== LIVE TICKING =====
+function tickStripPrices() {
+  if (!showStrip) return;
+  getActive().forEach(item => {
+    if (Math.random() > 0.45) return;
+    const variance = livePrices[item.id] * (Math.random() * 0.0018 - 0.0009);
+    livePrices[item.id] += variance;
+
+    const priceEl = document.getElementById('price-' + item.id);
+    const changeEl = document.getElementById('change-' + item.id);
+    if (!priceEl) return;
+
+    const newText = formatStripPrice(livePrices[item.id]);
+    const oldText = priceEl.textContent;
+    priceEl.textContent = newText;
+
+    const pctDelta = ((livePrices[item.id] - item.basePrice) / item.basePrice) * 100;
+    const totalPct = item.pct + pctDelta;
+    const isUp = totalPct >= 0;
+    changeEl.textContent = (isUp ? '+' : '') + totalPct.toFixed(2) + '%';
+    changeEl.className = 'strip-item-change ' + (isUp ? 'up' : 'down');
+
+    if (newText !== oldText) {
+      priceEl.classList.remove('tick-up', 'tick-down');
+      void priceEl.offsetWidth;
+      priceEl.classList.add(variance >= 0 ? 'tick-up' : 'tick-down');
+      setTimeout(() => priceEl.classList.remove('tick-up', 'tick-down'), 600);
+    }
+  });
+}
+
+function tickCharts() {
+  if (!showStrip) return;
+  getActive().forEach(item => {
+    advanceRolling(item.seed);
+    const canvas = document.getElementById('chart-' + item.id);
+    if (canvas) requestAnimationFrame(() => drawChart(canvas, item.seed, item.up));
+  });
+}
+
 // ===== RENDER STRIP =====
 function renderStrip() {
   const wrap = document.getElementById('topStripWrap');
@@ -948,18 +1012,19 @@ function renderStrip() {
   const container = document.getElementById('topStripScroll');
   container.innerHTML = '';
   getActive().forEach(item => {
+    const pct = item.pct;
+    const isUp = pct >= 0;
     const el = document.createElement('div');
     el.className = 'strip-item';
     el.innerHTML = `
       <div class="strip-item-name">${item.name}</div>
       <div class="strip-item-chart"><canvas id="chart-${item.id}"></canvas></div>
-      <div class="strip-item-price">${item.price}</div>
-      <div class="strip-item-change ${item.up ? 'up' : 'down'}">${item.change}</div>
+      <div class="strip-item-price" id="price-${item.id}">${formatStripPrice(livePrices[item.id])}</div>
+      <div class="strip-item-change ${isUp ? 'up' : 'down'}" id="change-${item.id}">${isUp ? '+' : ''}${pct.toFixed(2)}%</div>
     `;
     container.appendChild(el);
   });
 
-  // draw charts after DOM settles
   setTimeout(() => {
     getActive().forEach(item => {
       if (!rollingPoints[item.seed]) initRolling(item.seed, item.up, 30);
@@ -967,6 +1032,9 @@ function renderStrip() {
     });
   }, 50);
 }
+
+setInterval(tickStripPrices, 1500);
+setInterval(tickCharts, 2000);
 
 // ===== RENDER STRIP SETTINGS =====
 function renderStripSettings() {
