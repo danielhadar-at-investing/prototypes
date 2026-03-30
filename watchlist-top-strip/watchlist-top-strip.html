@@ -491,13 +491,15 @@ html, body {
 .ios-toggle.on .ios-toggle-knob { transform: translateX(20px); }
 
 /* ===== TOP STRIP SETTINGS SCREEN ===== */
-.strip-grid-wrap {
+.strip-settings-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 16px;
 }
-.strip-grid-wrap::-webkit-scrollbar { display: none; }
+.strip-settings-body::-webkit-scrollbar { display: none; }
+.strip-grid-wrap {
+  padding: 0 16px 8px;
+}
 .strip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .strip-grid-hint {
   font-size: 12px;
@@ -1022,9 +1024,6 @@ html, body {
           <div class="settings-row-label">Top Strip</div>
           <div class="settings-row-value" id="stripSettingsValue">S&P 500, TA-35, Gold, Bitcoin, Dow Jones, NVDA</div>
         </div>
-        <button class="ios-toggle on" id="stripToggle" onclick="event.stopPropagation()">
-          <div class="ios-toggle-knob"></div>
-        </button>
         <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
@@ -1046,7 +1045,29 @@ html, body {
       </button>
       <div class="settings-title">Top Strip</div>
     </div>
-    <div id="stripGridWrap" class="strip-grid-wrap"><!-- populated by JS --></div>
+    <div class="strip-settings-body">
+      <div class="settings-section-label">Instruments</div>
+      <div id="stripGridWrap" class="strip-grid-wrap"><!-- populated by JS --></div>
+      <div class="settings-section-label">General</div>
+      <div class="settings-rows">
+        <div class="settings-row" style="cursor: default;">
+          <div class="settings-row-content">
+            <div class="settings-row-label">Show Watchlist News</div>
+          </div>
+          <button class="ios-toggle on" id="newsToggle">
+            <div class="ios-toggle-knob"></div>
+          </button>
+        </div>
+        <div class="settings-row" style="cursor: default;">
+          <div class="settings-row-content">
+            <div class="settings-row-label">Show Instruments</div>
+          </div>
+          <button class="ios-toggle on" id="instrumentsToggle">
+            <div class="ios-toggle-knob"></div>
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- Selection Drawer -->
     <div class="strip-select-backdrop" id="stripSelectBackdrop" onclick="closeSelectDrawer()"></div>
     <div class="strip-select-drawer" id="stripSelectDrawer">
@@ -1095,6 +1116,7 @@ const allInstruments = [
 
 let activeIds = ['sp500', 'ta35', 'gold', 'btc', 'dji', 'nvda', 'nasdaq', 'oil', 'silver'];
 let showStrip = true;
+let showNews = true;
 
 function getActive() { return activeIds.map(id => allInstruments.find(i => i.id === id)); }
 function getAvailable() { return allInstruments.filter(i => !activeIds.includes(i.id)); }
@@ -1217,7 +1239,11 @@ function tickCharts() {
 // ===== RENDER STRIP =====
 function renderStrip() {
   const wrap = document.getElementById('topStripWrap');
-  wrap.style.display = showStrip ? '' : 'none';
+  const scroll = document.getElementById('topStripScroll');
+  const newsRow = document.querySelector('.news-ticker-row');
+  wrap.style.display = (showStrip || showNews) ? '' : 'none';
+  if (scroll) scroll.style.display = showStrip ? '' : 'none';
+  if (newsRow) newsRow.style.display = showNews ? '' : 'none';
   if (!showStrip) return;
 
   const container = document.getElementById('topStripScroll');
@@ -1500,7 +1526,12 @@ document.getElementById('stripSettingsBackBtn').addEventListener('click', () => 
 });
 
 // Strip toggle
-document.getElementById('stripToggle').addEventListener('click', function() {
+document.getElementById('newsToggle').addEventListener('click', function() {
+  showNews = !showNews;
+  this.classList.toggle('on', showNews);
+  renderStrip();
+});
+document.getElementById('instrumentsToggle').addEventListener('click', function() {
   showStrip = !showStrip;
   this.classList.toggle('on', showStrip);
   renderStrip();
