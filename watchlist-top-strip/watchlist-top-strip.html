@@ -443,134 +443,266 @@ html, body {
 .ios-toggle.on .ios-toggle-knob { transform: translateX(20px); }
 
 /* ===== TOP STRIP SETTINGS SCREEN ===== */
-.strip-settings-scroll {
+.strip-grid-wrap {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+}
+.strip-grid-wrap::-webkit-scrollbar { display: none; }
+.strip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.strip-grid-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 12px 0 4px;
+  width: 100%;
+  text-align: center;
+}
+
+.strip-grid-item {
+  width: calc((100% - 16px) / 3);
+  aspect-ratio: 1;
+  position: relative;
+  background: #FAFAFA;
+  border: 1px solid var(--border-mid);
+  border-radius: 12px;
+  padding: 8px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.strip-grid-item.being-dragged { opacity: 0.3; }
+.strip-grid-item.dragging-over {
+  border-color: var(--blue);
+  background: rgba(37, 99, 235, 0.04);
+  transform: scale(1.03);
+}
+.strip-grid-item-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 14px;
+}
+.strip-grid-item-chart { flex: 1; min-height: 0; margin: 3px -2px 2px; }
+.strip-grid-item-chart canvas { width: 100%; height: 100%; display: block; }
+.strip-grid-item-price {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.strip-grid-item-change {
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.strip-grid-item-change.up { color: var(--green); }
+.strip-grid-item-change.down { color: var(--red); }
+.strip-grid-item-x {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  border: none;
+  padding: 0;
+  transition: background 0.15s;
+}
+.strip-grid-item-x:active { background: rgba(226, 54, 54, 0.3); }
+.strip-grid-item-x svg { width: 9px; height: 9px; color: #555; }
+
+.strip-grid-plus {
+  width: calc((100% - 16px) / 3);
+  aspect-ratio: 1;
+  background: none;
+  border: 1.5px dashed var(--border-dark);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font);
+  transition: background 0.15s, border-color 0.15s;
+}
+.strip-grid-plus:active { background: rgba(0,0,0,0.03); border-color: #9CA3AF; }
+.strip-grid-plus svg { width: 22px; height: 22px; color: var(--text-tertiary); }
+.strip-grid-plus span { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+
+/* Drag ghost */
+.strip-drag-ghost {
+  position: fixed;
+  width: calc((390px - 48px) / 3);
+  aspect-ratio: 1;
+  background: var(--bg);
+  border: 1.5px solid var(--blue);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  pointer-events: none;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1.06);
+  transition: transform 0.15s;
+}
+.strip-drag-ghost .ghost-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ===== SELECTION DRAWER ===== */
+.strip-select-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.strip-select-backdrop.active { opacity: 1; pointer-events: auto; }
+.strip-select-drawer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: var(--bg);
+  border-radius: 18px 18px 0 0;
+  z-index: 31;
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 80%;
+  display: flex;
+  flex-direction: column;
+}
+.strip-select-drawer.active { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: #D1D5DB;
+  border-radius: 2px;
+  margin: 8px auto 2px;
+  flex-shrink: 0;
+}
+.strip-select-title {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 14px 16px 8px;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+}
+.strip-select-search {
+  position: relative;
+  padding: 0 16px 10px;
+  flex-shrink: 0;
+}
+.strip-select-search input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  padding: 0 12px 0 36px;
+  font-size: 14px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background: #F9FAFB;
+  outline: none;
+  -webkit-appearance: none;
+}
+.strip-select-search input:focus { border-color: var(--blue); background: #fff; }
+.strip-select-search input::placeholder { color: var(--text-tertiary); }
+.strip-search-icon {
+  position: absolute;
+  left: 28px; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+.strip-select-list {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.strip-settings-scroll::-webkit-scrollbar { display: none; }
-
-.strip-section-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 20px 16px 8px;
-}
-.strip-active-list { padding: 0 16px; }
-.strip-active-item {
+.strip-select-list::-webkit-scrollbar { display: none; }
+.strip-select-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 0;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-}
-.strip-active-item:last-child { border-bottom: none; }
-.strip-drag-handle {
-  width: 20px;
-  height: 20px;
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-  cursor: grab;
-}
-.strip-active-name {
-  flex: 1;
-  min-width: 0;
-}
-.strip-active-name-primary {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-.strip-active-name-sub {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  line-height: 1.2;
-}
-.strip-reorder-btns {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.strip-reorder-btn {
-  width: 24px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
   cursor: pointer;
-  border-radius: 4px;
-  padding: 0;
+  gap: 12px;
   transition: background 0.15s;
 }
-.strip-reorder-btn:active { background: rgba(0,0,0,0.06); }
-.strip-reorder-btn svg { width: 14px; height: 14px; color: var(--text-secondary); }
-.strip-reorder-btn:disabled svg { color: #D1D5DB; }
-.strip-remove-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  padding: 0;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-.strip-remove-btn:active { background: rgba(226, 54, 54, 0.08); }
-.strip-remove-btn svg { width: 18px; height: 18px; color: var(--red); }
-.strip-remove-btn:disabled svg { color: #D1D5DB; }
-.strip-remove-btn:disabled { cursor: default; }
+.strip-select-row:last-child { border-bottom: none; }
+.strip-select-row:active { background: #F9FAFB; }
+.strip-select-row.in-use { opacity: 0.38; pointer-events: none; }
+.strip-select-row.current-slot { background: rgba(37, 99, 235, 0.04); }
+.strip-select-row-info { flex: 1; min-width: 0; }
+.strip-select-row-name { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+.strip-select-row-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+.strip-select-row-right { text-align: right; flex-shrink: 0; }
+.strip-select-row-price { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.2; font-variant-numeric: tabular-nums; }
+.strip-select-row-chg { font-size: 11px; font-weight: 500; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.strip-select-row-chg.up { color: var(--green); }
+.strip-select-row-chg.down { color: var(--red); }
 
-/* Available instruments */
-.strip-avail-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 16px 24px;
-}
-.strip-avail-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  background: #F9FAFB;
-  border: 1px solid var(--border-dark);
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  border-radius: 20px;
-  transition: background 0.15s, border-color 0.15s;
-  font-family: var(--font);
-}
-.strip-avail-chip:active { background: #F0F0F0; }
-.strip-avail-chip .add-icon {
-  width: 16px;
-  height: 16px;
-  background: var(--blue);
-  border-radius: 50%;
+/* ===== REMOVE CONFIRM MODAL ===== */
+.strip-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
-.strip-avail-chip .add-icon svg { width: 10px; height: 10px; color: #fff; }
-.strip-count-note {
-  font-size: 13px;
-  color: var(--text-secondary);
-  padding: 0 16px 16px;
-  line-height: 1.4;
+.strip-confirm-backdrop.active { opacity: 1; pointer-events: auto; }
+.strip-confirm-modal {
+  background: var(--bg);
+  border-radius: 14px;
+  width: 270px;
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.2);
 }
-.strip-count-note.at-max { color: var(--text-tertiary); font-style: italic; }
+.strip-confirm-body { padding: 20px 16px 16px; }
+.strip-confirm-title { font-size: 17px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.strip-confirm-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.strip-confirm-divider { height: 1px; background: var(--border-dark); }
+.strip-confirm-btns { display: flex; }
+.strip-confirm-btns button {
+  flex: 1;
+  padding: 14px 8px;
+  font-size: 16px;
+  font-family: var(--font);
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.strip-confirm-btns button:active { background: #F3F4F6; }
+.strip-confirm-btns button + button { border-left: 1px solid var(--border-dark); }
+.strip-confirm-cancel { color: var(--text-primary); font-weight: 400; }
+.strip-confirm-remove { color: var(--red); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -858,8 +990,31 @@ html, body {
       </button>
       <div class="settings-title">Top Strip</div>
     </div>
-    <div class="strip-settings-scroll" id="stripSettingsScroll">
-      <!-- Populated by JS -->
+    <div id="stripGridWrap" class="strip-grid-wrap"><!-- populated by JS --></div>
+    <!-- Selection Drawer -->
+    <div class="strip-select-backdrop" id="stripSelectBackdrop" onclick="closeSelectDrawer()"></div>
+    <div class="strip-select-drawer" id="stripSelectDrawer">
+      <div class="sheet-handle"></div>
+      <div class="strip-select-title">Select Instrument</div>
+      <div class="strip-select-search">
+        <svg class="strip-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        <input type="text" id="stripSelectInput" placeholder="Search..." oninput="populateSelectList(this.value)">
+      </div>
+      <div class="strip-select-list" id="stripSelectList"></div>
+    </div>
+    <!-- Confirm Modal -->
+    <div class="strip-confirm-backdrop" id="stripConfirmBackdrop">
+      <div class="strip-confirm-modal">
+        <div class="strip-confirm-body">
+          <div class="strip-confirm-title">Remove Item</div>
+          <div class="strip-confirm-sub" id="stripConfirmSub">Remove this item from the top strip?</div>
+        </div>
+        <div class="strip-confirm-divider"></div>
+        <div class="strip-confirm-btns">
+          <button class="strip-confirm-cancel" onclick="cancelConfirm()">Cancel</button>
+          <button class="strip-confirm-remove" onclick="doRemove()">Remove</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1036,80 +1191,233 @@ function renderStrip() {
 setInterval(tickStripPrices, 1500);
 setInterval(tickCharts, 2000);
 
-// ===== RENDER STRIP SETTINGS =====
-function renderStripSettings() {
+// ===== STRIP SETTINGS GRID =====
+let selectingSlotIndex = -1;
+let confirmRemoveId = null;
+let dragIndex = -1;
+let dragGhost = null;
+let dragLongPressTimer = null;
+let dragStartX = 0, dragStartY = 0;
+
+function renderStripSettingsGrid() {
   const active = getActive();
-  const available = getAvailable();
-  const atMin = active.length <= 3;
-  const atMax = active.length >= 6;
+  const wrap = document.getElementById('stripGridWrap');
+  wrap.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'strip-grid';
+  grid.id = 'stripGrid';
 
-  let html = `<div class="strip-section-label">Active Items (${active.length}/6 min 3)</div>`;
-  html += `<div class="strip-active-list">`;
   active.forEach((item, i) => {
-    html += `
-      <div class="strip-active-item">
-        <svg class="strip-drag-handle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
-        <div class="strip-active-name">
-          <div class="strip-active-name-primary">${item.name}</div>
-          <div class="strip-active-name-sub">${item.ticker}</div>
-        </div>
-        <div class="strip-reorder-btns">
-          <button class="strip-reorder-btn" onclick="moveItem(${i}, -1)" ${i === 0 ? 'disabled' : ''}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-          </button>
-          <button class="strip-reorder-btn" onclick="moveItem(${i}, 1)" ${i === active.length - 1 ? 'disabled' : ''}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-        </div>
-        <button class="strip-remove-btn" onclick="removeItem('${item.id}')" ${atMin ? 'disabled' : ''}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        </button>
-      </div>
+    const el = document.createElement('div');
+    el.className = 'strip-grid-item';
+    el.dataset.id = item.id;
+    el.dataset.index = i;
+    const isUp = item.up;
+    el.innerHTML = `
+      <div class="strip-grid-item-name">${item.name}</div>
+      <div class="strip-grid-item-chart"><canvas id="sgchart-${item.id}"></canvas></div>
+      <div class="strip-grid-item-price">${formatStripPrice(livePrices[item.id])}</div>
+      <div class="strip-grid-item-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${item.pct.toFixed(2)}%</div>
+      <button class="strip-grid-item-x" onclick="confirmRemove(event, '${item.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     `;
-  });
-  html += `</div>`;
-
-  if (!atMax) {
-    html += `<div class="strip-section-label">Add Instrument</div>`;
-    html += `<div class="strip-avail-grid">`;
-    available.forEach(item => {
-      html += `
-        <button class="strip-avail-chip" onclick="addItem('${item.id}')">
-          <div class="add-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-          ${item.name}
-        </button>
-      `;
+    el.addEventListener('touchstart', (e) => onItemTouchStart(e, i), { passive: false });
+    el.addEventListener('touchmove', onItemTouchMove, { passive: false });
+    el.addEventListener('touchend', onItemTouchEnd);
+    el.addEventListener('touchcancel', onItemTouchEnd);
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.strip-grid-item-x')) return;
+      openSelectDrawer(i);
     });
-    html += `</div>`;
-  } else {
-    html += `<div class="strip-count-note at-max">Maximum 6 items reached. Remove one to add another.</div>`;
+    grid.appendChild(el);
+  });
+
+  if (active.length < 6) {
+    const plus = document.createElement('button');
+    plus.className = 'strip-grid-plus';
+    plus.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add</span>`;
+    plus.addEventListener('click', () => openSelectDrawer(-1));
+    grid.appendChild(plus);
   }
 
-  document.getElementById('stripSettingsScroll').innerHTML = html;
+  const hint = document.createElement('div');
+  hint.className = 'strip-grid-hint';
+  hint.textContent = active.length <= 3 ? 'Minimum 3 items' : 'Long press to reorder · Tap to change · Min 3, max 6';
+  grid.appendChild(hint);
 
-  // update summary in settings screen
-  document.getElementById('stripSettingsValue').textContent = getActive().map(i => i.name).join(', ');
+  wrap.appendChild(grid);
+
+  setTimeout(() => {
+    active.forEach(item => {
+      if (!rollingPoints[item.seed]) initRolling(item.seed, item.up, 30);
+      drawChart(document.getElementById('sgchart-' + item.id), item.seed, item.up);
+    });
+  }, 50);
+
+  document.getElementById('stripSettingsValue').textContent = active.map(i => i.name).join(', ');
 }
 
-function moveItem(index, dir) {
-  const newIndex = index + dir;
-  if (newIndex < 0 || newIndex >= activeIds.length) return;
-  [activeIds[index], activeIds[newIndex]] = [activeIds[newIndex], activeIds[index]];
-  renderStripSettings();
-  renderStrip();
+function openSelectDrawer(slotIndex) {
+  selectingSlotIndex = slotIndex;
+  document.getElementById('stripSelectInput').value = '';
+  populateSelectList('');
+  document.getElementById('stripSelectBackdrop').classList.add('active');
+  document.getElementById('stripSelectDrawer').classList.add('active');
+  setTimeout(() => document.getElementById('stripSelectInput').focus(), 350);
 }
 
-function removeItem(id) {
+function closeSelectDrawer() {
+  document.getElementById('stripSelectBackdrop').classList.remove('active');
+  document.getElementById('stripSelectDrawer').classList.remove('active');
+}
+
+function populateSelectList(query) {
+  const list = document.getElementById('stripSelectList');
+  const q = query.toLowerCase();
+  const currentId = selectingSlotIndex >= 0 ? activeIds[selectingSlotIndex] : null;
+  const items = allInstruments.filter(item => {
+    if (!q) return true;
+    return item.name.toLowerCase().includes(q) || item.ticker.toLowerCase().includes(q);
+  });
+  list.innerHTML = items.map(item => {
+    const inUse = activeIds.includes(item.id) && item.id !== currentId;
+    const isCurrent = item.id === currentId;
+    const isUp = item.up;
+    return `
+      <div class="strip-select-row ${inUse ? 'in-use' : ''} ${isCurrent ? 'current-slot' : ''}"
+           onclick="${inUse ? '' : `selectInstrument('${item.id}')`}">
+        <div class="strip-select-row-info">
+          <div class="strip-select-row-name">${item.name}</div>
+          <div class="strip-select-row-meta">${item.ticker}</div>
+        </div>
+        <div class="strip-select-row-right">
+          <div class="strip-select-row-price">${formatStripPrice(livePrices[item.id])}</div>
+          <div class="strip-select-row-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${item.pct.toFixed(2)}%</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectInstrument(id) {
+  closeSelectDrawer();
+  setTimeout(() => {
+    if (selectingSlotIndex === -1) {
+      if (activeIds.length < 6) activeIds.push(id);
+    } else {
+      activeIds[selectingSlotIndex] = id;
+    }
+    renderStripSettingsGrid();
+    renderStrip();
+  }, 300);
+}
+
+function confirmRemove(e, id) {
+  e.stopPropagation();
   if (activeIds.length <= 3) return;
-  activeIds = activeIds.filter(i => i !== id);
-  renderStripSettings();
+  confirmRemoveId = id;
+  const item = allInstruments.find(i => i.id === id);
+  document.getElementById('stripConfirmSub').textContent = `Remove ${item ? item.name : 'this item'} from the top strip?`;
+  document.getElementById('stripConfirmBackdrop').classList.add('active');
+}
+
+function doRemove() {
+  if (!confirmRemoveId) return;
+  activeIds = activeIds.filter(i => i !== confirmRemoveId);
+  confirmRemoveId = null;
+  document.getElementById('stripConfirmBackdrop').classList.remove('active');
+  renderStripSettingsGrid();
   renderStrip();
 }
 
-function addItem(id) {
-  if (activeIds.length >= 6) return;
-  activeIds.push(id);
-  renderStripSettings();
+function cancelConfirm() {
+  confirmRemoveId = null;
+  document.getElementById('stripConfirmBackdrop').classList.remove('active');
+}
+
+// ===== DRAG AND DROP =====
+function onItemTouchStart(e, index) {
+  const touch = e.touches[0];
+  dragStartX = touch.clientX;
+  dragStartY = touch.clientY;
+  dragLongPressTimer = setTimeout(() => startDrag(e, index), 400);
+}
+
+function onItemTouchMove(e) {
+  if (!dragGhost) {
+    const touch = e.touches[0];
+    if (Math.abs(touch.clientX - dragStartX) > 8 || Math.abs(touch.clientY - dragStartY) > 8) {
+      clearTimeout(dragLongPressTimer);
+      dragLongPressTimer = null;
+    }
+    return;
+  }
+  e.preventDefault();
+  moveDrag(e);
+}
+
+function onItemTouchEnd(e) {
+  clearTimeout(dragLongPressTimer);
+  dragLongPressTimer = null;
+  if (dragGhost) endDrag(e);
+}
+
+function startDrag(e, index) {
+  dragIndex = index;
+  const el = e.currentTarget;
+  el.classList.add('being-dragged');
+  const rect = el.getBoundingClientRect();
+  dragGhost = document.createElement('div');
+  dragGhost.className = 'strip-drag-ghost';
+  dragGhost.style.width = rect.width + 'px';
+  dragGhost.style.height = rect.height + 'px';
+  const item = allInstruments.find(i => i.id === activeIds[index]);
+  dragGhost.innerHTML = `<span class="ghost-name">${item ? item.name : ''}</span>`;
+  dragGhost.style.left = rect.left + 'px';
+  dragGhost.style.top = rect.top + 'px';
+  document.body.appendChild(dragGhost);
+  if (navigator.vibrate) navigator.vibrate(40);
+}
+
+function moveDrag(e) {
+  if (!dragGhost) return;
+  const touch = e.touches[0];
+  const w = parseFloat(dragGhost.style.width);
+  const h = parseFloat(dragGhost.style.height);
+  dragGhost.style.left = (touch.clientX - w / 2) + 'px';
+  dragGhost.style.top = (touch.clientY - h / 2) + 'px';
+  dragGhost.style.visibility = 'hidden';
+  const underEl = document.elementFromPoint(touch.clientX, touch.clientY);
+  dragGhost.style.visibility = '';
+  document.querySelectorAll('.strip-grid-item.dragging-over').forEach(el => el.classList.remove('dragging-over'));
+  const target = underEl && underEl.closest('.strip-grid-item');
+  if (target) {
+    const ti = parseInt(target.dataset.index);
+    if (!isNaN(ti) && ti !== dragIndex) target.classList.add('dragging-over');
+  }
+}
+
+function endDrag(e) {
+  if (!dragGhost) return;
+  const touch = e.changedTouches[0];
+  dragGhost.style.visibility = 'hidden';
+  const underEl = document.elementFromPoint(touch.clientX, touch.clientY);
+  dragGhost.style.visibility = '';
+  const target = underEl && underEl.closest('.strip-grid-item');
+  if (target) {
+    const ti = parseInt(target.dataset.index);
+    if (!isNaN(ti) && ti !== dragIndex) {
+      const moved = activeIds.splice(dragIndex, 1)[0];
+      activeIds.splice(ti, 0, moved);
+    }
+  }
+  dragGhost.remove();
+  dragGhost = null;
+  dragIndex = -1;
+  document.querySelectorAll('.strip-grid-item.being-dragged, .strip-grid-item.dragging-over')
+    .forEach(el => el.classList.remove('being-dragged', 'dragging-over'));
+  renderStripSettingsGrid();
   renderStrip();
 }
 
@@ -1127,7 +1435,7 @@ document.getElementById('settingsBackBtn').addEventListener('click', () => {
   settingsScreen.classList.remove('active');
 });
 document.getElementById('stripSettingsRow').addEventListener('click', () => {
-  renderStripSettings();
+  renderStripSettingsGrid();
   settingsScreen.style.transform = 'translateX(-30%)';
   stripSettingsScreen.classList.add('active');
 });
