@@ -296,18 +296,16 @@ html, body {
   background: #fff;
 }
 
-/* Fear & Greed Card */
+/* Second Index Card */
 .wgo-fng {
-  flex: 0.6;
+  flex: 0.7;
   min-width: 0;
   background: #FAFAFA;
   border: 1px solid var(--border);
-  padding: 8px 6px 6px;
+  padding: 10px 10px 6px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
+  justify-content: space-between;
 }
 .wgo-fng-label {
   font-size: 8.5px;
@@ -463,6 +461,11 @@ html, body {
 }
 .symbol-price.tick-up { color: var(--green); }
 .symbol-price.tick-down { color: var(--red); }
+.index-card-price.tick-up { color: var(--green); }
+.index-card-price.tick-down { color: var(--red); }
+.wgo-sp500-price { transition: color 0.3s; }
+.wgo-sp500-price.tick-up { color: var(--green); }
+.wgo-sp500-price.tick-down { color: var(--red); }
 .symbol-change {
   font-size: 12px;
   font-weight: 500;
@@ -783,7 +786,7 @@ html, body {
   transform: translateY(100%);
   transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
   will-change: transform;
-  max-height: 80%;
+  max-height: 88%;
   display: flex;
   flex-direction: column;
 }
@@ -862,6 +865,7 @@ html, body {
   color: var(--text-primary);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
 }
 .index-card-change {
   font-size: 9px;
@@ -871,6 +875,20 @@ html, body {
 }
 .index-card-change.up { color: var(--green); }
 .index-card-change.down { color: var(--red); }
+.index-card-subtitle {
+  font-size: 8.5px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+}
+.index-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 4px 16px 8px;
+  letter-spacing: 0.1px;
+}
 
 /* Second item card variants */
 .si-card {
@@ -959,7 +977,7 @@ html, body {
 
 .index-search-bar {
   position: relative;
-  padding: 12px 16px;
+  padding: 12px 16px 28px;
   flex-shrink: 0;
   border-top: 1px solid var(--border);
 }
@@ -985,7 +1003,7 @@ html, body {
 .index-search-icon {
   position: absolute;
   left: 28px;
-  top: 50%;
+  top: 31px;
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
@@ -1274,24 +1292,26 @@ html, body {
       <div class="wgo-cards">
         <!-- S&P 500 -->
         <div class="wgo-card wgo-sp500">
-          <div class="wgo-sp500-label" id="mainIndexLabel">S&P 500</div>
+          <div class="wgo-sp500-label" id="mainIndexLabel">Gold</div>
           <div class="wgo-sp500-chart">
             <canvas id="sp500Chart"></canvas>
           </div>
           <div class="wgo-sp500-bottom">
-            <div class="wgo-sp500-price" id="sp500Price">6,836.17</div>
-            <div class="wgo-sp500-change up" id="sp500Change">+3.41 (+0.05%)</div>
+            <div class="wgo-sp500-price" id="sp500Price">2,024.50</div>
+            <div class="wgo-sp500-change down" id="sp500Change">-0.40%</div>
           </div>
         </div>
 
-        <!-- Fear & Greed -->
+        <!-- Second Index -->
         <div class="wgo-card wgo-fng">
-          <div class="wgo-fng-label">Fear &<br>Greed</div>
-          <div class="wgo-fng-gauge">
-            <canvas id="fngGauge"></canvas>
+          <div class="wgo-sp500-label" id="mainSecondLabel">TA-35</div>
+          <div class="wgo-sp500-chart">
+            <canvas id="secondChart"></canvas>
           </div>
-          <div class="wgo-fng-value">36</div>
-          <div class="wgo-fng-sentiment">Fear</div>
+          <div class="wgo-sp500-bottom">
+            <div class="wgo-sp500-price" id="secondPrice">2,101.54</div>
+            <div class="wgo-sp500-change up" id="secondChange">+0.41%</div>
+          </div>
         </div>
 
         <!-- Articles Carousel -->
@@ -1401,7 +1421,7 @@ html, body {
         </div>
         <div class="config-row-content">
           <div class="config-row-label">First Item</div>
-          <div class="config-row-value" id="configIndexValue">S&P 500</div>
+          <div class="config-row-value" id="configIndexValue">Gold</div>
         </div>
         <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
@@ -1419,7 +1439,7 @@ html, body {
         </div>
         <div class="config-row-content">
           <div class="config-row-label">Second Item</div>
-          <div class="config-row-value" id="configFngValue">Fear & Greed</div>
+          <div class="config-row-value" id="configFngValue">TA-35</div>
         </div>
         <svg class="config-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="9 18 15 12 9 6"/>
@@ -1496,14 +1516,6 @@ html, body {
           <div class="ios-toggle-knob"></div>
         </button>
       </div>
-      <div class="config-row" style="cursor: default; border-bottom: none;">
-        <div class="config-row-content">
-          <div class="config-row-label">Notify me about upcoming sales</div>
-        </div>
-        <button class="ios-toggle on" id="saleToggleMain">
-          <div class="ios-toggle-knob"></div>
-        </button>
-      </div>
     </div>
 
     <!-- Toast -->
@@ -1517,6 +1529,7 @@ html, body {
       <div class="sheet-handle"></div>
       <div class="sheet-title">Select First Item</div>
       <div class="sheet-scroll" id="indexSheetScroll">
+        <div class="index-section-label">Popular</div>
         <div class="index-grid" id="indexGrid">
           <!-- Populated by JS -->
         </div>
@@ -1526,7 +1539,7 @@ html, body {
           <circle cx="11" cy="11" r="7"/>
           <line x1="16.5" y1="16.5" x2="21" y2="21"/>
         </svg>
-        <input type="text" class="index-search-input" id="indexSearchInput" placeholder="Search indices...">
+        <input type="text" class="index-search-input" id="indexSearchInput" placeholder="Search anything...">
       </div>
     </div>
 
@@ -1534,10 +1547,18 @@ html, body {
     <div class="bottom-sheet" id="secondItemSheet">
       <div class="sheet-handle"></div>
       <div class="sheet-title">Select Second Item</div>
-      <div class="sheet-scroll" id="secondItemGrid">
-        <div class="index-grid" id="secondItemGridInner">
+      <div class="sheet-scroll" id="secondItemScroll">
+        <div class="index-section-label">Popular</div>
+        <div class="index-grid" id="secondItemGrid">
           <!-- Populated by JS -->
         </div>
+      </div>
+      <div class="index-search-bar">
+        <svg class="index-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+        </svg>
+        <input type="text" class="index-search-input" id="secondSearchInput" placeholder="Search anything...">
       </div>
     </div>
 
@@ -1664,111 +1685,85 @@ function tickPrices() {
 }
 setInterval(tickPrices, 1500);
 
-// ===== S&P 500 MINI CHART =====
-function drawSP500Chart() {
-  const canvas = document.getElementById('sp500Chart');
+// ===== ROLLING CHART STATE =====
+const rollingPoints = {};
+
+function initRolling(seed, isUp, count) {
+  let s = seed * 9301 + 49297;
+  function rnd() { s = (s * 9301 + 49297) % 233280; return s / 233280; }
+  const pts = [];
+  let val = 50;
+  const drift = isUp ? 0.35 : -0.35;
+  for (let i = 0; i < count; i++) {
+    val += (rnd() - 0.5 + drift * 0.12) * 5;
+    val = Math.max(8, Math.min(92, val));
+    pts.push(val);
+  }
+  rollingPoints[seed] = { pts, isUp, s };
+}
+
+function advanceRolling(seed) {
+  const st = rollingPoints[seed];
+  if (!st) return;
+  st.s = (st.s * 9301 + 49297) % 233280;
+  const r = st.s / 233280;
+  let val = st.pts[st.pts.length - 1] + (r - 0.5 + (st.isUp ? 0.35 : -0.35) * 0.12) * 5;
+  val = Math.max(8, Math.min(92, val));
+  st.pts.shift();
+  st.pts.push(val);
+}
+
+// ===== UNIFIED STRIP CHART (main bar cards) =====
+function drawStripChart(canvasId, seed, isUp) {
+  const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.parentElement.getBoundingClientRect();
+  if (!rect.width) return;
   canvas.width = rect.width * dpr;
   canvas.height = rect.height * dpr;
   canvas.style.width = rect.width + 'px';
   canvas.style.height = rect.height + 'px';
-
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const w = rect.width, h = rect.height;
 
-  const points = [];
-  let val = 6810;
-  for (let i = 0; i <= 30; i++) {
-    val += (Math.random() - 0.42) * 8;
-    points.push(val);
-  }
-  const min = Math.min(...points) - 5;
-  const max = Math.max(...points) + 5;
+  const pts = (rollingPoints[seed] || {}).pts || [];
+  if (pts.length < 2) return;
+
+  const min = Math.min(...pts) - 2, max = Math.max(...pts) + 2;
+  const color = isUp ? '#0ECB81' : '#E23636';
+  const mapped = pts.map((v, i) => ({
+    x: (i / (pts.length - 1)) * w,
+    y: h - ((v - min) / (max - min)) * h
+  }));
 
   ctx.beginPath();
-  points.forEach((v, i) => {
-    const x = (i / (points.length - 1)) * w;
-    const y = h - ((v - min) / (max - min)) * h;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.strokeStyle = '#0ECB81';
+  mapped.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = color;
   ctx.lineWidth = 1.5;
   ctx.lineJoin = 'round';
   ctx.stroke();
 
-  const lastX = w;
-  ctx.lineTo(lastX, h);
-  ctx.lineTo(0, h);
+  const last = mapped[mapped.length - 1];
+  ctx.lineTo(last.x, h);
+  ctx.lineTo(mapped[0].x, h);
   ctx.closePath();
   const grad = ctx.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, 'rgba(14, 203, 129, 0.18)');
-  grad.addColorStop(1, 'rgba(14, 203, 129, 0.02)');
+  grad.addColorStop(0, isUp ? 'rgba(14,203,129,0.18)' : 'rgba(226,54,54,0.18)');
+  grad.addColorStop(1, isUp ? 'rgba(14,203,129,0.02)' : 'rgba(226,54,54,0.02)');
   ctx.fillStyle = grad;
   ctx.fill();
 }
-setTimeout(drawSP500Chart, 50);
 
-// ===== FEAR & GREED GAUGE =====
-function drawFnGGauge() {
-  const canvas = document.getElementById('fngGauge');
-  if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
-
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  const w = rect.width, h = rect.height;
-  const cx = w / 2, cy = h - 2;
-  const r = Math.min(w / 2 - 4, h - 6);
-
-  const startAngle = Math.PI;
-  const segments = [
-    { color: '#E23636', pct: 0.25 },
-    { color: '#F59E0B', pct: 0.25 },
-    { color: '#A3A3A3', pct: 0.1 },
-    { color: '#84CC16', pct: 0.2 },
-    { color: '#0ECB81', pct: 0.2 },
-  ];
-
-  let currentAngle = startAngle;
-  segments.forEach(seg => {
-    const sweep = seg.pct * Math.PI;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, currentAngle, currentAngle + sweep);
-    ctx.strokeStyle = seg.color;
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    currentAngle += sweep;
-  });
-
-  const value = 36;
-  const needleAngle = startAngle + (value / 100) * Math.PI;
-  const needleLen = r - 6;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(
-    cx + Math.cos(needleAngle) * needleLen,
-    cy + Math.sin(needleAngle) * needleLen
-  );
-  ctx.strokeStyle = '#1A1A2E';
-  ctx.lineWidth = 1.5;
-  ctx.lineCap = 'round';
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#1A1A2E';
-  ctx.fill();
+function animateStripChart(canvasId, seed, isUp) {
+  requestAnimationFrame(() => drawStripChart(canvasId, seed, isUp));
 }
-setTimeout(drawFnGGauge, 50);
+
+setTimeout(() => {
+  drawStripChart('sp500Chart', 14, false);
+  drawStripChart('secondChart', 9, true);
+}, 50);
 
 // ===== ARTICLE AUTO-SCROLL =====
 let currentArticle = 0;
@@ -1822,28 +1817,27 @@ setInterval(() => {
 
 // State
 const configState = {
-  selectedIndex: 'S&P 500',
-  selectedSecondItem: 'Fear & Greed',
+  selectedIndex: 'Gold',
+  selectedSecondItem: 'TA-35',
   selectedNews: ['Breaking News'],
   selectedMarkets: ['US Markets', 'Israel (TA)'],
-  saleNotify: true,
   showStrip: true
 };
 
 // Index data
 const indices = [
-  { name: 'S&P 500', price: '6,836.17', change: '+0.05%', up: true, seed: 1 },
-  { name: 'Dow Jones', price: '49,500.93', change: '+0.10%', up: true, seed: 2 },
-  { name: 'Nasdaq', price: '22,546.67', change: '-0.22%', up: false, seed: 3 },
-  { name: 'FTSE 100', price: '8,727.30', change: '+0.34%', up: true, seed: 4 },
-  { name: 'DAX', price: '22,148.60', change: '+0.62%', up: true, seed: 5 },
-  { name: 'Nikkei 225', price: '39,461.47', change: '-0.79%', up: false, seed: 6 },
-  { name: 'Hang Seng', price: '22,976.81', change: '+1.24%', up: true, seed: 7 },
-  { name: 'CAC 40', price: '8,063.12', change: '+0.18%', up: true, seed: 8 },
-  { name: 'TA-35', price: '2,101.54', change: '+0.41%', up: true, seed: 9 },
-  { name: 'ASX 200', price: '8,481.00', change: '-0.15%', up: false, seed: 10 },
-  { name: 'KOSPI', price: '2,624.92', change: '-0.33%', up: false, seed: 11 },
-  { name: 'IBEX 35', price: '13,025.40', change: '+0.27%', up: true, seed: 12 },
+  { name: 'S&P 500', price: '6,836.17', change: '+0.05%', up: true, seed: 1, subtitle: 'Index' },
+  { name: 'Dow Jones', price: '49,500.93', change: '+0.10%', up: true, seed: 2, subtitle: 'Index' },
+  { name: 'Nasdaq', price: '22,546.67', change: '-0.22%', up: false, seed: 3, subtitle: 'Index' },
+  { name: 'NVDA', price: '875.35', change: '+2.14%', up: true, seed: 13, subtitle: 'Stock' },
+  { name: 'Gold', price: '2,024.50', change: '-0.40%', up: false, seed: 14, subtitle: 'Commodity' },
+  { name: 'Bitcoin', price: '68,559', change: '+1.90%', up: true, seed: 15, subtitle: 'Crypto' },
+  { name: 'FTSE 100', price: '8,727.30', change: '+0.34%', up: true, seed: 4, subtitle: 'Index' },
+  { name: 'DAX', price: '22,148.60', change: '+0.62%', up: true, seed: 5, subtitle: 'Index' },
+  { name: 'Ethereum', price: '3,412.80', change: '+1.20%', up: true, seed: 16, subtitle: 'Crypto' },
+  { name: 'Crude Oil WTI', price: '77.24', change: '-0.80%', up: false, seed: 17, subtitle: 'Commodity' },
+  { name: 'Nikkei 225', price: '39,461.47', change: '-0.79%', up: false, seed: 6, subtitle: 'Index' },
+  { name: 'TA-35', price: '2,101.54', change: '+0.41%', up: true, seed: 9, subtitle: 'Index' },
 ];
 
 // News options
@@ -1966,7 +1960,7 @@ document.getElementById('configFngRow').addEventListener('click', () => openShee
 document.getElementById('configNewsRow').addEventListener('click', () => openSheet(newsSheet));
 document.getElementById('configMarketRow').addEventListener('click', () => openSheet(marketSheet));
 
-// ===== INDEX GRID =====
+// ===== INDEX GRID SPARKLINES =====
 function drawMiniSparkline(canvas, seed, isUp) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.parentElement.getBoundingClientRect();
@@ -1975,32 +1969,18 @@ function drawMiniSparkline(canvas, seed, isUp) {
   canvas.height = rect.height * dpr;
   canvas.style.width = rect.width + 'px';
   canvas.style.height = rect.height + 'px';
-
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
   const w = rect.width, h = rect.height;
-
-  // Seeded pseudo-random for consistent sparklines
-  let s = seed * 9301 + 49297;
-  function rand() {
-    s = (s * 9301 + 49297) % 233280;
-    return s / 233280;
-  }
-
-  const points = [];
-  let val = 50;
-  const drift = isUp ? 0.6 : -0.6;
-  for (let i = 0; i <= 20; i++) {
-    val += (rand() - 0.5 + drift * 0.15) * 6;
-    points.push(val);
-  }
-  const min = Math.min(...points) - 2;
-  const max = Math.max(...points) + 2;
   const pad = 1;
 
+  const pts = (rollingPoints[seed] || {}).pts || [];
+  if (pts.length < 2) return;
+
+  const min = Math.min(...pts) - 2, max = Math.max(...pts) + 2;
   ctx.beginPath();
-  points.forEach((v, i) => {
-    const x = pad + (i / (points.length - 1)) * (w - pad * 2);
+  pts.forEach((v, i) => {
+    const x = pad + (i / (pts.length - 1)) * (w - pad * 2);
     const y = pad + (h - pad * 2) - ((v - min) / (max - min)) * (h - pad * 2);
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
@@ -2010,154 +1990,183 @@ function drawMiniSparkline(canvas, seed, isUp) {
   ctx.stroke();
 }
 
+function drawMiniSparklineAnimated(canvas, seed, isUp) {
+  requestAnimationFrame(() => drawMiniSparkline(canvas, seed, isUp));
+}
+
 function renderIndexGrid() {
   const grid = document.getElementById('indexGrid');
-  const filtered = indices;
-
   grid.innerHTML = '';
-  filtered.forEach(idx => {
+  indices.forEach(idx => {
+    const live = liveIndexPrices[idx.name];
     const isSelected = idx.name === configState.selectedIndex;
     const card = document.createElement('div');
     card.className = `index-card${isSelected ? ' selected' : ''}`;
+    card.dataset.indexName = idx.name;
     card.innerHTML = `
       <div class="index-card-name">${idx.name}</div>
       <div class="index-card-chart"><canvas></canvas></div>
-      <div class="index-card-price">${idx.price}</div>
-      <div class="index-card-change ${idx.up ? 'up' : 'down'}">${idx.change}</div>
+      <div class="index-card-price">${live.displayPrice}</div>
+      <div class="index-card-change ${live.up ? 'up' : 'down'}">${live.displayChange}</div>
     `;
     card.addEventListener('click', () => {
       configState.selectedIndex = idx.name;
       document.getElementById('configIndexValue').textContent = idx.name;
       document.getElementById('mainIndexLabel').textContent = idx.name;
+      document.getElementById('sp500Price').textContent = live.displayPrice;
+      const ce = document.getElementById('sp500Change');
+      ce.textContent = live.displayChange;
+      ce.className = `wgo-sp500-change ${live.up ? 'up' : 'down'}`;
+      animateStripChart('sp500Chart', idx.seed, live.up);
       renderIndexGrid();
     });
     grid.appendChild(card);
   });
 
-  // Draw sparklines after DOM insertion
   requestAnimationFrame(() => {
-    const canvases = grid.querySelectorAll('canvas');
-    filtered.forEach((idx, i) => {
-      if (canvases[i]) {
-        drawMiniSparkline(canvases[i], idx.seed, idx.up);
-      }
+    grid.querySelectorAll('.index-card').forEach((card, i) => {
+      const canvas = card.querySelector('canvas');
+      if (canvas && indices[i]) drawMiniSparklineAnimated(canvas, indices[i].seed, liveIndexPrices[indices[i].name].up);
     });
   });
 }
 
-renderIndexGrid();
-
 // ===== SECOND ITEM GRID =====
-const secondItems = [
-  { name: 'Fear & Greed', type: 'gauge', value: 36, label: 'Fear', color: 'red' },
-  { name: 'VIX', type: 'number', value: '18.42', change: '-1.2%', up: false, subtitle: 'Volatility Index' },
-  { name: 'Market Breadth', type: 'number', value: '72%', change: 'Bullish', up: true, subtitle: '% above 50-day MA' },
-  { name: 'Advance/Decline', type: 'number', value: '2.4:1', change: 'Bullish', up: true, subtitle: 'NYSE ratio' },
-  { name: 'Put/Call Ratio', type: 'number', value: '0.82', change: 'Neutral', up: null, subtitle: 'Options sentiment' },
-  { name: 'Sector Heatmap', type: 'heatmap', subtitle: '11 GICS sectors' },
-  { name: 'Market Regime', type: 'label', value: 'Risk On', color: 'green', subtitle: 'Algo-derived' },
-  { name: 'DXY', type: 'number', value: '104.32', change: '+0.3%', up: true, subtitle: 'Dollar Index' },
-  { name: 'Bitcoin', type: 'number', value: '68,559', change: '+1.9%', up: true, subtitle: 'BTC/USD' },
-  { name: 'Gold', type: 'number', value: '2,024', change: '-0.4%', up: false, subtitle: 'XAU/USD' },
-  { name: '10Y Yield', type: 'number', value: '4.28%', change: '+2bp', up: true, subtitle: 'US Treasury' },
-  { name: 'Money Flow', type: 'label', value: '$2.1B in', color: 'green', subtitle: 'Net inflows today' },
-];
-
-const heatmapColors = [
-  '#0ECB81','#E23636','#0ECB81','#E23636',
-  '#0ECB81','#0ECB81','#E23636','#F59E0B',
-  '#0ECB81','#0ECB81','#E23636','#0ECB81'
-];
-
-function renderSecondItemPreview(item) {
-  if (item.type === 'gauge') {
-    return `<div class="si-card-preview">
-      <svg class="si-preview-gauge" viewBox="0 0 44 26">
-        <path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="#E5E7EB" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M4 22 A18 18 0 0 1 40 22" fill="none" stroke="url(#siGaugeGrad)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="56.5" stroke-dashoffset="${56.5 - (item.value / 100) * 56.5}"/>
-        <defs><linearGradient id="siGaugeGrad"><stop offset="0%" stop-color="#E23636"/><stop offset="50%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#0ECB81"/></linearGradient></defs>
-      </svg>
-    </div>`;
-  }
-  if (item.type === 'number') {
-    const cls = item.up === true ? 'up' : item.up === false ? 'down' : 'neutral';
-    return `<div class="si-card-preview"><span class="si-preview-number ${cls}">${item.value}</span></div>`;
-  }
-  if (item.type === 'label') {
-    return `<div class="si-card-preview"><span class="si-preview-label ${item.color}">${item.value}</span></div>`;
-  }
-  if (item.type === 'heatmap') {
-    let cells = heatmapColors.map(c => `<div class="si-hm-cell" style="background:${c}"></div>`).join('');
-    return `<div class="si-card-preview"><div class="si-preview-heatmap">${cells}</div></div>`;
-  }
-  return '<div class="si-card-preview"></div>';
-}
-
-function renderSecondItemGrid() {
-  const grid = document.getElementById('secondItemGridInner');
+function renderSecondGrid() {
+  const grid = document.getElementById('secondItemGrid');
   grid.innerHTML = '';
-  secondItems.forEach(item => {
-    const isSelected = item.name === configState.selectedSecondItem;
+  indices.forEach(idx => {
+    const live = liveIndexPrices[idx.name];
+    const isSelected = idx.name === configState.selectedSecondItem;
     const card = document.createElement('div');
-    card.className = `si-card${isSelected ? ' selected' : ''}`;
-    const subtitleHtml = item.subtitle ? `<div class="si-card-subtitle">${item.subtitle}</div>` : '';
-    const changeCls = item.up === true ? 'up' : item.up === false ? 'down' : '';
-    const changeHtml = item.change ? `<div class="si-card-change ${changeCls}">${item.change}</div>` : '';
+    card.className = `index-card${isSelected ? ' selected' : ''}`;
+    card.dataset.indexName = idx.name;
     card.innerHTML = `
-      <div class="si-card-name">${item.name}</div>
-      ${renderSecondItemPreview(item)}
-      ${changeHtml}
-      ${subtitleHtml}
+      <div class="index-card-name">${idx.name}</div>
+      <div class="index-card-chart"><canvas></canvas></div>
+      <div class="index-card-price">${live.displayPrice}</div>
+      <div class="index-card-change ${live.up ? 'up' : 'down'}">${live.displayChange}</div>
     `;
     card.addEventListener('click', () => {
-      configState.selectedSecondItem = item.name;
-      document.getElementById('configFngValue').textContent = item.name;
-      renderSecondItemGrid();
-      updateWgoSecondItem(item);
+      configState.selectedSecondItem = idx.name;
+      document.getElementById('configFngValue').textContent = idx.name;
+      document.getElementById('mainSecondLabel').textContent = idx.name;
+      document.getElementById('secondPrice').textContent = live.displayPrice;
+      const changeEl = document.getElementById('secondChange');
+      changeEl.textContent = live.displayChange;
+      changeEl.className = `wgo-sp500-change ${live.up ? 'up' : 'down'}`;
+      animateStripChart('secondChart', idx.seed, live.up);
+      renderSecondGrid();
     });
     grid.appendChild(card);
   });
+
+  requestAnimationFrame(() => {
+    grid.querySelectorAll('.index-card').forEach((card, i) => {
+      const canvas = card.querySelector('canvas');
+      if (canvas && indices[i]) drawMiniSparklineAnimated(canvas, indices[i].seed, liveIndexPrices[indices[i].name].up);
+    });
+  });
 }
 
-function updateWgoSecondItem(item) {
-  const fngCard = document.querySelector('.wgo-fng');
-  if (!fngCard) return;
-  if (item.type === 'gauge') {
-    fngCard.innerHTML = `
-      <div class="wgo-fng-label">${item.name.replace(' & ', ' &<br>')}</div>
-      <div class="wgo-fng-gauge"><canvas id="fngGauge"></canvas></div>
-      <div class="wgo-fng-value">${item.value}</div>
-      <div class="wgo-fng-sentiment">${item.label}</div>
-    `;
-    requestAnimationFrame(drawFnGGauge);
-  } else if (item.type === 'number') {
-    const cls = item.up ? 'up' : 'down';
-    fngCard.innerHTML = `
-      <div class="wgo-fng-label">${item.name}</div>
-      <div style="font-size:20px;font-weight:700;margin:6px 0 2px;text-align:center;color:var(--text-primary)">${item.value}</div>
-      ${item.change ? `<div style="font-size:11px;font-weight:600;text-align:center" class="${cls}">${item.change}</div>` : ''}
-      <div class="wgo-fng-sentiment" style="margin-top:2px">${item.subtitle || ''}</div>
-    `;
-  } else if (item.type === 'label') {
-    const colorVar = item.color === 'green' ? 'var(--green)' : item.color === 'red' ? 'var(--red)' : '#F59E0B';
-    fngCard.innerHTML = `
-      <div class="wgo-fng-label">${item.name}</div>
-      <div style="font-size:14px;font-weight:700;margin:8px 0 2px;text-align:center;color:${colorVar}">${item.value}</div>
-      <div class="wgo-fng-sentiment" style="margin-top:2px">${item.subtitle || ''}</div>
-    `;
-  } else if (item.type === 'heatmap') {
-    let cells = heatmapColors.map(c => `<div style="border-radius:2px;background:${c}"></div>`).join('');
-    fngCard.innerHTML = `
-      <div class="wgo-fng-label">${item.name}</div>
-      <div style="display:grid;grid-template-columns:repeat(4,14px);grid-template-rows:repeat(3,14px);gap:2px;justify-content:center;margin:8px 0 4px">${cells}</div>
-      <div class="wgo-fng-sentiment">${item.subtitle || ''}</div>
-    `;
-  }
+// Initialize rolling points (indices must be defined first)
+indices.forEach(idx => initRolling(idx.seed, idx.up, 35));
+
+// ===== LIVE INDEX PRICES =====
+function formatIndexPrice(p) {
+  return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatIndexChange(pct) {
+  return (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
 }
 
-renderSecondItemGrid();
+const liveIndexPrices = {};
+indices.forEach(idx => {
+  const base = parseFloat(idx.price.replace(/,/g, ''));
+  liveIndexPrices[idx.name] = {
+    price: base, origPrice: base,
+    changePct: parseFloat(idx.change),
+    up: idx.up,
+    displayPrice: idx.price,
+    displayChange: idx.change
+  };
+});
 
-// Search bar is visual only - no filtering
+// Now render grids (liveIndexPrices is ready)
+renderIndexGrid();
+renderSecondGrid();
+
+function flashEl(el, cls) {
+  el.classList.remove('tick-up', 'tick-down');
+  void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 600);
+}
+
+function tickIndexPrices() {
+  indices.forEach(idx => {
+    if (Math.random() > 0.45) return;
+    const st = liveIndexPrices[idx.name];
+    const variance = st.price * (Math.random() * 0.0018 - 0.0009);
+    st.price += variance;
+    st.changePct = ((st.price - st.origPrice) / st.origPrice) * 100;
+    st.up = st.changePct >= 0;
+    st.displayPrice = formatIndexPrice(st.price);
+    st.displayChange = formatIndexChange(st.changePct);
+
+    ['indexGrid', 'secondItemGrid'].forEach(gridId => {
+      const card = document.querySelector(`#${gridId} [data-index-name="${idx.name}"]`);
+      if (!card) return;
+      const priceEl = card.querySelector('.index-card-price');
+      const changeEl = card.querySelector('.index-card-change');
+      if (priceEl && priceEl.textContent !== st.displayPrice) {
+        priceEl.textContent = st.displayPrice;
+        flashEl(priceEl, st.up ? 'tick-up' : 'tick-down');
+      }
+      if (changeEl) {
+        changeEl.textContent = st.displayChange;
+        changeEl.className = `index-card-change ${st.up ? 'up' : 'down'}`;
+      }
+    });
+
+    if (idx.name === configState.selectedIndex) {
+      const p = document.getElementById('sp500Price');
+      const c = document.getElementById('sp500Change');
+      if (p && p.textContent !== st.displayPrice) { p.textContent = st.displayPrice; flashEl(p, st.up ? 'tick-up' : 'tick-down'); }
+      if (c) { c.textContent = st.displayChange; c.className = `wgo-sp500-change ${st.up ? 'up' : 'down'}`; }
+    }
+    if (idx.name === configState.selectedSecondItem) {
+      const p = document.getElementById('secondPrice');
+      const c = document.getElementById('secondChange');
+      if (p && p.textContent !== st.displayPrice) { p.textContent = st.displayPrice; flashEl(p, st.up ? 'tick-up' : 'tick-down'); }
+      if (c) { c.textContent = st.displayChange; c.className = `wgo-sp500-change ${st.up ? 'up' : 'down'}`; }
+    }
+  });
+}
+setInterval(tickIndexPrices, 1500);
+
+// Evolve rolling charts & redraw every 2s
+setInterval(() => {
+  indices.forEach(idx => advanceRolling(idx.seed));
+
+  const firstIdx = indices.find(i => i.name === configState.selectedIndex);
+  const secondIdx = indices.find(i => i.name === configState.selectedSecondItem);
+  if (firstIdx) drawStripChart('sp500Chart', firstIdx.seed, liveIndexPrices[firstIdx.name].up);
+  if (secondIdx) drawStripChart('secondChart', secondIdx.seed, liveIndexPrices[secondIdx.name].up);
+
+  ['indexGrid', 'secondItemGrid'].forEach(gridId => {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.querySelectorAll('.index-card').forEach(card => {
+      const name = card.dataset.indexName;
+      const idx = indices.find(i => i.name === name);
+      const canvas = card.querySelector('canvas');
+      if (canvas && idx) drawMiniSparkline(canvas, idx.seed, liveIndexPrices[name].up);
+    });
+  });
+}, 2000);
+
+// Search bars are visual only - no filtering
 
 // ===== NEWS OPTIONS (multi-select) =====
 function updateNewsLabel() {
@@ -2268,13 +2277,6 @@ document.getElementById('stripToggle').addEventListener('click', () => {
     row.classList.toggle('disabled', !configState.showStrip);
     row.style.pointerEvents = configState.showStrip ? '' : 'none';
   });
-});
-
-// ===== SALE TOGGLE (on config page) =====
-document.getElementById('saleToggleMain').addEventListener('click', () => {
-  configState.saleNotify = !configState.saleNotify;
-  const btn = document.getElementById('saleToggleMain');
-  btn.classList.toggle('on', configState.saleNotify);
 });
 
 // ===== MARKET CATEGORIES SCREEN =====
