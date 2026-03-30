@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Investing.com - Watchlist Top Strip</title>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --green: #0ECB81;
+  --green-bg: rgba(14, 203, 129, 0.08);
+  --red: #E23636;
+  --red-bg: rgba(226, 54, 54, 0.08);
+  --border: #F0F0F0;
+  --border-dark: #E5E7EB;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  --blue: #2563EB;
+  --header-h: 48px;
+  --tab-h: 56px;
+}
+
+html, body {
+  font-family: var(--font);
+  background: #E8E8ED;
+  color: var(--text-primary);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== PHONE FRAME ===== */
+#phone {
+  position: relative;
+  width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 420px) {
+  #phone { width: 100%; max-height: none; box-shadow: none; }
+}
+@media (min-height: 845px) {
+  #phone { margin-top: calc((100vh - 844px) / 2); border-radius: 44px; }
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 6px;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.status-time {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ===== WATCHLIST NAV BAR ===== */
+.wl-nav {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  background: var(--bg);
+  position: relative;
+}
+.wl-nav-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+  pointer-events: none;
+}
+.wl-nav-left {
+  width: 32px;
+}
+.wl-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.wl-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.wl-icon-btn:active { background: rgba(0,0,0,0.05); }
+.wl-icon-btn svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-primary);
+}
+
+/* ===== WHAT'S GOING ON BAR ===== */
+.wgo-container {
+  margin: 4px 16px 8px;
+  flex-shrink: 0;
+  position: relative;
+}
+.wgo-market-status {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  margin: 6px 0 8px;
+}
+.wgo-market-ticker {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s ease;
+}
+.wgo-market-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.wgo-market-item .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.wgo-market-item .status-dot.open {
+  background: var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.wgo-market-item .status-dot.countdown {
+  background: var(--text-tertiary);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.wgo-market-item .flag-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.wgo-cards {
+  display: flex;
+  gap: 8px;
+  height: 96px;
+}
+
+/* S&P 500 Card */
+.wgo-card {
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.wgo-sp500 {
+  flex: 0.7;
+  min-width: 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.wgo-sp500-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.2px;
+}
+.wgo-sp500-chart {
+  flex: 1;
+  min-height: 0;
+  margin: 2px -4px 2px;
+  position: relative;
+}
+.wgo-sp500-chart canvas {
+  width: 100%;
+  height: 100%;
+}
+.wgo-sp500-bottom {
+  flex-shrink: 0;
+}
+.wgo-sp500-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  transition: color 0.3s;
+}
+.wgo-sp500-price.tick-up { color: var(--green); }
+.wgo-sp500-price.tick-down { color: var(--red); }
+.wgo-sp500-change {
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.wgo-sp500-change.up { color: var(--green); }
+.wgo-sp500-change.down { color: var(--red); }
+
+/* Article Card */
+.wgo-article {
+  flex: 1.4;
+  min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.wgo-article-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.wgo-article-slide.active { opacity: 1; }
+.wgo-article-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.wgo-article-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+}
+.wgo-article-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 8px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+  letter-spacing: 0.05px;
+}
+.wgo-article-dots {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  display: flex;
+  gap: 3px;
+}
+.wgo-article-dots .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transition: background 0.3s;
+}
+.wgo-article-dots .dot.active { background: #fff; }
+
+/* Second Index Card */
+.wgo-fng {
+  flex: 0.7;
+  min-width: 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  padding: 10px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Sale Slide */
+.wgo-article-slide-sale {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFB347 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+}
+.wgo-article-slide-sale.active { opacity: 1; }
+.wgo-article-slide-sale .sale-sun { font-size: 18px; line-height: 1; }
+.wgo-article-slide-sale .sale-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.wgo-article-slide-sale .sale-pct {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  margin: 2px 0;
+}
+.wgo-article-slide-sale .sale-desc {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  line-height: 1.2;
+}
+
+/* Article image placeholders */
+.article-bg-1 { background: linear-gradient(135deg, #1a2744 0%, #2d4a7a 40%, #1e3b5f 70%, #0f2035 100%); }
+.article-bg-2 { background: linear-gradient(135deg, #3a2810 0%, #6b4c1e 30%, #c97e3a 60%, #f4a951 100%); }
+.article-bg-3 { background: linear-gradient(135deg, #2c5f8a 0%, #1e4060 30%, #8a8a8a 60%, #c43030 90%); }
+
+/* ===== WATCHLIST CONTENT ===== */
+.wl-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #F2F2F7;
+  padding: 12px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wl-scroll::-webkit-scrollbar { display: none; }
+
+/* Group card */
+.wl-group {
+  background: var(--bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Group header - collapsed */
+.wl-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 8px;
+  cursor: pointer;
+}
+.wl-group-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wl-group-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+.wl-group-chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+.wl-group.expanded .wl-group-chevron {
+  transform: rotate(180deg);
+}
+.wl-group-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wl-group-action-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.wl-group-action-btn:active { background: rgba(0,0,0,0.05); }
+.wl-group-action-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+.wl-add-btn svg {
+  color: var(--text-primary);
+}
+.wl-group-count {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  padding: 0 16px 14px;
+}
+
+/* Group filter chips */
+.wl-filter-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.wl-filter-chips::-webkit-scrollbar { display: none; }
+.wl-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: #F2F2F7;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: none;
+  font-family: var(--font);
+}
+.wl-chip svg {
+  width: 14px;
+  height: 14px;
+  color: var(--text-secondary);
+}
+
+/* Watchlist rows */
+.wl-rows {
+  border-top: 1px solid var(--border);
+}
+.wl-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.wl-row:last-child { border-bottom: none; }
+.wl-row:active { background: #F9FAFB; }
+
+.wl-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.wl-row-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+.wl-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.2;
+}
+.wl-row-meta .clock-icon {
+  color: var(--red);
+  font-size: 11px;
+}
+
+.wl-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.wl-row-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.wl-row-change {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.wl-row-change.up { color: var(--green); }
+.wl-row-change.down { color: var(--red); }
+
+/* After hours row */
+.wl-row-ah {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.wl-row-ah .moon-icon { font-size: 11px; }
+.wl-row-ah-price { color: var(--text-primary); font-weight: 500; }
+.wl-row-ah-change { color: var(--green); font-weight: 500; }
+.wl-row-ah-change.down { color: var(--red); }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  height: var(--tab-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+}
+.tab-item svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-tertiary);
+}
+.tab-item.active svg { color: var(--blue); }
+.tab-item span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.tab-item.active span { color: var(--blue); }
+.tab-badge {
+  position: relative;
+}
+.tab-badge::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  background: var(--red);
+  border-radius: 50%;
+  border: 1.5px solid var(--bg);
+}
+
+/* Expanded content hidden by default */
+.wl-group-expanded-content {
+  display: none;
+}
+.wl-group.expanded .wl-group-expanded-content {
+  display: block;
+}
+.wl-group-collapsed-actions {
+  display: flex;
+}
+.wl-group.expanded .wl-group-collapsed-actions {
+  display: flex;
+}
+</style>
+</head>
+<body>
+
+<div id="phone">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">10:26</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 18 12" fill="none" width="18" height="12">
+        <rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/>
+        <rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/>
+        <rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/>
+        <rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/>
+      </svg>
+      <svg viewBox="0 0 16 12" fill="none" width="16" height="12">
+        <path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/>
+        <path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/>
+        <circle cx="8" cy="11" r="1.5" fill="currentColor"/>
+      </svg>
+      <svg viewBox="0 0 28 13" fill="none" width="28" height="13">
+        <rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/>
+        <rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/>
+        <rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Watchlist Nav Bar -->
+  <div class="wl-nav">
+    <div class="wl-nav-left"></div>
+    <div class="wl-nav-title">Watchlist</div>
+    <div class="wl-nav-right">
+      <!-- Search -->
+      <button class="wl-icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="16.5" y1="16.5" x2="21" y2="21"/>
+        </svg>
+      </button>
+      <!-- Portfolio / briefcase -->
+      <button class="wl-icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/>
+          <line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </button>
+      <!-- Edit / pencil -->
+      <button class="wl-icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- What's Going On Strip -->
+  <div class="wgo-container">
+    <div class="wgo-market-status">
+      <div class="wgo-market-ticker" id="marketTicker">
+        <div class="wgo-market-item">
+          <span class="status-dot open"></span>
+          <span class="flag-icon">🇮🇱</span>
+          <span>IL Market is open</span>
+        </div>
+        <div class="wgo-market-item">
+          <span class="status-dot countdown"></span>
+          <span class="flag-icon">🇺🇸</span>
+          <span id="usCountdown">US Market open in 2 hrs 26 mins</span>
+        </div>
+        <div class="wgo-market-item">
+          <span class="flag-icon">🔥</span>
+          <span>ProPicks rebalance coming in <span id="propicksCountdown">13:17:59</span> ></span>
+        </div>
+      </div>
+    </div>
+    <div class="wgo-cards">
+      <!-- S&P 500 -->
+      <div class="wgo-card wgo-sp500">
+        <div class="wgo-sp500-label">S&P 500</div>
+        <div class="wgo-sp500-chart">
+          <canvas id="sp500Chart"></canvas>
+        </div>
+        <div class="wgo-sp500-bottom">
+          <div class="wgo-sp500-price" id="sp500Price">5,611.85</div>
+          <div class="wgo-sp500-change down" id="sp500Change">-0.22%</div>
+        </div>
+      </div>
+
+      <!-- Article Carousel -->
+      <div class="wgo-card wgo-article" id="articleCarousel">
+        <div class="wgo-article-slide active" data-index="0">
+          <div class="wgo-article-img article-bg-1"></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Futures lower; oil climbs; RBA raises rates</div>
+        </div>
+        <div class="wgo-article-slide-sale" data-index="1">
+          <div class="sale-sun">&#9728;&#65039;</div>
+          <div class="sale-title">Summer Sale</div>
+          <div class="sale-pct">60% off</div>
+          <div class="sale-desc">Yearly subscription</div>
+        </div>
+        <div class="wgo-article-slide" data-index="2">
+          <div class="wgo-article-img article-bg-2"></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Spot the trade on Crude Oil before it happens with AI</div>
+        </div>
+        <div class="wgo-article-slide" data-index="3">
+          <div class="wgo-article-img article-bg-3"></div>
+          <div class="wgo-article-gradient"></div>
+          <div class="wgo-article-title">Nissan to cut production at Kyushu plant as exports stall</div>
+        </div>
+        <div class="wgo-article-dots">
+          <div class="dot active" data-dot="0"></div>
+          <div class="dot" data-dot="1"></div>
+          <div class="dot" data-dot="2"></div>
+          <div class="dot" data-dot="3"></div>
+        </div>
+      </div>
+
+      <!-- Second Index (Gold) -->
+      <div class="wgo-card wgo-fng wgo-sp500">
+        <div class="wgo-sp500-label">Gold</div>
+        <div class="wgo-sp500-chart">
+          <canvas id="secondChart"></canvas>
+        </div>
+        <div class="wgo-sp500-bottom">
+          <div class="wgo-sp500-price" id="secondPrice">3,084.20</div>
+          <div class="wgo-sp500-change up" id="secondChange">+0.41%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watchlist Scroll -->
+  <div class="wl-scroll" id="wlScroll">
+
+    <!-- Group: My Watchlist (collapsed) -->
+    <div class="wl-group" data-group="0">
+      <div class="wl-group-header" onclick="toggleGroup(0)">
+        <div class="wl-group-left">
+          <span class="wl-group-name">My Watchlist</span>
+          <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="wl-group-right wl-group-collapsed-actions"></div>
+      </div>
+      <div class="wl-group-count">4 Symbols</div>
+    </div>
+
+    <!-- Group: Ggg (collapsed) -->
+    <div class="wl-group" data-group="1">
+      <div class="wl-group-header" onclick="toggleGroup(1)">
+        <div class="wl-group-left">
+          <span class="wl-group-name">Ggg</span>
+          <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="wl-group-right wl-group-collapsed-actions"></div>
+      </div>
+      <div class="wl-group-count">1 Symbol</div>
+    </div>
+
+    <!-- Group: Gg (collapsed) -->
+    <div class="wl-group" data-group="2">
+      <div class="wl-group-header" onclick="toggleGroup(2)">
+        <div class="wl-group-left">
+          <span class="wl-group-name">Gg</span>
+          <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="wl-group-right wl-group-collapsed-actions"></div>
+      </div>
+      <div class="wl-group-count">1 Symbol</div>
+    </div>
+
+    <!-- Group: My Watchlist (expanded) -->
+    <div class="wl-group expanded" data-group="3">
+      <div class="wl-group-header" onclick="toggleGroup(3)">
+        <div class="wl-group-left">
+          <span class="wl-group-name">My Watchlist</span>
+          <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="wl-group-right">
+          <!-- Edit -->
+          <button class="wl-group-action-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <!-- Add -->
+          <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="wl-group-count">1 Symbol</div>
+
+      <!-- Expanded content -->
+      <div class="wl-group-expanded-content">
+        <!-- Filter chips -->
+        <div class="wl-filter-chips">
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+              <line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/>
+            </svg>
+            News
+          </button>
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            Details
+          </button>
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Analysis
+          </button>
+        </div>
+
+        <!-- Stock rows -->
+        <div class="wl-rows">
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">NVIDIA</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | NVDA</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">167.52</div>
+              <div class="wl-row-change down">-3.72 (-2.17%)</div>
+              <div class="wl-row-ah">
+                <span class="moon-icon">&#127769;</span>
+                <span class="wl-row-ah-price">167.96</span>
+                <span class="wl-row-ah-change">+0.44 (+0.26%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group: hello (expanded, partially visible) -->
+    <div class="wl-group expanded" data-group="4">
+      <div class="wl-group-header" onclick="toggleGroup(4)">
+        <div class="wl-group-left">
+          <span class="wl-group-name">hello</span>
+          <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+        <div class="wl-group-right">
+          <button class="wl-group-action-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+          <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="9"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="wl-group-count">10 Symbols</div>
+
+      <div class="wl-group-expanded-content">
+        <div class="wl-filter-chips">
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+              <line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/>
+            </svg>
+            News
+          </button>
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            Details
+          </button>
+          <button class="wl-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Analysis
+          </button>
+        </div>
+        <div class="wl-rows">
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">Apple</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | AAPL</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">221.53</div>
+              <div class="wl-row-change down">-2.14 (-0.96%)</div>
+            </div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">Tesla</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | TSLA</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">282.74</div>
+              <div class="wl-row-change up">+4.58 (+1.65%)</div>
+            </div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">Microsoft</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | MSFT</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">389.21</div>
+              <div class="wl-row-change down">-5.43 (-1.38%)</div>
+            </div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">Amazon</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | AMZN</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">195.44</div>
+              <div class="wl-row-change up">+1.92 (+0.99%)</div>
+            </div>
+          </div>
+          <div class="wl-row">
+            <div class="wl-row-left">
+              <div class="wl-row-name">Meta</div>
+              <div class="wl-row-meta">
+                <span class="clock-icon">&#9201;</span>
+                <span>3/27 | META</span>
+              </div>
+            </div>
+            <div class="wl-row-right">
+              <div class="wl-row-price">564.10</div>
+              <div class="wl-row-change down">-7.82 (-1.37%)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Markets</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+        <line x1="10" y1="8" x2="18" y2="8"/>
+        <line x1="10" y1="12" x2="18" y2="12"/>
+      </svg>
+      <span>News</span>
+    </button>
+    <button class="tab-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+        <path d="M12 2a10 10 0 0 1 7.07 17.07"/>
+        <path d="M12 22a10 10 0 0 1-7.07-17.07"/>
+      </svg>
+      <span>Ideas</span>
+    </button>
+    <button class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1.6">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+      </svg>
+      <span>Watchlist</span>
+    </button>
+    <button class="tab-item tab-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      <span>More</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ===== ROLLING CHART STATE =====
+const rollingPoints = {};
+
+function initRolling(seed, isUp, count) {
+  let s = seed * 9301 + 49297;
+  function rnd() { s = (s * 9301 + 49297) % 233280; return s / 233280; }
+  const pts = [];
+  let val = 50;
+  const drift = isUp ? 0.35 : -0.35;
+  for (let i = 0; i < count; i++) {
+    val += (rnd() - 0.5 + drift * 0.12) * 5;
+    val = Math.max(8, Math.min(92, val));
+    pts.push(val);
+  }
+  rollingPoints[seed] = { pts, isUp, s };
+}
+
+function initAllCharts() {
+  initRolling(14, false, 40);
+  initRolling(9, true, 40);
+}
+
+// ===== STRIP CHART =====
+function drawStripChart(canvasId, seed, isUp) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  if (!rect.width) return;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+  const pts = (rollingPoints[seed] || {}).pts || [];
+  if (pts.length < 2) return;
+  const min = Math.min(...pts) - 2, max = Math.max(...pts) + 2;
+  const color = isUp ? '#0ECB81' : '#E23636';
+  const mapped = pts.map((v, i) => ({
+    x: (i / (pts.length - 1)) * w,
+    y: h - ((v - min) / (max - min)) * h
+  }));
+  ctx.beginPath();
+  mapped.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  const last = mapped[mapped.length - 1];
+  ctx.lineTo(last.x, h);
+  ctx.lineTo(mapped[0].x, h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, isUp ? 'rgba(14,203,129,0.18)' : 'rgba(226,54,54,0.18)');
+  grad.addColorStop(1, isUp ? 'rgba(14,203,129,0.02)' : 'rgba(226,54,54,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+initAllCharts();
+setTimeout(() => {
+  drawStripChart('sp500Chart', 14, false);
+  drawStripChart('secondChart', 9, true);
+}, 50);
+
+// ===== ARTICLE AUTO-SCROLL =====
+let currentArticle = 0;
+const allSlides = document.querySelectorAll('#articleCarousel > [data-index]');
+const dots = document.querySelectorAll('.wgo-article-dots .dot');
+
+function showArticle(index) {
+  allSlides.forEach(s => s.classList.remove('active'));
+  dots.forEach(d => d.classList.remove('active'));
+  allSlides[index].classList.add('active');
+  dots[index].classList.add('active');
+  currentArticle = index;
+}
+setInterval(() => {
+  showArticle((currentArticle + 1) % allSlides.length);
+}, 3500);
+
+// ===== MARKET STATUS TICKER =====
+let currentMarketItem = 0;
+const ticker = document.getElementById('marketTicker');
+const marketItems = ticker.querySelectorAll('.wgo-market-item');
+setInterval(() => {
+  currentMarketItem = (currentMarketItem + 1) % marketItems.length;
+  ticker.style.transform = `translateY(-${currentMarketItem * 20}px)`;
+}, 4000);
+
+// ===== PROPICKS COUNTDOWN =====
+let ppSecs = 59;
+const ppEl = document.getElementById('propicksCountdown');
+setInterval(() => {
+  ppSecs--;
+  if (ppSecs < 0) ppSecs = 59;
+  ppEl.textContent = `13:17:${String(ppSecs).padStart(2, '0')}`;
+}, 1000);
+
+// ===== GROUP TOGGLE =====
+function toggleGroup(index) {
+  const group = document.querySelector(`.wl-group[data-group="${index}"]`);
+  if (!group) return;
+  group.classList.toggle('expanded');
+}
+</script>
+</body>
+</html>
