@@ -104,8 +104,56 @@ html, body {
 /* ===== TOP STRIP ===== */
 .top-strip-wrap {
   flex-shrink: 0;
-  padding: 4px 0 10px;
+  padding: 4px 0 0;
   border-bottom: 1px solid var(--border);
+}
+
+/* ===== WATCHLIST NEWS TICKER ===== */
+.news-ticker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 8px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+}
+.news-ticker-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.news-ticker-sep {
+  width: 1px;
+  height: 13px;
+  background: var(--border-dark);
+  flex-shrink: 0;
+}
+.news-ticker-window {
+  flex: 1;
+  min-width: 0;
+  height: 17px;
+  overflow: hidden;
+  position: relative;
+}
+.news-ticker-track {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.news-ticker-item {
+  height: 17px;
+  line-height: 17px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 .top-strip-scroll {
   display: flex;
@@ -745,6 +793,19 @@ html, body {
     <div class="top-strip-wrap" id="topStripWrap">
       <div class="top-strip-scroll" id="topStripScroll">
         <!-- Populated by JS -->
+      </div>
+      <div class="news-ticker-row">
+        <span class="news-ticker-label">Watchlist News</span>
+        <div class="news-ticker-sep"></div>
+        <div class="news-ticker-window">
+          <div class="news-ticker-track" id="newsTickerTrack">
+            <div class="news-ticker-item">Fed signals caution on rate cuts amid persistent inflation</div>
+            <div class="news-ticker-item">Apple beats Q1 earnings, raises dividend by 10%</div>
+            <div class="news-ticker-item">Bitcoin surges past $90K on institutional demand</div>
+            <div class="news-ticker-item">Oil jumps 2% after unexpected OPEC+ supply cut</div>
+            <div class="news-ticker-item">Nvidia posts record revenue, guides higher for Q2</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1453,6 +1514,15 @@ function toggleGroup(index) {
   const group = document.querySelector(`.wl-group[data-group="${index}"]`);
   if (group) group.classList.toggle('expanded');
 }
+
+// ===== NEWS TICKER =====
+const newsItemH = 17;
+let currentNews = 0;
+setInterval(() => {
+  currentNews = (currentNews + 1) % 5;
+  const track = document.getElementById('newsTickerTrack');
+  if (track) track.style.transform = `translateY(-${currentNews * newsItemH}px)`;
+}, 3500);
 
 // ===== INIT =====
 renderStrip();
