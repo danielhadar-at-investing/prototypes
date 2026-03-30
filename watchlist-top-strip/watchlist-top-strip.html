@@ -958,18 +958,13 @@ html, body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
         <div class="settings-row-content">
-          <div class="settings-row-label">Top Strip Items</div>
+          <div class="settings-row-label">Top Strip</div>
           <div class="settings-row-value" id="stripSettingsValue">S&P 500, TA-35, Gold, Bitcoin, Dow Jones, NVDA</div>
         </div>
-        <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-      <div class="settings-row" style="cursor: default;">
-        <div class="settings-row-content">
-          <div class="settings-row-label">Show Top Strip</div>
-        </div>
-        <button class="ios-toggle on" id="stripToggle">
+        <button class="ios-toggle on" id="stripToggle" onclick="event.stopPropagation()">
           <div class="ios-toggle-knob"></div>
         </button>
+        <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
   </div>
@@ -1037,7 +1032,7 @@ const allInstruments = [
   { id: 'eurusd', name: 'EUR/USD',   ticker: 'EURUSD', basePrice: 1.0821,  pct:  0.12, up: true,  seed: 20 },
 ];
 
-let activeIds = ['sp500', 'ta35', 'gold', 'btc', 'dji', 'nvda'];
+let activeIds = ['sp500', 'ta35', 'gold', 'btc', 'dji', 'nvda', 'nasdaq', 'oil', 'silver'];
 let showStrip = true;
 
 function getActive() { return activeIds.map(id => allInstruments.find(i => i.id === id)); }
@@ -1233,18 +1228,13 @@ function renderStripSettingsGrid() {
     grid.appendChild(el);
   });
 
-  if (active.length < 6) {
+  if (active.length < 9) {
     const plus = document.createElement('button');
     plus.className = 'strip-grid-plus';
     plus.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add</span>`;
     plus.addEventListener('click', () => openSelectDrawer(-1));
     grid.appendChild(plus);
   }
-
-  const hint = document.createElement('div');
-  hint.className = 'strip-grid-hint';
-  hint.textContent = active.length <= 3 ? 'Minimum 3 items' : 'Long press to reorder · Tap to change · Min 3, max 6';
-  grid.appendChild(hint);
 
   wrap.appendChild(grid);
 
@@ -1304,7 +1294,7 @@ function selectInstrument(id) {
   closeSelectDrawer();
   setTimeout(() => {
     if (selectingSlotIndex === -1) {
-      if (activeIds.length < 6) activeIds.push(id);
+      if (activeIds.length < 9) activeIds.push(id);
     } else {
       activeIds[selectingSlotIndex] = id;
     }
@@ -1337,11 +1327,14 @@ function cancelConfirm() {
 }
 
 // ===== DRAG AND DROP =====
+let dragEl = null;
+
 function onItemTouchStart(e, index) {
   const touch = e.touches[0];
   dragStartX = touch.clientX;
   dragStartY = touch.clientY;
-  dragLongPressTimer = setTimeout(() => startDrag(e, index), 400);
+  dragEl = e.currentTarget;
+  dragLongPressTimer = setTimeout(() => startDrag(index), 400);
 }
 
 function onItemTouchMove(e) {
@@ -1363,9 +1356,10 @@ function onItemTouchEnd(e) {
   if (dragGhost) endDrag(e);
 }
 
-function startDrag(e, index) {
+function startDrag(index) {
   dragIndex = index;
-  const el = e.currentTarget;
+  const el = dragEl;
+  if (!el) return;
   el.classList.add('being-dragged');
   const rect = el.getBoundingClientRect();
   dragGhost = document.createElement('div');
