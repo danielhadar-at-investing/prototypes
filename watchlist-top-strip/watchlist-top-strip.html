@@ -793,6 +793,67 @@ html, body {
 .strip-confirm-cancel { color: var(--text-primary); font-weight: 400; }
 .strip-confirm-remove { color: var(--red); font-weight: 600; }
 
+/* ===== WATCHLIST DETAIL SCREEN ===== */
+.wl-detail-nav { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; flex-shrink: 0; background: var(--bg); border-bottom: 1px solid var(--border); position: relative; }
+.wl-detail-nav-center { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
+.wl-detail-nav-title { font-size: 17px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+.wl-detail-nav-count { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.wl-detail-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; flex-shrink: 0; background: var(--bg); }
+.wl-detail-tab { padding: 10px 16px; font-size: 15px; font-weight: 500; color: var(--text-tertiary); border: none; background: none; cursor: pointer; font-family: var(--font); position: relative; transition: color 0.15s; }
+.wl-detail-tab.active { color: var(--text-primary); font-weight: 600; }
+.wl-detail-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--text-primary); border-radius: 1px; }
+
+/* Table scroll container */
+.wl-detail-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.wl-detail-scroll::-webkit-scrollbar { display: none; }
+.wl-detail-table-wrap { display: flex; }
+.wl-detail-col-left { width: 130px; flex-shrink: 0; }
+.wl-detail-col-right { flex: 1; min-width: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.wl-detail-col-right::-webkit-scrollbar { display: none; }
+
+/* Table header row (sticky) */
+.wl-tbl-header { display: flex; position: sticky; top: 0; background: #F8F8F8; z-index: 2; border-bottom: 1px solid var(--border-dark); }
+.wl-tbl-left-header { width: 130px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 10px 8px; font-size: 12px; color: var(--text-secondary); font-weight: 500; background: #F8F8F8; border-right: 1px solid var(--border); }
+.wl-tbl-col-header { flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; gap: 3px; padding: 10px 8px; font-size: 11px; color: var(--text-secondary); font-weight: 500; text-align: right; line-height: 1.3; }
+.wl-tbl-sort-icon { display: flex; flex-direction: column; gap: 1px; flex-shrink: 0; }
+.wl-tbl-sort-icon span { width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; }
+.wl-tbl-sort-icon .arrow-up { border-bottom: 4px solid #C0C0C0; }
+.wl-tbl-sort-icon .arrow-dn { border-top: 4px solid #C0C0C0; }
+.wl-pro-badge { font-size: 9px; font-weight: 700; color: #F59E0B; background: rgba(245,158,11,0.12); border-radius: 3px; padding: 1px 3px; flex-shrink: 0; }
+
+/* Row cells */
+.wl-tbl-row { display: flex; border-bottom: 1px solid var(--border); }
+.wl-tbl-left-cell { width: 130px; flex-shrink: 0; height: 56px; display: flex; align-items: center; padding: 0 8px; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
+.wl-tbl-left-cell-border { position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0; }
+.wl-tbl-left-cell-border.up { background: var(--green); }
+.wl-tbl-left-cell-border.down { background: var(--red); }
+.wl-tbl-ticker { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+.wl-tbl-name { font-size: 11px; color: var(--text-secondary); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 105px; }
+.wl-tbl-data-cell { flex-shrink: 0; height: 56px; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 13px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+/* Column animation */
+.wl-detail-cols-wrap { transition: opacity 0.18s ease, transform 0.18s ease; }
+.wl-detail-cols-wrap.exiting { opacity: 0; transform: translateX(-16px); }
+.wl-detail-cols-wrap.entering { opacity: 0; transform: translateX(16px); }
+.wl-detail-cols-wrap.visible { opacity: 1; transform: translateX(0); transition: opacity 0.22s ease, transform 0.22s ease; }
+
+/* News section */
+.wl-news-section { padding-bottom: 32px; }
+.wl-news-header { font-size: 20px; font-weight: 700; color: var(--text-primary); padding: 20px 16px 12px; }
+.wl-news-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.wl-news-item:active { background: #F9FAFB; }
+.wl-news-content { flex: 1; min-width: 0; }
+.wl-news-tickers { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 5px; }
+.wl-news-chip { font-size: 11px; font-weight: 600; background: #F3F4F6; border-radius: 4px; padding: 2px 6px; }
+.wl-news-chip.up { color: var(--green); }
+.wl-news-chip.down { color: var(--red); }
+.wl-news-title { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wl-news-meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.wl-news-thumb { width: 64px; height: 64px; border-radius: 8px; background: #E5E7EB; flex-shrink: 0; overflow: hidden; }
+
+/* View More button */
+.wl-view-more-btn { font-size: 13px; font-weight: 500; color: var(--blue); background: none; border: none; cursor: pointer; padding: 0 4px; font-family: var(--font); }
+
 /* ===== TYPE TABS ===== */
 .wl-type-tabs {
   display: flex;
@@ -913,20 +974,9 @@ html, body {
             <span class="wl-group-name">My Watchlist</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="wl-group-right">
-            <div class="wl-group-actions">
-              <button class="wl-group-action-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-            </div>
-          </div>
         </div>
         <div class="wl-group-count">4 Symbols</div>
         <div class="wl-group-expanded-content">
-          <div class="wl-filter-chips">
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>News</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Details</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analysis</button>
-          </div>
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
@@ -943,20 +993,9 @@ html, body {
             <span class="wl-group-name">Ggg</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="wl-group-right">
-            <div class="wl-group-actions">
-              <button class="wl-group-action-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-            </div>
-          </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
         <div class="wl-group-expanded-content">
-          <div class="wl-filter-chips">
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>News</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Details</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analysis</button>
-          </div>
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Bitcoin</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | BTC</span></div></div><div class="wl-row-right"><div class="wl-row-price">87,234.10</div><div class="wl-row-change up">+1,243.50 (+1.45%)</div></div></div>
           </div>
@@ -970,20 +1009,9 @@ html, body {
             <span class="wl-group-name">Gg</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <div class="wl-group-right">
-            <div class="wl-group-actions">
-              <button class="wl-group-action-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-            </div>
-          </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
         <div class="wl-group-expanded-content">
-          <div class="wl-filter-chips">
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>News</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Details</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analysis</button>
-          </div>
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Ethereum</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | ETH</span></div></div><div class="wl-row-right"><div class="wl-row-price">1,978.34</div><div class="wl-row-change down">-42.10 (-2.08%)</div></div></div>
           </div>
@@ -998,19 +1026,11 @@ html, body {
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <div class="wl-group-actions">
-              <button class="wl-group-action-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-            </div>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">View More ›</button>
           </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
         <div class="wl-group-expanded-content">
-          <div class="wl-filter-chips">
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>News</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Details</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analysis</button>
-          </div>
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">NVIDIA</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | NVDA</span></div></div><div class="wl-row-right"><div class="wl-row-price">167.52</div><div class="wl-row-change down">-3.72 (-2.17%)</div><div class="wl-row-ah"><span class="moon-icon">&#127769;</span><span class="wl-row-ah-price">167.96</span><span class="wl-row-ah-change">+0.44 (+0.26%)</span></div></div></div>
           </div>
@@ -1025,19 +1045,11 @@ html, body {
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <div class="wl-group-actions">
-              <button class="wl-group-action-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="wl-group-action-btn wl-add-btn" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-            </div>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(4); event.stopPropagation();">View More ›</button>
           </div>
         </div>
         <div class="wl-group-count">10 Symbols</div>
         <div class="wl-group-expanded-content">
-          <div class="wl-filter-chips">
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/></svg>News</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Details</button>
-            <button class="wl-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analysis</button>
-          </div>
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
@@ -1122,6 +1134,52 @@ html, body {
         </div>
         <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== WATCHLIST DETAIL SCREEN ===== -->
+  <div class="screen" id="wlDetailScreen">
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="status-time">10:26</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none" width="18" height="12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" width="16" height="12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none" width="28" height="13"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <!-- Nav Bar -->
+    <div class="wl-detail-nav">
+      <div style="display:flex;align-items:center;">
+        <button class="wl-icon-btn" onclick="closeWatchlistDetail()" style="width:36px;height:36px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+      <div class="wl-detail-nav-center">
+        <div class="wl-detail-nav-title" id="wlDetailName">hello</div>
+        <div class="wl-detail-nav-count" id="wlDetailCount">8 Symbols</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button class="wl-icon-btn" style="width:36px;height:36px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="22" height="22"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </button>
+        <button class="wl-icon-btn" style="width:36px;height:36px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- View Mode Tabs -->
+    <div class="wl-detail-tabs">
+      <button class="wl-detail-tab active" data-view="basic" onclick="switchDetailView('basic')">Basic</button>
+      <button class="wl-detail-tab" data-view="details" onclick="switchDetailView('details')">Details</button>
+      <button class="wl-detail-tab" data-view="analysis" onclick="switchDetailView('analysis')">Analysis</button>
+    </div>
+    <!-- Table + News scroll container -->
+    <div class="wl-detail-scroll" id="wlDetailScroll">
+      <!-- Table -->
+      <div id="wlDetailTableContainer"></div>
+      <!-- News -->
+      <div class="wl-news-section" id="wlDetailNews"></div>
     </div>
   </div>
 
@@ -1664,6 +1722,273 @@ setInterval(() => {
 
 // ===== INIT =====
 renderStrip();
+
+// ===== WATCHLIST DETAIL SCREEN =====
+const WL_STOCKS = [
+  { ticker: 'AAPL', name: 'Apple Inc.', price: '221.53', change: '-2.14', changePct: '-0.96', isUp: false,
+    low: '219.44', high: '223.71', vol: '58.32M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '221.80', extHrsPct: '0.12',
+    valuation: 'Fairly Valued', upside: '+8.42', fv: '239.96', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '245.50', analystUp: '+10.82', mktCap: '3.32T', pe: '32.14', evebitda: '23.40', epsFore: '1.62', epsGrw: '11.20', epsUp: '3', epsDn: '1' },
+  { ticker: 'TSLA', name: 'Tesla, Inc.', price: '282.74', change: '+4.58', changePct: '+1.65', isUp: true,
+    low: '278.10', high: '285.90', vol: '89.14M', time: '3/30', timeOpen: false, nextEarn: 'Apr 22, 2026', extHrs: '283.20', extHrsPct: '0.16',
+    valuation: 'Overvalued', upside: '-12.30', fv: '248.11', cashFlow: 'Good', growth: 'Excellent', profit: 'Weak', apt: '312.00', analystUp: '+10.36', mktCap: '908.5B', pe: '88.40', evebitda: '61.20', epsFore: '3.20', epsGrw: '24.50', epsUp: '2', epsDn: '5' },
+  { ticker: 'MSFT', name: 'Microsoft', price: '389.21', change: '-5.43', changePct: '-1.38', isUp: false,
+    low: '387.50', high: '394.80', vol: '22.41M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '389.90', extHrsPct: '0.18',
+    valuation: 'Undervalued', upside: '+18.52', fv: '461.30', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '472.00', analystUp: '+21.27', mktCap: '2.89T', pe: '31.20', evebitda: '22.80', epsFore: '3.46', epsGrw: '14.80', epsUp: '8', epsDn: '2' },
+  { ticker: 'AMZN', name: 'Amazon', price: '195.44', change: '+1.92', changePct: '+0.99', isUp: true,
+    low: '193.10', high: '196.80', vol: '41.72M', time: '3/30', timeOpen: false, nextEarn: 'May 1, 2026', extHrs: '-', extHrsPct: '-',
+    valuation: 'Undervalued', upside: '+22.14', fv: '238.74', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Good', apt: '248.00', analystUp: '+26.90', mktCap: '2.07T', pe: '35.80', evebitda: '20.10', epsFore: '1.47', epsGrw: '18.30', epsUp: '10', epsDn: '1' },
+  { ticker: 'META', name: 'Meta Platforms', price: '564.10', change: '-7.82', changePct: '-1.37', isUp: false,
+    low: '561.00', high: '572.40', vol: '18.55M', time: '3/30', timeOpen: false, nextEarn: 'Apr 23, 2026', extHrs: '565.40', extHrsPct: '0.23',
+    valuation: 'Undervalued', upside: '+15.80', fv: '653.20', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '680.00', analystUp: '+20.52', mktCap: '1.43T', pe: '24.60', evebitda: '16.80', epsFore: '6.18', epsGrw: '16.40', epsUp: '7', epsDn: '2' },
+  { ticker: 'NVDA', name: 'NVIDIA', price: '167.52', change: '-3.72', changePct: '-2.17', isUp: false,
+    low: '165.80', high: '172.10', vol: '185.63M', time: '3/30', timeOpen: false, nextEarn: 'May 20, 2026', extHrs: '166.67', extHrsPct: '0.91',
+    valuation: 'Undervalued', upside: '+32.41', fv: '218.70', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '268.22', analystUp: '+59.44', mktCap: '4.01T', pe: '33.42', evebitda: '29.74', epsFore: '1.76', epsGrw: '0.00', epsUp: '0', epsDn: '0' },
+  { ticker: 'GOOGL', name: 'Alphabet Inc.', price: '172.38', change: '+1.14', changePct: '+0.67', isUp: true,
+    low: '170.90', high: '173.80', vol: '24.10M', time: '3/30', timeOpen: false, nextEarn: 'Apr 29, 2026', extHrs: '172.80', extHrsPct: '0.24',
+    valuation: 'Undervalued', upside: '+19.40', fv: '205.80', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '210.00', analystUp: '+21.82', mktCap: '2.14T', pe: '20.40', evebitda: '14.20', epsFore: '2.22', epsGrw: '12.60', epsUp: '6', epsDn: '3' },
+  { ticker: 'BRK.B', name: 'Berkshire B', price: '528.10', change: '+2.30', changePct: '+0.44', isUp: true,
+    low: '525.40', high: '529.80', vol: '3.22M', time: '3/30', timeOpen: false, nextEarn: '-', extHrs: '-', extHrsPct: '-',
+    valuation: 'Fairly Valued', upside: '+5.20', fv: '555.60', cashFlow: 'Good', growth: 'Fair', profit: 'Good', apt: '580.00', analystUp: '+9.83', mktCap: '1.16T', pe: '11.80', evebitda: '-', epsFore: '18.40', epsGrw: '8.10', epsUp: '2', epsDn: '1' },
+];
+
+const WL_NEWS = [
+  { title: 'Fed signals caution on rate cuts amid persistent inflation pressure on global markets', source: 'Investing.com', time: '2h ago', tickers: [['US500', '-0.22%', false], ['DJI', '+0.10%', true]] },
+  { title: 'Apple beats Q1 earnings expectations, raises dividend by 10% for shareholders', source: 'Reuters', time: '4h ago', tickers: [['AAPL', '-0.96%', false], ['MSFT', '-1.38%', false]] },
+  { title: 'Bitcoin surges past $90K on rising institutional demand and ETF inflows', source: 'Investing.com', time: '5h ago', tickers: [['BTC', '+1.45%', true], ['ETH', '-2.08%', false]] },
+  { title: 'Nvidia posts record revenue, guides higher on AI chip demand from hyperscalers', source: 'Reuters', time: '8h ago', tickers: [['NVDA', '-2.17%', false], ['AMD', '+1.87%', true]] },
+  { title: 'Amazon expands AI infrastructure spend to $100B, plans 50 new data centers', source: 'Bloomberg', time: '10h ago', tickers: [['AMZN', '+0.99%', true], ['GOOGL', '+0.67%', true]] },
+  { title: 'Tesla deliveries disappoint in Q1 as price cuts fail to stimulate demand globally', source: 'WSJ', time: '12h ago', tickers: [['TSLA', '+1.65%', true], ['F', '-0.82%', false]] },
+  { title: 'Meta AI assistant reaches 1 billion monthly active users across all platforms', source: 'FT', time: '14h ago', tickers: [['META', '-1.37%', false], ['SNAP', '+2.10%', true]] },
+  { title: 'Microsoft Azure cloud revenue grows 35% YoY, beating estimates by wide margin', source: 'Investing.com', time: '16h ago', tickers: [['MSFT', '-1.38%', false], ['AMZN', '+0.99%', true]] },
+  { title: 'Alphabet launches Gemini Ultra 2.0, claims top benchmark scores across all tests', source: 'TechCrunch', time: '18h ago', tickers: [['GOOGL', '+0.67%', true], ['MSFT', '-1.38%', false]] },
+  { title: "Warren Buffett's Berkshire Hathaway discloses $10B stake in energy sector", source: 'Reuters', time: '1d ago', tickers: [['BRK.B', '+0.44%', true], ['XOM', '+1.20%', true]] },
+];
+
+const DETAIL_COLS = {
+  basic: [
+    { key: 'price', label: 'Price', w: 100 },
+    { key: 'change_fmt', label: 'Change', w: 130 },
+  ],
+  details: [
+    { key: 'price', label: 'Price', w: 90 },
+    { key: 'changePct_fmt', label: 'Chg%', w: 90 },
+    { key: 'low', label: 'Low', w: 90 },
+    { key: 'high', label: 'High', w: 90 },
+    { key: 'vol', label: 'Vol.', w: 100 },
+    { key: 'time_fmt', label: 'Time', w: 90 },
+    { key: 'nextEarn', label: 'Next Earn.', w: 110 },
+    { key: 'extHrs', label: 'Ext. Hrs.', w: 90 },
+    { key: 'extHrsPct', label: 'Ext. Hrs. %', w: 105 },
+  ],
+  analysis: [
+    { key: 'valuation', label: 'Valuation', w: 115, pro: true },
+    { key: 'upside_fmt', label: 'Upside', w: 90, pro: true },
+    { key: 'fv', label: 'Fair Value', w: 90, pro: true },
+    { key: 'cashFlow', label: 'Cash Flow', w: 100, pro: true },
+    { key: 'growth', label: 'Growth', w: 90, pro: true },
+    { key: 'profit', label: 'Profit', w: 90, pro: true },
+    { key: 'apt', label: 'Analyst PT', w: 100 },
+    { key: 'analystUp_fmt', label: 'Analyst \u2191', w: 100, pro: true },
+    { key: 'mktCap', label: 'Mkt Cap', w: 90 },
+    { key: 'pe', label: 'P/E', w: 80 },
+    { key: 'evebitda', label: 'EV/EBITDA', w: 100 },
+    { key: 'epsFore', label: 'EPS Fore.', w: 90 },
+    { key: 'epsGrw', label: 'EPS Grw.%', w: 95 },
+    { key: 'epsUp', label: 'EPS Up', w: 80 },
+    { key: 'epsDn', label: 'EPS Dn', w: 80 },
+  ]
+};
+
+let currentDetailView = 'basic';
+let currentDetailGroup = null;
+
+function clockSvg(isOpen) {
+  const color = isOpen ? 'var(--green)' : 'var(--red)';
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="flex-shrink:0;margin-right:3px;"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>`;
+}
+
+function sortArrows() {
+  return `<div class="wl-tbl-sort-icon"><span class="arrow-up"></span><span class="arrow-dn"></span></div>`;
+}
+
+function getCellValue(stock, key) {
+  switch(key) {
+    case 'change_fmt': {
+      const color = stock.isUp ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${color}">${stock.change} (${stock.changePct}%)</span>`;
+    }
+    case 'changePct_fmt': {
+      const color = stock.isUp ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${color}">${stock.changePct}%</span>`;
+    }
+    case 'upside_fmt': {
+      const val = parseFloat(stock.upside);
+      const color = val >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${color}">${stock.upside}%</span>`;
+    }
+    case 'analystUp_fmt': {
+      const val = parseFloat(stock.analystUp);
+      const color = val >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${color}">${stock.analystUp}%</span>`;
+    }
+    case 'time_fmt': {
+      return `<span style="display:flex;align-items:center;">${clockSvg(stock.timeOpen)}${stock.time}</span>`;
+    }
+    case 'valuation': {
+      const v = stock.valuation;
+      const color = v === 'Undervalued' ? 'var(--green)' : v === 'Overvalued' ? 'var(--red)' : '#F59E0B';
+      return `<span style="color:${color};font-weight:500;">${v}</span>`;
+    }
+    case 'cashFlow':
+    case 'growth':
+    case 'profit': {
+      const v = stock[key];
+      const color = v === 'Excellent' ? 'var(--green)' : v === 'Good' ? '#F97316' : v === 'Fair' ? '#F59E0B' : 'var(--red)';
+      return `<span style="color:${color};font-weight:500;">${v}</span>`;
+    }
+    default:
+      return stock[key] || '-';
+  }
+}
+
+function buildLeftRows(stocks) {
+  return stocks.map(s => `
+    <div class="wl-tbl-row">
+      <div class="wl-tbl-left-cell">
+        <div class="wl-tbl-left-cell-border ${s.isUp ? 'up' : 'down'}"></div>
+        <div style="padding-left:6px;">
+          <div class="wl-tbl-ticker">${s.ticker}</div>
+          <div class="wl-tbl-name">${s.name}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function buildRightColsContent(view) {
+  const cols = DETAIL_COLS[view];
+  const headerCells = cols.map(col => `
+    <div class="wl-tbl-col-header" style="min-width:${col.w}px;width:${col.w}px;">
+      ${col.pro ? '<span class="wl-pro-badge">P</span>' : ''}
+      <span>${col.label}</span>
+      ${sortArrows()}
+    </div>`).join('');
+  const dataRows = WL_STOCKS.map(s => `
+    <div class="wl-tbl-row">
+      ${cols.map(col => `
+        <div class="wl-tbl-data-cell" style="min-width:${col.w}px;width:${col.w}px;">${getCellValue(s, col.key)}</div>
+      `).join('')}
+    </div>`).join('');
+  return { headerCells, dataRows };
+}
+
+function renderDetailTable(view) {
+  const container = document.getElementById('wlDetailTableContainer');
+  const { headerCells, dataRows } = buildRightColsContent(view);
+  container.innerHTML = `
+    <div style="display:flex;position:sticky;top:0;z-index:3;background:#F8F8F8;border-bottom:1px solid var(--border-dark);">
+      <div class="wl-tbl-left-header" style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${sortArrows()} Symbol</div>
+      <div style="flex:1;min-width:0;overflow-x:hidden;">
+        <div id="wlHeaderScrollSync" style="display:flex;overflow-x:hidden;">${headerCells}</div>
+      </div>
+    </div>
+    <div style="display:flex;">
+      <div style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">
+        ${buildLeftRows(WL_STOCKS)}
+      </div>
+      <div class="wl-detail-col-right" id="wlRightCol" onscroll="syncHeaderScroll(this)">
+        <div class="wl-detail-cols-wrap visible" id="wlColsWrap">${dataRows}</div>
+      </div>
+    </div>
+  `;
+}
+
+function syncHeaderScroll(el) {
+  const hdr = document.getElementById('wlHeaderScrollSync');
+  if (hdr) hdr.style.transform = 'translateX(-' + el.scrollLeft + 'px)';
+}
+
+function renderDetailCols(view) {
+  const rightCol = document.getElementById('wlRightCol');
+  if (!rightCol) return;
+  const { headerCells, dataRows } = buildRightColsContent(view);
+  rightCol.innerHTML = `<div class="wl-detail-cols-wrap" id="wlColsWrap">${dataRows}</div>`;
+  // Also update header
+  const hdr = document.getElementById('wlHeaderScrollSync');
+  if (hdr) hdr.innerHTML = headerCells;
+  // Restore scroll sync
+  rightCol.onscroll = function() { syncHeaderScroll(this); };
+}
+
+function renderDetailNews(wlName) {
+  const section = document.getElementById('wlDetailNews');
+  const itemsHTML = WL_NEWS.map(item => {
+    const chipsHTML = item.tickers.map(([sym, pct, up]) =>
+      `<span class="wl-news-chip ${up ? 'up' : 'down'}">${sym} ${pct}</span>`
+    ).join('');
+    return `<div class="wl-news-item">
+      <div class="wl-news-content">
+        <div class="wl-news-tickers">${chipsHTML}</div>
+        <div class="wl-news-title">${item.title}</div>
+        <div class="wl-news-meta">${item.source} &bull; ${item.time}</div>
+      </div>
+      <div class="wl-news-thumb"></div>
+    </div>`;
+  }).join('');
+  section.innerHTML = `<div class="wl-news-header">${wlName} News</div>${itemsHTML}`;
+}
+
+function openWatchlistDetail(groupIndex) {
+  currentDetailGroup = groupIndex;
+  const groups = [
+    { name: 'My Watchlist', count: 4 },
+    { name: 'Ggg', count: 1 },
+    { name: 'Gg', count: 1 },
+    { name: 'My Watchlist', count: 1 },
+    { name: 'hello', count: 8 },
+  ];
+  const g = groups[groupIndex];
+  document.getElementById('wlDetailName').textContent = g.name;
+  document.getElementById('wlDetailCount').textContent = g.count + ' Symbols';
+  document.getElementById('mainScreen').classList.add('pushed');
+  document.getElementById('wlDetailScreen').classList.add('active');
+  // Reset scroll
+  const scroll = document.getElementById('wlDetailScroll');
+  if (scroll) scroll.scrollTop = 0;
+  // Render table and news
+  currentDetailView = 'basic';
+  document.querySelectorAll('.wl-detail-tab').forEach(t => t.classList.toggle('active', t.dataset.view === 'basic'));
+  renderDetailTable('basic');
+  renderDetailNews(g.name);
+}
+
+function closeWatchlistDetail() {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('wlDetailScreen').classList.remove('active');
+}
+
+function switchDetailView(view) {
+  if (view === currentDetailView && document.getElementById('wlColsWrap')) return;
+  currentDetailView = view;
+  document.querySelectorAll('.wl-detail-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+
+  const wrap = document.getElementById('wlColsWrap');
+  if (!wrap) { renderDetailTable(view); return; }
+
+  // Exit animation
+  wrap.classList.remove('visible');
+  wrap.classList.add('exiting');
+
+  setTimeout(() => {
+    renderDetailCols(view);
+    const newWrap = document.getElementById('wlColsWrap');
+    if (!newWrap) return;
+    newWrap.classList.add('entering');
+    // Trigger reflow
+    newWrap.offsetHeight;
+    newWrap.classList.remove('entering');
+    newWrap.classList.add('visible');
+  }, 180);
+}
 </script>
 </body>
 </html>
