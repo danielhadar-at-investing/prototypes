@@ -127,14 +127,14 @@ html, body {
 }
 .news-ticker-sep {
   width: 1px;
-  height: 34px;
+  height: 46px;
   background: var(--border-dark);
   flex-shrink: 0;
 }
 .news-ticker-window {
   flex: 1;
   min-width: 0;
-  height: 34px;
+  height: 52px;
   overflow: hidden;
   position: relative;
 }
@@ -144,17 +144,43 @@ html, body {
   transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .news-ticker-item {
-  height: 34px;
-  font-size: 13px;
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
+.nti-tickers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.nti-sym {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.nti-chg {
+  font-size: 11px;
+  font-weight: 600;
+}
+.nti-chg.up { color: var(--green); }
+.nti-chg.down { color: var(--red); }
+.nti-body {
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
-  line-height: 1.42;
+  line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex-shrink: 0;
 }
+.nti-dot { color: var(--text-tertiary); }
+.nti-source { font-weight: 600; color: var(--text-secondary); }
+.nti-time { color: var(--text-tertiary); font-weight: 400; }
 .top-strip-scroll {
   display: flex;
   gap: 8px;
@@ -798,11 +824,26 @@ html, body {
         <div class="news-ticker-sep"></div>
         <div class="news-ticker-window">
           <div class="news-ticker-track" id="newsTickerTrack">
-            <div class="news-ticker-item">Fed signals caution on rate cuts amid persistent inflation</div>
-            <div class="news-ticker-item">Apple beats Q1 earnings, raises dividend by 10%</div>
-            <div class="news-ticker-item">Bitcoin surges past $90K on institutional demand</div>
-            <div class="news-ticker-item">Oil jumps 2% after unexpected OPEC+ supply cut</div>
-            <div class="news-ticker-item">Nvidia posts record revenue, guides higher for Q2</div>
+            <div class="news-ticker-item">
+              <div class="nti-tickers"><span class="nti-sym">US500</span><span class="nti-chg down">-0.22%</span><span class="nti-sym">DJI</span><span class="nti-chg up">+0.10%</span></div>
+              <div class="nti-body">Fed signals caution on rate cuts amid persistent inflation<span class="nti-dot"> · </span><span class="nti-source">Reuters</span> <span class="nti-time">2h ago</span></div>
+            </div>
+            <div class="news-ticker-item">
+              <div class="nti-tickers"><span class="nti-sym">AAPL</span><span class="nti-chg down">-0.96%</span><span class="nti-sym">MSFT</span><span class="nti-chg down">-1.38%</span></div>
+              <div class="nti-body">Apple beats Q1 earnings expectations, raises dividend by 10%<span class="nti-dot"> · </span><span class="nti-source">Investing.com</span> <span class="nti-time">4h ago</span></div>
+            </div>
+            <div class="news-ticker-item">
+              <div class="nti-tickers"><span class="nti-sym">BTC</span><span class="nti-chg up">+1.45%</span><span class="nti-sym">ETH</span><span class="nti-chg down">-2.08%</span></div>
+              <div class="nti-body">Bitcoin surges past $90K on rising institutional demand<span class="nti-dot"> · </span><span class="nti-source">Reuters</span> <span class="nti-time">5h ago</span></div>
+            </div>
+            <div class="news-ticker-item">
+              <div class="nti-tickers"><span class="nti-sym">WTI</span><span class="nti-chg down">-0.55%</span><span class="nti-sym">XAU</span><span class="nti-chg down">-0.18%</span></div>
+              <div class="nti-body">Oil climbs 2% after unexpected OPEC+ production cut<span class="nti-dot"> · </span><span class="nti-source">Investing.com</span> <span class="nti-time">6h ago</span></div>
+            </div>
+            <div class="news-ticker-item">
+              <div class="nti-tickers"><span class="nti-sym">NVDA</span><span class="nti-chg up">+2.14%</span><span class="nti-sym">AMD</span><span class="nti-chg up">+1.87%</span></div>
+              <div class="nti-body">Nvidia posts record revenue, guides higher on AI chip demand<span class="nti-dot"> · </span><span class="nti-source">Reuters</span> <span class="nti-time">8h ago</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1547,7 +1588,7 @@ function toggleGroup(index) {
 }
 
 // ===== NEWS TICKER =====
-const newsItemH = 34;
+const newsItemH = 52;
 let currentNews = 0;
 setInterval(() => {
   currentNews = (currentNews + 1) % 5;
