@@ -779,6 +779,39 @@ html, body {
 .strip-confirm-btns button + button { border-left: 1px solid var(--border-dark); }
 .strip-confirm-cancel { color: var(--text-primary); font-weight: 400; }
 .strip-confirm-remove { color: var(--red); font-weight: 600; }
+
+/* ===== TYPE TABS ===== */
+.wl-type-tabs {
+  display: flex;
+  padding: 0 8px;
+  background: var(--bg);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.wl-type-tab {
+  padding: 10px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-family: var(--font);
+  letter-spacing: -0.2px;
+  transition: color 0.15s;
+}
+.wl-type-tab.active { color: var(--text-primary); }
+.wl-type-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 1px;
+}
 </style>
 </head>
 <body>
@@ -804,9 +837,6 @@ html, body {
         <button class="wl-icon-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
         </button>
-        <button class="wl-icon-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        </button>
         <!-- Cogwheel -->
         <button class="wl-icon-btn" id="openSettingsBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -815,6 +845,12 @@ html, body {
           </svg>
         </button>
       </div>
+    </div>
+
+    <!-- Type Tabs -->
+    <div class="wl-type-tabs">
+      <button class="wl-type-tab active" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlist</button>
+      <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Portfolio</button>
     </div>
 
     <!-- Top Strip -->
@@ -999,6 +1035,10 @@ html, body {
 
     </div>
 
+    <!-- Portfolio Empty -->
+    <div id="portfolioEmpty" style="display:none; flex:1; align-items:center; justify-content:center; flex-direction:column; gap:8px;">
+    </div>
+
     <!-- Tab Bar -->
     <div class="tab-bar">
       <button class="tab-item">
@@ -1158,6 +1198,7 @@ const allInstruments = [
 let activeIds = ['sp500', 'ta35', 'gold', 'btc', 'dji', 'nvda', 'nasdaq', 'oil', 'silver'];
 let showStrip = true;
 let showNews = true;
+let currentTab = 'watchlist';
 
 function getActive() { return activeIds.map(id => allInstruments.find(i => i.id === id)); }
 function getAvailable() { return allInstruments.filter(i => !activeIds.includes(i.id)); }
@@ -1277,11 +1318,22 @@ function tickCharts() {
   });
 }
 
+// ===== TAB SWITCHING =====
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.wl-type-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const isWl = tab === 'watchlist';
+  document.querySelector('.wl-scroll').style.display = isWl ? '' : 'none';
+  document.getElementById('portfolioEmpty').style.display = isWl ? 'none' : 'flex';
+  renderStrip();
+}
+
 // ===== RENDER STRIP =====
 function renderStrip() {
   const wrap = document.getElementById('topStripWrap');
   const scroll = document.getElementById('topStripScroll');
   const newsRow = document.querySelector('.news-ticker-row');
+  if (currentTab !== 'watchlist') { wrap.style.display = 'none'; return; }
   wrap.style.display = (showStrip || showNews) ? '' : 'none';
   if (scroll) scroll.style.display = showStrip ? '' : 'none';
   if (newsRow) newsRow.style.display = showNews ? '' : 'none';
