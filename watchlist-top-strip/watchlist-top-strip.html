@@ -1885,7 +1885,7 @@ function splitDonut(buy, hold, sell) {
     ${seg(sellLen, '#EF4444', start - buyLen - holdLen)}
   </svg>`;
   const label = `<div style="display:flex;flex-direction:column;"><span style="font-size:11px;line-height:1.55;font-weight:600;color:#22C55E;">Buy ${buy}</span><span style="font-size:11px;line-height:1.55;font-weight:600;color:#9CA3AF;">Hold ${hold}</span><span style="font-size:11px;line-height:1.55;font-weight:600;color:#EF4444;">Sell ${sell}</span></div>`;
-  return `<div style="display:flex;align-items:center;gap:8px;">${svg}${label}</div>`;
+  return `<div style="display:flex;align-items:center;align-self:stretch;gap:8px;">${svg}${label}</div>`;
 }
 
 function clockSvg(isOpen) {
