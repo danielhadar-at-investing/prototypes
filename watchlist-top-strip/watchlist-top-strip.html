@@ -798,8 +798,9 @@ html, body {
 .wl-detail-nav-center { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none; }
 .wl-detail-nav-title { font-size: 17px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
 .wl-detail-nav-count { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
-.wl-detail-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 16px; flex-shrink: 0; background: var(--bg); }
-.wl-detail-tab { padding: 10px 16px; font-size: 15px; font-weight: 500; color: var(--text-tertiary); border: none; background: none; cursor: pointer; font-family: var(--font); position: relative; transition: color 0.15s; }
+.wl-detail-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 8px; flex-shrink: 0; background: var(--bg); overflow-x: auto; scrollbar-width: none; }
+.wl-detail-tabs::-webkit-scrollbar { display: none; }
+.wl-detail-tab { padding: 10px 14px; font-size: 15px; font-weight: 500; color: var(--text-tertiary); border: none; background: none; cursor: pointer; font-family: var(--font); position: relative; transition: color 0.15s; white-space: nowrap; flex-shrink: 0; }
 .wl-detail-tab.active { color: var(--text-primary); font-weight: 600; }
 .wl-detail-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--text-primary); border-radius: 1px; }
 
@@ -1007,104 +1008,91 @@ html, body {
       <!-- Watchlist Scroll -->
       <div class="wl-scroll">
 
-      <!-- Group: My Watchlist (collapsed) -->
+      <!-- Group 0: Big Bets (collapsed) -->
       <div class="wl-group" data-group="0">
         <div class="wl-group-header" onclick="toggleGroup(0)">
           <div class="wl-group-left">
-            <span class="wl-group-name">My Watchlist</span>
+            <span class="wl-group-name">Big Bets</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(0); event.stopPropagation();">Dive Deeper ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(0); event.stopPropagation();">Details ›</button>
           </div>
         </div>
         <div class="wl-group-count">4 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Microsoft</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | MSFT</span></div></div><div class="wl-row-right"><div class="wl-row-price">389.21</div><div class="wl-row-change down">-5.43 (-1.38%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Amazon</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AMZN</span></div></div><div class="wl-row-right"><div class="wl-row-price">195.44</div><div class="wl-row-change up">+1.92 (+0.99%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Microsoft</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | MSFT</span></div></div><div class="wl-row-right"><div class="wl-row-price">389.21</div><div class="wl-row-change down">-5.43 (-1.38%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Amazon</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | AMZN</span></div></div><div class="wl-row-right"><div class="wl-row-price">195.44</div><div class="wl-row-change up">+1.92 (+0.99%)</div></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Group: Ggg (collapsed) -->
+      <!-- Group 1: Follow-ups (collapsed) -->
       <div class="wl-group" data-group="1">
         <div class="wl-group-header" onclick="toggleGroup(1)">
           <div class="wl-group-left">
-            <span class="wl-group-name">Ggg</span>
+            <span class="wl-group-name">Follow-ups</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(1); event.stopPropagation();">Dive Deeper ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(1); event.stopPropagation();">Details ›</button>
           </div>
         </div>
-        <div class="wl-group-count">1 Symbol</div>
+        <div class="wl-group-count">3 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Bitcoin</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | BTC</span></div></div><div class="wl-row-right"><div class="wl-row-price">87,234.10</div><div class="wl-row-change up">+1,243.50 (+1.45%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">NVIDIA</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | NVDA</span></div></div><div class="wl-row-right"><div class="wl-row-price">167.52</div><div class="wl-row-change down">-3.72 (-2.17%)</div><div class="wl-row-ah"><span class="moon-icon">&#127769;</span><span class="wl-row-ah-price">167.96</span><span class="wl-row-ah-change">+0.44 (+0.26%)</span></div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Alphabet</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | GOOGL</span></div></div><div class="wl-row-right"><div class="wl-row-price">172.38</div><div class="wl-row-change up">+1.14 (+0.67%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Meta</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | META</span></div></div><div class="wl-row-right"><div class="wl-row-price">564.10</div><div class="wl-row-change down">-7.82 (-1.37%)</div></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Group: Gg (collapsed) -->
-      <div class="wl-group" data-group="2">
+      <!-- Group 2: Crypto (expanded) -->
+      <div class="wl-group expanded" data-group="2">
         <div class="wl-group-header" onclick="toggleGroup(2)">
           <div class="wl-group-left">
-            <span class="wl-group-name">Gg</span>
+            <span class="wl-group-name">Crypto</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(2); event.stopPropagation();">Dive Deeper ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(2); event.stopPropagation();">Details ›</button>
           </div>
         </div>
-        <div class="wl-group-count">1 Symbol</div>
+        <div class="wl-group-count">2 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Ethereum</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | ETH</span></div></div><div class="wl-row-right"><div class="wl-row-price">1,978.34</div><div class="wl-row-change down">-42.10 (-2.08%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Bitcoin</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | BTC</span></div></div><div class="wl-row-right"><div class="wl-row-price">87,234.10</div><div class="wl-row-change up">+1,243.50 (+1.45%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Ethereum</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | ETH</span></div></div><div class="wl-row-right"><div class="wl-row-price">1,978.34</div><div class="wl-row-change down">-42.10 (-2.08%)</div></div></div>
           </div>
         </div>
       </div>
 
-      <!-- Group: My Watchlist (expanded) -->
+      <!-- Group 3: High Risk (expanded) -->
       <div class="wl-group expanded" data-group="3">
         <div class="wl-group-header" onclick="toggleGroup(3)">
           <div class="wl-group-left">
-            <span class="wl-group-name">My Watchlist</span>
+            <span class="wl-group-name">High Risk</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">Dive Deeper ›</button>
-          </div>
-        </div>
-        <div class="wl-group-count">1 Symbol</div>
-        <div class="wl-group-expanded-content">
-          <div class="wl-rows">
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">NVIDIA</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | NVDA</span></div></div><div class="wl-row-right"><div class="wl-row-price">167.52</div><div class="wl-row-change down">-3.72 (-2.17%)</div><div class="wl-row-ah"><span class="moon-icon">&#127769;</span><span class="wl-row-ah-price">167.96</span><span class="wl-row-ah-change">+0.44 (+0.26%)</span></div></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Group: hello (expanded) -->
-      <div class="wl-group expanded" data-group="4">
-        <div class="wl-group-header" onclick="toggleGroup(4)">
-          <div class="wl-group-left">
-            <span class="wl-group-name">hello</span>
-            <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(4); event.stopPropagation();">Dive Deeper ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">Details ›</button>
           </div>
         </div>
         <div class="wl-group-count">8 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Microsoft</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | MSFT</span></div></div><div class="wl-row-right"><div class="wl-row-price">389.21</div><div class="wl-row-change down">-5.43 (-1.38%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Amazon</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AMZN</span></div></div><div class="wl-row-right"><div class="wl-row-price">195.44</div><div class="wl-row-change up">+1.92 (+0.99%)</div></div></div>
-            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Meta</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | META</span></div></div><div class="wl-row-right"><div class="wl-row-price">564.10</div><div class="wl-row-change down">-7.82 (-1.37%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Tesla</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | TSLA</span></div></div><div class="wl-row-right"><div class="wl-row-price">282.74</div><div class="wl-row-change up">+4.58 (+1.65%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Microsoft</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | MSFT</span></div></div><div class="wl-row-right"><div class="wl-row-price">389.21</div><div class="wl-row-change down">-5.43 (-1.38%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Amazon</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | AMZN</span></div></div><div class="wl-row-right"><div class="wl-row-price">195.44</div><div class="wl-row-change up">+1.92 (+0.99%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Meta</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | META</span></div></div><div class="wl-row-right"><div class="wl-row-price">564.10</div><div class="wl-row-change down">-7.82 (-1.37%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">NVIDIA</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | NVDA</span></div></div><div class="wl-row-right"><div class="wl-row-price">167.52</div><div class="wl-row-change down">-3.72 (-2.17%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Alphabet</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | GOOGL</span></div></div><div class="wl-row-right"><div class="wl-row-price">172.38</div><div class="wl-row-change up">+1.14 (+0.67%)</div></div></div>
+            <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Berkshire B</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | BRK.B</span></div></div><div class="wl-row-right"><div class="wl-row-price">528.10</div><div class="wl-row-change up">+2.30 (+0.44%)</div></div></div>
           </div>
         </div>
       </div>
@@ -1219,9 +1207,11 @@ html, body {
     </div>
     <!-- View Mode Tabs -->
     <div class="wl-detail-tabs">
-      <button class="wl-detail-tab active" data-view="basic" onclick="switchDetailView('basic')">Basic</button>
-      <button class="wl-detail-tab" data-view="details" onclick="switchDetailView('details')">Details</button>
-      <button class="wl-detail-tab" data-view="analysis" onclick="switchDetailView('analysis')">Analysis</button>
+      <button class="wl-detail-tab" data-view="basic" onclick="switchDetailView('basic')">Basic</button>
+      <button class="wl-detail-tab active" data-view="details" onclick="switchDetailView('details')">Details</button>
+      <button class="wl-detail-tab" data-view="ratings" onclick="switchDetailView('ratings')">Ratings</button>
+      <button class="wl-detail-tab" data-view="technical" onclick="switchDetailView('technical')">Technical</button>
+      <button class="wl-detail-tab" data-view="valuation" onclick="switchDetailView('valuation')">Valuation</button>
     </div>
     <!-- Table + News scroll container -->
     <div class="wl-detail-scroll" id="wlDetailScroll">
@@ -1786,28 +1776,36 @@ renderStrip();
 const WL_STOCKS = [
   { ticker: 'AAPL', name: 'Apple Inc.', price: '221.53', change: '-2.14', changePct: '-0.96', isUp: false,
     low: '219.44', high: '223.71', vol: '58.32M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '221.80', extHrsPct: '0.12',
-    valuation: 'Fairly Valued', upside: '+8.42', fv: '239.96', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '245.50', analystUp: '+10.82', mktCap: '3.32T', pe: '32.14', evebitda: '23.40', epsFore: '1.62', epsGrw: '11.20', epsUp: '3', epsDn: '1' },
+    valuation: 'Fairly Valued', upside: '+8.42', fv: '239.96', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '245.50', analystUp: '+10.82', mktCap: '3.32T', pe: '32.14', evebitda: '23.40', epsFore: '1.62', epsGrw: '11.20', epsUp: '3', epsDn: '1',
+    consensus: 'Buy', split: {buy:28, hold:8, sell:4} },
   { ticker: 'TSLA', name: 'Tesla, Inc.', price: '282.74', change: '+4.58', changePct: '+1.65', isUp: true,
     low: '278.10', high: '285.90', vol: '89.14M', time: '3/30', timeOpen: false, nextEarn: 'Apr 22, 2026', extHrs: '283.20', extHrsPct: '0.16',
-    valuation: 'Overvalued', upside: '-12.30', fv: '248.11', cashFlow: 'Good', growth: 'Excellent', profit: 'Weak', apt: '312.00', analystUp: '+10.36', mktCap: '908.5B', pe: '88.40', evebitda: '61.20', epsFore: '3.20', epsGrw: '24.50', epsUp: '2', epsDn: '5' },
+    valuation: 'Overvalued', upside: '-12.30', fv: '248.11', cashFlow: 'Good', growth: 'Excellent', profit: 'Weak', apt: '312.00', analystUp: '+10.36', mktCap: '908.5B', pe: '88.40', evebitda: '61.20', epsFore: '3.20', epsGrw: '24.50', epsUp: '2', epsDn: '5',
+    consensus: 'Hold', split: {buy:12, hold:15, sell:8} },
   { ticker: 'MSFT', name: 'Microsoft', price: '389.21', change: '-5.43', changePct: '-1.38', isUp: false,
     low: '387.50', high: '394.80', vol: '22.41M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '389.90', extHrsPct: '0.18',
-    valuation: 'Undervalued', upside: '+18.52', fv: '461.30', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '472.00', analystUp: '+21.27', mktCap: '2.89T', pe: '31.20', evebitda: '22.80', epsFore: '3.46', epsGrw: '14.80', epsUp: '8', epsDn: '2' },
+    valuation: 'Undervalued', upside: '+18.52', fv: '461.30', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '472.00', analystUp: '+21.27', mktCap: '2.89T', pe: '31.20', evebitda: '22.80', epsFore: '3.46', epsGrw: '14.80', epsUp: '8', epsDn: '2',
+    consensus: 'Strong Buy', split: {buy:32, hold:5, sell:1} },
   { ticker: 'AMZN', name: 'Amazon', price: '195.44', change: '+1.92', changePct: '+0.99', isUp: true,
     low: '193.10', high: '196.80', vol: '41.72M', time: '3/30', timeOpen: false, nextEarn: 'May 1, 2026', extHrs: '-', extHrsPct: '-',
-    valuation: 'Undervalued', upside: '+22.14', fv: '238.74', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Good', apt: '248.00', analystUp: '+26.90', mktCap: '2.07T', pe: '35.80', evebitda: '20.10', epsFore: '1.47', epsGrw: '18.30', epsUp: '10', epsDn: '1' },
+    valuation: 'Undervalued', upside: '+22.14', fv: '238.74', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Good', apt: '248.00', analystUp: '+26.90', mktCap: '2.07T', pe: '35.80', evebitda: '20.10', epsFore: '1.47', epsGrw: '18.30', epsUp: '10', epsDn: '1',
+    consensus: 'Strong Buy', split: {buy:35, hold:4, sell:1} },
   { ticker: 'META', name: 'Meta Platforms', price: '564.10', change: '-7.82', changePct: '-1.37', isUp: false,
     low: '561.00', high: '572.40', vol: '18.55M', time: '3/30', timeOpen: false, nextEarn: 'Apr 23, 2026', extHrs: '565.40', extHrsPct: '0.23',
-    valuation: 'Undervalued', upside: '+15.80', fv: '653.20', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '680.00', analystUp: '+20.52', mktCap: '1.43T', pe: '24.60', evebitda: '16.80', epsFore: '6.18', epsGrw: '16.40', epsUp: '7', epsDn: '2' },
+    valuation: 'Undervalued', upside: '+15.80', fv: '653.20', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '680.00', analystUp: '+20.52', mktCap: '1.43T', pe: '24.60', evebitda: '16.80', epsFore: '6.18', epsGrw: '16.40', epsUp: '7', epsDn: '2',
+    consensus: 'Strong Buy', split: {buy:40, hold:5, sell:2} },
   { ticker: 'NVDA', name: 'NVIDIA', price: '167.52', change: '-3.72', changePct: '-2.17', isUp: false,
     low: '165.80', high: '172.10', vol: '185.63M', time: '3/30', timeOpen: false, nextEarn: 'May 20, 2026', extHrs: '166.67', extHrsPct: '0.91',
-    valuation: 'Undervalued', upside: '+32.41', fv: '218.70', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '268.22', analystUp: '+59.44', mktCap: '4.01T', pe: '33.42', evebitda: '29.74', epsFore: '1.76', epsGrw: '0.00', epsUp: '0', epsDn: '0' },
+    valuation: 'Undervalued', upside: '+32.41', fv: '218.70', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '268.22', analystUp: '+59.44', mktCap: '4.01T', pe: '33.42', evebitda: '29.74', epsFore: '1.76', epsGrw: '0.00', epsUp: '0', epsDn: '0',
+    consensus: 'Strong Buy', split: {buy:38, hold:6, sell:2} },
   { ticker: 'GOOGL', name: 'Alphabet Inc.', price: '172.38', change: '+1.14', changePct: '+0.67', isUp: true,
     low: '170.90', high: '173.80', vol: '24.10M', time: '3/30', timeOpen: false, nextEarn: 'Apr 29, 2026', extHrs: '172.80', extHrsPct: '0.24',
-    valuation: 'Undervalued', upside: '+19.40', fv: '205.80', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '210.00', analystUp: '+21.82', mktCap: '2.14T', pe: '20.40', evebitda: '14.20', epsFore: '2.22', epsGrw: '12.60', epsUp: '6', epsDn: '3' },
+    valuation: 'Undervalued', upside: '+19.40', fv: '205.80', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '210.00', analystUp: '+21.82', mktCap: '2.14T', pe: '20.40', evebitda: '14.20', epsFore: '2.22', epsGrw: '12.60', epsUp: '6', epsDn: '3',
+    consensus: 'Buy', split: {buy:30, hold:8, sell:2} },
   { ticker: 'BRK.B', name: 'Berkshire B', price: '528.10', change: '+2.30', changePct: '+0.44', isUp: true,
     low: '525.40', high: '529.80', vol: '3.22M', time: '3/30', timeOpen: false, nextEarn: '-', extHrs: '-', extHrsPct: '-',
-    valuation: 'Fairly Valued', upside: '+5.20', fv: '555.60', cashFlow: 'Good', growth: 'Fair', profit: 'Good', apt: '580.00', analystUp: '+9.83', mktCap: '1.16T', pe: '11.80', evebitda: '-', epsFore: '18.40', epsGrw: '8.10', epsUp: '2', epsDn: '1' },
+    valuation: 'Fairly Valued', upside: '+5.20', fv: '555.60', cashFlow: 'Good', growth: 'Fair', profit: 'Good', apt: '580.00', analystUp: '+9.83', mktCap: '1.16T', pe: '11.80', evebitda: '-', epsFore: '18.40', epsGrw: '8.10', epsUp: '2', epsDn: '1',
+    consensus: 'Buy', split: {buy:15, hold:7, sell:3} },
 ];
 
 const WL_NEWS = [
@@ -1839,7 +1837,14 @@ const DETAIL_COLS = {
     { key: 'extHrs', label: 'Ext. Hrs.', w: 90 },
     { key: 'extHrsPct', label: 'Ext. Hrs. %', w: 105 },
   ],
-  analysis: [
+  ratings: [
+    { key: 'consensus', label: 'Consensus', w: 120 },
+    { key: 'split_fmt', label: 'Split', w: 150 },
+    { key: 'apt', label: 'Price Target', w: 110 },
+    { key: 'analyst_updown', label: 'Upside/Downside', w: 140 },
+  ],
+  technical: [],
+  valuation: [
     { key: 'valuation', label: 'Valuation', w: 115, pro: true },
     { key: 'upside_fmt', label: 'Upside', w: 90, pro: true },
     { key: 'fv', label: 'Fair Value', w: 90, pro: true },
@@ -1860,6 +1865,26 @@ const DETAIL_COLS = {
 
 let currentDetailView = 'basic';
 let currentDetailGroup = null;
+
+function splitDonut(buy, hold, sell) {
+  const total = buy + hold + sell;
+  if (!total) return '-';
+  const r = 9, cx = 12, cy = 12, sw = 5.5;
+  const circ = 2 * Math.PI * r;
+  const buyLen = (buy / total) * circ;
+  const holdLen = (hold / total) * circ;
+  const sellLen = (sell / total) * circ;
+  const start = circ / 4; // 12 o'clock
+  const seg = (len, color, offset) => len < 0.5 ? '' :
+    `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-dasharray="${len.toFixed(2)} ${(circ-len).toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>`;
+  const svg = `<svg width="24" height="24" viewBox="0 0 24 24" style="flex-shrink:0;">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#E5E7EB" stroke-width="${sw}"/>
+    ${seg(buyLen, '#22C55E', start)}
+    ${seg(holdLen, '#9CA3AF', start - buyLen)}
+    ${seg(sellLen, '#EF4444', start - buyLen - holdLen)}
+  </svg>`;
+  return `<div style="display:flex;align-items:center;gap:6px;">${svg}<span style="font-size:11px;line-height:1.3;color:var(--text-secondary);"><span style="color:#22C55E;font-weight:600;">${buy}</span>B <span style="color:#9CA3AF;font-weight:600;">${hold}</span>H <span style="color:#EF4444;font-weight:600;">${sell}</span>S</span></div>`;
+}
 
 function clockSvg(isOpen) {
   const color = isOpen ? 'var(--green)' : 'var(--red)';
@@ -1905,6 +1930,22 @@ function getCellValue(stock, key) {
       const color = v === 'Excellent' ? 'var(--green)' : v === 'Good' ? '#F97316' : v === 'Fair' ? '#F59E0B' : 'var(--red)';
       return `<span style="color:${color};font-weight:500;">${v}</span>`;
     }
+    case 'consensus': {
+      const clr = { 'Strong Buy': '#15803D', 'Buy': '#22C55E', 'Hold': '#9CA3AF', 'Sell': '#F87171', 'Strong Sell': '#DC2626' };
+      const wt = { 'Strong Buy': 700, 'Strong Sell': 700 };
+      return `<span style="color:${clr[stock.consensus]||'#9CA3AF'};font-weight:${wt[stock.consensus]||500};">${stock.consensus}</span>`;
+    }
+    case 'split_fmt':
+      return splitDonut(stock.split.buy, stock.split.hold, stock.split.sell);
+    case 'analyst_updown': {
+      const price = parseFloat(stock.price.replace(/,/g,''));
+      const target = parseFloat(stock.apt);
+      if (isNaN(target)) return '-';
+      const pct = (target - price) / price * 100;
+      const sign = pct >= 0 ? '+' : '';
+      const color = pct >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<span style="color:${color};font-weight:500;">${sign}${pct.toFixed(2)}%</span>`;
+    }
     default:
       return stock[key] || '-';
   }
@@ -1924,7 +1965,8 @@ function buildLeftRows(stocks) {
 }
 
 function buildRightColsContent(view) {
-  const cols = DETAIL_COLS[view];
+  const cols = DETAIL_COLS[view] || [];
+  if (cols.length === 0) return { headerCells: '', dataRows: '', empty: true };
   const headerCells = cols.map(col => `
     <div class="wl-tbl-col-header" style="min-width:${col.w}px;width:${col.w}px;">
       ${col.pro ? '<span class="wl-pro-badge">P</span>' : ''}
@@ -1942,7 +1984,19 @@ function buildRightColsContent(view) {
 
 function renderDetailTable(view) {
   const container = document.getElementById('wlDetailTableContainer');
-  const { headerCells, dataRows } = buildRightColsContent(view);
+  const result = buildRightColsContent(view);
+  if (result.empty) {
+    container.innerHTML = `
+      <div style="display:flex;position:sticky;top:0;z-index:3;background:#F8F8F8;border-bottom:1px solid var(--border-dark);">
+        <div class="wl-tbl-left-header" style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${sortArrows()} Symbol</div>
+      </div>
+      <div style="display:flex;">
+        <div style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${buildLeftRows(WL_STOCKS)}</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;color:var(--text-tertiary);font-size:14px;">Coming soon</div>
+      </div>`;
+    return;
+  }
+  const { headerCells, dataRows } = result;
   container.innerHTML = `
     <div style="display:flex;position:sticky;top:0;z-index:3;background:#F8F8F8;border-bottom:1px solid var(--border-dark);">
       <div class="wl-tbl-left-header" style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${sortArrows()} Symbol</div>
@@ -1967,14 +2021,15 @@ function syncHeaderScroll(el) {
 }
 
 function renderDetailCols(view) {
+  const result = buildRightColsContent(view);
+  if (result.empty) { renderDetailTable(view); return; }
+  const { headerCells, dataRows } = result;
   const rightCol = document.getElementById('wlRightCol');
-  if (!rightCol) return;
-  const { headerCells, dataRows } = buildRightColsContent(view);
+  if (!rightCol) { renderDetailTable(view); return; }
   rightCol.innerHTML = `<div class="wl-detail-cols-wrap" id="wlColsWrap">${dataRows}</div>`;
-  // Also update header
+  rightCol.scrollLeft = 0;
   const hdr = document.getElementById('wlHeaderScrollSync');
-  if (hdr) hdr.innerHTML = headerCells;
-  // Restore scroll sync
+  if (hdr) { hdr.innerHTML = headerCells; hdr.scrollLeft = 0; }
   rightCol.onscroll = function() { syncHeaderScroll(this); };
   startDetailTick();
 }
@@ -2000,11 +2055,10 @@ function renderDetailNews(wlName) {
 function openWatchlistDetail(groupIndex) {
   currentDetailGroup = groupIndex;
   const groups = [
-    { name: 'My Watchlist', count: 4 },
-    { name: 'Ggg', count: 1 },
-    { name: 'Gg', count: 1 },
-    { name: 'My Watchlist', count: 1 },
-    { name: 'hello', count: 8 },
+    { name: 'Big Bets', count: 4 },
+    { name: 'Follow-ups', count: 3 },
+    { name: 'Crypto', count: 2 },
+    { name: 'High Risk', count: 8 },
   ];
   const g = groups[groupIndex];
   document.getElementById('wlDetailName').textContent = g.name;
