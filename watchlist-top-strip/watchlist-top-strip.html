@@ -829,7 +829,9 @@ html, body {
 .wl-tbl-left-cell-border.down { background: var(--red); }
 .wl-tbl-ticker { font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .wl-tbl-name { font-size: 11px; color: var(--text-secondary); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 105px; }
-.wl-tbl-data-cell { flex-shrink: 0; height: 56px; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 13px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.wl-tbl-data-cell { flex-shrink: 0; height: 56px; display: flex; align-items: center; justify-content: flex-end; padding: 0 8px; font-size: 13px; color: var(--text-primary); font-variant-numeric: tabular-nums; transition: color 0.3s; }
+.wl-tbl-data-cell.tick-up { color: var(--green) !important; }
+.wl-tbl-data-cell.tick-down { color: var(--red) !important; }
 
 /* Column animation */
 .wl-detail-cols-wrap { transition: opacity 0.18s ease, transform 0.18s ease; }
@@ -853,6 +855,44 @@ html, body {
 
 /* View More button */
 .wl-view-more-btn { font-size: 13px; font-weight: 500; color: var(--blue); background: none; border: none; cursor: pointer; padding: 0 4px; font-family: var(--font); }
+
+/* ===== DETAIL MENU ACTION SHEET ===== */
+.detail-menu-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 60; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.detail-menu-backdrop.active { opacity: 1; pointer-events: auto; }
+.detail-menu-sheet {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  z-index: 61; transform: translateY(110%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.detail-menu-sheet.active { transform: translateY(0); }
+.detail-menu-group {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.detail-menu-item {
+  display: block; width: 100%; padding: 16px 20px;
+  font-size: 17px; font-weight: 400; color: var(--text-primary);
+  text-align: center; background: none; border: none;
+  cursor: pointer; font-family: var(--font); transition: background 0.15s;
+  border-top: 1px solid var(--border-dark);
+}
+.detail-menu-item:first-child { border-top: none; }
+.detail-menu-item:active { background: #F3F4F6; }
+.detail-menu-cancel {
+  display: block; width: 100%; padding: 16px 20px;
+  font-size: 17px; font-weight: 600; color: var(--blue);
+  text-align: center; background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px); border-radius: 14px;
+  border: none; cursor: pointer; font-family: var(--font);
+  transition: background 0.15s;
+}
+.detail-menu-cancel:active { background: #F3F4F6; }
 
 /* ===== TYPE TABS ===== */
 .wl-type-tabs {
@@ -974,6 +1014,9 @@ html, body {
             <span class="wl-group-name">My Watchlist</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
+          <div class="wl-group-right">
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(0); event.stopPropagation();">Dive Deeper ›</button>
+          </div>
         </div>
         <div class="wl-group-count">4 Symbols</div>
         <div class="wl-group-expanded-content">
@@ -993,6 +1036,9 @@ html, body {
             <span class="wl-group-name">Ggg</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
+          <div class="wl-group-right">
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(1); event.stopPropagation();">Dive Deeper ›</button>
+          </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
         <div class="wl-group-expanded-content">
@@ -1008,6 +1054,9 @@ html, body {
           <div class="wl-group-left">
             <span class="wl-group-name">Gg</span>
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="wl-group-right">
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(2); event.stopPropagation();">Dive Deeper ›</button>
           </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
@@ -1026,7 +1075,7 @@ html, body {
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">View More ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">Dive Deeper ›</button>
           </div>
         </div>
         <div class="wl-group-count">1 Symbol</div>
@@ -1045,10 +1094,10 @@ html, body {
             <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
           <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(4); event.stopPropagation();">View More ›</button>
+            <button class="wl-view-more-btn" onclick="openWatchlistDetail(4); event.stopPropagation();">Dive Deeper ›</button>
           </div>
         </div>
-        <div class="wl-group-count">10 Symbols</div>
+        <div class="wl-group-count">8 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
             <div class="wl-row"><div class="wl-row-left"><div class="wl-row-name">Apple</div><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/27 | AAPL</span></div></div><div class="wl-row-right"><div class="wl-row-price">221.53</div><div class="wl-row-change down">-2.14 (-0.96%)</div></div></div>
@@ -1163,8 +1212,8 @@ html, body {
         <button class="wl-icon-btn" style="width:36px;height:36px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="22" height="22"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         </button>
-        <button class="wl-icon-btn" style="width:36px;height:36px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <button class="wl-icon-btn" style="width:36px;height:36px;" onclick="openDetailMenu()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
         </button>
       </div>
     </div>
@@ -1180,6 +1229,16 @@ html, body {
       <div id="wlDetailTableContainer"></div>
       <!-- News -->
       <div class="wl-news-section" id="wlDetailNews"></div>
+    </div>
+    <!-- "..." Action Sheet -->
+    <div class="detail-menu-backdrop" id="detailMenuBackdrop" onclick="closeDetailMenu()"></div>
+    <div class="detail-menu-sheet" id="detailMenuSheet">
+      <div class="detail-menu-group">
+        <button class="detail-menu-item" onclick="closeDetailMenu()">Watchlist Settings</button>
+        <button class="detail-menu-item" onclick="closeDetailMenu()">Edit List</button>
+        <button class="detail-menu-item" onclick="closeDetailMenu()">Customize Columns</button>
+      </div>
+      <button class="detail-menu-cancel" onclick="closeDetailMenu()">Cancel</button>
     </div>
   </div>
 
@@ -1872,10 +1931,10 @@ function buildRightColsContent(view) {
       <span>${col.label}</span>
       ${sortArrows()}
     </div>`).join('');
-  const dataRows = WL_STOCKS.map(s => `
+  const dataRows = WL_STOCKS.map((s, i) => `
     <div class="wl-tbl-row">
       ${cols.map(col => `
-        <div class="wl-tbl-data-cell" style="min-width:${col.w}px;width:${col.w}px;">${getCellValue(s, col.key)}</div>
+        <div class="wl-tbl-data-cell" data-row="${i}" data-col="${col.key}" style="min-width:${col.w}px;width:${col.w}px;">${getCellValue(s, col.key)}</div>
       `).join('')}
     </div>`).join('');
   return { headerCells, dataRows };
@@ -1887,8 +1946,8 @@ function renderDetailTable(view) {
   container.innerHTML = `
     <div style="display:flex;position:sticky;top:0;z-index:3;background:#F8F8F8;border-bottom:1px solid var(--border-dark);">
       <div class="wl-tbl-left-header" style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${sortArrows()} Symbol</div>
-      <div style="flex:1;min-width:0;overflow-x:hidden;">
-        <div id="wlHeaderScrollSync" style="display:flex;overflow-x:hidden;">${headerCells}</div>
+      <div style="flex:1;min-width:0;overflow:hidden;">
+        <div id="wlHeaderScrollSync" style="display:flex;overflow-x:auto;scrollbar-width:none;">${headerCells}</div>
       </div>
     </div>
     <div style="display:flex;">
@@ -1904,7 +1963,7 @@ function renderDetailTable(view) {
 
 function syncHeaderScroll(el) {
   const hdr = document.getElementById('wlHeaderScrollSync');
-  if (hdr) hdr.style.transform = 'translateX(-' + el.scrollLeft + 'px)';
+  if (hdr) hdr.scrollLeft = el.scrollLeft;
 }
 
 function renderDetailCols(view) {
@@ -1917,6 +1976,7 @@ function renderDetailCols(view) {
   if (hdr) hdr.innerHTML = headerCells;
   // Restore scroll sync
   rightCol.onscroll = function() { syncHeaderScroll(this); };
+  startDetailTick();
 }
 
 function renderDetailNews(wlName) {
@@ -1955,15 +2015,76 @@ function openWatchlistDetail(groupIndex) {
   const scroll = document.getElementById('wlDetailScroll');
   if (scroll) scroll.scrollTop = 0;
   // Render table and news
-  currentDetailView = 'basic';
-  document.querySelectorAll('.wl-detail-tab').forEach(t => t.classList.toggle('active', t.dataset.view === 'basic'));
-  renderDetailTable('basic');
+  currentDetailView = 'details';
+  document.querySelectorAll('.wl-detail-tab').forEach(t => t.classList.toggle('active', t.dataset.view === 'details'));
+  renderDetailTable('details');
   renderDetailNews(g.name);
+  startDetailTick();
 }
 
 function closeWatchlistDetail() {
   document.getElementById('mainScreen').classList.remove('pushed');
   document.getElementById('wlDetailScreen').classList.remove('active');
+  stopDetailTick();
+}
+
+// ===== "..." ACTION SHEET =====
+function openDetailMenu() {
+  document.getElementById('detailMenuBackdrop').classList.add('active');
+  document.getElementById('detailMenuSheet').classList.add('active');
+}
+function closeDetailMenu() {
+  document.getElementById('detailMenuBackdrop').classList.remove('active');
+  document.getElementById('detailMenuSheet').classList.remove('active');
+}
+
+// ===== DETAIL TABLE LIVE TICKING =====
+let detailTickInterval = null;
+// Mutable live prices (index matches WL_STOCKS)
+const detailLive = WL_STOCKS.map(s => ({ price: parseFloat(s.price.replace(/,/g,'')), baseChange: parseFloat(s.change), basePct: parseFloat(s.changePct) }));
+
+function stopDetailTick() {
+  if (detailTickInterval) { clearInterval(detailTickInterval); detailTickInterval = null; }
+}
+
+function startDetailTick() {
+  stopDetailTick();
+  detailTickInterval = setInterval(() => {
+    const container = document.getElementById('wlDetailTableContainer');
+    if (!container) { stopDetailTick(); return; }
+    WL_STOCKS.forEach((s, i) => {
+      const delta = (Math.random() - 0.49) * detailLive[i].price * 0.0015;
+      detailLive[i].price = Math.max(0.01, detailLive[i].price + delta);
+      const newPct = detailLive[i].basePct + (detailLive[i].price / parseFloat(s.price.replace(/,/g,'')) - 1) * 100;
+      const isUp = newPct >= 0;
+      const fmtPrice = detailLive[i].price < 100
+        ? detailLive[i].price.toFixed(2)
+        : detailLive[i].price < 1000
+          ? detailLive[i].price.toFixed(2)
+          : detailLive[i].price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const sign = isUp ? '+' : '';
+      const fmtPct = sign + newPct.toFixed(2) + '%';
+      const chgAmt = detailLive[i].baseChange + (detailLive[i].price - parseFloat(s.price.replace(/,/g,'')));
+      const fmtChg = (chgAmt >= 0 ? '+' : '') + chgAmt.toFixed(2) + ' (' + fmtPct + ')';
+      // Update price cells
+      container.querySelectorAll(`[data-row="${i}"][data-col="price"]`).forEach(el => {
+        el.textContent = fmtPrice;
+        el.classList.remove('tick-up','tick-down');
+        el.classList.add(delta > 0 ? 'tick-up' : 'tick-down');
+        setTimeout(() => el.classList.remove('tick-up','tick-down'), 400);
+      });
+      // Update changePct cells
+      container.querySelectorAll(`[data-row="${i}"][data-col="changePct_fmt"]`).forEach(el => {
+        el.textContent = fmtPct;
+        el.style.color = isUp ? 'var(--green)' : 'var(--red)';
+      });
+      // Update change cells (basic view)
+      container.querySelectorAll(`[data-row="${i}"][data-col="change_fmt"]`).forEach(el => {
+        el.textContent = fmtChg;
+        el.style.color = isUp ? 'var(--green)' : 'var(--red)';
+      });
+    });
+  }, 1600);
 }
 
 function switchDetailView(view) {
