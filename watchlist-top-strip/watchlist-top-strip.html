@@ -1008,8 +1008,8 @@ html, body {
       <!-- Watchlist Scroll -->
       <div class="wl-scroll">
 
-      <!-- Group 0: Big Bets (collapsed) -->
-      <div class="wl-group" data-group="0">
+      <!-- Group 0: Big Bets (expanded) -->
+      <div class="wl-group expanded" data-group="0">
         <div class="wl-group-header" onclick="toggleGroup(0)">
           <div class="wl-group-left">
             <span class="wl-group-name">Big Bets</span>
@@ -1051,8 +1051,8 @@ html, body {
         </div>
       </div>
 
-      <!-- Group 2: Crypto (expanded) -->
-      <div class="wl-group expanded" data-group="2">
+      <!-- Group 2: Crypto (collapsed) -->
+      <div class="wl-group" data-group="2">
         <div class="wl-group-header" onclick="toggleGroup(2)">
           <div class="wl-group-left">
             <span class="wl-group-name">Crypto</span>
@@ -1071,8 +1071,8 @@ html, body {
         </div>
       </div>
 
-      <!-- Group 3: High Risk (expanded) -->
-      <div class="wl-group expanded" data-group="3">
+      <!-- Group 3: High Risk (collapsed) -->
+      <div class="wl-group" data-group="3">
         <div class="wl-group-header" onclick="toggleGroup(3)">
           <div class="wl-group-left">
             <span class="wl-group-name">High Risk</span>
@@ -1100,6 +1100,7 @@ html, body {
     </div><!-- /wl-scroll -->
     <!-- Portfolio Empty -->
     <div id="portfolioEmpty" style="display:none; align-items:center; justify-content:center; flex-direction:column; gap:8px; padding: 60px 32px;">
+      <div style="font-size:18px; font-weight:600; color:var(--text-secondary); text-align:center; line-height:1.5;">TBD<br>😊</div>
     </div>
     </div><!-- /main-scroll -->
 
