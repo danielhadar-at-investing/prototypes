@@ -1884,7 +1884,7 @@ function splitDonut(buy, hold, sell) {
     ${seg(holdLen, '#9CA3AF', start - buyLen)}
     ${seg(sellLen, '#EF4444', start - buyLen - holdLen)}
   </svg>`;
-  const label = `<span style="font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:nowrap;"><span style="color:#22C55E;font-weight:600;">Buy ${buy}</span><br><span style="color:#9CA3AF;font-weight:600;">Hold ${hold}</span><br><span style="color:#EF4444;font-weight:600;">Sell ${sell}</span></span>`;
+  const label = `<div style="display:flex;flex-direction:column;"><span style="font-size:11px;line-height:1.55;font-weight:600;color:#22C55E;">Buy ${buy}</span><span style="font-size:11px;line-height:1.55;font-weight:600;color:#9CA3AF;">Hold ${hold}</span><span style="font-size:11px;line-height:1.55;font-weight:600;color:#EF4444;">Sell ${sell}</span></div>`;
   return `<div style="display:flex;align-items:center;gap:8px;">${svg}${label}</div>`;
 }
 
