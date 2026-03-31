@@ -783,13 +783,14 @@ html, body {
 /* ===== TYPE TABS ===== */
 .wl-type-tabs {
   display: flex;
-  padding: 0 8px;
+  justify-content: center;
+  gap: 8px;
   background: var(--bg);
   flex-shrink: 0;
   border-bottom: 1px solid var(--border);
 }
 .wl-type-tab {
-  padding: 10px 12px;
+  padding: 10px 24px;
   font-size: 15px;
   font-weight: 600;
   color: var(--text-tertiary);
@@ -806,8 +807,8 @@ html, body {
   content: '';
   position: absolute;
   bottom: -1px;
-  left: 4px;
-  right: 4px;
+  left: 8px;
+  right: 8px;
   height: 2px;
   background: var(--text-primary);
   border-radius: 1px;
@@ -845,12 +846,6 @@ html, body {
           </svg>
         </button>
       </div>
-    </div>
-
-    <!-- Type Tabs -->
-    <div class="wl-type-tabs">
-      <button class="wl-type-tab active" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlist</button>
-      <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Portfolio</button>
     </div>
 
     <!-- Top Strip -->
@@ -1033,6 +1028,12 @@ html, body {
         </div>
       </div>
 
+    </div>
+
+    <!-- Type Tabs -->
+    <div class="wl-type-tabs">
+      <button class="wl-type-tab active" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlists</button>
+      <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Holdings</button>
     </div>
 
     <!-- Portfolio Empty -->
@@ -1333,7 +1334,6 @@ function renderStrip() {
   const wrap = document.getElementById('topStripWrap');
   const scroll = document.getElementById('topStripScroll');
   const newsRow = document.querySelector('.news-ticker-row');
-  if (currentTab !== 'watchlist') { wrap.style.display = 'none'; return; }
   wrap.style.display = (showStrip || showNews) ? '' : 'none';
   if (scroll) scroll.style.display = showStrip ? '' : 'none';
   if (newsRow) newsRow.style.display = showNews ? '' : 'none';
