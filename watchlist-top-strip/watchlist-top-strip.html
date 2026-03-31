@@ -1100,7 +1100,7 @@ html, body {
     </div><!-- /wl-scroll -->
     <!-- Portfolio Empty -->
     <div id="portfolioEmpty" style="display:none; align-items:center; justify-content:center; flex-direction:column; gap:8px; padding: 60px 32px;">
-      <div style="font-size:18px; font-weight:600; color:var(--text-secondary); text-align:center; line-height:1.5;">TBD<br>😊</div>
+      <div style="font-size:18px; font-weight:600; color:var(--text-secondary); text-align:center; line-height:1.5;">Coming soon<br>😊</div>
     </div>
     </div><!-- /main-scroll -->
 
@@ -1884,7 +1884,8 @@ function splitDonut(buy, hold, sell) {
     ${seg(holdLen, '#9CA3AF', start - buyLen)}
     ${seg(sellLen, '#EF4444', start - buyLen - holdLen)}
   </svg>`;
-  return `<div style="display:flex;align-items:center;gap:6px;">${svg}<span style="font-size:11px;line-height:1.3;color:var(--text-secondary);"><span style="color:#22C55E;font-weight:600;">${buy}</span>B <span style="color:#9CA3AF;font-weight:600;">${hold}</span>H <span style="color:#EF4444;font-weight:600;">${sell}</span>S</span></div>`;
+  const label = `<span style="font-size:11px;line-height:1.6;color:var(--text-secondary);white-space:nowrap;"><span style="color:#22C55E;font-weight:600;">Buy ${buy}</span><br><span style="color:#9CA3AF;font-weight:600;">Hold ${hold}</span><br><span style="color:#EF4444;font-weight:600;">Sell ${sell}</span></span>`;
+  return `<div style="display:flex;align-items:center;gap:8px;">${svg}${label}</div>`;
 }
 
 function clockSvg(isOpen) {
@@ -1993,7 +1994,7 @@ function renderDetailTable(view) {
       </div>
       <div style="display:flex;">
         <div style="width:130px;flex-shrink:0;border-right:1px solid var(--border);">${buildLeftRows(WL_STOCKS)}</div>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;color:var(--text-tertiary);font-size:14px;">Coming soon</div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;color:var(--text-tertiary);font-size:14px;">Coming soon 😊</div>
       </div>`;
     return;
   }
@@ -2063,7 +2064,7 @@ function openWatchlistDetail(groupIndex) {
   ];
   const g = groups[groupIndex];
   document.getElementById('wlDetailName').textContent = g.name;
-  document.getElementById('wlDetailCount').textContent = g.count + ' Symbols';
+  document.getElementById('wlDetailCount').textContent = WL_STOCKS.length + ' Symbols';
   document.getElementById('mainScreen').classList.add('pushed');
   document.getElementById('wlDetailScreen').classList.add('active');
   // Reset scroll
