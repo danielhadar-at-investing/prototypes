@@ -104,7 +104,7 @@ html, body {
 /* ===== TOP STRIP ===== */
 .top-strip-wrap {
   flex-shrink: 0;
-  padding: 0 0 10px;
+  padding: 4px 0 10px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -115,6 +115,8 @@ html, body {
   gap: 10px;
   padding: 7px 16px;
   border-bottom: 1px solid var(--border);
+  margin: -12px -16px 0;
+  width: calc(100% + 32px);
 }
 .news-ticker-label {
   font-size: 9.5px;
@@ -850,6 +852,19 @@ html, body {
 
     <!-- Top Strip -->
     <div class="top-strip-wrap" id="topStripWrap">
+      <div class="top-strip-scroll" id="topStripScroll">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Type Tabs -->
+    <div class="wl-type-tabs">
+      <button class="wl-type-tab active" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlists</button>
+      <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Holdings</button>
+    </div>
+
+    <!-- Watchlist Scroll -->
+    <div class="wl-scroll">
       <div class="news-ticker-row">
         <span class="news-ticker-label">Watchlist<br>News</span>
         <div class="news-ticker-sep"></div>
@@ -878,19 +893,6 @@ html, body {
           </div>
         </div>
       </div>
-      <div class="top-strip-scroll" id="topStripScroll">
-        <!-- Populated by JS -->
-      </div>
-    </div>
-
-    <!-- Type Tabs -->
-    <div class="wl-type-tabs">
-      <button class="wl-type-tab active" data-tab="watchlist" onclick="switchTab('watchlist')">Watchlists</button>
-      <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Holdings</button>
-    </div>
-
-    <!-- Watchlist Scroll -->
-    <div class="wl-scroll">
 
       <!-- Group: My Watchlist (collapsed) -->
       <div class="wl-group" data-group="0">
