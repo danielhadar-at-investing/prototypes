@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Investing.com - New Feature Popup Prototype</title>
+<style>
+/* ===== RESET & VARIABLES ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-tertiary: #9CA3AF;
+  --green: #0ECB81;
+  --red: #E23636;
+  --border: #F0F0F0;
+  --border-dark: #E5E7EB;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  --accent: #ef8c43;
+  --accent-active: #d97a35;
+}
+
+html, body {
+  font-family: var(--font);
+  background: #E8E8ED;
+  color: var(--text-primary);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== TOGGLE BAR ===== */
+#toggleBar {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.toggle-group {
+  display: flex;
+  background: rgba(30, 30, 40, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 2px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.toggle-seg {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+.toggle-seg.active {
+  background: #FFFFFF;
+  color: #1A1A2E;
+}
+
+/* ===== PHONE FRAME ===== */
+#phone {
+  position: relative;
+  width: 390px;
+  height: 100vh;
+  max-height: 844px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 420px) {
+  #phone { width: 100%; max-height: none; box-shadow: none; }
+}
+@media (min-height: 845px) {
+  #phone { margin-top: calc((100vh - 844px) / 2); border-radius: 44px; }
+}
+
+/* ===== FAKE CONTENT BEHIND POPUP ===== */
+.fake-content {
+  flex: 1;
+  padding: 60px 20px 20px;
+  opacity: 0.6;
+}
+.fake-line {
+  height: 12px;
+  background: #E5E7EB;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.fake-line:nth-child(1) { width: 60%; }
+.fake-line:nth-child(2) { width: 90%; }
+.fake-line:nth-child(3) { width: 75%; }
+.fake-line:nth-child(4) { width: 85%; }
+.fake-line:nth-child(5) { width: 40%; margin-bottom: 24px; }
+.fake-line:nth-child(6) { width: 95%; }
+.fake-line:nth-child(7) { width: 80%; }
+.fake-line:nth-child(8) { width: 70%; }
+.fake-block {
+  height: 120px;
+  background: #F3F4F6;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+/* ===== ONBOARDING OVERLAY ===== */
+.onboarding-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.onboarding-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.onboarding-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.onboarding-modal {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  pointer-events: auto;
+}
+.onboarding-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: none;
+}
+.onboarding-label.shown {
+  display: block;
+}
+.onboarding-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A2E;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+.onboarding-body {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.onboarding-asset {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #E5E7EB;
+  margin-bottom: 16px;
+  overflow: hidden;
+  display: none;
+  background: #F9FAFB;
+}
+.onboarding-asset.shown {
+  display: block;
+}
+.asset-placeholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+.asset-placeholder-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.asset-placeholder-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #9CA3AF;
+}
+.asset-placeholder-text {
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+.onboarding-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cta-primary {
+  width: 100%;
+  height: 46px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: background 0.15s;
+  display: none;
+}
+.cta-primary.shown {
+  display: block;
+}
+.cta-primary:active {
+  background: var(--accent-active);
+}
+.cta-secondary {
+  width: 100%;
+  height: 46px;
+  background: transparent;
+  color: #6B7280;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: color 0.15s;
+}
+.cta-secondary:active {
+  color: #1A1A2E;
+}
+.cta-solo {
+  width: 100%;
+  height: 46px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: background 0.15s;
+}
+.cta-solo:active {
+  background: var(--accent-active);
+}
+</style>
+</head>
+<body>
+
+<!-- Toggle Bar -->
+<div id="toggleBar">
+  <div class="toggle-group" data-toggle="flag">
+    <button class="toggle-seg active" onclick="setToggle('flag', true)">Flag</button>
+    <button class="toggle-seg" onclick="setToggle('flag', false)">No Flag</button>
+  </div>
+  <div class="toggle-group" data-toggle="asset">
+    <button class="toggle-seg active" onclick="setToggle('asset', true)">Asset</button>
+    <button class="toggle-seg" onclick="setToggle('asset', false)">No Asset</button>
+  </div>
+  <div class="toggle-group" data-toggle="ctas">
+    <button class="toggle-seg active" onclick="setToggle('ctas', 2)">2 CTAs</button>
+    <button class="toggle-seg" onclick="setToggle('ctas', 1)">1 CTA</button>
+  </div>
+</div>
+
+<div id="phone">
+  <!-- Fake content behind popup -->
+  <div class="fake-content">
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+    <div class="fake-block"></div>
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+    <div class="fake-line"></div>
+  </div>
+
+  <!-- New Feature Popup -->
+  <div class="onboarding-overlay visible" id="onboardingOverlay">
+    <div class="onboarding-backdrop" onclick="resetPopup()"></div>
+    <div class="onboarding-modal">
+      <div class="onboarding-label shown" id="flagLabel">New Feature</div>
+      <div class="onboarding-title">ProPicks AI Gets a Facelift!</div>
+      <div class="onboarding-body">Your AI investment companion, powered by our latest engine. Get an un-fair advantage over the market.</div>
+      <div class="onboarding-asset shown" id="assetBlock">
+        <div class="asset-placeholder">
+          <div class="asset-placeholder-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
+            </svg>
+          </div>
+          <div class="asset-placeholder-text">Asset placeholder</div>
+        </div>
+      </div>
+      <div class="onboarding-ctas" id="ctaBlock">
+        <button class="cta-primary shown" id="ctaPrimary" onclick="resetPopup()">Check it out</button>
+        <button class="cta-secondary" id="ctaSecondary" onclick="resetPopup()">Close</button>
+        <button class="cta-solo" id="ctaSolo" onclick="resetPopup()" style="display:none">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = { flag: true, asset: true, ctas: 2 };
+
+function setToggle(key, value) {
+  state[key] = value;
+  const group = document.querySelector(`[data-toggle="${key}"]`);
+  const buttons = group.querySelectorAll('.toggle-seg');
+  buttons[0].classList.toggle('active', key === 'ctas' ? value === 2 : value === true);
+  buttons[1].classList.toggle('active', key === 'ctas' ? value === 1 : value === false);
+  render();
+  showPopup();
+}
+
+function render() {
+  document.getElementById('flagLabel').classList.toggle('shown', state.flag);
+  document.getElementById('assetBlock').classList.toggle('shown', state.asset);
+
+  const primary = document.getElementById('ctaPrimary');
+  const secondary = document.getElementById('ctaSecondary');
+  const solo = document.getElementById('ctaSolo');
+
+  if (state.ctas === 2) {
+    primary.style.display = 'block';
+    secondary.style.display = 'block';
+    solo.style.display = 'none';
+  } else {
+    primary.style.display = 'none';
+    secondary.style.display = 'none';
+    solo.style.display = 'block';
+  }
+}
+
+function showPopup() {
+  document.getElementById('onboardingOverlay').classList.add('visible');
+}
+
+function resetPopup() {
+  const overlay = document.getElementById('onboardingOverlay');
+  overlay.classList.remove('visible');
+  setTimeout(showPopup, 400);
+}
+
+render();
+</script>
+</body>
+</html>
