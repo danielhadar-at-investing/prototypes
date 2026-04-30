@@ -1094,8 +1094,8 @@
     letter-spacing: 0;
   }
 
-  /* Models toggle (replaces "X of Y selected" sublabel) */
-  .models-toggle {
+  /* Section toggle (replaces sublabel; reused for Analyst Targets and Investing Models) */
+  .section-toggle {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -1110,29 +1110,147 @@
     cursor: pointer;
     align-self: flex-start;
   }
-  .models-toggle:active { opacity: 0.6; }
-  .models-toggle-chev {
+  .section-toggle:active { opacity: 0.6; }
+  .section-toggle-chev {
     color: var(--text-secondary);
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .models-toggle.open .models-toggle-chev {
+  .section-toggle.open .section-toggle-chev {
     transform: rotate(180deg);
   }
 
-  /* Models expanded section (continuation of ranges card) */
-  .models-expanded {
+  /* Section expanded panel (continuation of a section card) */
+  .section-expanded {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .models-expanded.open {
+  .section-expanded.open {
     max-height: 2000px;
   }
-  .models-expanded-inner {
+  .section-expanded-inner {
     padding-top: 16px;
     margin-top: 16px;
     border-top: 1px solid var(--border);
   }
+
+  /* Analyst inline table */
+  .analyst-table-header {
+    display: flex;
+    padding: 6px 0 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    gap: 10px;
+  }
+  .ath-firm { flex: 1.5; }
+  .ath-pos { flex: 0.6; }
+  .ath-price { flex: 1.4; text-align: right; }
+  .analyst-row {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    align-items: center;
+    gap: 10px;
+  }
+  .analyst-row:last-child { border-bottom: none; }
+  .ar-firm {
+    flex: 1.5;
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .ar-price {
+    flex: 1.4;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .ar-price-val { font-weight: 700; color: var(--text-primary); }
+  .ar-price-pct { font-weight: 600; margin-left: 4px; }
+  .ar-price-pct.up { color: var(--green); }
+  .ar-price-pct.down { color: var(--red); }
+  .ar-pos { flex: 0.6; font-weight: 600; font-size: 12px; }
+  .ar-pos.buy { color: var(--green); }
+  .ar-pos.hold { color: var(--text-secondary); }
+  .ar-pos.sell { color: var(--red); }
+
+  /* Show all/less button */
+  .show-all-btn {
+    display: block;
+    width: fit-content;
+    margin: 14px auto 2px;
+    padding: 7px 16px;
+    background: rgba(0,0,0,0.05);
+    border: none;
+    border-radius: 16px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .show-all-btn:active { background: rgba(0,0,0,0.1); }
+
+  /* Full Analyst Ratings detail screen */
+  .full-ratings-wrap {
+    padding: 14px 0 24px;
+  }
+  .full-ratings-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .full-ratings-scroll::-webkit-scrollbar { display: none; }
+  .full-ratings-table {
+    min-width: 780px;
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+  .frt-header {
+    display: flex;
+    padding: 10px 16px;
+    background: #F5F5F5;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    gap: 10px;
+    align-items: center;
+  }
+  .frt-row {
+    display: flex;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+  }
+  .frt-firm { width: 120px; flex-shrink: 0; font-weight: 500; }
+  .frt-article { width: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .frt-row .frt-article svg { color: var(--blue); }
+  .frt-pos { width: 56px; flex-shrink: 0; font-weight: 600; }
+  .frt-pos.buy { color: var(--green); }
+  .frt-pos.hold { color: var(--text-secondary); }
+  .frt-pos.sell { color: var(--red); }
+  .frt-pt { width: 70px; flex-shrink: 0; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .frt-up { width: 100px; flex-shrink: 0; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .frt-up.up { color: var(--green); }
+  .frt-up.down { color: var(--red); }
+  .frt-up.na { color: var(--text-tertiary); font-weight: 500; }
+  .frt-from { width: 90px; flex-shrink: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .frt-action { width: 70px; flex-shrink: 0; color: var(--text-secondary); }
+  .frt-date { width: 90px; flex-shrink: 0; text-align: right; color: var(--text-secondary); }
 
   /* Bottom padding for scroll */
   .bottom-pad {
@@ -1233,59 +1351,82 @@
                 <div class="range-tooltip"><strong>How is Fair Value calculated?</strong>Fair Value is an estimation determined through various valuation models, including discounted cash flow analysis, peer valuation multiples models, and dividend discount models.</div>
               </button>
             </div>
+            <!-- Market Range -->
             <div class="section-card">
-              <div class="range-group">
-                <div class="range-item">
-                  <div class="range-header">
-                    <div class="range-header-left">
-                      <span class="range-label">Market Range</span>
-                      <span class="range-sublabel">52 weeks</span>
-                    </div>
-                    <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                      <div class="range-tooltip"><strong>Market Range</strong>The range of stock prices this stock has traded within over the last 52 weeks.</div>
-                    </button>
+              <div class="range-item">
+                <div class="range-header">
+                  <div class="range-header-left">
+                    <span class="range-label">Market Range</span>
+                    <span class="range-sublabel">52 weeks</span>
                   </div>
-                  <div class="range-bar-area" id="rangeMarket"></div>
-                  <div class="range-bounds" id="rangeMarketBounds"></div>
+                  <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                    <div class="range-tooltip"><strong>Market Range</strong>The range of stock prices this stock has traded within over the last 52 weeks.</div>
+                  </button>
                 </div>
+                <div class="range-bar-area" id="rangeMarket"></div>
+                <div class="range-bounds" id="rangeMarketBounds"></div>
+              </div>
+            </div>
 
-                <div class="range-item">
-                  <div class="range-header">
-                    <div class="range-header-left">
-                      <span class="range-label">Analyst Targets</span>
-                      <span class="range-sublabel">40 analysts</span>
-                    </div>
-                    <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                      <div class="range-tooltip"><strong>Analyst Targets</strong>The range and average of price targets set by professional analysts at equity research firms.</div>
+            <!-- Analyst Targets -->
+            <div class="section-card">
+              <div class="range-item">
+                <div class="range-header">
+                  <div class="range-header-left">
+                    <span class="range-label">Analyst Targets</span>
+                    <button class="section-toggle" id="analystToggle" onclick="toggleSectionExpansion('analystToggle','analystExpanded')">
+                      <span id="analystToggleText">Show 15 analysts</span>
+                      <svg class="section-toggle-chev" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                        <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
                     </button>
                   </div>
-                  <div class="range-bar-area" id="rangeAnalyst"></div>
-                  <div class="range-bounds" id="rangeAnalystBounds"></div>
+                  <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                    <div class="range-tooltip"><strong>Analyst Targets</strong>The range and average of price targets set by professional analysts at equity research firms.</div>
+                  </button>
                 </div>
-
-                <div class="range-item">
-                  <div class="range-header">
-                    <div class="range-header-left">
-                      <span class="range-label">Investing Models</span>
-                      <button class="models-toggle" id="modelsToggle" onclick="toggleModelsExpansion()">
-                        <span id="modelsToggleText">Show 14 models</span>
-                        <svg class="models-toggle-chev" width="10" height="6" viewBox="0 0 10 6" fill="none">
-                          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </button>
-                    </div>
-                    <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                      <div class="range-tooltip">The fair value range and average implied by InvestingPro's valuation and risk models.</div>
-                    </button>
-                  </div>
-                  <div class="range-bar-area" id="rangeModels"></div>
-                  <div class="range-bounds" id="rangeModelsBounds"></div>
-                </div>
+                <div class="range-bar-area" id="rangeAnalyst"></div>
+                <div class="range-bounds" id="rangeAnalystBounds"></div>
               </div>
 
-              <!-- Expandable models breakdown (continuation of ranges) -->
-              <div class="models-expanded" id="modelsExpanded">
-                <div class="models-expanded-inner">
+              <!-- Expandable analyst table -->
+              <div class="section-expanded" id="analystExpanded">
+                <div class="section-expanded-inner">
+                  <div class="analyst-table-header">
+                    <span class="ath-firm">Firm</span>
+                    <span class="ath-pos">Position</span>
+                    <span class="ath-price">Price</span>
+                  </div>
+                  <div id="analystRows"></div>
+                  <button class="show-all-btn" onclick="openAnalystDetail()">Show all 15 ›</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Investing Models -->
+            <div class="section-card">
+              <div class="range-item">
+                <div class="range-header">
+                  <div class="range-header-left">
+                    <span class="range-label">Investing Models</span>
+                    <button class="section-toggle" id="modelsToggle" onclick="toggleSectionExpansion('modelsToggle','modelsExpanded')">
+                      <span id="modelsToggleText">Show 14 models</span>
+                      <svg class="section-toggle-chev" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                        <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                    <div class="range-tooltip">The fair value range and average implied by InvestingPro's valuation and risk models.</div>
+                  </button>
+                </div>
+                <div class="range-bar-area" id="rangeModels"></div>
+                <div class="range-bounds" id="rangeModelsBounds"></div>
+              </div>
+
+              <!-- Expandable models breakdown -->
+              <div class="section-expanded" id="modelsExpanded">
+                <div class="section-expanded-inner">
                   <div class="consensus-bar-wrap" id="consensusBar">
                     <div class="consensus-seg green" id="segGreen" style="flex:11">11</div>
                     <div class="consensus-seg yellow" id="segYellow" style="flex:2">2</div>
@@ -1349,6 +1490,22 @@
         </div>
       </div>
 
+      <!-- Analyst Ratings Detail Screen -->
+      <div class="detail-screen" id="analystDetail">
+        <div class="detail-header">
+          <div class="detail-back" onclick="closeAnalystDetail()">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="detail-title">Analyst Ratings</div>
+          <div style="width:32px;flex-shrink:0"></div>
+        </div>
+        <div class="full-ratings-wrap">
+          <div class="full-ratings-scroll">
+            <div class="full-ratings-table" id="fullRatingsTable"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Health Detail Screen -->
       <div class="detail-screen" id="healthDetail">
         <div class="detail-header">
@@ -1389,8 +1546,28 @@ const fairModels = ['Graham Number', 'Price/Book'];
 
 const rangeData = {
   market: { low: 164.08, high: 260.10, value: CURRENT_PRICE },
-  analyst: { low: 180.00, high: 280.00, value: 235.00, count: 40 }
+  analyst: { low: 180.00, high: 280.00, value: 235.00, count: 15 }
 };
+
+const analystRatings = [
+  { firm: 'Morgan Stanley', position: 'Buy',  priceTarget: 260, fromTarget: 250, action: 'Maintain', date: 'Apr 30, 2026' },
+  { firm: 'Goldman Sachs',  position: 'Buy',  priceTarget: 255, fromTarget: 245, action: 'Raise',    date: 'Apr 29, 2026' },
+  { firm: 'JPMorgan',       position: 'Buy',  priceTarget: 245, fromTarget: 245, action: 'Maintain', date: 'Apr 29, 2026' },
+  { firm: 'Bank of America',position: 'Buy',  priceTarget: 250, fromTarget: 240, action: 'Raise',    date: 'Apr 28, 2026' },
+  { firm: 'Citi',           position: 'Hold', priceTarget: 210, fromTarget: 215, action: 'Lower',    date: 'Apr 28, 2026' },
+  { firm: 'Wells Fargo',    position: 'Buy',  priceTarget: 240, fromTarget: 230, action: 'Raise',    date: 'Apr 27, 2026' },
+  { firm: 'Wedbush',        position: 'Buy',  priceTarget: 280, fromTarget: 270, action: 'Raise',    date: 'Apr 26, 2026' },
+  { firm: 'Mizuho',         position: 'Buy',  priceTarget: 265, fromTarget: 260, action: 'Raise',    date: 'Apr 25, 2026' },
+  { firm: 'Barclays',       position: 'Buy',  priceTarget: 230, fromTarget: 230, action: 'Maintain', date: 'Apr 24, 2026' },
+  { firm: 'UBS',            position: 'Buy',  priceTarget: 235, fromTarget: 225, action: 'Raise',    date: 'Apr 23, 2026' },
+  { firm: 'Bernstein',      position: 'Hold', priceTarget: 215, fromTarget: 215, action: 'Maintain', date: 'Apr 22, 2026' },
+  { firm: 'Deutsche Bank',  position: 'Hold', priceTarget: 200, fromTarget: 210, action: 'Lower',    date: 'Apr 20, 2026' },
+  { firm: 'Evercore ISI',   position: 'Buy',  priceTarget: 245, fromTarget: 235, action: 'Raise',    date: 'Apr 19, 2026' },
+  { firm: 'KeyBanc',        position: 'Hold', priceTarget: 215, fromTarget: 220, action: 'Lower',    date: 'Apr 17, 2026' },
+  { firm: 'Loop Capital',   position: 'Sell', priceTarget: 180, fromTarget: 190, action: 'Lower',    date: 'Apr 14, 2026' }
+];
+
+const ANALYST_PREVIEW_COUNT = 5;
 
 const healthModels = [
   { name: 'Cash Flow Health', score: 3.5, label: '3.5' },
@@ -1711,6 +1888,8 @@ function init() {
   renderChartLegend();
   setupStickyObserver();
   document.getElementById('modelsToggleText').textContent = 'Show ' + models.length + ' models';
+  document.getElementById('analystToggleText').textContent = 'Show ' + analystRatings.length + ' analysts';
+  renderAnalystTable();
 }
 
 function getGlobalRange() {
@@ -1797,9 +1976,9 @@ function updateModelsRange(g) {
   renderRangeBar('rangeModels', 'rangeModelsBounds', low, high, avg, g, 'models', true);
 }
 
-function toggleModelsExpansion() {
-  const expanded = document.getElementById('modelsExpanded');
-  const toggle = document.getElementById('modelsToggle');
+function toggleSectionExpansion(toggleId, expandedId) {
+  const expanded = document.getElementById(expandedId);
+  const toggle = document.getElementById(toggleId);
   const willOpen = !expanded.classList.contains('open');
   expanded.classList.toggle('open');
   toggle.classList.toggle('open');
@@ -1812,6 +1991,87 @@ function toggleModelsExpansion() {
     const targetOffset = targetRect.top - containerRect.top + scrollContent.scrollTop;
     scrollContent.scrollTo({ top: targetOffset - 48, behavior: 'smooth' });
   }
+}
+
+// ===================== ANALYST RATINGS =====================
+function computeUpside(target) {
+  return ((target - CURRENT_PRICE) / CURRENT_PRICE) * 100;
+}
+
+function renderAnalystTable() {
+  const container = document.getElementById('analystRows');
+  const data = analystRatings.slice(0, ANALYST_PREVIEW_COUNT);
+
+  container.innerHTML = data.map(r => {
+    const upside = computeUpside(r.priceTarget);
+    const upClass = upside >= 0 ? 'up' : 'down';
+    const upSign = upside >= 0 ? '+' : '';
+    const posClass = r.position.toLowerCase();
+    return `
+      <div class="analyst-row">
+        <div class="ar-firm">${r.firm}</div>
+        <div class="ar-pos ${posClass}">${r.position}</div>
+        <div class="ar-price">
+          <span class="ar-price-val">${r.priceTarget.toFixed(2)}</span><span class="ar-price-pct ${upClass}">(${upSign}${upside.toFixed(1)}%)</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderAnalystFullTable() {
+  const container = document.getElementById('fullRatingsTable');
+  const articleSVG = `<svg width="14" height="16" viewBox="0 0 14 16" fill="none">
+    <rect x="1" y="1" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+    <line x1="3.5" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1"/>
+    <line x1="3.5" y1="8" x2="10" y2="8" stroke="currentColor" stroke-width="1"/>
+    <line x1="3.5" y1="11" x2="8" y2="11" stroke="currentColor" stroke-width="1"/>
+  </svg>`;
+
+  let html = `
+    <div class="frt-header">
+      <span class="frt-firm">Firm (${analystRatings.length})</span>
+      <span class="frt-article">Article</span>
+      <span class="frt-pos">Position</span>
+      <span class="frt-pt">Price Target</span>
+      <span class="frt-up">Upside / Downside</span>
+      <span class="frt-from">From Price Target</span>
+      <span class="frt-action">Action</span>
+      <span class="frt-date">Date</span>
+    </div>
+  `;
+
+  analystRatings.forEach(r => {
+    const upside = computeUpside(r.priceTarget);
+    const upClass = upside >= 0 ? 'up' : 'down';
+    const upSign = upside >= 0 ? '+' : '';
+    const posClass = r.position.toLowerCase();
+    html += `
+      <div class="frt-row">
+        <span class="frt-firm">${r.firm}</span>
+        <span class="frt-article">${articleSVG}</span>
+        <span class="frt-pos ${posClass}">${r.position}</span>
+        <span class="frt-pt">$${r.priceTarget.toFixed(2)}</span>
+        <span class="frt-up ${upClass}">${upSign}${upside.toFixed(2)}%</span>
+        <span class="frt-from">$${r.fromTarget.toFixed(2)}</span>
+        <span class="frt-action">${r.action}</span>
+        <span class="frt-date">${r.date}</span>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function openAnalystDetail() {
+  renderAnalystFullTable();
+  document.getElementById('mainScreen').classList.add('pushed');
+  document.getElementById('analystDetail').classList.add('visible');
+}
+
+function closeAnalystDetail() {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('analystDetail').classList.remove('visible');
 }
 
 // ===================== TABS =====================
