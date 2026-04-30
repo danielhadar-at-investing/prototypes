@@ -407,70 +407,58 @@
     margin-bottom: 6px;
   }
   .consensus-bar-wrap {
-    background: rgba(0,0,0,0.04);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    height: 36px;
     display: flex;
+    height: 28px;
+    border-radius: 8px;
+    overflow: hidden;
+    gap: 2px;
     margin-bottom: 8px;
   }
   .consensus-seg {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #fff;
-    transition: flex-basis 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     overflow: hidden;
   }
-  .consensus-seg.green { background: rgba(14,203,129,0.75); }
-  .consensus-seg.yellow { background: rgba(255,171,0,0.65); }
-  .consensus-seg.red { background: rgba(226,54,54,0.65); }
+  .consensus-seg.green { background: var(--green); }
+  .consensus-seg.yellow { background: var(--yellow); }
+  .consensus-seg.red { background: var(--red); }
   .consensus-legend {
     display: flex;
-    gap: 16px;
+    align-items: center;
+    gap: 12px;
   }
   .legend-item {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11.5px;
     color: var(--text-secondary);
+    font-weight: 500;
   }
   .legend-item span {
     font-weight: 700;
     color: var(--text-primary);
   }
   .legend-dot {
-    width: 8px; height: 8px;
+    width: 6px; height: 6px;
     border-radius: 50%;
+  }
+  .consensus-divider {
+    height: 1px;
+    background: var(--border);
+    margin-top: 10px;
   }
 
   /* Model rows */
   .models-list {
     display: flex;
     flex-direction: column;
-  }
-  .models-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2px;
-  }
-  .models-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .models-badge {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: rgba(0,0,0,0.04);
-    padding: 3px 8px;
-    border-radius: 10px;
   }
   .model-row {
     display: flex;
@@ -1093,11 +1081,57 @@
     position: absolute;
     transform: translateX(-50%);
   }
-  .range-connector {
-    width: 1.5px;
-    height: 10px;
-    background: var(--border-dark);
-    margin: 0 auto;
+  /* Tab section title (lives outside the section card, like detail-section-title) */
+  .tab-section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-top: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: 0;
+  }
+
+  /* Models toggle (replaces "X of Y selected" sublabel) */
+  .models-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 2px 0;
+    margin-top: 1px;
+    font-family: var(--font);
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    align-self: flex-start;
+  }
+  .models-toggle:active { opacity: 0.6; }
+  .models-toggle-chev {
+    color: var(--text-secondary);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .models-toggle.open .models-toggle-chev {
+    transform: rotate(180deg);
+  }
+
+  /* Models expanded section (continuation of ranges card) */
+  .models-expanded {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .models-expanded.open {
+    max-height: 2000px;
+  }
+  .models-expanded-inner {
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
   }
 
   /* Bottom padding for scroll */
@@ -1193,7 +1227,12 @@
           <div class="tab-content active" id="contentFV">
 
 
-            <!-- Range bars -->
+            <!-- Fair Value Models -->
+            <div class="tab-section-title">Fair Value Models
+              <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                <div class="range-tooltip"><strong>How is Fair Value calculated?</strong>Fair Value is an estimation determined through various valuation models, including discounted cash flow analysis, peer valuation multiples models, and dividend discount models.</div>
+              </button>
+            </div>
             <div class="section-card">
               <div class="range-group">
                 <div class="range-item">
@@ -1228,7 +1267,12 @@
                   <div class="range-header">
                     <div class="range-header-left">
                       <span class="range-label">Investing Models</span>
-                      <span class="range-sublabel" id="modelsSubLabel">14 of 14 selected</span>
+                      <button class="models-toggle" id="modelsToggle" onclick="toggleModelsExpansion()">
+                        <span id="modelsToggleText">Show 14 models</span>
+                        <svg class="models-toggle-chev" width="10" height="6" viewBox="0 0 10 6" fill="none">
+                          <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
                     </div>
                     <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
                       <div class="range-tooltip">The fair value range and average implied by InvestingPro's valuation and risk models.</div>
@@ -1238,36 +1282,24 @@
                   <div class="range-bounds" id="rangeModelsBounds"></div>
                 </div>
               </div>
-            </div>
 
-            <div class="range-connector"></div>
-
-            <!-- Model Consensus -->
-            <div class="section-card">
-              <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">Model Consensus
-                <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                  <div class="range-tooltip"><strong>How is Fair Value calculated?</strong>The Fair Value is an estimation determined through various valuation models, including discounted cash flow analysis, peer valuation multiples models, and dividend discount models.</div>
-                </button>
+              <!-- Expandable models breakdown (continuation of ranges) -->
+              <div class="models-expanded" id="modelsExpanded">
+                <div class="models-expanded-inner">
+                  <div class="consensus-bar-wrap" id="consensusBar">
+                    <div class="consensus-seg green" id="segGreen" style="flex:11">11</div>
+                    <div class="consensus-seg yellow" id="segYellow" style="flex:2">2</div>
+                    <div class="consensus-seg red" id="segRed" style="flex:1">1</div>
+                  </div>
+                  <div class="consensus-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span id="legendUV">11</span> Undervalued</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span id="legendFair">2</span> Fair</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span id="legendOV">1</span> Overvalued</div>
+                  </div>
+                  <div class="consensus-divider"></div>
+                  <div class="models-list" id="chipsGrid"></div>
+                </div>
               </div>
-              <div class="consensus-bar-wrap" id="consensusBar">
-                <div class="consensus-seg green" id="segGreen" style="flex-basis:78.6%">11</div>
-                <div class="consensus-seg yellow" id="segYellow" style="flex-basis:14.3%">2</div>
-                <div class="consensus-seg red" id="segRed" style="flex-basis:7.1%">1</div>
-              </div>
-              <div class="consensus-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span id="legendUV">11</span> Undervalued</div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div><span id="legendFair">2</span> Fair</div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div><span id="legendOV">1</span> Overvalued</div>
-              </div>
-            </div>
-
-            <!-- Models list -->
-            <div class="section-card">
-              <div class="models-header">
-                <span class="models-title">Investing Models</span>
-                <span class="models-badge" id="modelsBadge">14 / 14 selected</span>
-              </div>
-              <div class="models-list" id="chipsGrid"></div>
             </div>
 
             <div class="bottom-pad"></div>
@@ -1275,17 +1307,17 @@
 
           <!-- Health tab -->
           <div class="tab-content" id="contentHealth">
+            <div class="tab-section-title">Financial Health
+              <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the Information Technology sector and operating in Developed economic markets.</div>
+              </button>
+            </div>
             <div class="section-card">
-              <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">Financial Health
-                <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                  <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the Information Technology sector and operating in Developed economic markets.</div>
-                </button>
-              </div>
               <div id="healthRows"></div>
             </div>
 
+            <div class="tab-section-title">Financial Health History</div>
             <div class="section-card">
-              <div class="section-title">Health Over Time</div>
               <div class="chart-canvas-wrap">
                 <canvas id="healthChart" width="680" height="360"></canvas>
               </div>
@@ -1678,6 +1710,7 @@ function init() {
   renderHealthChart();
   renderChartLegend();
   setupStickyObserver();
+  document.getElementById('modelsToggleText').textContent = 'Show ' + models.length + ' models';
 }
 
 function getGlobalRange() {
@@ -1762,8 +1795,23 @@ function updateModelsRange(g) {
   const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
   if (!g) g = getGlobalRange();
   renderRangeBar('rangeModels', 'rangeModelsBounds', low, high, avg, g, 'models', true);
-  document.getElementById('modelsSubLabel').textContent = active.length + ' of ' + models.length + ' selected';
-  document.getElementById('modelsBadge').textContent = active.length + ' / ' + models.length + ' selected';
+}
+
+function toggleModelsExpansion() {
+  const expanded = document.getElementById('modelsExpanded');
+  const toggle = document.getElementById('modelsToggle');
+  const willOpen = !expanded.classList.contains('open');
+  expanded.classList.toggle('open');
+  toggle.classList.toggle('open');
+
+  if (willOpen) {
+    const scrollContent = document.getElementById('scrollContent');
+    const targetRow = toggle.closest('.range-item');
+    const containerRect = scrollContent.getBoundingClientRect();
+    const targetRect = targetRow.getBoundingClientRect();
+    const targetOffset = targetRect.top - containerRect.top + scrollContent.scrollTop;
+    scrollContent.scrollTo({ top: targetOffset - 48, behavior: 'smooth' });
+  }
 }
 
 // ===================== TABS =====================
@@ -1903,25 +1951,19 @@ function updateCalculations() {
   document.getElementById('stickyUpside').textContent = '+' + upside.toFixed(1) + '%';
 
   // Update consensus bar
-  const total = count;
-  const greenPct = total > 0 ? (uv / total * 100) : 0;
-  const yellowPct = total > 0 ? (fair / total * 100) : 0;
-
-  const redPct = total > 0 ? (ov / total * 100) : 0;
-
   const segGreen = document.getElementById('segGreen');
   const segYellow = document.getElementById('segYellow');
   const segRed = document.getElementById('segRed');
 
-  segGreen.style.flexBasis = greenPct + '%';
+  segGreen.style.flex = uv > 0 ? uv : '0';
   segGreen.textContent = uv > 0 ? uv : '';
   segGreen.style.display = uv > 0 ? 'flex' : 'none';
 
-  segYellow.style.flexBasis = yellowPct + '%';
+  segYellow.style.flex = fair > 0 ? fair : '0';
   segYellow.textContent = fair > 0 ? fair : '';
   segYellow.style.display = fair > 0 ? 'flex' : 'none';
 
-  segRed.style.flexBasis = redPct + '%';
+  segRed.style.flex = ov > 0 ? ov : '0';
   segRed.textContent = ov > 0 ? ov : '';
   segRed.style.display = ov > 0 ? 'flex' : 'none';
 
