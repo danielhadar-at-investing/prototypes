@@ -27,16 +27,37 @@ h1 {
   color: #6B7280;
   margin-bottom: 32px;
 }
-.section-title {
+details.section { margin-top: 32px; }
+details.section:first-of-type { margin-top: 0; }
+summary.section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #6B7280;
-  margin: 32px 0 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
 }
-.section-title:first-of-type { margin-top: 0; }
-.section-title.archive { color: #9CA3AF; }
+summary.section-title::-webkit-details-marker { display: none; }
+summary.section-title::before {
+  content: "\203A";
+  font-size: 16px;
+  line-height: 1;
+  color: #9CA3AF;
+  transition: transform 0.15s;
+}
+details[open] > summary.section-title::before { transform: rotate(90deg); }
+summary.section-title .count {
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #9CA3AF;
+}
+summary.section-title.archive { color: #9CA3AF; }
 .proto-list.archive a.proto-card { background: #F3F4F6; }
 .proto-list.archive .proto-name { color: #4B5563; }
 .proto-list {
@@ -84,7 +105,8 @@ a.proto-card:hover {
 <div class="container">
   <h1>Prototypes</h1>
   <p class="subtitle">Investing.com mobile product prototypes</p>
-  <h2 class="section-title">P1</h2>
+  <details class="section" open>
+  <summary class="section-title">P1 <span class="count">(2)</span></summary>
   <div class="proto-list">
     <a class="proto-card" href="fv-tab/fv-tab.html">
       <div>
@@ -103,7 +125,9 @@ a.proto-card:hover {
       <span class="proto-arrow">&rsaquo;</span>
     </a>
   </div>
-  <h2 class="section-title">P2</h2>
+  </details>
+  <details class="section" open>
+  <summary class="section-title">P2 <span class="count">(3)</span></summary>
   <div class="proto-list">
     <a class="proto-card" href="whats-going-on-bar/whats-going-on-bar.html">
       <div>
@@ -130,7 +154,9 @@ a.proto-card:hover {
       <span class="proto-arrow">&rsaquo;</span>
     </a>
   </div>
-  <h2 class="section-title archive">Archive</h2>
+  </details>
+  <details class="section">
+  <summary class="section-title archive">Archive <span class="count">(3)</span></summary>
   <div class="proto-list archive">
     <a class="proto-card" href="watchlist-coast-to-coast/watchlist-coast-to-coast.html">
       <div>
@@ -157,6 +183,7 @@ a.proto-card:hover {
       <span class="proto-arrow">&rsaquo;</span>
     </a>
   </div>
+  </details>
 </div>
 </body>
 </html>
