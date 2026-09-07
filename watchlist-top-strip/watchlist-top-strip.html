@@ -19,8 +19,20 @@
   --border-dark: #E5E7EB;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
   --blue: #2563EB;
+  --amber: #F5A623;
+  --fg-fear: #EB682D;   /* --red blended toward --amber */
+  --fg-greed: #76BA57;  /* --green blended toward --amber */
   --header-h: 48px;
   --tab-h: 56px;
+  /* Light-mode tokens pulled from Figma node 3236:67592 via get_variable_defs.
+     One uniform watchlist surface, structure carried by 1px dividers. */
+  --surface: #F8F8F8;      /* Figma  ●/BG/Tertiary3  - the single watchlist background */
+  --divider: #DEDEDE;      /* Figma  ●/Divider/Primary */
+  --chip-bg: rgba(0,0,0,0.06); /* Figma  ●/Basic/White&Black6% (#0000000f) */
+  --blue-bright: #1E6EF4;  /* Figma  ●/Basic/BlueBright - sign-up CTA */
+  --gap-bg: #F8F8F8;
+  --band: #F8F8F8;
+  --wl-sticky-top: 0px;
 }
 html, body {
   font-family: var(--font);
@@ -115,20 +127,112 @@ html, body {
 .wl-icon-btn:active { background: rgba(0,0,0,0.05); }
 .wl-icon-btn svg { width: 22px; height: 22px; color: var(--text-primary); }
 
+/* ===== WATCHLIST ROW LIVE-TICK ===== */
+.wl-row-price { transition: color 0.3s; }
+.wl-row-price.tick-up { color: var(--green); }
+.wl-row-price.tick-down { color: var(--red); }
+
 /* ===== TOP STRIP ===== */
 .top-strip-wrap {
   flex-shrink: 0;
   padding: 4px 0 10px;
   border-bottom: 1px solid var(--border);
 }
+.top-strip-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 8px 16px 0;
+}
+.top-strip-scroll::-webkit-scrollbar { display: none; }
+/* Every tile shares ONE internal grid, so the name rows and the value rows sit
+   on the same line right across the strip whatever a tile contains:
+     row 1  name
+     row 2  the number - the price, or the gauge arc with its value inside it
+     row 3  the coloured value - the change %, or the sentiment word
+   Width is content-driven with an 80px floor instead of a hard 80px, so no
+   label can truncate (a horizontal scroller does not need equal widths). */
+.strip-item {
+  width: auto;
+  min-width: 80px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  padding: 8px 10px 7px;
+  display: grid;
+  grid-template-rows: 15px 26px 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+.strip-item:active { background: #F3F4F6; }
+.strip-item-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.strip-item-name {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* Market-closed marker. Inline SVG on currentColor, matching the stroke weight
+   of the other icons in the prototype - the old 10px stopwatch emoji turned to
+   mush at that size. */
+.strip-item-closed {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--red);
+  line-height: 0;
+}
+.strip-item-closed svg { width: 11px; height: 11px; display: block; }
+.strip-item-price {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s;
+}
+/* The gauge tile is deliberately centre-aligned as a set (label, arc, value,
+   sentiment word); the price tiles stay left-aligned. */
+.strip-item.is-gauge { text-align: center; }
+.strip-item.is-gauge .strip-item-header { justify-content: center; }
+.strip-item .sfg-gauge { width: 100%; height: 100%; margin: 0; }
+/* The sentiment word shares row 3 with the other tiles' change %. Same font
+   size deliberately, so the two line boxes and their baselines match exactly;
+   only the weight goes up, because it is that tile's headline value. */
+.strip-item.is-gauge .strip-item-change { font-weight: 700; }
+.strip-item-price.tick-up { color: var(--green); }
+.strip-item-price.tick-down { color: var(--red); }
+.strip-item-change {
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.strip-item-change.up { color: var(--green); }
+.strip-item-change.down { color: var(--red); }
 
 /* ===== WATCHLIST NEWS TICKER ===== */
+/* Lives inside .main-scroll ABOVE the sticky .strip-and-tabs, so it scrolls
+   away while the instrument strip and the type tabs stay pinned. */
 .news-ticker-row {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 7px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
+  background: var(--surface);
 }
 .news-ticker-label {
   font-size: 9.5px;
@@ -196,142 +300,281 @@ html, body {
 .nti-source { font-size: 11px; font-weight: 500; color: var(--text-secondary); }
 .nti-time { font-size: 11px; font-weight: 400; color: var(--text-tertiary); }
 
-.top-strip-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 8px 16px 0;
-}
-.top-strip-scroll::-webkit-scrollbar { display: none; }
+/* ===== FEAR & GREED GAUGE ===== */
+.sfg-gauge { display: block; width: 100%; height: auto; margin-top: 1px; }
+.sfg-seg { fill: none; stroke-linecap: butt; }
+.sfg-seg.dim { stroke-width: 4.2; opacity: 0.3; }
+.sfg-seg.lit { stroke-width: 6.2; }
+.sfg-needle { stroke: var(--text-primary); stroke-width: 2.4; stroke-linecap: round; }
+.sfg-val { font-size: 13px; font-weight: 800; fill: var(--text-primary); letter-spacing: -0.3px; }
+.sfg-tint { color: var(--fg-fear); }
+.strip-grid-item-gauge { flex: 1; min-height: 0; display: flex; align-items: center; margin: 3px -2px 2px; }
 
-.strip-item {
-  width: 80px;
-  flex-shrink: 0;
-  background: #FAFAFA;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 8px 7px;
+/* ===== TYPE TABS (Watchlists / Holdings) ===== */
+.wl-type-tabs {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  cursor: pointer;
-  transition: background 0.15s;
-  position: relative;
-}
-.strip-item:active { background: #F3F4F6; }
-.strip-item-header {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 2px;
-}
-.strip-item-name {
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.strip-item-closed {
-  font-size: 10px;
-  color: var(--red);
-  line-height: 1;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
   flex-shrink: 0;
+  border-bottom: 1px solid var(--divider);
 }
-.strip-item-price {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  transition: color 0.3s;
-}
-.strip-item-price.tick-up { color: var(--green); }
-.strip-item-price.tick-down { color: var(--red); }
-.wl-row-price { transition: color 0.3s; }
-.wl-row-price.tick-up { color: var(--green); }
-.wl-row-price.tick-down { color: var(--red); }
-.strip-item-change {
-  font-size: 10.5px;
+.wl-type-tab {
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-family: var(--font);
+  letter-spacing: -0.2px;
+  transition: color 0.15s;
 }
-.strip-item-change.up { color: var(--green); }
-.strip-item-change.down { color: var(--red); }
+.wl-type-tab.active { color: var(--text-primary); }
+.wl-type-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 8px;
+  right: 8px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 1px;
+}
 
 /* ===== MAIN SCROLL ===== */
 .main-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 .main-scroll::-webkit-scrollbar { display: none; }
+
+/* Sticky chrome stack inside .main-scroll: the instrument strip + type tabs
+   pin to the top of the scroll view. Its live height is measured by
+   updateWlStickyTop() into --wl-sticky-top, which is what the grey watchlist
+   title bands stick below. The news ticker deliberately sits ABOVE this
+   wrapper (not inside it) so it scrolls away. */
 .strip-and-tabs {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--bg);
+  background: var(--surface);
 }
 
-/* ===== WATCHLIST CONTENT ===== */
+/* ===== WATCHLIST CONTENT (coast-to-coast) ===== */
 .wl-scroll {
-  background: var(--bg);
-  padding: 12px 16px 12px;
+  background: var(--surface);
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 .wl-scroll::-webkit-scrollbar { display: none; }
 .wl-group {
-  background: var(--bg);
-  border-radius: 16px;
-  border: 1px solid #D1D5DB;
+  background: var(--surface);
+  margin-bottom: 10px;
 }
+/* Sticky title band. Per Figma 3236:67592 the whole watchlist area is one flat
+   surface, so the band no longer tints - only its 1px divider separates it. */
+.wl-group-head {
+  position: sticky;
+  top: calc(var(--wl-sticky-top) - 1px);
+  z-index: 4;
+  background: var(--surface);
+  border-bottom: 1px solid var(--divider);
+}
+.wl-group:not(.expanded) .wl-group-head { border-bottom-color: var(--divider); }
 .wl-group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 16px 8px;
+  padding: 12px 16px;
   cursor: pointer;
 }
-.wl-group-left { display: flex; align-items: center; gap: 6px; }
-.wl-group-name { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.2px; }
+.wl-group-name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wl-group-name-left { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.wl-group-actions { display: flex; align-items: center; gap: 1px; flex-shrink: 0; }
+.wl-group-action-btn {
+  width: 30px; height: 30px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer; border-radius: 50%;
+  transition: background 0.15s;
+}
+.wl-group-action-btn:active { background: rgba(0,0,0,0.06); }
+.wl-group-action-btn svg { width: 18px; height: 18px; color: var(--text-secondary); }
+.wl-group-name { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .wl-group-chevron {
   width: 18px;
   height: 18px;
   color: var(--text-secondary);
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 .wl-group.expanded .wl-group-chevron { transform: rotate(180deg); }
-.wl-group-right { display: flex; align-items: center; gap: 8px; }
-.wl-group-actions { display: none; align-items: center; gap: 8px; }
-.wl-group.expanded .wl-group-actions { display: flex; }
-.wl-group-action-btn {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  transition: background 0.15s;
-}
-.wl-group-action-btn:active { background: rgba(0,0,0,0.05); }
-.wl-group-action-btn svg { width: 18px; height: 18px; color: var(--text-secondary); }
-.wl-add-btn svg { color: var(--text-primary); }
-.wl-group-count { font-size: 13px; font-weight: 600; color: var(--text-secondary); padding: 0 16px 14px; }
+.wl-group-count { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 3px; }
 .wl-group-expanded-content { display: none; }
 .wl-group.expanded .wl-group-expanded-content { display: block; }
+
+/* Detail-view switcher (merged into the flat title band).
+   Per Figma node 3236:67599 ("Tabs Container", 575 wide inside a 375 viewport):
+   the News chip is PINNED at the far left (x=16, w=70), then a 1px vertical
+   divider (x=94), and only the data chips to its right (x=102..575) scroll
+   horizontally. Two 48px background-coloured "Gradient" rects mark the two ends
+   of that scroll region - one at x=327 (right edge) and one at x=101, i.e.
+   immediately RIGHT of the divider, never over the News chip. Their visibility
+   is bound to scroll position, so they are soft edges of the scroll region, not
+   an overlap: see updateSwitchFade(). */
+.wl-group-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 12px 16px;
+}
+.wl-group:not(.expanded) .wl-group-switch { display: none; }
+/* Pinned News chip - same pill treatment as a data chip, but it is an action
+   (opens the news screen), never a selected category, which is what the
+   divider after it signals in the Figma. */
+.wl-switch-news {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 100px;
+  background: var(--chip-bg);
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.wl-switch-news:active { background: rgba(0,0,0,0.12); }
+.wl-switch-news svg { width: 12px; height: 12px; flex-shrink: 0; }
+/* The 1px vertical rule between the pinned News chip and the scrolling strip
+   (Figma 3236:67611: x=94, 16px tall, stroke ●/Divider/Primary). */
+.wl-switch-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 16px;
+  background: var(--divider);
+}
+/* The scrolling region. --fade-l / --fade-r are set by updateSwitchFade() to
+   48px (Figma gradient width) only on the edge that has content beyond it. */
+.wl-switch-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l, 0px), #000 calc(100% - var(--fade-r, 0px)), transparent 100%);
+}
+.wl-switch-scroll::-webkit-scrollbar { display: none; }
+/* Figma chip treatment: unselected = 6% black pill, no border; selected =
+   no fill + 1px black outline (Figma 3236:67612). Scoped to the watchlist
+   switcher so the Customize Columns type bar keeps its own look. */
+.wl-group-switch .sw-chip {
+  height: 24px;
+  padding: 0 10px;
+  gap: 4px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  background: var(--chip-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+.wl-group-switch .sw-chip svg { width: 12px; height: 12px; }
+.wl-group-switch .sw-chip.active {
+  background: transparent;
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+.sw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #FFFFFF;
+  border: 1px solid var(--border-dark);
+  border-radius: 18px;
+  padding: 6px 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-family: var(--font);
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.sw-chip svg { width: 14px; height: 14px; flex-shrink: 0; }
+.sw-chip.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+
+/* Condensed per-view row extras (Details/Ratings/Technical/Valuation) */
+.wl-row-metrics { font-size: 12px; color: var(--text-secondary); font-variant-numeric: tabular-nums; line-height: 1.3; }
+.wl-row-val { font-size: 13px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.wl-pill { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 3px 8px; white-space: nowrap; }
+.wl-pill.strongbuy { color: #0B7A52; background: #D2F4E5; }
+.wl-pill.buy { color: #0E9F6E; background: #E3F9F0; }
+.wl-pill.hold, .wl-pill.neutral { color: #B45309; background: #FEF3C7; }
+.wl-pill.sell, .wl-pill.strongsell { color: #C81E1E; background: #FDE8E8; }
+
+/* ===== INLINE DETAIL TABLE (non-Basic categories) ===== */
+.wl-group-expanded-content { transition: opacity 0.18s ease; }
+.wl-itbl { background: var(--surface); }
+.wl-itbl-head { display: flex; background: var(--surface); border-bottom: 1px solid var(--divider); }
+.wl-itbl-left-head { width: 132px; flex-shrink: 0; display: flex; align-items: center; gap: 4px; padding: 9px 12px; font-size: 12px; font-weight: 600; color: var(--text-secondary); border-right: 1px solid var(--divider); }
+.wl-itbl-head-scroll { flex: 1; min-width: 0; display: flex; overflow-x: hidden; }
+.wl-itbl-body { display: flex; }
+.wl-itbl-left { width: 132px; flex-shrink: 0; border-right: 1px solid var(--divider); }
+.wl-itbl-right { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.wl-itbl-right::-webkit-scrollbar { display: none; }
+.wl-itbl .wl-tbl-left-cell { width: 132px; }
+.wl-itbl .wl-tbl-name-primary { font-size: 15px; font-weight: 600; color: var(--text-primary); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+.wl-itbl .wl-tbl-name-secondary { font-size: 12px; color: var(--text-tertiary); line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+/* Non-stock rows (e.g. crypto) in ratings/valuation: kept visible but greyed, with an inline note. */
+.wl-row-unsupported { background: var(--surface); }
+.wl-row-unsupported .wl-tbl-name-primary { color: var(--text-tertiary); }
+.wl-row-unsupported .wl-tbl-left-cell-border.up,
+.wl-row-unsupported .wl-tbl-left-cell-border.down { background: var(--border-mid); }
+.wl-tbl-unsupported-cell { height: 56px; display: flex; align-items: center; }
+.wl-unsupported-msg { position: sticky; left: 0; padding: 0 12px; font-size: 13px; font-style: italic; color: var(--text-tertiary); white-space: nowrap; }
+/* Locked (guest + free): redact premium (pro) cells with a uniform neutral bar.
+   Hides the real value's color (no green/red leak) and makes every locked cell the
+   same length, so the user can't infer the value from color or word length. */
+#phone.tier-locked .wl-itbl .wl-tbl-data-cell.is-locked {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+#phone.tier-locked .wl-itbl .wl-tbl-data-cell.is-locked > * { visibility: hidden; }
+#phone.tier-locked .wl-itbl .wl-tbl-data-cell.is-locked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 15px;
+  height: 15px;
+  background-color: #F59E0B;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%201a5%205%200%200%200-5%205v3H6a2%202%200%200%200-2%202v9a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2v-9a2%202%200%200%200-2-2h-1V6a5%205%200%200%200-5-5zm3%208H9V6a3%203%200%200%201%206%200v3z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%201a5%205%200%200%200-5%205v3H6a2%202%200%200%200-2%202v9a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2v-9a2%202%200%200%200-2-2h-1V6a5%205%200%200%200-5-5zm3%208H9V6a3%203%200%200%201%206%200v3z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 
 /* Filter chips */
 .wl-filter-chips {
@@ -362,14 +605,14 @@ html, body {
 .wl-chip svg { width: 14px; height: 14px; color: var(--text-secondary); }
 
 /* Rows */
-.wl-rows { border-top: 1px solid var(--border); }
+.wl-rows { border-top: 1px solid var(--divider); }
 .wl-row {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 4px;
   padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--divider);
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -384,7 +627,10 @@ html, body {
 .wl-insight-label {
   font-size: 11px;
   font-weight: 500;
-  color: #818CF8;
+  color: var(--text-secondary);
+  background: #F2F2F7;
+  border-radius: 6px;
+  padding: 3px 8px;
   letter-spacing: 0px;
   font-family: var(--font);
 }
@@ -442,10 +688,12 @@ html, body {
 .ra-chart-label { font-size: 12px; font-weight: 600; width: 96px; flex-shrink: 0; }
 .ra-chart-label.red { color: #FF6B6B; }
 .ra-chart-label.green { color: #34C759; }
+.ra-chart-label.grey { color: #A0A4AE; }
 .ra-chart-track { flex: 1; height: 7px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
 .ra-chart-bar { height: 100%; border-radius: 4px; }
 .ra-chart-bar.red { background: #FF6B6B; }
 .ra-chart-bar.green { background: #34C759; }
+.ra-chart-bar.grey { background: #A0A4AE; }
 .ra-cta {
   width: 100%;
   background: linear-gradient(135deg, #F7931A 0%, #FF6B35 100%);
@@ -558,7 +806,12 @@ html, body {
 .add-menu-item:last-child { border-bottom: none; }
 .add-menu-item:active { background: #F2F2F7; }
 .add-menu-item svg { flex-shrink: 0; color: var(--text-primary); }
+.add-menu-item.danger { color: var(--red); }
+.add-menu-item.danger svg { color: var(--red); width: 20px; height: 20px; }
 .add-menu-sep { height: 1px; background: var(--border); }
+/* Pencil context menu: positioned via fixed coords set in JS (anchored to tapped pencil) */
+.wl-pencil-menu { position: fixed; top: auto; right: auto; min-width: 180px; }
+.wl-pencil-menu .add-menu-item { border-bottom: none; }
 
 /* ===== TAB BAR ===== */
 .tab-bar {
@@ -613,6 +866,8 @@ html, body {
   will-change: transform;
 }
 .screen.active { transform: translateX(0); }
+/* Customize Columns & Reorder Categories open from Watchlist Settings; keep them above so they slide over, not under. */
+#customizeColumnsScreen, #reorderCategoriesScreen { z-index: 11; }
 .main-screen {
   position: relative;
   display: flex;
@@ -693,11 +948,12 @@ html, body {
 .settings-row-icon svg { width: 18px; height: 18px; }
 .settings-row-icon.icon-reorder { background: rgba(139, 92, 246, 0.1); color: #8B5CF6; }
 .settings-row-icon.icon-reorder-holdings { background: rgba(52, 199, 89, 0.1); color: #34C759; }
-.settings-row-icon.icon-strip { background: rgba(37, 99, 235, 0.1); color: var(--blue); }
 .settings-row-content { flex: 1; min-width: 0; }
 .settings-row-label { font-size: 16px; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
 .settings-row-value { font-size: 13px; color: var(--text-secondary); line-height: 1.3; margin-top: 1px; }
 .settings-row-chevron { flex-shrink: 0; width: 16px; height: 16px; color: var(--text-tertiary); }
+.settings-row-icon.icon-columns { background: rgba(37, 99, 235, 0.1); color: var(--blue); }
+.settings-row-icon.icon-strip { background: rgba(37, 99, 235, 0.1); color: var(--blue); }
 
 /* iOS toggle */
 .ios-toggle {
@@ -725,6 +981,59 @@ html, body {
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .ios-toggle.on .ios-toggle-knob { transform: translateX(20px); }
+
+/* ===== CUSTOMIZE COLUMNS SCREEN ===== */
+.cc-back { width: auto; padding: 0 6px 0 0; gap: 0; border-radius: 8px; }
+.cc-back span { font-size: 16px; font-weight: 400; color: var(--text-primary); margin-left: -2px; }
+.cc-save {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; font-family: var(--font);
+  font-size: 16px; font-weight: 600; color: var(--text-tertiary);
+  cursor: default; z-index: 2; padding: 6px 6px; transition: color 0.15s;
+}
+.cc-save.active { color: var(--blue); cursor: pointer; }
+.cc-typebar {
+  display: flex; gap: 8px; padding: 12px 16px 4px; overflow-x: auto;
+  scrollbar-width: none; flex-shrink: 0;
+}
+.cc-typebar::-webkit-scrollbar { display: none; }
+.cc-count {
+  font-size: 15px; color: var(--text-primary); font-weight: 400;
+  padding: 12px 16px 4px; flex-shrink: 0;
+}
+.cc-list-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.cc-list { padding: 0 16px 32px; position: relative; }
+.cc-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 0; border-bottom: 1px solid var(--border);
+  background: var(--bg); touch-action: none;
+}
+.cc-row:last-child { border-bottom: none; }
+.cc-check {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  border: 1.6px solid var(--border-dark); background: transparent;
+}
+.cc-check svg { width: 15px; height: 15px; color: #fff; opacity: 0; transition: opacity 0.12s; }
+.cc-row.selected .cc-check { background: #1A1A2E; border-color: #1A1A2E; }
+.cc-row.selected .cc-check svg { opacity: 1; }
+.cc-row.disabled .cc-check { background: #C9CDD3; border-color: #C9CDD3; cursor: default; }
+.cc-row.disabled .cc-check svg { opacity: 1; }
+.cc-label { flex: 1; min-width: 0; font-size: 17px; font-weight: 400; color: var(--text-primary); }
+.cc-row:not(.selected) .cc-label { color: var(--text-tertiary); }
+.cc-row .cc-arrow { flex-shrink: 0; margin-left: -8px; }
+.cc-row .cc-arrow + .cc-handle { margin-left: -2px; }
+.cc-handle {
+  flex-shrink: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  color: #B8BCC4; cursor: grab; touch-action: none;
+}
+.cc-handle svg { width: 22px; height: 22px; }
+.cc-row.cc-dragging {
+  position: relative; z-index: 20; box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+  border-radius: 12px; border-bottom-color: transparent; opacity: 0.96;
+}
+.cc-row.cc-shift { transition: transform 0.18s cubic-bezier(0.32,0.72,0,1); }
 
 /* ===== TOP STRIP SETTINGS SCREEN ===== */
 .strip-settings-body {
@@ -1020,8 +1329,8 @@ html, body {
 .wl-pro-badge { font-size: 9px; font-weight: 700; color: #F59E0B; background: rgba(245,158,11,0.12); border-radius: 3px; padding: 1px 3px; flex-shrink: 0; }
 
 /* Row cells */
-.wl-tbl-row { display: flex; border-bottom: 1px solid var(--border); }
-.wl-tbl-left-cell { width: 130px; flex-shrink: 0; height: 56px; display: flex; align-items: center; padding: 0 8px; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
+.wl-tbl-row { display: flex; border-bottom: 1px solid var(--divider); }
+.wl-tbl-left-cell { width: 130px; flex-shrink: 0; height: 56px; display: flex; align-items: center; padding: 0 8px; border-right: 1px solid var(--divider); position: relative; overflow: hidden; }
 .wl-tbl-left-cell-border { position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0; }
 .wl-tbl-left-cell-border.up { background: var(--green); }
 .wl-tbl-left-cell-border.down { background: var(--red); }
@@ -1058,7 +1367,52 @@ html, body {
 /* ===== WATCHLIST NEWS SECTION ===== */
 .wl-news-section {
   padding-bottom: 24px;
+  background: var(--bg);
+  position: relative;
 }
+/* ===== WATCHLIST NEWS SIGN-UP GATE (guest only) =====
+   Figma light node 3236:67656: an #FFFFFF @ 80% veil over the whole news
+   container, with the CTA group (3236:67657) sitting on top of it. */
+.wl-news-gate {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 3;
+}
+#phone.state-guest .wl-news-gate { display: flex; }
+.wl-news-gate-btn {
+  width: 248px;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
+  background: var(--blue-bright);
+  color: #FFFFFF;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.wl-news-gate-btn:active { background: #175CD8; }
+.wl-news-gate-socials { display: flex; gap: 20px; }
+.wl-news-gate-social {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--divider);
+  border-radius: 100px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.wl-news-gate-social:active { background: #F1F1F1; }
+.wl-news-gate-social svg { width: 19px; height: 19px; display: block; }
 .wl-news-heading {
   font-size: 18px;
   font-weight: 700;
@@ -1238,39 +1592,49 @@ html, body {
 }
 .detail-menu-cancel:active { background: #F3F4F6; }
 
-/* ===== TYPE TABS ===== */
-.wl-type-tabs {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  background: var(--bg);
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-}
-.wl-type-tab {
-  padding: 10px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  font-family: var(--font);
-  letter-spacing: -0.2px;
-  transition: color 0.15s;
-}
-.wl-type-tab.active { color: var(--text-primary); }
-.wl-type-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 8px;
-  right: 8px;
-  height: 2px;
-  background: var(--text-primary);
-  border-radius: 1px;
-}
+/* ===== WATCHLIST SETTINGS / EDIT LIST ===== */
+.wl-settings-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 32px; background: var(--bg); }
+.wl-settings-body::-webkit-scrollbar { display: none; }
+.hdr-save { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; font-family: var(--font); font-size: 16px; font-weight: 600; color: var(--blue); cursor: pointer; z-index: 2; padding: 6px 6px; }
+.hdr-save:disabled { color: var(--text-tertiary); cursor: default; }
+/* Name input */
+.wl-name-input { display: block; width: calc(100% - 32px); margin: 4px 16px 0; padding: 14px 16px; background: #F2F2F7; border: 1.5px solid transparent; border-radius: 12px; font-size: 16px; font-weight: 600; color: var(--text-primary); font-family: var(--font); outline: none; transition: border-color .15s, background .15s; }
+.wl-name-input:focus { border-color: var(--blue); background: #fff; }
+.wl-name-input.invalid { border-color: var(--red); background: #fff; }
+.wl-name-error { font-size: 12px; color: var(--red); padding: 6px 16px 0; display: none; }
+.wl-name-error.show { display: block; }
+/* View mode cards */
+.wl-viewmode { display: flex; gap: 12px; padding: 4px 16px 0; }
+.wl-vm-card { flex: 1; background: #F7F7F9; border: 1.5px solid var(--border-dark); border-radius: 14px; padding: 14px 16px; cursor: pointer; position: relative; transition: border-color .15s, background .15s; }
+.wl-vm-card.selected { border-color: var(--blue); background: #fff; }
+.wl-vm-card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.wl-vm-card-sub { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.wl-vm-check { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-mid); display: flex; align-items: center; justify-content: center; transition: background .15s, border-color .15s; }
+.wl-vm-card.selected .wl-vm-check { background: var(--text-primary); border-color: var(--text-primary); }
+.wl-vm-check svg { width: 12px; height: 12px; color: #fff; opacity: 0; }
+.wl-vm-card.selected .wl-vm-check svg { opacity: 1; }
+/* Reorder rows */
+.wl-reorder-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.wl-reorder-row:last-child { border-bottom: none; }
+.wl-rr-cat-icon { width: 24px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); flex-shrink: 0; }
+.wl-rr-cat-icon svg { width: 17px; height: 17px; }
+.wl-rr-remove { width: 24px; height: 24px; border-radius: 50%; background: var(--red); border: none; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.wl-rr-remove::before { content: ''; width: 11px; height: 2px; background: #fff; border-radius: 1px; }
+.wl-rr-main { flex: 1; min-width: 0; }
+.wl-rr-name { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.wl-rr-sub { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.wl-rr-sub .clock-icon { color: var(--red); font-size: 11px; }
+.wl-rr-icon-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-tertiary); display: flex; align-items: center; }
+.wl-rr-icon-btn:disabled { opacity: 0.25; cursor: default; }
+.wl-rr-icon-btn svg { width: 20px; height: 20px; }
+.wl-rr-handle { color: var(--text-tertiary); display: flex; align-items: center; flex-shrink: 0; }
+.wl-rr-handle svg { width: 22px; height: 22px; }
+/* Sort by + delete */
+.wl-sortby { display: flex; align-items: center; gap: 8px; padding: 16px; font-size: 16px; border-bottom: 1px solid var(--border); }
+.wl-sortby-label { color: var(--text-primary); font-weight: 500; }
+.wl-sortby-val { color: var(--blue); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.wl-sortby-val svg { width: 16px; height: 16px; }
+
 </style>
 </head>
 <body>
@@ -1294,7 +1658,7 @@ html, body {
       <div class="wl-nav-left">
         <button class="promo-btn" id="promoBanner" onclick="showToast('Opening subscription screen')">Get 50% Off</button>
       </div>
-      <div class="wl-nav-title">Watchlist</div>
+      <div class="wl-nav-title" id="navTitle">Watchlist</div>
       <div class="wl-nav-right">
         <button class="wl-icon-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
@@ -1316,7 +1680,7 @@ html, body {
           </button>
           <div class="add-menu-sep"></div>
           <button class="add-menu-item" id="openSettingsBtn" onclick="closeDotsMenu(); openSettingsScreen()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             Settings
           </button>
         </div>
@@ -1325,7 +1689,7 @@ html, body {
 
     <div class="main-scroll" id="mainScroll">
 
-      <div class="news-ticker-row">
+      <div class="news-ticker-row" style="display: none;">
         <span class="news-ticker-label">Watchlist<br>News</span>
         <div class="news-ticker-sep"></div>
         <div class="news-ticker-window">
@@ -1366,26 +1730,37 @@ html, body {
           <button class="wl-type-tab" data-tab="portfolio" onclick="switchTab('portfolio')">Holdings</button>
         </div>
       </div>
+
       <!-- Watchlist Scroll -->
       <div class="wl-scroll">
 
       <!-- Group 0: Big Bets (expanded) -->
       <div class="wl-group expanded" data-group="0">
-        <div class="wl-group-header" onclick="toggleGroup(0)">
-          <div class="wl-group-left">
-            <span class="wl-group-name">Big Bets</span>
-            <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="wl-group-head">
+          <div class="wl-group-header" onclick="toggleGroup(0)">
+            <div class="wl-group-name-row">
+              <span class="wl-group-name">Big Bets</span>
+              <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="wl-group-count">5 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'bigbets')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
           </div>
-          <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(0); event.stopPropagation();">View More ›</button>
+          <div class="wl-group-switch">
+            <button class="wl-switch-news" aria-label="Watchlist news" onclick="event.stopPropagation(); showToast('open news screen')">News</button>
+            <span class="wl-switch-divider" aria-hidden="true"></span>
+            <div class="wl-switch-scroll" onscroll="updateSwitchFade(this)">
+              <button class="sw-chip active" data-view="basic" onclick="event.stopPropagation();pickWlView(0,'basic',this)">Main</button>
+              <button class="sw-chip" data-view="details" onclick="event.stopPropagation();pickWlView(0,'details',this)">Details</button>
+              <button class="sw-chip" data-view="technical" onclick="event.stopPropagation();pickWlView(0,'technical',this)">Technical</button>
+              <button class="sw-chip" data-view="ratings" onclick="event.stopPropagation();pickWlView(0,'ratings',this)">Ratings</button>
+              <button class="sw-chip" data-view="valuation" onclick="event.stopPropagation();pickWlView(0,'valuation',this)">Valuation</button>
+            </div>
           </div>
         </div>
-        <div class="wl-group-count">5 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'bigbets')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
             <div class="wl-row">
               <div class="wl-row-line"><div class="wl-row-name">Bitcoin</div><div class="wl-row-price" id="wl-price-btc">87,234</div></div>
-              <div class="wl-row-line"><div class="wl-row-meta"><span>BTC</span></div><div class="wl-row-change up" id="wl-change-btc">+1.45%</div></div>
+              <div class="wl-row-line"><div class="wl-row-meta"><span>BTC/USD</span></div><div class="wl-row-change up" id="wl-change-btc">+1.45%</div></div>
             </div>
             <div class="wl-row">
               <div class="wl-row-line"><div class="wl-row-name">Tesla</div><div class="wl-row-price">282.74</div></div>
@@ -1413,16 +1788,26 @@ html, body {
 
       <!-- Group 1: Follow-ups (collapsed) -->
       <div class="wl-group" data-group="1">
-        <div class="wl-group-header" onclick="toggleGroup(1)">
-          <div class="wl-group-left">
-            <span class="wl-group-name">Follow-ups</span>
-            <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="wl-group-head">
+          <div class="wl-group-header" onclick="toggleGroup(1)">
+            <div class="wl-group-name-row">
+              <span class="wl-group-name">Follow-ups</span>
+              <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="wl-group-count">3 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'followups')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
           </div>
-          <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(1); event.stopPropagation();">View More ›</button>
+          <div class="wl-group-switch">
+            <button class="wl-switch-news" aria-label="Watchlist news" onclick="event.stopPropagation(); showToast('open news screen')">News</button>
+            <span class="wl-switch-divider" aria-hidden="true"></span>
+            <div class="wl-switch-scroll" onscroll="updateSwitchFade(this)">
+              <button class="sw-chip active" data-view="basic" onclick="event.stopPropagation();pickWlView(1,'basic',this)">Main</button>
+              <button class="sw-chip" data-view="details" onclick="event.stopPropagation();pickWlView(1,'details',this)">Details</button>
+              <button class="sw-chip" data-view="technical" onclick="event.stopPropagation();pickWlView(1,'technical',this)">Technical</button>
+              <button class="sw-chip" data-view="ratings" onclick="event.stopPropagation();pickWlView(1,'ratings',this)">Ratings</button>
+              <button class="sw-chip" data-view="valuation" onclick="event.stopPropagation();pickWlView(1,'valuation',this)">Valuation</button>
+            </div>
           </div>
         </div>
-        <div class="wl-group-count">3 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'followups')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
             <div class="wl-row">
@@ -1444,21 +1829,31 @@ html, body {
 
       <!-- Group 2: Crypto (collapsed) -->
       <div class="wl-group" data-group="2">
-        <div class="wl-group-header" onclick="toggleGroup(2)">
-          <div class="wl-group-left">
-            <span class="wl-group-name">Crypto</span>
-            <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="wl-group-head">
+          <div class="wl-group-header" onclick="toggleGroup(2)">
+            <div class="wl-group-name-row">
+              <span class="wl-group-name">Crypto</span>
+              <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="wl-group-count">2 Symbols</div>
           </div>
-          <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(2); event.stopPropagation();">View More ›</button>
+          <div class="wl-group-switch">
+            <button class="wl-switch-news" aria-label="Watchlist news" onclick="event.stopPropagation(); showToast('open news screen')">News</button>
+            <span class="wl-switch-divider" aria-hidden="true"></span>
+            <div class="wl-switch-scroll" onscroll="updateSwitchFade(this)">
+              <button class="sw-chip active" data-view="basic" onclick="event.stopPropagation();pickWlView(2,'basic',this)">Main</button>
+              <button class="sw-chip" data-view="details" onclick="event.stopPropagation();pickWlView(2,'details',this)">Details</button>
+              <button class="sw-chip" data-view="technical" onclick="event.stopPropagation();pickWlView(2,'technical',this)">Technical</button>
+              <button class="sw-chip" data-view="ratings" onclick="event.stopPropagation();pickWlView(2,'ratings',this)">Ratings</button>
+              <button class="sw-chip" data-view="valuation" onclick="event.stopPropagation();pickWlView(2,'valuation',this)">Valuation</button>
+            </div>
           </div>
         </div>
-        <div class="wl-group-count">2 Symbols</div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
             <div class="wl-row">
               <div class="wl-row-line"><div class="wl-row-name">Bitcoin</div><div class="wl-row-price">87,234.10</div></div>
-              <div class="wl-row-line"><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | BTC</span></div><div class="wl-row-change up">+1,243.50 (+1.45%)</div></div>
+              <div class="wl-row-line"><div class="wl-row-meta"><span class="clock-icon">&#9201;</span><span>3/30 | BTC/USD</span></div><div class="wl-row-change up">+1,243.50 (+1.45%)</div></div>
             </div>
             <div class="wl-row">
               <div class="wl-row-line"><div class="wl-row-name">Ethereum</div><div class="wl-row-price">1,978.34</div></div>
@@ -1470,16 +1865,26 @@ html, body {
 
       <!-- Group 3: High Risk (collapsed) -->
       <div class="wl-group" data-group="3">
-        <div class="wl-group-header" onclick="toggleGroup(3)">
-          <div class="wl-group-left">
-            <span class="wl-group-name">High Risk</span>
-            <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="wl-group-head">
+          <div class="wl-group-header" onclick="toggleGroup(3)">
+            <div class="wl-group-name-row">
+              <span class="wl-group-name">High Risk</span>
+              <svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="wl-group-count">8 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'highrisk')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
           </div>
-          <div class="wl-group-right">
-            <button class="wl-view-more-btn" onclick="openWatchlistDetail(3); event.stopPropagation();">View More ›</button>
+          <div class="wl-group-switch">
+            <button class="wl-switch-news" aria-label="Watchlist news" onclick="event.stopPropagation(); showToast('open news screen')">News</button>
+            <span class="wl-switch-divider" aria-hidden="true"></span>
+            <div class="wl-switch-scroll" onscroll="updateSwitchFade(this)">
+              <button class="sw-chip active" data-view="basic" onclick="event.stopPropagation();pickWlView(3,'basic',this)">Main</button>
+              <button class="sw-chip" data-view="details" onclick="event.stopPropagation();pickWlView(3,'details',this)">Details</button>
+              <button class="sw-chip" data-view="technical" onclick="event.stopPropagation();pickWlView(3,'technical',this)">Technical</button>
+              <button class="sw-chip" data-view="ratings" onclick="event.stopPropagation();pickWlView(3,'ratings',this)">Ratings</button>
+              <button class="sw-chip" data-view="valuation" onclick="event.stopPropagation();pickWlView(3,'valuation',this)">Valuation</button>
+            </div>
           </div>
         </div>
-        <div class="wl-group-count">8 Symbols <span class="ra-link" onclick="showRiskTooltip(event,'highrisk')">(<span class="ra-link-text">Risk Analysis</span>)</span></div>
         <div class="wl-group-expanded-content">
           <div class="wl-rows">
             <div class="wl-row">
@@ -1605,6 +2010,29 @@ html, body {
           </div>
         </div>
 
+        <!-- Watchlist News sign-up gate. Figma: veil 3236:67656 (#FFFFFF @ 80%)
+             over the whole news container, CTA group 3236:67657 (button
+             3236:67688 248x40 r4 #1E6EF4 with label 3236:67689, then four 32px
+             round social buttons 3236:67668 / 67673 / 67681 / 67684 at a 52px
+             pitch). Guest state only. -->
+        <div class="wl-news-gate" id="wlNewsGate" onclick="event.stopPropagation()">
+          <button class="wl-news-gate-btn" onclick="showToast('Opening sign up screen')">Sign up for Watchlist News</button>
+          <div class="wl-news-gate-socials">
+            <button class="wl-news-gate-social" aria-label="Sign up with Apple" onclick="showToast('Sign up with Apple')">
+              <svg viewBox="0 0 24 24" fill="#000000"><path d="M17.05 12.54c.02-2.2 1.79-3.26 1.87-3.31-1.02-1.5-2.61-1.7-3.17-1.73-1.42-.14-2.78.83-3.5.83-.73 0-1.84-.81-3.03-.79-1.56.02-3 .9-3.8 2.3-1.62 2.82-.42 7 1.16 9.29.77 1.12 1.7 2.38 2.91 2.33 1.17-.05 1.61-.75 3.02-.75 1.4 0 1.8.75 3.03.73 1.25-.02 2.04-1.14 2.8-2.27.87-1.3 1.23-2.55 1.25-2.62-.03-.01-2.4-.92-2.42-3.64zM14.9 5.9c.64-.77 1.07-1.85.95-2.92-.94.04-2.08.63-2.75 1.4-.6.68-1.11 1.78-.97 2.83 1.05.08 2.13-.53 2.77-1.31z"/></svg>
+            </button>
+            <button class="wl-news-gate-social" aria-label="Sign up with Google" onclick="showToast('Sign up with Google')">
+              <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.44a5.5 5.5 0 0 1-2.39 3.62v3h3.86c2.26-2.08 3.59-5.15 3.59-8.81z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.86-3a7.2 7.2 0 0 1-10.72-3.78H1.4v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC04" d="M5.37 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.4a12 12 0 0 0 0 10.8l3.97-3.1z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42A11.97 11.97 0 0 0 1.4 6.6l3.97 3.1A7.16 7.16 0 0 1 12 4.75z"/></svg>
+            </button>
+            <button class="wl-news-gate-social" aria-label="Sign up with Facebook" onclick="showToast('Sign up with Facebook')">
+              <svg viewBox="0 0 24 24" fill="#1E6EF4"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.96h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+            </button>
+            <button class="wl-news-gate-social" aria-label="Sign up with email" onclick="showToast('Sign up with email')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1A1A2E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><polyline points="3.5 7 12 13 20.5 7"/></svg>
+            </button>
+          </div>
+        </div>
+
       </div><!-- /wl-news-section -->
 
     </div><!-- /wl-scroll -->
@@ -1703,46 +2131,67 @@ html, body {
       <div class="settings-title">Settings</div>
     </div>
 
-    <div class="settings-section-label">Watchlists</div>
-    <div class="settings-rows">
-      <div class="settings-row" id="reorderWlRow">
-        <div class="settings-row-icon icon-reorder">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <div class="wl-settings-body">
+      <div class="settings-section-label">Reorder Watchlists</div>
+      <div class="wl-reorder-list" id="manageWlReorder"></div>
+
+      <div class="settings-section-label">Holdings</div>
+      <div class="settings-rows">
+        <div class="settings-row" id="reorderHoldingsRow">
+          <div class="settings-row-icon icon-reorder-holdings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </div>
+          <div class="settings-row-content">
+            <div class="settings-row-label">Reorder Holdings</div>
+            <div class="settings-row-value">Tech Growth, Dividend Income, Retirement...</div>
+          </div>
+          <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        <div class="settings-row-content">
-          <div class="settings-row-label">Reorder Watchlists</div>
-          <div class="settings-row-value">My Watchlist, Ggg, Gg...</div>
+      </div>
+
+      <div class="settings-section-label">Top Strip</div>
+      <div class="settings-rows">
+        <div class="settings-row" id="stripSettingsRow">
+          <div class="settings-row-icon icon-strip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="settings-row-content">
+            <div class="settings-row-label">Top Strip</div>
+            <div class="settings-row-value" id="stripSettingsValue">Fear &amp; Greed, NVDA, Gold, Bitcoin, Dow Jones, S&amp;P 500</div>
+          </div>
+          <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
     </div>
+  </div>
 
-    <div class="settings-section-label">Holdings</div>
-    <div class="settings-rows">
-      <div class="settings-row" id="reorderHoldingsRow">
-        <div class="settings-row-icon icon-reorder-holdings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </div>
-        <div class="settings-row-content">
-          <div class="settings-row-label">Reorder Holdings</div>
-          <div class="settings-row-value">Apple, NVIDIA, Microsoft...</div>
-        </div>
-        <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  <!-- ===== CUSTOMIZE COLUMNS SCREEN ===== -->
+  <div class="screen" id="customizeColumnsScreen">
+    <div class="status-bar">
+      <span class="status-time">10:26</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none" width="18" height="12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" width="16" height="12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none" width="28" height="13"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/></svg>
       </div>
     </div>
-
-    <div class="settings-section-label">Top Strip</div>
-    <div class="settings-rows">
-      <div class="settings-row" id="stripSettingsRow">
-        <div class="settings-row-icon icon-strip">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <div class="settings-row-content">
-          <div class="settings-row-label">Top Strip</div>
-          <div class="settings-row-value" id="stripSettingsValue">TA-35, NVDA, Gold, Bitcoin, Dow Jones, S&P 500</div>
-        </div>
-        <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
+    <div class="settings-header">
+      <button class="settings-back-btn cc-back" id="ccBackBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>Back</span>
+      </button>
+      <div class="settings-title">Customize Columns</div>
+      <button class="cc-save" id="ccSaveBtn" onclick="saveCustomizeColumns()">Save</button>
+    </div>
+    <div class="cc-typebar" id="ccTypeBar">
+      <button class="sw-chip active" data-cctype="details" onclick="pickCcType('details', this)">Details</button>
+      <button class="sw-chip" data-cctype="technical" onclick="pickCcType('technical', this)">Technical</button>
+      <button class="sw-chip" data-cctype="ratings" onclick="pickCcType('ratings', this)">Ratings</button>
+      <button class="sw-chip" data-cctype="valuation" onclick="pickCcType('valuation', this)">Valuation</button>
+    </div>
+    <div class="cc-count" id="ccCount">Items selected 10 (min 4)</div>
+    <div class="cc-list-scroll">
+      <div class="cc-list" id="ccList"></div>
     </div>
   </div>
 
@@ -1804,6 +2253,134 @@ html, body {
     </div>
   </div>
 
+  <!-- ===== WATCHLIST EDIT MENU (pencil context menu) ===== -->
+  <div id="wlMenu" class="add-menu wl-pencil-menu">
+    <button class="add-menu-item" onclick="openWlEditList()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Edit List
+    </button>
+    <button class="add-menu-item" onclick="openWlSettings()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      Settings
+    </button>
+    <div class="add-menu-sep"></div>
+    <button class="add-menu-item danger" onclick="closeWlMenu(); showToast('Delete watchlist')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Delete
+    </button>
+  </div>
+
+  <!-- ===== WATCHLIST SETTINGS SCREEN ===== -->
+  <div class="screen" id="wlSettingsScreen">
+    <div class="status-bar">
+      <span class="status-time">10:26</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none" width="18" height="12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" width="16" height="12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none" width="28" height="13"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="settings-header">
+      <button class="settings-back-btn" id="wlSettingsBackBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="settings-title">Watchlist Settings</div>
+      <button class="hdr-save" id="wlSettingsSave" onclick="saveWlSettings()">Save</button>
+    </div>
+    <div class="wl-settings-body">
+      <div class="settings-section-label">Watchlist Name</div>
+      <input class="wl-name-input" id="wlSettingsName" type="text" autocomplete="off" oninput="onWlNameInput()">
+      <div class="wl-name-error" id="wlNameError">Name can't be empty</div>
+
+      <div class="settings-section-label">Display Mode</div>
+      <div class="wl-viewmode" id="wlViewModeCards">
+        <div class="wl-vm-card selected" data-mode="name" onclick="selectViewMode('name')">
+          <div class="wl-vm-card-title">Full Name</div>
+          <div class="wl-vm-card-sub">Apple Inc</div>
+          <div class="wl-vm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="wl-vm-card" data-mode="symbol" onclick="selectViewMode('symbol')">
+          <div class="wl-vm-card-title">Symbol</div>
+          <div class="wl-vm-card-sub">AAPL</div>
+          <div class="wl-vm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+
+      <div class="settings-section-label">Content</div>
+      <div class="settings-rows">
+        <div class="settings-row" onclick="openReorderCategories()">
+          <div class="settings-row-icon icon-reorder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><polyline points="8 4 5 7 8 10" transform="translate(11 0)"/></svg>
+          </div>
+          <div class="settings-row-content">
+            <div class="settings-row-label">Reorder Categories</div>
+            <div class="settings-row-value">Change the order of category tabs</div>
+          </div>
+          <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="settings-row" onclick="openCustomizeColumns()">
+          <div class="settings-row-icon icon-columns">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="11" y2="6"/><circle cx="16" cy="6" r="2.2"/><line x1="20" y1="6" x2="18.5" y2="6"/><line x1="4" y1="12" x2="6" y2="12"/><circle cx="10" cy="12" r="2.2"/><line x1="13" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="13" y2="18"/><circle cx="17" cy="18" r="2.2"/><line x1="20" y1="18" x2="19.5" y2="18"/></svg>
+          </div>
+          <div class="settings-row-content">
+            <div class="settings-row-label">Customize Columns</div>
+            <div class="settings-row-value">Choose and reorder table columns</div>
+          </div>
+          <svg class="settings-row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REORDER CATEGORIES SCREEN ===== -->
+  <div class="screen" id="reorderCategoriesScreen">
+    <div class="status-bar">
+      <span class="status-time">10:26</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none" width="18" height="12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" width="16" height="12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none" width="28" height="13"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="settings-header">
+      <button class="settings-back-btn" id="reorderCatBackBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="settings-title">Reorder Categories</div>
+      <button class="hdr-save" id="reorderCatSave" onclick="saveReorderCategories()">Save</button>
+    </div>
+    <div class="wl-settings-body">
+      <div class="settings-section-label">Categories</div>
+      <div class="wl-reorder-list" id="wlCatReorder"></div>
+    </div>
+  </div>
+
+  <!-- ===== WATCHLIST EDIT LIST SCREEN ===== -->
+  <div class="screen" id="wlEditListScreen">
+    <div class="status-bar">
+      <span class="status-time">10:26</span>
+      <div class="status-icons">
+        <svg viewBox="0 0 18 12" fill="none" width="18" height="12"><rect x="0" y="3" width="3" height="9" rx="0.5" fill="currentColor"/><rect x="4.5" y="2" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="9" y="0.5" width="3" height="11.5" rx="0.5" fill="currentColor"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        <svg viewBox="0 0 16 12" fill="none" width="16" height="12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.1 1.2 4.9 0 8 0s5.9 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill="currentColor"/><path d="M8 6.8c-1.5 0-2.9.6-3.9 1.6L2.4 6.6C3.9 5.2 5.8 4.4 8 4.4s4.1.8 5.6 2.2L11.9 8.4C10.9 7.4 9.5 6.8 8 6.8z" fill="currentColor"/><circle cx="8" cy="11" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 28 13" fill="none" width="28" height="13"><rect x="0" y="0.5" width="23" height="12" rx="3" stroke="currentColor" stroke-width="1"/><rect x="24.5" y="4" width="2.5" height="5" rx="1" fill="currentColor" opacity="0.4"/><rect x="1.5" y="2" width="21" height="9" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="settings-header">
+      <button class="settings-back-btn" id="wlEditListBackBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="settings-title">Edit Watchlist</div>
+      <button class="hdr-save" id="wlEditListSave" onclick="saveWlEditList()">Save</button>
+    </div>
+    <div class="wl-settings-body">
+      <div class="wl-sortby">
+        <span class="wl-sortby-label">Sort by:</span>
+        <span class="wl-sortby-val" onclick="showToast('Sort options')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>Custom</span>
+      </div>
+      <div class="wl-reorder-list" id="wlEditReorder"></div>
+    </div>
+  </div>
+
   <!-- ===== TOP STRIP SETTINGS SCREEN ===== -->
   <div class="screen" id="stripSettingsScreen">
     <div class="status-bar">
@@ -1829,7 +2406,7 @@ html, body {
           <div class="settings-row-content">
             <div class="settings-row-label">Show Watchlist News</div>
           </div>
-          <button class="ios-toggle on" id="newsToggle">
+          <button class="ios-toggle" id="newsToggle">
             <div class="ios-toggle-knob"></div>
           </button>
         </div>
@@ -1885,11 +2462,12 @@ html, body {
 <script>
 // ===== INSTRUMENT DATA =====
 const allInstruments = [
-  { id: 'sp500',  name: 'S&P 500',   ticker: 'US500',  basePrice: 5611.85, pct: -0.22, up: false, seed: 1  },
+  { id: 'feargreed', type: 'gauge', name: 'Fear & Greed', ticker: 'FGI', value: 33, sentiment: 'Fear' },
   { id: 'ta35',   name: 'TA-35',     ticker: 'TA35',   basePrice: 2101.54, pct:  0.41, up: true,  seed: 9  },
   { id: 'gold',   name: 'Gold',      ticker: 'XAU',    basePrice: 3084.20, pct: -0.18, up: false, seed: 14 },
   { id: 'btc',    name: 'Bitcoin',   ticker: 'BTC',    basePrice: 87234.1, pct:  1.45, up: true,  seed: 15 },
   { id: 'dji',    name: 'Dow Jones', ticker: 'DJI',    basePrice: 41583.0, pct:  0.10, up: true,  seed: 2  },
+  { id: 'sp500',  name: 'S&P 500',   ticker: 'US500',  basePrice: 5611.85, pct: -0.22, up: false, seed: 1  },
   { id: 'nvda',   name: 'NVDA',      ticker: 'NVDA',   basePrice: 875.35,  pct:  2.14, up: true,  seed: 13 },
   { id: 'nasdaq', name: 'Nasdaq',    ticker: 'IXIC',   basePrice: 17680.0, pct: -0.35, up: false, seed: 3  },
   { id: 'eth',    name: 'Ethereum',  ticker: 'ETH',    basePrice: 1978.34, pct: -2.08, up: false, seed: 16 },
@@ -1900,18 +2478,33 @@ const allInstruments = [
   { id: 'elal',   name: 'El-Al',    ticker: 'ELAL',   basePrice: 772.00,  pct:  1.24, up: true,  seed: 21 },
 ];
 
-let activeIds = ['ta35', 'nvda', 'gold', 'btc', 'dji', 'sp500', 'nasdaq', 'oil', 'silver'];
+let activeIds = ['feargreed', 'nvda', 'gold', 'btc', 'dji', 'sp500', 'nasdaq', 'oil', 'silver'];
 let showStrip = true;
-let showNews = true;
+let showNews = false;
 
 let currentTab = 'watchlist';
 
 function getActive() { return activeIds.map(id => allInstruments.find(i => i.id === id)); }
 function getAvailable() { return allInstruments.filter(i => !activeIds.includes(i.id)); }
 
-// Live price state
+// Fear & Greed Index gauge (static inline SVG - value 33, "Fear" band)
+const FG_GAUGE_SVG = `<svg class="sfg-gauge" viewBox="0 0 64 25" role="img" aria-label="Fear and Greed Index 33, Fear">
+        <path class="sfg-seg dim" stroke="var(--red)" d="M10.507 23.437A21.5 21.5 0 0 1 14.281 11.822"/>
+        <path class="sfg-seg lit" stroke="var(--fg-fear)" d="M14.943 10.912A21.5 21.5 0 0 1 24.823 3.733"/>
+        <path class="sfg-seg dim" stroke="var(--amber)" d="M25.894 3.385A21.5 21.5 0 0 1 38.106 3.385"/>
+        <path class="sfg-seg dim" stroke="var(--fg-greed)" d="M39.177 3.733A21.5 21.5 0 0 1 49.057 10.912"/>
+        <path class="sfg-seg dim" stroke="var(--green)" d="M49.719 11.822A21.5 21.5 0 0 1 53.493 23.437"/>
+        <line class="sfg-needle" x1="25.637" y1="13.241" x2="21.565" y2="6.355"/>
+        <text class="sfg-val" x="32" y="23.2" text-anchor="middle">33</text>
+      </svg>`;
+
+// Market-closed clock for the strip tiles. Same glyph and stroke weight as
+// clockSvg() used in the tables, on currentColor so the tile's token drives it.
+const STRIP_CLOCK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>`;
+
+// Live price state (gauge items have no price)
 const livePrices = {};
-allInstruments.forEach(i => { livePrices[i.id] = i.basePrice; });
+allInstruments.forEach(i => { if (i.type !== 'gauge') livePrices[i.id] = i.basePrice; });
 
 function formatStripPrice(p) {
   if (p >= 10000) return p.toLocaleString('en-US', { maximumFractionDigits: 0 });
@@ -1988,6 +2581,7 @@ function drawChart(canvas, seed, isUp) {
 function tickStripPrices() {
   if (!showStrip) return;
   getActive().forEach(item => {
+    if (item.type === 'gauge') return;
     if (item.id === 'nvda') return;
     if (Math.random() > 0.45) return;
     const variance = livePrices[item.id] * (Math.random() * 0.0018 - 0.0009);
@@ -2048,6 +2642,7 @@ function tickStripPrices() {
 function tickCharts() {
   if (!showStrip) return;
   getActive().forEach(item => {
+    if (item.type === 'gauge') return;
     advanceRolling(item.seed);
   });
 }
@@ -2060,6 +2655,8 @@ function switchTab(tab) {
   document.querySelector('.wl-scroll').style.display = isWl ? '' : 'none';
   updateHoldingsView();
   renderStrip();
+  // Tab change can alter the chrome above the sticky title bands.
+  updateWlStickyTop();
 }
 
 function updateHoldingsView() {
@@ -2073,22 +2670,41 @@ function renderStrip() {
   const wrap = document.getElementById('topStripWrap');
   const scroll = document.getElementById('topStripScroll');
   const newsRow = document.querySelector('.news-ticker-row');
+  // One independent line per element: the ticker is a sibling of the sticky
+  // wrapper now, so gating the wrapper on (showStrip || showNews) would leave
+  // an empty bordered strip visible when instruments are off but news is on.
   wrap.style.display = showStrip ? '' : 'none';
   if (scroll) scroll.style.display = showStrip ? '' : 'none';
-  if (newsRow) newsRow.style.display = showNews ? '' : 'none';
+  if (newsRow) newsRow.style.display = showNews ? 'flex' : 'none';
+  // The sticky chrome just changed height; the grey title bands stick below it.
+  updateWlStickyTop();
   if (!showStrip) return;
 
   const container = document.getElementById('topStripScroll');
   container.innerHTML = '';
   getActive().forEach(item => {
-    const pct = item.pct;
-    const isUp = pct >= 0;
     const el = document.createElement('div');
     el.className = 'strip-item';
+    if (item.type === 'gauge') {
+      // Same three grid rows as a price tile: name / arc (its value sits inside
+      // the arc) / sentiment word, so nothing has to be nudged to line up.
+      el.classList.add('is-gauge');
+      el.innerHTML = `
+      <div class="strip-item-header">
+        <div class="strip-item-name">${item.name}</div>
+      </div>
+      ${FG_GAUGE_SVG}
+      <div class="strip-item-change sfg-tint">${item.sentiment}</div>
+    `;
+      container.appendChild(el);
+      return;
+    }
+    const pct = item.pct;
+    const isUp = pct >= 0;
     el.innerHTML = `
       <div class="strip-item-header">
         <div class="strip-item-name">${item.name}</div>
-        ${item.id === 'nvda' ? '<span class="strip-item-closed">&#9201;</span>' : ''}
+        ${item.id === 'nvda' ? `<span class="strip-item-closed" aria-label="Market closed">${STRIP_CLOCK_SVG}</span>` : ''}
       </div>
       <div class="strip-item-price" id="price-${item.id}">${formatStripPrice(livePrices[item.id])}</div>
       <div class="strip-item-change ${isUp ? 'up' : 'down'}" id="change-${item.id}">${isUp ? '+' : ''}${pct.toFixed(2)}%</div>
@@ -2098,12 +2714,23 @@ function renderStrip() {
 
   setTimeout(() => {
     getActive().forEach(item => {
+      if (item.type === 'gauge') return;
       if (!rollingPoints[item.seed]) initRolling(item.seed, item.up, 30);
     });
   }, 50);
 }
-
 setInterval(tickStripPrices, 1500);
+
+// ===== NEWS TICKER =====
+// Off by default (showNews === false); the interval early-returns while hidden.
+const newsItemH = 52;
+let currentNews = 0;
+setInterval(() => {
+  if (!showNews) return;
+  currentNews = (currentNews + 1) % 5;
+  const track = document.getElementById('newsTickerTrack');
+  if (track) track.style.transform = `translateY(-${currentNews * newsItemH}px)`;
+}, 3500);
 
 // ===== STRIP SETTINGS GRID =====
 let selectingSlotIndex = -1;
@@ -2127,14 +2754,21 @@ function renderStripSettingsGrid() {
     el.dataset.id = item.id;
     el.dataset.index = i;
     const isUp = item.up;
-    el.innerHTML = `
+    const removeBtn = `
+      <button class="strip-grid-item-x" onclick="confirmRemove(event, '${item.id}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    el.innerHTML = item.type === 'gauge' ? `
+      <div class="strip-grid-item-name">${item.name}</div>
+      <div class="strip-grid-item-gauge">${FG_GAUGE_SVG}</div>
+      <div class="strip-grid-item-price sfg-tint">${item.sentiment}</div>
+      ${removeBtn}
+    ` : `
       <div class="strip-grid-item-name">${item.name}</div>
       <div class="strip-grid-item-chart"><canvas id="sgchart-${item.id}"></canvas></div>
       <div class="strip-grid-item-price">${formatStripPrice(livePrices[item.id])}</div>
       <div class="strip-grid-item-change ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${item.pct.toFixed(2)}%</div>
-      <button class="strip-grid-item-x" onclick="confirmRemove(event, '${item.id}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      ${removeBtn}
     `;
     el.addEventListener('touchstart', (e) => onItemTouchStart(e, i), { passive: false });
     el.addEventListener('touchmove', onItemTouchMove, { passive: false });
@@ -2159,6 +2793,7 @@ function renderStripSettingsGrid() {
 
   setTimeout(() => {
     active.forEach(item => {
+      if (item.type === 'gauge') return;
       if (!rollingPoints[item.seed]) initRolling(item.seed, item.up, 30);
       drawChart(document.getElementById('sgchart-' + item.id), item.seed, item.up);
     });
@@ -2193,6 +2828,11 @@ function populateSelectList(query) {
     const inUse = activeIds.includes(item.id) && item.id !== currentId;
     const isCurrent = item.id === currentId;
     const isUp = item.up;
+    const right = item.type === 'gauge'
+      ? `<div class="strip-select-row-price">${item.value}</div>
+          <div class="strip-select-row-chg sfg-tint">${item.sentiment}</div>`
+      : `<div class="strip-select-row-price">${formatStripPrice(livePrices[item.id])}</div>
+          <div class="strip-select-row-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${item.pct.toFixed(2)}%</div>`;
     return `
       <div class="strip-select-row ${inUse ? 'in-use' : ''} ${isCurrent ? 'current-slot' : ''}"
            onclick="${inUse ? '' : `selectInstrument('${item.id}')`}">
@@ -2201,8 +2841,7 @@ function populateSelectList(query) {
           <div class="strip-select-row-meta">${item.ticker}</div>
         </div>
         <div class="strip-select-row-right">
-          <div class="strip-select-row-price">${formatStripPrice(livePrices[item.id])}</div>
-          <div class="strip-select-row-chg ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${item.pct.toFixed(2)}%</div>
+          ${right}
         </div>
       </div>
     `;
@@ -2333,50 +2972,77 @@ function endDrag(e) {
   renderStripSettingsGrid();
   renderStrip();
 }
-
 // ===== NAVIGATION =====
 const mainScreen = document.getElementById('mainScreen');
 const settingsScreen = document.getElementById('settingsScreen');
 const stripSettingsScreen = document.getElementById('stripSettingsScreen');
 
-function openSettingsScreen() {
+// ----- Manage Watchlists (reorder) -----
+function buildManageWlRows(names) {
+  document.getElementById('manageWlReorder').innerHTML = names.map((name, i) => `
+    <div class="wl-reorder-row" data-name="${name}">
+      <button class="wl-rr-remove" onclick="removeManageWlRow(this)" aria-label="Remove"></button>
+      <div class="wl-rr-main"><div class="wl-rr-name">${name}</div></div>
+      <button class="wl-rr-icon-btn" ${i === 0 ? 'disabled' : ''} onclick="moveManageWlRow(this,-1)">${ARROW_UP}</button>
+      <button class="wl-rr-icon-btn" ${i === names.length - 1 ? 'disabled' : ''} onclick="moveManageWlRow(this,1)">${ARROW_DOWN}</button>
+      <span class="wl-rr-handle">${HANDLE}</span>
+    </div>`).join('');
+}
+
+function moveManageWlRow(btn, dir) {
+  const row = btn.closest('.wl-reorder-row');
+  const wrap = row.parentElement;
+  if (dir < 0 && row.previousElementSibling) wrap.insertBefore(row, row.previousElementSibling);
+  else if (dir > 0 && row.nextElementSibling) wrap.insertBefore(row.nextElementSibling, row);
+  buildManageWlRows([...wrap.querySelectorAll('.wl-reorder-row')].map(r => r.dataset.name));
+}
+
+function removeManageWlRow(btn) {
+  btn.closest('.wl-reorder-row').remove();
+  buildManageWlRows([...document.querySelectorAll('#manageWlReorder .wl-reorder-row')].map(r => r.dataset.name));
+}
+
+function applyManageWlOrder() {
+  const order = [...document.querySelectorAll('#manageWlReorder .wl-reorder-row')].map(r => r.dataset.name);
+  const scroll = document.querySelector('.wl-scroll');
+  if (!scroll) return;
+  const news = scroll.querySelector('.wl-news-section');
+  // Delete watchlists removed in the manage screen
+  [...scroll.querySelectorAll('.wl-group')].forEach(g => {
+    const nm = (g.querySelector('.wl-group-name') || {}).textContent?.trim();
+    if (nm && !order.includes(nm)) g.remove();
+  });
+  // Apply the new order
+  order.forEach(name => {
+    const group = [...scroll.querySelectorAll('.wl-group')]
+      .find(g => (g.querySelector('.wl-group-name') || {}).textContent?.trim() === name);
+    if (group) scroll.insertBefore(group, news);
+  });
+}
+
+function openManageWatchlists() {
+  const names = [...document.querySelectorAll('.wl-scroll .wl-group .wl-group-name')].map(el => el.textContent.trim());
+  buildManageWlRows(names);
   mainScreen.classList.add('pushed');
   settingsScreen.classList.add('active');
 }
+// The merged Settings screen is the same screen; keep both names working.
+function openSettingsScreen() { openManageWatchlists(); }
+
 document.getElementById('settingsBackBtn').addEventListener('click', () => {
+  applyManageWlOrder();
+  // Return directly to the watchlist.
   mainScreen.classList.remove('pushed');
   settingsScreen.classList.remove('active');
 });
-document.getElementById('stripSettingsRow').addEventListener('click', () => {
-  renderStripSettingsGrid();
-  settingsScreen.style.transform = 'translateX(-30%)';
-  stripSettingsScreen.classList.add('active');
-});
-document.getElementById('stripSettingsBackBtn').addEventListener('click', () => {
-  settingsScreen.style.transform = '';
-  stripSettingsScreen.classList.remove('active');
-});
-
-// Strip toggle
-document.getElementById('newsToggle').addEventListener('click', function() {
-  showNews = !showNews;
-  this.classList.toggle('on', showNews);
-  renderStrip();
-});
-document.getElementById('instrumentsToggle').addEventListener('click', function() {
-  showStrip = !showStrip;
-  this.classList.toggle('on', showStrip);
-  renderStrip();
-});
-
-// Reorder watchlists / holdings (no-op tap feedback)
-document.getElementById('reorderWlRow').addEventListener('click', () => {});
-document.getElementById('reorderHoldingsRow').addEventListener('click', () => {});
 
 // ===== GROUP TOGGLE =====
 function toggleGroup(index) {
   const group = document.querySelector(`.wl-group[data-group="${index}"]`);
   if (group) group.classList.toggle('expanded');
+  // The chips strip has no measurable width while collapsed, so re-measure the
+  // scroll fades once it is on screen again.
+  if (group) updateSwitchFade(group.querySelector('.wl-switch-scroll'));
 }
 
 
@@ -2411,20 +3077,23 @@ function closeInsightTooltip() {
 
 // ===== USER STATE =====
 let userState = 'guest';
+// over/under/fair are explicit and together cover every valuated stock in the list.
 const riskData = {
-  bigbets:   { name: 'Big Bets',   stocks: 4, valuated: 3, overvalued: 1 },
-  followups: { name: 'Follow-ups', stocks: 3, valuated: 3, overvalued: 2 },
-  highrisk:  { name: 'High Risk',  stocks: 8, valuated: 8, overvalued: 5 }
+  bigbets:   { name: 'Big Bets',   overvalued: 1, undervalued: 2, fair: 1 },
+  followups: { name: 'Follow-ups', overvalued: 2, undervalued: 1, fair: 0 },
+  highrisk:  { name: 'High Risk',  overvalued: 5, undervalued: 2, fair: 1 }
 };
 let activeRiskTooltip = null;
 function showRiskTooltip(e, key) {
   e.stopPropagation();
   closeRiskTooltip();
   const d = riskData[key];
-  const valuated = d.valuated || d.stocks;
-  const undervalued = valuated - d.overvalued;
-  const ovPct = Math.round((d.overvalued / valuated) * 100);
-  const unPct = 100 - ovPct;
+  const fair = d.fair || 0;
+  const undervalued = d.undervalued;
+  const total = d.overvalued + undervalued + fair;
+  const ovPct = Math.round((d.overvalued / total) * 100);
+  const fairPct = Math.round((fair / total) * 100);
+  const unPct = Math.round((undervalued / total) * 100);
   const phone = document.getElementById('phone');
   const phoneRect = phone.getBoundingClientRect();
   const linkRect = e.currentTarget.getBoundingClientRect();
@@ -2432,7 +3101,7 @@ function showRiskTooltip(e, key) {
   tip.className = 'ra-tooltip';
   tip.innerHTML = `
     <div class="ra-tooltip-title">${d.name} Risk Analysis</div>
-    <div class="ra-tooltip-sub">Out of ${d.stocks} stocks in your watchlist:</div>
+    <div class="ra-tooltip-sub">Out of ${total} stocks in your watchlist:</div>
     <div class="ra-chart">
       <div class="ra-chart-row">
         <div class="ra-chart-label red">${d.overvalued} Overvalued</div>
@@ -2442,6 +3111,10 @@ function showRiskTooltip(e, key) {
         <div class="ra-chart-label green">${undervalued} Undervalued</div>
         <div class="ra-chart-track"><div class="ra-chart-bar green" style="width:${unPct}%"></div></div>
       </div>
+      ${fair > 0 ? `<div class="ra-chart-row">
+        <div class="ra-chart-label grey">${fair} Fair Valued</div>
+        <div class="ra-chart-track"><div class="ra-chart-bar grey" style="width:${fairPct}%"></div></div>
+      </div>` : ''}
     </div>
     <button class="ra-cta" onclick="showToast('Opening subscription screen'); closeRiskTooltip()"><span class="ra-cta-icon">🔒</span><span>Unlock Data</span><span></span></button>
     <div class="ra-how" onclick="showToast('Fair Value details'); event.stopPropagation()">How is this calculated?</div>
@@ -2474,6 +3147,13 @@ function setUserState(state) {
   });
   // Promo banner: guest + free only
   document.getElementById('promoBanner').style.display = state !== 'pro' ? 'block' : 'none';
+  // Guest + Free: blur premium (locked) data fields
+  document.getElementById('phone').classList.toggle('tier-locked', state !== 'pro');
+  // Guest: the Watchlist News section is veiled behind the sign-up CTA
+  // (Figma 3236:67656 / 3236:67657). A sign-up prompt only makes sense for a
+  // logged-out user, so this is guest-only; free and pro read the news.
+  document.getElementById('phone').classList.toggle('state-guest', state === 'guest');
+  // Holdings tab: guest sees the sign-up empty state, free + pro see the lists
   updateHoldingsView();
 }
 
@@ -2507,59 +3187,49 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ===== NEWS TICKER =====
-const newsItemH = 52;
-let currentNews = 0;
-setInterval(() => {
-  currentNews = (currentNews + 1) % 5;
-  const track = document.getElementById('newsTickerTrack');
-  if (track) track.style.transform = `translateY(-${currentNews * newsItemH}px)`;
-}, 3500);
-
 // ===== INIT =====
-renderStrip();
 setUserState('free');
 
 // ===== WATCHLIST DETAIL SCREEN =====
 const WL_STOCKS = [
   { ticker: 'AAPL', name: 'Apple Inc.', price: '221.53', change: '-2.14', changePct: '-0.96', isUp: false,
     low: '219.44', high: '223.71', vol: '58.32M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '221.80', extHrsPct: '0.12',
-    valuation: 'Fairly Valued', upside: '+8.42', fv: '239.96', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '245.50', analystUp: '+10.82', mktCap: '3.32T', pe: '32.14', evebitda: '23.40', epsFore: '1.62', epsGrw: '11.20', epsUp: '3', epsDn: '1',
+    valuation: 'Fair', upside: '+8.42', fv: '239.96', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', relativeValue: 'Fair', priceMomentum: 'Weak', apt: '245.50', analystUp: '+10.82', mktCap: '3.32T', pe: '32.14', evebitda: '23.40', epsFore: '1.62', epsGrw: '11.20', epsUp: '3', epsDn: '1',
     consensus: 'Buy', split: {buy:28, hold:8, sell:4},
     tech: { '1m':'Sell','5m':'Sell','15m':'Sell','30m':'Sell','1h':'Hold','d':'Hold','w':'Buy','mo':'Buy' } },
   { ticker: 'TSLA', name: 'Tesla, Inc.', price: '282.74', change: '+4.58', changePct: '+1.65', isUp: true,
     low: '278.10', high: '285.90', vol: '89.14M', time: '3/30', timeOpen: false, nextEarn: 'Apr 22, 2026', extHrs: '283.20', extHrsPct: '0.16',
-    valuation: 'Overvalued', upside: '-12.30', fv: '248.11', cashFlow: 'Good', growth: 'Excellent', profit: 'Weak', apt: '312.00', analystUp: '+10.36', mktCap: '908.5B', pe: '88.40', evebitda: '61.20', epsFore: '3.20', epsGrw: '24.50', epsUp: '2', epsDn: '5',
+    valuation: 'Overvalued', upside: '-12.30', fv: '248.11', cashFlow: 'Good', growth: 'Excellent', profit: 'Weak', relativeValue: 'Weak', priceMomentum: 'Good', apt: '312.00', analystUp: '+10.36', mktCap: '908.5B', pe: '88.40', evebitda: '61.20', epsFore: '3.20', epsGrw: '24.50', epsUp: '2', epsDn: '5',
     consensus: 'Hold', split: {buy:12, hold:15, sell:8},
     tech: { '1m':'Strong Buy','5m':'Buy','15m':'Buy','30m':'Strong Buy','1h':'Buy','d':'Strong Buy','w':'Hold','mo':'Buy' } },
   { ticker: 'MSFT', name: 'Microsoft', price: '389.21', change: '-5.43', changePct: '-1.38', isUp: false,
     low: '387.50', high: '394.80', vol: '22.41M', time: '3/30', timeOpen: false, nextEarn: 'Apr 30, 2026', extHrs: '389.90', extHrsPct: '0.18',
-    valuation: 'Undervalued', upside: '+18.52', fv: '461.30', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '472.00', analystUp: '+21.27', mktCap: '2.89T', pe: '31.20', evebitda: '22.80', epsFore: '3.46', epsGrw: '14.80', epsUp: '8', epsDn: '2',
+    valuation: 'Undervalued', upside: '+18.52', fv: '461.30', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', relativeValue: 'Good', priceMomentum: 'Good', apt: '472.00', analystUp: '+21.27', mktCap: '2.89T', pe: '31.20', evebitda: '22.80', epsFore: '3.46', epsGrw: '14.80', epsUp: '8', epsDn: '2',
     consensus: 'Strong Buy', split: {buy:32, hold:5, sell:1},
     tech: { '1m':'Sell','5m':'Sell','15m':'Sell','30m':'Hold','1h':'Hold','d':'Strong Buy','w':'Strong Buy','mo':'Strong Buy' } },
   { ticker: 'AMZN', name: 'Amazon', price: '195.44', change: '+1.92', changePct: '+0.99', isUp: true,
     low: '193.10', high: '196.80', vol: '41.72M', time: '3/30', timeOpen: false, nextEarn: 'May 1, 2026', extHrs: '-', extHrsPct: '-',
-    valuation: 'Undervalued', upside: '+22.14', fv: '238.74', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Good', apt: '248.00', analystUp: '+26.90', mktCap: '2.07T', pe: '35.80', evebitda: '20.10', epsFore: '1.47', epsGrw: '18.30', epsUp: '10', epsDn: '1',
+    valuation: 'Undervalued', upside: '+22.14', fv: '238.74', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Good', relativeValue: 'Good', priceMomentum: 'Excellent', apt: '248.00', analystUp: '+26.90', mktCap: '2.07T', pe: '35.80', evebitda: '20.10', epsFore: '1.47', epsGrw: '18.30', epsUp: '10', epsDn: '1',
     consensus: 'Strong Buy', split: {buy:35, hold:4, sell:1},
     tech: { '1m':'Buy','5m':'Strong Buy','15m':'Buy','30m':'Buy','1h':'Strong Buy','d':'Buy','w':'Strong Buy','mo':'Strong Buy' } },
   { ticker: 'META', name: 'Meta Platforms', price: '564.10', change: '-7.82', changePct: '-1.37', isUp: false,
     low: '561.00', high: '572.40', vol: '18.55M', time: '3/30', timeOpen: false, nextEarn: 'Apr 23, 2026', extHrs: '565.40', extHrsPct: '0.23',
-    valuation: 'Undervalued', upside: '+15.80', fv: '653.20', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '680.00', analystUp: '+20.52', mktCap: '1.43T', pe: '24.60', evebitda: '16.80', epsFore: '6.18', epsGrw: '16.40', epsUp: '7', epsDn: '2',
+    valuation: 'Undervalued', upside: '+15.80', fv: '653.20', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', relativeValue: 'Excellent', priceMomentum: 'Fair', apt: '680.00', analystUp: '+20.52', mktCap: '1.43T', pe: '24.60', evebitda: '16.80', epsFore: '6.18', epsGrw: '16.40', epsUp: '7', epsDn: '2',
     consensus: 'Strong Buy', split: {buy:40, hold:5, sell:2},
     tech: { '1m':'Strong Sell','5m':'Sell','15m':'Sell','30m':'Sell','1h':'Hold','d':'Hold','w':'Buy','mo':'Strong Buy' } },
   { ticker: 'NVDA', name: 'NVIDIA', price: '167.52', change: '-3.72', changePct: '-2.17', isUp: false,
     low: '165.80', high: '172.10', vol: '185.63M', time: '3/30', timeOpen: false, nextEarn: 'May 20, 2026', extHrs: '166.67', extHrsPct: '0.91',
-    valuation: 'Undervalued', upside: '+32.41', fv: '218.70', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', apt: '268.22', analystUp: '+59.44', mktCap: '4.01T', pe: '33.42', evebitda: '29.74', epsFore: '1.76', epsGrw: '0.00', epsUp: '0', epsDn: '0',
+    valuation: 'Undervalued', upside: '+32.41', fv: '218.70', cashFlow: 'Excellent', growth: 'Excellent', profit: 'Excellent', relativeValue: 'Good', priceMomentum: 'Good', apt: '268.22', analystUp: '+59.44', mktCap: '4.01T', pe: '33.42', evebitda: '29.74', epsFore: '1.76', epsGrw: '0.00', epsUp: '0', epsDn: '0',
     consensus: 'Strong Buy', split: {buy:38, hold:6, sell:2},
     tech: { '1m':'Strong Sell','5m':'Strong Sell','15m':'Sell','30m':'Sell','1h':'Hold','d':'Buy','w':'Strong Buy','mo':'Strong Buy' } },
   { ticker: 'GOOGL', name: 'Alphabet Inc.', price: '172.38', change: '+1.14', changePct: '+0.67', isUp: true,
     low: '170.90', high: '173.80', vol: '24.10M', time: '3/30', timeOpen: false, nextEarn: 'Apr 29, 2026', extHrs: '172.80', extHrsPct: '0.24',
-    valuation: 'Undervalued', upside: '+19.40', fv: '205.80', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', apt: '210.00', analystUp: '+21.82', mktCap: '2.14T', pe: '20.40', evebitda: '14.20', epsFore: '2.22', epsGrw: '12.60', epsUp: '6', epsDn: '3',
+    valuation: 'Undervalued', upside: '+19.40', fv: '205.80', cashFlow: 'Excellent', growth: 'Good', profit: 'Excellent', relativeValue: 'Excellent', priceMomentum: 'Excellent', apt: '210.00', analystUp: '+21.82', mktCap: '2.14T', pe: '20.40', evebitda: '14.20', epsFore: '2.22', epsGrw: '12.60', epsUp: '6', epsDn: '3',
     consensus: 'Buy', split: {buy:30, hold:8, sell:2},
     tech: { '1m':'Buy','5m':'Buy','15m':'Buy','30m':'Strong Buy','1h':'Buy','d':'Buy','w':'Strong Buy','mo':'Strong Buy' } },
   { ticker: 'BRK.B', name: 'Berkshire B', price: '528.10', change: '+2.30', changePct: '+0.44', isUp: true,
     low: '525.40', high: '529.80', vol: '3.22M', time: '3/30', timeOpen: false, nextEarn: '-', extHrs: '-', extHrsPct: '-',
-    valuation: 'Fairly Valued', upside: '+5.20', fv: '555.60', cashFlow: 'Good', growth: 'Fair', profit: 'Good', apt: '580.00', analystUp: '+9.83', mktCap: '1.16T', pe: '11.80', evebitda: '-', epsFore: '18.40', epsGrw: '8.10', epsUp: '2', epsDn: '1',
+    valuation: 'Fair', upside: '+5.20', fv: '555.60', cashFlow: 'Good', growth: 'Fair', profit: 'Good', relativeValue: 'Excellent', priceMomentum: 'Good', apt: '580.00', analystUp: '+9.83', mktCap: '1.16T', pe: '11.80', evebitda: '-', epsFore: '18.40', epsGrw: '8.10', epsUp: '2', epsDn: '1',
     consensus: 'Buy', split: {buy:15, hold:7, sell:3},
     tech: { '1m':'Hold','5m':'Hold','15m':'Buy','30m':'Buy','1h':'Buy','d':'Buy','w':'Strong Buy','mo':'Strong Buy' } },
 ];
@@ -2597,37 +3267,94 @@ const DETAIL_COLS = {
     { key: 'consensus', label: 'Consensus', w: 120 },
     { key: 'split_fmt', label: 'Split', w: 150 },
     { key: 'apt', label: 'Price Target', w: 110 },
-    { key: 'analyst_updown', label: 'Upside/Downside', w: 140 },
+    // Figma 3236:69290 renders this header as "Up / Downside" (two lines).
+    { key: 'analyst_updown', label: 'Up / Downside', w: 140 },
   ],
+  // Technical columns taken from Figma node 3236:69122 / 3236:69410 ("Table",
+  // 1540 wide), which enumerates the full set: Symbol then 1 Min ... MA5 Exp.
+  // The prototype's old leading "Summary" column is not in that set, so it goes.
   technical: [
-    { key: 'tech_summary', label: 'Summary',  w: 110 },
-    { key: 'tech_1m',      label: '1 Min',    w: 95 },
-    { key: 'tech_5m',      label: '5 Min',    w: 95 },
-    { key: 'tech_15m',     label: '15 Min',   w: 95 },
-    { key: 'tech_30m',     label: '30 Min',   w: 95 },
-    { key: 'tech_1h',      label: 'Hourly',   w: 95 },
-    { key: 'tech_d',       label: 'Daily',    w: 95 },
-    { key: 'tech_w',       label: 'Weekly',   w: 95 },
-    { key: 'tech_mo',      label: 'Monthly',  w: 105 },
+    { key: 'tech_1m',      label: '1 Min',        w: 95, pro: true, locked: true },
+    { key: 'tech_5m',      label: '5 Min',        w: 95, pro: true, locked: true },
+    { key: 'tech_15m',     label: '15 Min',       w: 95, pro: true, locked: true },
+    { key: 'tech_30m',     label: '30 Min',       w: 95 },
+    { key: 'tech_1h',      label: 'Hourly',       w: 95 },
+    { key: 'tech_d',       label: 'Daily',        w: 95 },
+    { key: 'tech_w',       label: 'Weekly',       w: 95 },
+    { key: 'tech_mo',      label: 'Monthly',      w: 105 },
+    { key: 'tech_ma',      label: 'Moving Avg.',  w: 110 },
+    { key: 'tech_ind',     label: 'Indicators',   w: 105 },
+    { key: 'pivR3Classic', label: 'R3 Classic',   w: 105 },
+    { key: 'pivR3Fib',     label: 'R3 Fibonacci', w: 115 },
+    { key: 'ma5Simple',    label: 'MA5 Simple',   w: 110 },
+    { key: 'ma5Exp',       label: 'MA5 Exp.',     w: 100 },
   ],
   valuation: [
-    { key: 'valuation', label: 'Valuation', w: 115, pro: true },
-    { key: 'upside_fmt', label: 'Upside', w: 90, pro: true },
-    { key: 'fv', label: 'Fair Value', w: 90, pro: true },
-    { key: 'cashFlow', label: 'Cash Flow', w: 100, pro: true },
-    { key: 'growth', label: 'Growth', w: 90, pro: true },
-    { key: 'profit', label: 'Profit', w: 90, pro: true },
-    { key: 'apt', label: 'Analyst PT', w: 100 },
-    { key: 'analystUp_fmt', label: 'Analyst \u2191', w: 100, pro: true },
-    { key: 'mktCap', label: 'Mkt Cap', w: 90 },
-    { key: 'pe', label: 'P/E', w: 80 },
-    { key: 'evebitda', label: 'EV/EBITDA', w: 100 },
-    { key: 'epsFore', label: 'EPS Fore.', w: 90 },
-    { key: 'epsGrw', label: 'EPS Grw.%', w: 95 },
-    { key: 'epsUp', label: 'EPS Up', w: 80 },
-    { key: 'epsDn', label: 'EPS Dn', w: 80 },
+    { key: 'fv', label: 'Fair Value', w: 100, pro: true, locked: true },
+    { key: 'upside_fmt', label: 'Upside/Downside', w: 140, pro: true, locked: true },
+    { key: 'valuation', label: 'Valuation', w: 115, pro: true, locked: true },
+    { key: 'cashFlow', label: 'Cash Flow', w: 110, pro: true, locked: true },
+    { key: 'growth', label: 'Growth', w: 100, pro: true, locked: true },
+    { key: 'profit', label: 'Profitability', w: 120, pro: true, locked: true },
+    { key: 'relativeValue', label: 'Relative Value', w: 125, pro: true, locked: true },
+    { key: 'priceMomentum', label: 'Price Momentum', w: 135, pro: true, locked: true },
   ]
 };
+
+// ===== LIVE COLUMN CONFIG (source of truth for table renderers + Customize Columns) =====
+// Each entry: { key, label, w, pro?, locked?, selected, fixed? }
+// "Symbol" is the fixed frozen left column. Scrollable columns = selected && !fixed, in order.
+// PER-WATCHLIST: COLUMN_CONFIG[groupIndex][view]. Each watchlist is seeded independently
+// from DETAIL_COLS so they all start identical, then diverge as the user edits each one.
+const COLUMN_CONFIG = {};
+const WL_GROUP_COUNT = 4;
+function seedViewConfig(view){
+  const SYMBOL = { key: '__symbol', label: 'Symbol', w: 130, fixed: true, selected: true };
+  // Details: seed current 9 (from DETAIL_COLS) as selected, then add 5 new deselected columns.
+  const detailsExtra = [
+    { key: 'prevPrice',   label: 'Previous Price', w: 100, selected: false },
+    { key: 'priceChange', label: 'Price Change',   w: 105, selected: false },
+    { key: 'ask',         label: 'Ask Price',      w: 95,  selected: false },
+    { key: 'open',        label: 'Open Price',     w: 95,  selected: false },
+    { key: 'exchange',    label: 'Exchange',       w: 100, selected: false },
+  ];
+  // Relabel Details columns to the friendlier names shown in the customize screen.
+  const detailsLabels = {
+    price: 'Last Price', changePct_fmt: 'Change %', low: 'Low Price', high: 'High Price',
+    vol: 'Volume', time_fmt: 'Time', nextEarn: 'Next Earning Date', extHrs: 'Extended Hours',
+    extHrsPct: 'Extended Hours %'
+  };
+  const seeded = (DETAIL_COLS[view] || []).map(c => ({
+    ...c,
+    label: (view === 'details' && detailsLabels[c.key]) ? detailsLabels[c.key] : c.label,
+    selected: true
+  }));
+  let cols = [ { ...SYMBOL }, ...seeded ];
+  if (view === 'details') cols = cols.concat(detailsExtra.map(c => ({ ...c })));
+  return cols;
+}
+(function seedColumnConfig(){
+  for (let g = 0; g < WL_GROUP_COUNT; g++){
+    COLUMN_CONFIG[g] = {};
+    ['details', 'technical', 'ratings', 'valuation'].forEach(view => {
+      COLUMN_CONFIG[g][view] = seedViewConfig(view);
+    });
+  }
+})();
+
+// Per-stock exchange (defaults to NASDAQ).
+const STOCK_EXCHANGE = {
+  AAPL:'NASDAQ', TSLA:'NASDAQ', MSFT:'NASDAQ', AMZN:'NASDAQ', META:'NASDAQ',
+  NVDA:'NASDAQ', GOOGL:'NASDAQ', 'BRK.B':'NYSE'
+};
+
+// Selected, non-fixed columns for a (group, view), in config order (used by table renderers).
+function activeCols(groupIndex, view){
+  const group = COLUMN_CONFIG[groupIndex];
+  const cfg = group && group[view];
+  if (!cfg) return (DETAIL_COLS[view] || []);
+  return cfg.filter(c => c.selected && !c.fixed);
+}
 
 let currentDetailView = 'basic';
 let currentDetailGroup = null;
@@ -2681,11 +3408,57 @@ function techSignalHtml(signal, bold) {
   return `<span style="color:${color};font-weight:${fw};">${signal || '-'}</span>`;
 }
 
+// "Indicators" (Figma 3236:69187) is the intraday-only aggregate, so it can
+// diverge from the all-timeframe "Moving Avg." aggregate above it.
+const TECH_INTRADAY_KEYS = ['1m', '5m', '15m', '30m', '1h'];
+function techIndicators(tech) {
+  const avg = TECH_INTRADAY_KEYS.reduce((s, k) => s + (TECH_SCORE[tech[k]] || 0), 0) / TECH_INTRADAY_KEYS.length;
+  if (avg <= -1.5) return 'Strong Sell';
+  if (avg <= -0.5) return 'Sell';
+  if (avg <   0.5) return 'Hold';
+  if (avg <   1.5) return 'Buy';
+  return 'Strong Buy';
+}
+
+// Pivot points and moving averages are all derived from the row's own
+// high / low / last / change, so the new Figma columns need no new mock data
+// and stay consistent with the Details columns.
+function techNum(v) {
+  const n = parseFloat(String(v == null ? '' : v).replace(/,/g, ''));
+  return isNaN(n) ? null : n;
+}
+function techFmt(n) {
+  if (n == null || !isFinite(n)) return '-';
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function techLevels(stock) {
+  const high = techNum(stock.high), low = techNum(stock.low), close = techNum(stock.price);
+  if (high == null || low == null || close == null) return null;
+  const range = high - low;
+  const pivot = (high + low + close) / 3;
+  const prev = close - (techNum(stock.change) || 0);
+  const open = prev + (techNum(stock.change) || 0) * 0.2;
+  const sma5 = (high + low + close + prev + open) / 5;
+  return {
+    r3Classic: pivot + 2 * range,
+    r3Fib: pivot + range,
+    ma5Simple: sma5,
+    ma5Exp: close * (1 / 3) + sma5 * (2 / 3),
+  };
+}
+
 function getCellValue(stock, key) {
   if (key.startsWith('tech_')) {
     const tk = key.slice(5);
-    if (tk === 'summary') return techSignalHtml(techSummary(stock.tech || {}), true);
+    if (tk === 'summary' || tk === 'ma') return techSignalHtml(techSummary(stock.tech || {}), true);
+    if (tk === 'ind') return techSignalHtml(techIndicators(stock.tech || {}));
     return techSignalHtml((stock.tech || {})[tk]);
+  }
+  if (key === 'pivR3Classic' || key === 'pivR3Fib' || key === 'ma5Simple' || key === 'ma5Exp') {
+    const lv = techLevels(stock);
+    if (!lv) return '-';
+    const map = { pivR3Classic: 'r3Classic', pivR3Fib: 'r3Fib', ma5Simple: 'ma5Simple', ma5Exp: 'ma5Exp' };
+    return techFmt(lv[map[key]]);
   }
   switch(key) {
     case 'change_fmt': {
@@ -2716,8 +3489,11 @@ function getCellValue(stock, key) {
     }
     case 'cashFlow':
     case 'growth':
-    case 'profit': {
+    case 'profit':
+    case 'relativeValue':
+    case 'priceMomentum': {
       const v = stock[key];
+      if (!v || v === '-') return '-';
       const color = v === 'Excellent' ? 'var(--green)' : v === 'Good' ? '#F97316' : v === 'Fair' ? '#F59E0B' : 'var(--red)';
       return `<span style="color:${color};font-weight:500;">${v}</span>`;
     }
@@ -2737,6 +3513,38 @@ function getCellValue(stock, key) {
       const color = pct >= 0 ? 'var(--green)' : 'var(--red)';
       return `<span style="color:${color};font-weight:500;">${sign}${pct.toFixed(2)}%</span>`;
     }
+    case 'prevPrice': {
+      // Previous close = current price minus today's absolute change.
+      const price = parseFloat(stock.price.replace(/,/g,''));
+      const chg = parseFloat(stock.change);
+      if (isNaN(price) || isNaN(chg)) return '-';
+      return (price - chg).toFixed(2);
+    }
+    case 'priceChange': {
+      // Today's absolute change with +/- sign and up/down color.
+      const chg = parseFloat(stock.change);
+      if (isNaN(chg)) return '-';
+      const color = stock.isUp ? 'var(--green)' : 'var(--red)';
+      const sign = chg >= 0 ? '+' : '';
+      return `<span style="color:${color}">${sign}${chg.toFixed(2)}</span>`;
+    }
+    case 'ask': {
+      // Ask = current price + a small spread.
+      const price = parseFloat(stock.price.replace(/,/g,''));
+      if (isNaN(price)) return '-';
+      const spread = price > 1000 ? 0.15 : price > 100 ? 0.05 : 0.02;
+      return (price + spread).toFixed(2);
+    }
+    case 'open': {
+      // Open ~ previous close, nudged slightly.
+      const price = parseFloat(stock.price.replace(/,/g,''));
+      const chg = parseFloat(stock.change);
+      if (isNaN(price) || isNaN(chg)) return '-';
+      const prev = price - chg;
+      return (prev + chg * 0.2).toFixed(2);
+    }
+    case 'exchange':
+      return STOCK_EXCHANGE[stock.ticker] || 'NASDAQ';
     default:
       return stock[key] || '-';
   }
@@ -2756,7 +3564,7 @@ function buildLeftRows(stocks) {
 }
 
 function buildRightColsContent(view) {
-  const cols = DETAIL_COLS[view] || [];
+  const cols = activeCols(currentDetailGroup, view);
   if (cols.length === 0) return { headerCells: '', dataRows: '', empty: true };
   const headerCells = cols.map(col => `
     <div class="wl-tbl-col-header" style="min-width:${col.w}px;">
@@ -2955,6 +3763,744 @@ function switchDetailView(view) {
     newWrap.classList.add('visible');
   }, 180);
 }
+
+// ===== INLINE DETAIL-VIEW SWITCHER (merged "View More" into the watchlist) =====
+// Per-group symbols for the condensed non-Basic views. Basic stays the original rows.
+const WL_VIEW_DATA = {
+  0: [
+    { name:'Bitcoin', sym:'BTC/USD', live:true, price:'87,234', chg:'+1.45%', dir:'up' },
+    { name:'Tesla', sym:'TSLA', date:'3/30', price:'282.74', chg:'+4.58 (+1.65%)', dir:'up' },
+    { name:'Microsoft', sym:'MSFT', date:'3/30', price:'389.21', chg:'-5.43 (-1.38%)', dir:'down' },
+    { name:'El-Al', sym:'ELAL', live:true, price:'772.00', chg:'+1.24%', dir:'up' },
+    { name:'Broadcom', sym:'AVGO', date:'3/30', price:'174.82', chg:'+2.31 (+1.34%)', dir:'up' },
+  ],
+  1: [
+    { name:'NVIDIA', sym:'NVDA', date:'3/30', price:'167.52', chg:'-3.72 (-2.17%)', dir:'down' },
+    { name:'Alphabet', sym:'GOOGL', date:'3/30', price:'172.38', chg:'+1.14 (+0.67%)', dir:'up' },
+    { name:'Meta', sym:'META', date:'3/30', price:'564.10', chg:'-7.82 (-1.37%)', dir:'down' },
+  ],
+  2: [
+    { name:'Bitcoin', sym:'BTC/USD', date:'3/30', price:'87,234.10', chg:'+1,243.50 (+1.45%)', dir:'up' },
+    { name:'Ethereum', sym:'ETH', date:'3/30', price:'1,978.34', chg:'-42.10 (-2.08%)', dir:'down' },
+  ],
+  3: [
+    { name:'Apple', sym:'AAPL', date:'3/30', price:'221.53', chg:'-2.14 (-0.96%)', dir:'down' },
+    { name:'Tesla', sym:'TSLA', date:'3/30', price:'282.74', chg:'+4.58 (+1.65%)', dir:'up' },
+    { name:'Microsoft', sym:'MSFT', date:'3/30', price:'389.21', chg:'-5.43 (-1.38%)', dir:'down' },
+    { name:'Amazon', sym:'AMZN', date:'3/30', price:'195.44', chg:'+1.92 (+0.99%)', dir:'up' },
+    { name:'Meta', sym:'META', date:'3/30', price:'564.10', chg:'-7.82 (-1.37%)', dir:'down' },
+    { name:'NVIDIA', sym:'NVDA', date:'3/30', price:'167.52', chg:'-3.72 (-2.17%)', dir:'down' },
+    { name:'Alphabet', sym:'GOOGL', date:'3/30', price:'172.38', chg:'+1.14 (+0.67%)', dir:'up' },
+    { name:'Berkshire B', sym:'BRK.B', date:'3/30', price:'528.10', chg:'+2.30 (+0.44%)', dir:'up' },
+  ],
+};
+
+function wlMetaHtml(r){
+  return r.live ? `<span>${r.sym}</span>`
+    : `<span class="clock-icon">&#9201;</span><span>${r.date} | ${r.sym}</span>`;
+}
+function wlFmt(n, d=2){ return n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function wlMock(r){
+  const base = parseFloat(String(r.price).replace(/,/g,''));
+  const seed = [...r.sym].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const up = r.dir === 'up';
+  const pe = 12 + (seed % 30);
+  const tgtPct = 5 + (seed % 16);
+  return {
+    vol: ((seed % 50) + 8).toFixed(1),
+    avgVol: ((seed % 40) + 6).toFixed(1),
+    high: wlFmt(base * 1.012, base >= 1000 ? 0 : 2),
+    low: wlFmt(base * 0.985, base >= 1000 ? 0 : 2),
+    rating: up ? (seed % 2 ? 'Strong Buy' : 'Buy') : (seed % 2 ? 'Hold' : 'Sell'),
+    target: wlFmt(base * (1 + tgtPct / 100), base >= 1000 ? 0 : 2),
+    tgtPct,
+    analysts: 8 + (seed % 22),
+    rsi: (35 + (seed % 45)).toFixed(1),
+    tech: up ? 'Strong Buy' : (seed % 2 ? 'Neutral' : 'Sell'),
+    maSignal: up ? 'Buy' : 'Sell',
+    pe: pe.toFixed(1),
+    mktCap: ((seed % 900) + 40),
+    eps: wlFmt(base / pe, 2),
+    div: ((seed % 35) / 10).toFixed(2),
+  };
+}
+function wlPillCls(label){ return label.toLowerCase().replace(/\s+/g,''); }
+
+function wlRowDetails(r){ const m = wlMock(r); return `<div class="wl-row">
+  <div class="wl-row-line"><div class="wl-row-name">${r.name}</div><div class="wl-row-price">${r.price}</div></div>
+  <div class="wl-row-line"><div class="wl-row-meta">${wlMetaHtml(r)}</div><div class="wl-row-change ${r.dir}">${r.chg}</div></div>
+  <div class="wl-row-line"><span class="wl-row-metrics">Vol ${m.vol}M · Avg ${m.avgVol}M · Range ${m.low}–${m.high}</span></div>
+</div>`; }
+function wlRowRatings(r){ const m = wlMock(r); return `<div class="wl-row">
+  <div class="wl-row-line"><div class="wl-row-name">${r.name}</div><span class="wl-pill ${wlPillCls(m.rating)}">${m.rating}</span></div>
+  <div class="wl-row-line"><div class="wl-row-meta">${wlMetaHtml(r)}</div><span class="wl-row-val">Target ${m.target} <span class="wl-row-change up">(+${m.tgtPct}%)</span></span></div>
+  <div class="wl-row-line"><span class="wl-row-metrics">${m.analysts} analysts</span></div>
+</div>`; }
+function wlRowTechnical(r){ const m = wlMock(r); return `<div class="wl-row">
+  <div class="wl-row-line"><div class="wl-row-name">${r.name}</div><span class="wl-pill ${wlPillCls(m.tech)}">${m.tech}</span></div>
+  <div class="wl-row-line"><div class="wl-row-meta">${wlMetaHtml(r)}</div><span class="wl-row-val">RSI ${m.rsi}</span></div>
+  <div class="wl-row-line"><span class="wl-row-metrics">Moving Avg: ${m.maSignal} · Oscillators: ${r.dir === 'up' ? 'Buy' : 'Neutral'}</span></div>
+</div>`; }
+function wlRowValuation(r){ const m = wlMock(r); return `<div class="wl-row">
+  <div class="wl-row-line"><div class="wl-row-name">${r.name}</div><span class="wl-row-val">P/E ${m.pe}</span></div>
+  <div class="wl-row-line"><div class="wl-row-meta">${wlMetaHtml(r)}</div><span class="wl-row-val">Mkt Cap ${m.mktCap}B</span></div>
+  <div class="wl-row-line"><span class="wl-row-metrics">EPS ${m.eps} · Div Yield ${m.div}%</span></div>
+</div>`; }
+const WL_VIEW_RENDERERS = { details: wlRowDetails, ratings: wlRowRatings, technical: wlRowTechnical, valuation: wlRowValuation };
+
+const wlBasicCache = {};
+function pickWlView(groupIndex, view, btn){
+  const group = document.querySelector(`.wl-group[data-group="${groupIndex}"]`);
+  if (!group) return;
+  if (!group.classList.contains('expanded')) group.classList.add('expanded');
+  group.querySelectorAll('.sw-chip').forEach(c => c.classList.toggle('active', c === btn));
+  // Keep the picked chip inside the visible part of the scrolling strip (and
+  // out from under the right-edge fade), then re-evaluate both fades.
+  const strip = group.querySelector('.wl-switch-scroll');
+  if (strip && btn) {
+    const stripBox = strip.getBoundingClientRect();
+    const chipBox = btn.getBoundingClientRect();
+    if (chipBox.right > stripBox.right - 48) strip.scrollLeft += (chipBox.right - stripBox.right) + 48;
+    else if (chipBox.left < stripBox.left + 48) strip.scrollLeft -= (stripBox.left - chipBox.left) + 48;
+    updateSwitchFade(strip);
+  }
+  const content = group.querySelector('.wl-group-expanded-content');
+  if (!content) return;
+  content.style.opacity = '0';
+  if (view === 'basic'){
+    content.innerHTML = wlBasicCache[groupIndex];
+    applyWlViewMode(groupIndex);
+  } else {
+    content.innerHTML = renderInlineTable(groupIndex, view);
+  }
+  requestAnimationFrame(() => { content.style.opacity = '1'; });
+}
+
+// Inject category icons into the switcher chips (by data-view).
+const WL_VIEW_ICONS = {
+  basic:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+  details:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+  ratings:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 16.5a8.5 8.5 0 0 1 17 0"/><line x1="12" y1="16.5" x2="16" y2="10.8"/><circle cx="12" cy="16.5" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  technical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  valuation: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+};
+document.querySelectorAll('.wl-group-switch .sw-chip').forEach(chip => {
+  const icon = WL_VIEW_ICONS[chip.getAttribute('data-view')];
+  if (icon) chip.innerHTML = icon + '<span>' + chip.textContent.trim() + '</span>';
+});
+
+// Mirror the icon+label treatment on the Customize Columns type-selector pills (by data-cctype).
+document.querySelectorAll('#ccTypeBar .sw-chip').forEach(chip => {
+  const icon = WL_VIEW_ICONS[chip.getAttribute('data-cctype')];
+  if (icon) chip.innerHTML = icon + '<span>' + chip.textContent.trim() + '</span>';
+});
+
+// Scroll-position fades for the chips strip. Figma draws a 48px background
+// gradient at each end of the scroll region and toggles the LEFT one with
+// scroll position: hidden at scrollLeft 0 (3236:67641, first chip selected)
+// and visible once the strip has scrolled (786:9554, last chip selected).
+function updateSwitchFade(el){
+  if (!el) return;
+  const max = el.scrollWidth - el.clientWidth;
+  el.style.setProperty('--fade-l', el.scrollLeft > 1 ? '48px' : '0px');
+  el.style.setProperty('--fade-r', el.scrollLeft < max - 1 ? '48px' : '0px');
+}
+function updateAllSwitchFades(){
+  document.querySelectorAll('.wl-switch-scroll').forEach(updateSwitchFade);
+}
+
+// Title-line action icons: pencil (edit) + plus-in-circle (add instrument).
+// News moved into the chips row as the pinned leftmost chip (Figma 3236:67601),
+// so the title row no longer carries a News pill.
+const WL_NEWS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v12a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9h-3"/><line x1="6" y1="8" x2="15" y2="8"/><line x1="6" y1="12" x2="15" y2="12"/><line x1="6" y1="16" x2="11" y2="16"/></svg>';
+const WL_PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>';
+const WL_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+document.querySelectorAll('.wl-group-name-row').forEach(row => {
+  const left = document.createElement('div');
+  left.className = 'wl-group-name-left';
+  while (row.firstChild) left.appendChild(row.firstChild);
+  row.appendChild(left);
+  const actions = document.createElement('div');
+  actions.className = 'wl-group-actions';
+  actions.innerHTML =
+    `<button class="wl-group-action-btn" aria-label="Edit watchlist" onclick="event.stopPropagation(); openWlMenu(this)">${WL_PENCIL}</button>` +
+    `<button class="wl-group-action-btn" aria-label="Add new instrument" onclick="event.stopPropagation(); showToast('add new instrument')">${WL_PLUS}</button>`;
+  row.appendChild(actions);
+});
+
+// Pinned News chip: same icon+label treatment as the data chips (Figma 3236:67601).
+document.querySelectorAll('.wl-switch-news').forEach(btn => {
+  btn.innerHTML = WL_NEWS_ICON + '<span>' + btn.textContent.trim() + '</span>';
+});
+
+// Cache the original Basic rows so switching back restores them exactly (live ticking IDs, tooltips).
+document.querySelectorAll('.wl-group').forEach(g => {
+  const content = g.querySelector('.wl-group-expanded-content');
+  if (content) wlBasicCache[g.getAttribute('data-group')] = content.innerHTML;
+});
+
+// The grey watchlist title bands stick below whatever sticky chrome is pinned
+// above them inside .main-scroll - that is .strip-and-tabs (instrument strip +
+// type tabs), whose height changes when "Show Instruments" is toggled. The news
+// ticker is NOT sticky (it scrolls away) so it must not count toward the offset.
+// Measured live rather than hardcoded, and re-measured on every change.
+function updateWlStickyTop(){
+  const chrome = document.querySelector('.strip-and-tabs');
+  let h = 0;
+  if (chrome) {
+    const cs = getComputedStyle(chrome);
+    // A hidden wrapper contributes nothing; otherwise measure the live box.
+    if (cs.display !== 'none') h = Math.round(chrome.getBoundingClientRect().height);
+  }
+  document.documentElement.style.setProperty('--wl-sticky-top', h + 'px');
+}
+updateWlStickyTop();
+
+// ===== WATCHLIST EDIT MENU + SETTINGS + EDIT LIST =====
+let activeWlGroup = null;
+const wlViewMode = {}; // groupIndex -> 'name' | 'symbol'
+// Chip / category labels confirmed from Figma text nodes in section 564:26744
+// ("iOS Watchlist Redesign"): News, Main, Details, Technical, Ratings, Valuation.
+const WL_VIEW_LABELS = { basic:'Main', details:'Details', ratings:'Ratings', technical:'Technical', valuation:'Valuation' };
+const ARROW_UP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>';
+const ARROW_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>';
+const ARROW_TOP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="7"/><polyline points="6 12 12 6 18 12"/><line x1="6" y1="4" x2="18" y2="4"/></svg>';
+const HANDLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/></svg>';
+
+function wlGroupName(idx){ const el = document.querySelector(`.wl-group[data-group="${idx}"] .wl-group-name`); return el ? el.textContent.trim() : ''; }
+
+// Apply Full Name vs Symbol to the group's currently-rendered rows (by index).
+function applyWlViewMode(idx){
+  const mode = wlViewMode[idx] || 'name';
+  const data = WL_VIEW_DATA[idx] || [];
+  const rows = document.querySelectorAll(`.wl-group[data-group="${idx}"] .wl-row .wl-row-name`);
+  rows.forEach((nameEl, i) => { if (data[i]) nameEl.textContent = mode === 'symbol' ? data[i].sym : data[i].name; });
+}
+
+// ----- Drawer -----
+function openWlMenu(btn){
+  const g = btn.closest('.wl-group');
+  activeWlGroup = g ? g.getAttribute('data-group') : null;
+  const menu = document.getElementById('wlMenu');
+  const isOpen = menu.style.display === 'block';
+  if (isOpen) { closeWlMenu(); return; }
+  // Show first (off-screen) to measure, then anchor to the tapped pencil button
+  menu.style.visibility = 'hidden';
+  menu.style.display = 'block';
+  const r = btn.getBoundingClientRect();
+  const mw = menu.offsetWidth, mh = menu.offsetHeight;
+  const margin = 8, gap = 6;
+  // Align menu's right edge to the button's right edge; clamp to viewport
+  let left = r.right - mw;
+  left = Math.max(margin, Math.min(left, window.innerWidth - mw - margin));
+  // Open below by default; flip above if it would overflow the bottom
+  let top = r.bottom + gap;
+  if (top + mh > window.innerHeight - margin) {
+    top = r.top - gap - mh;
+  }
+  top = Math.max(margin, top);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+  menu.style.visibility = 'visible';
+  // Dismiss on outside click or scroll (like the dots menu)
+  setTimeout(() => {
+    document.addEventListener('click', closeWlMenu, { once: true });
+    // Capture-phase scroll catches any scrolling container in the tree
+    window.addEventListener('scroll', closeWlMenu, { once: true, capture: true });
+  }, 0);
+}
+function closeWlMenu(){
+  const menu = document.getElementById('wlMenu');
+  if (menu) menu.style.display = 'none';
+}
+
+// ----- Watchlist Settings -----
+function openWlSettings(){
+  closeWlMenu();
+  const idx = activeWlGroup;
+  // Name
+  const nameInput = document.getElementById('wlSettingsName');
+  nameInput.value = wlGroupName(idx);
+  onWlNameInput();
+  // View mode
+  const mode = wlViewMode[idx] || 'name';
+  document.querySelectorAll('#wlViewModeCards .wl-vm-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === mode));
+  document.getElementById('mainScreen').classList.add('pushed');
+  document.getElementById('wlSettingsScreen').classList.add('active');
+}
+document.getElementById('wlSettingsBackBtn').addEventListener('click', () => {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('wlSettingsScreen').classList.remove('active');
+});
+function onWlNameInput(){
+  const v = document.getElementById('wlSettingsName').value.trim();
+  const empty = v.length === 0;
+  document.getElementById('wlSettingsSave').disabled = empty;
+  document.getElementById('wlSettingsName').classList.toggle('invalid', empty);
+  document.getElementById('wlNameError').classList.toggle('show', empty);
+}
+function selectViewMode(mode){
+  document.querySelectorAll('#wlViewModeCards .wl-vm-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === mode));
+}
+function renderCatReorder(order){
+  const wrap = document.getElementById('wlCatReorder');
+  wrap.innerHTML = order.map((v, i) => `
+    <div class="wl-reorder-row" data-view="${v}">
+      <span class="wl-rr-cat-icon">${WL_VIEW_ICONS[v] || ''}</span>
+      <div class="wl-rr-main"><div class="wl-rr-name">${WL_VIEW_LABELS[v]}</div></div>
+      <button class="wl-rr-icon-btn" ${i === 0 ? 'disabled' : ''} onclick="moveCatRow(this,-1)">${ARROW_UP}</button>
+      <button class="wl-rr-icon-btn" ${i === order.length - 1 ? 'disabled' : ''} onclick="moveCatRow(this,1)">${ARROW_DOWN}</button>
+      <span class="wl-rr-handle">${HANDLE}</span>
+    </div>`).join('');
+}
+function moveCatRow(btn, dir){
+  const row = btn.closest('.wl-reorder-row');
+  const wrap = row.parentElement;
+  if (dir < 0 && row.previousElementSibling) wrap.insertBefore(row, row.previousElementSibling);
+  else if (dir > 0 && row.nextElementSibling) wrap.insertBefore(row.nextElementSibling, row);
+  // re-render to refresh disabled states from current order
+  renderCatReorder([...wrap.querySelectorAll('.wl-reorder-row')].map(r => r.dataset.view));
+}
+function saveWlSettings(){
+  const idx = activeWlGroup;
+  const v = document.getElementById('wlSettingsName').value.trim();
+  if (!v) return;
+  // Name
+  const nameEl = document.querySelector(`.wl-group[data-group="${idx}"] .wl-group-name`);
+  if (nameEl) nameEl.textContent = v;
+  // View mode
+  const sel = document.querySelector('#wlViewModeCards .wl-vm-card.selected');
+  wlViewMode[idx] = sel ? sel.dataset.mode : 'name';
+  // Re-render the active view so the new name mode applies (basic rows or table)
+  const activeChip = document.querySelector(`.wl-group[data-group="${idx}"] .sw-chip.active`);
+  if (activeChip) pickWlView(idx, activeChip.dataset.view, activeChip);
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('wlSettingsScreen').classList.remove('active');
+  showToast('Watchlist updated');
+}
+
+// ----- Reorder Categories (own screen, opened from Watchlist Settings) -----
+function openReorderCategories(){
+  const idx = activeWlGroup;
+  const order = [...document.querySelectorAll(`.wl-group[data-group="${idx}"] .sw-chip`)].map(c => c.dataset.view);
+  renderCatReorder(order);
+  // Slides over Watchlist Settings (which stays active underneath).
+  document.getElementById('reorderCategoriesScreen').classList.add('active');
+}
+function closeReorderCategories(){
+  document.getElementById('reorderCategoriesScreen').classList.remove('active');
+}
+document.getElementById('reorderCatBackBtn').addEventListener('click', () => {
+  // Discard and return to Watchlist Settings.
+  closeReorderCategories();
+});
+function saveReorderCategories(){
+  const idx = activeWlGroup;
+  // Category order -> reorder chips in the switcher
+  const order = [...document.querySelectorAll('#wlCatReorder .wl-reorder-row')].map(r => r.dataset.view);
+  // Chips live inside the scrolling strip, to the right of the pinned News chip
+  // and its divider, so they must be re-appended to that wrapper, not the row.
+  const switchEl = document.querySelector(`.wl-group[data-group="${idx}"] .wl-switch-scroll`);
+  if (switchEl) {
+    order.forEach(view => { const chip = switchEl.querySelector(`.sw-chip[data-view="${view}"]`); if (chip) switchEl.appendChild(chip); });
+    updateSwitchFade(switchEl);
+  }
+  // Re-render the active view if needed so reordered chips stay consistent
+  const activeChip = document.querySelector(`.wl-group[data-group="${idx}"] .sw-chip.active`);
+  if (activeChip) pickWlView(idx, activeChip.dataset.view, activeChip);
+  closeReorderCategories();
+  showToast('Categories updated');
+}
+
+// ----- Edit List -----
+function openWlEditList(){
+  closeWlMenu();
+  const idx = activeWlGroup;
+  const data = WL_VIEW_DATA[idx] || [];
+  const wrap = document.getElementById('wlEditReorder');
+  wrap.innerHTML = data.map((r, i) => `
+    <div class="wl-reorder-row" data-sym="${r.sym}">
+      <button class="wl-rr-remove" onclick="removeEditRow(this)" aria-label="Remove"></button>
+      <div class="wl-rr-main">
+        <div class="wl-rr-name">${r.name}</div>
+        <div class="wl-rr-sub">${r.live ? `<span>${r.sym}</span>` : `<span class="clock-icon">&#9201;</span><span>${r.date} | ${r.sym}</span>`}</div>
+      </div>
+      <button class="wl-rr-icon-btn" ${i === 0 ? 'disabled' : ''} onclick="moveEditTop(this)">${ARROW_TOP}</button>
+      <span class="wl-rr-handle">${HANDLE}</span>
+    </div>`).join('');
+  refreshEditTopButtons();
+  document.getElementById('mainScreen').classList.add('pushed');
+  document.getElementById('wlEditListScreen').classList.add('active');
+}
+document.getElementById('wlEditListBackBtn').addEventListener('click', () => {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('wlEditListScreen').classList.remove('active');
+});
+function refreshEditTopButtons(){
+  document.querySelectorAll('#wlEditReorder .wl-reorder-row').forEach((row, i) => {
+    const btn = row.querySelector('.wl-rr-icon-btn');
+    if (btn) btn.disabled = (i === 0);
+  });
+}
+function removeEditRow(btn){ btn.closest('.wl-reorder-row').remove(); refreshEditTopButtons(); }
+function moveEditTop(btn){
+  const row = btn.closest('.wl-reorder-row');
+  const wrap = row.parentElement;
+  wrap.insertBefore(row, wrap.firstElementChild);
+  refreshEditTopButtons();
+}
+function saveWlEditList(){
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('wlEditListScreen').classList.remove('active');
+  showToast('List updated');
+}
+
+// ===== INLINE DETAIL TABLE (non-Basic categories) =====
+// Enrich each group's symbols with full per-column data (reuse real WL_STOCKS where the
+// ticker matches; add entries for the crypto/extra symbols not covered there).
+const EXTRA_STOCKS = [
+  { ticker:'BTC/USD', name:'Bitcoin', price:'87,234', change:'+1,243', changePct:'+1.45', isUp:true,
+    low:'85,910', high:'88,420', vol:'42.1B', time:'24h', timeOpen:true, nextEarn:'-', extHrs:'-', extHrsPct:'-',
+    valuation:'Fair', upside:'+6.20', fv:'92,600', cashFlow:'-', growth:'-', profit:'-', apt:'-', analystUp:'-', mktCap:'1.72T', pe:'-', evebitda:'-', epsFore:'-', epsGrw:'-', epsUp:'-', epsDn:'-',
+    consensus:'Buy', split:{buy:8,hold:3,sell:1},
+    tech:{ '1m':'Buy','5m':'Buy','15m':'Strong Buy','30m':'Buy','1h':'Hold','d':'Buy','w':'Strong Buy','mo':'Buy' } },
+  { ticker:'ELAL', name:'El-Al', price:'772.00', change:'+9.45', changePct:'+1.24', isUp:true,
+    low:'760.50', high:'778.20', vol:'1.20M', time:'3/30', timeOpen:false, nextEarn:'May 15, 2026', extHrs:'-', extHrsPct:'-',
+    valuation:'Undervalued', upside:'+14.00', fv:'880.00', cashFlow:'Good', growth:'Fair', profit:'Good', relativeValue:'Excellent', priceMomentum:'Good', apt:'850.00', analystUp:'+10.10', mktCap:'3.80B', pe:'6.20', evebitda:'4.10', epsFore:'124.00', epsGrw:'8.00', epsUp:'2', epsDn:'1',
+    consensus:'Buy', split:{buy:5,hold:2,sell:1},
+    tech:{ '1m':'Buy','5m':'Hold','15m':'Buy','30m':'Buy','1h':'Strong Buy','d':'Buy','w':'Buy','mo':'Hold' } },
+  { ticker:'AVGO', name:'Broadcom', price:'174.82', change:'+2.31', changePct:'+1.34', isUp:true,
+    low:'171.90', high:'176.80', vol:'28.5M', time:'3/30', timeOpen:false, nextEarn:'Jun 5, 2026', extHrs:'174.20', extHrsPct:'-0.36',
+    valuation:'Undervalued', upside:'+12.50', fv:'197.00', cashFlow:'Excellent', growth:'Excellent', profit:'Excellent', relativeValue:'Good', priceMomentum:'Excellent', apt:'205.00', analystUp:'+17.30', mktCap:'815B', pe:'34.10', evebitda:'24.50', epsFore:'5.12', epsGrw:'19.20', epsUp:'9', epsDn:'1',
+    consensus:'Strong Buy', split:{buy:30,hold:4,sell:1},
+    tech:{ '1m':'Buy','5m':'Strong Buy','15m':'Buy','30m':'Strong Buy','1h':'Buy','d':'Strong Buy','w':'Strong Buy','mo':'Strong Buy' } },
+  { ticker:'ETH', name:'Ethereum', price:'1,978.34', change:'-42.10', changePct:'-2.08', isUp:false,
+    low:'1,938.00', high:'2,031.00', vol:'18.3B', time:'24h', timeOpen:true, nextEarn:'-', extHrs:'-', extHrsPct:'-',
+    valuation:'-', upside:'-', fv:'-', cashFlow:'-', growth:'-', profit:'-', apt:'-', analystUp:'-', mktCap:'238B', pe:'-', evebitda:'-', epsFore:'-', epsGrw:'-', epsUp:'-', epsDn:'-',
+    consensus:'Hold', split:{buy:4,hold:4,sell:2},
+    tech:{ '1m':'Sell','5m':'Sell','15m':'Hold','30m':'Sell','1h':'Hold','d':'Sell','w':'Hold','mo':'Buy' } },
+];
+const STOCK_MAP = {};
+WL_STOCKS.forEach(s => { STOCK_MAP[s.ticker] = s; });
+EXTRA_STOCKS.forEach(s => { STOCK_MAP[s.ticker] = s; });
+// Per-group table data: same symbols/order/names as Basic, enriched with column data.
+const GROUP_TABLE_STOCKS = {};
+Object.keys(WL_VIEW_DATA).forEach(g => {
+  GROUP_TABLE_STOCKS[g] = WL_VIEW_DATA[g].map(r => ({ ...(STOCK_MAP[r.sym] || {}), ticker: r.sym, name: r.name }));
+});
+
+// Crypto has no analyst ratings or valuation coverage.
+const CRYPTO_SYMS = new Set(['BTC/USD', 'ETH']);
+const isCryptoSym = s => CRYPTO_SYMS.has(s);
+const CRYPTO_HIDDEN_VIEWS = ['ratings', 'valuation'];
+
+// All-crypto watchlists: drop the ratings/valuation categories entirely (chips + settings).
+Object.keys(WL_VIEW_DATA).forEach(g => {
+  const syms = WL_VIEW_DATA[g].map(r => r.sym);
+  if (syms.length && syms.every(isCryptoSym)) {
+    const switchEl = document.querySelector(`.wl-group[data-group="${g}"] .wl-group-switch`);
+    if (switchEl) {
+      CRYPTO_HIDDEN_VIEWS.forEach(v => { const c = switchEl.querySelector(`.sw-chip[data-view="${v}"]`); if (c) c.remove(); });
+      updateSwitchFade(switchEl.querySelector('.wl-switch-scroll'));
+    }
+  }
+});
+
+function buildInlineLeft(stocks, mode, view){
+  const muteCrypto = CRYPTO_HIDDEN_VIEWS.includes(view);
+  return stocks.map(s => {
+    const unsupported = muteCrypto && isCryptoSym(s.ticker);
+    return `
+    <div class="wl-tbl-row${unsupported ? ' wl-row-unsupported' : ''}">
+      <div class="wl-tbl-left-cell">
+        <div class="wl-tbl-left-cell-border ${s.isUp ? 'up' : 'down'}"></div>
+        <div style="padding-left:8px;min-width:0;overflow:hidden;">
+          <div class="wl-tbl-name-primary">${mode === 'symbol' ? s.ticker : s.name}</div>
+          <div class="wl-tbl-name-secondary">${mode === 'symbol' ? s.name : s.ticker}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function buildInlineCols(groupIndex, view, stocks){
+  const cols = activeCols(groupIndex, view);
+  const totalW = cols.reduce((sum, c) => sum + c.w, 0);
+  const muteCrypto = CRYPTO_HIDDEN_VIEWS.includes(view);
+  const viewLabel = view.charAt(0).toUpperCase() + view.slice(1);
+  const headerCells = cols.map(col => `
+    <div class="wl-tbl-col-header" style="min-width:${col.w}px;width:${col.w}px;">
+      ${col.pro ? '<span class="wl-pro-badge">P</span>' : ''}<span>${col.label}</span>${sortArrows()}
+    </div>`).join('');
+  const dataRows = stocks.map(s => {
+    if (muteCrypto && isCryptoSym(s.ticker)) {
+      return `
+    <div class="wl-tbl-row wl-row-unsupported">
+      <div class="wl-tbl-unsupported-cell" style="min-width:${totalW}px;width:${totalW}px;">
+        <span class="wl-unsupported-msg">${viewLabel} only supported for stocks</span>
+      </div>
+    </div>`;
+    }
+    return `
+    <div class="wl-tbl-row">
+      ${cols.map(col => `<div class="wl-tbl-data-cell${col.locked ? ' is-locked' : ''}" data-col="${col.key}" style="min-width:${col.w}px;width:${col.w}px;">${getCellValue(s, col.key)}</div>`).join('')}
+    </div>`;
+  }).join('');
+  return { headerCells, dataRows };
+}
+function renderInlineTable(groupIndex, view){
+  const stocks = GROUP_TABLE_STOCKS[groupIndex] || [];
+  const mode = wlViewMode[groupIndex] || 'name';
+  const { headerCells, dataRows } = buildInlineCols(groupIndex, view, stocks);
+  return `
+    <div class="wl-itbl" data-view="${view}">
+      <div class="wl-itbl-head">
+        <div class="wl-itbl-left-head">${sortArrows()}<span>Symbol</span></div>
+        <div class="wl-itbl-head-scroll">${headerCells}</div>
+      </div>
+      <div class="wl-itbl-body">
+        <div class="wl-itbl-left">${buildInlineLeft(stocks, mode, view)}</div>
+        <div class="wl-itbl-right" onscroll="syncITbl(this)">${dataRows}</div>
+      </div>
+    </div>`;
+}
+function syncITbl(el){
+  const tbl = el.closest('.wl-itbl');
+  const head = tbl && tbl.querySelector('.wl-itbl-head-scroll');
+  if (head) head.scrollLeft = el.scrollLeft;
+}
+
+// ===================== CUSTOMIZE COLUMNS =====================
+const CC_TYPES = ['details', 'technical', 'ratings', 'valuation'];
+let ccActiveType = 'details';
+let ccDraft = null;     // { details:[...], technical:[...], ... } working copy of one group's COLUMN_CONFIG
+let ccDirty = false;    // any change made this session
+let ccGroup = null;     // group index whose columns are being edited (from activeWlGroup)
+const CC_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const CC_HANDLE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="16" x2="20" y2="16"/></svg>';
+
+function openCustomizeColumns(){
+  // Edit columns for the watchlist the user came through (pencil -> Watchlist Settings).
+  ccGroup = activeWlGroup;
+  const groupCfg = COLUMN_CONFIG[ccGroup] || {};
+  // Fresh working copy (deep clone) of that group's config for the editable views.
+  ccDraft = {};
+  CC_TYPES.forEach(v => { ccDraft[v] = (groupCfg[v] || []).map(c => ({ ...c })); });
+  ccDirty = false;
+  ccActiveType = 'details';
+  document.querySelectorAll('#ccTypeBar .sw-chip').forEach(c => c.classList.toggle('active', c.dataset.cctype === 'details'));
+  setCcSaveActive(false);
+  renderCcList();
+  // Customize Columns slides over Watchlist Settings (which stays underneath).
+  document.getElementById('customizeColumnsScreen').classList.add('active');
+}
+function closeCustomizeColumns(){
+  // Return to Watchlist Settings (which is still active underneath).
+  document.getElementById('customizeColumnsScreen').classList.remove('active');
+}
+document.getElementById('ccBackBtn').addEventListener('click', () => {
+  // Discard unsaved changes.
+  closeCustomizeColumns();
+});
+
+function setCcSaveActive(on){
+  document.getElementById('ccSaveBtn').classList.toggle('active', !!on);
+}
+function pickCcType(type, btn){
+  ccActiveType = type;
+  document.querySelectorAll('#ccTypeBar .sw-chip').forEach(c => c.classList.toggle('active', c === btn));
+  renderCcList();
+}
+function ccSelectedCount(type){
+  return ccDraft[type].filter(c => c.selected).length;
+}
+function updateCcCount(){
+  const name = wlGroupName(ccGroup);
+  const prefix = name ? `${name} · ` : '';
+  document.getElementById('ccCount').textContent = `${prefix}Items selected ${ccSelectedCount(ccActiveType)}`;
+}
+function renderCcList(){
+  const list = document.getElementById('ccList');
+  const cols = ccDraft[ccActiveType];
+  // Index of the first non-fixed row (its up arrow is disabled - can't move above pinned Symbol).
+  const firstMovable = cols.findIndex(c => !c.fixed);
+  const lastMovable = cols.length - 1; // arrays keep fixed Symbol at index 0, so the last row is always movable
+  list.innerHTML = cols.map((c, i) => {
+    const isFixed = !!c.fixed;
+    const sel = c.selected;
+    return `
+    <div class="cc-row ${sel ? 'selected' : ''} ${isFixed ? 'disabled' : ''}" data-key="${c.key}" data-index="${i}">
+      <div class="cc-check" ${isFixed ? '' : `onclick="toggleCcRow('${c.key}')"`}>${CC_CHECK}</div>
+      <div class="cc-label">${c.label}</div>
+      ${isFixed ? '' : `<button class="wl-rr-icon-btn cc-arrow" ${i === firstMovable ? 'disabled' : ''} onclick="moveCcRow('${c.key}',-1)">${ARROW_UP}</button>
+      <button class="wl-rr-icon-btn cc-arrow" ${i === lastMovable ? 'disabled' : ''} onclick="moveCcRow('${c.key}',1)">${ARROW_DOWN}</button>
+      <div class="cc-handle" data-handle>${CC_HANDLE}</div>`}
+    </div>`;
+  }).join('');
+  updateCcCount();
+  attachCcDrag();
+}
+function toggleCcRow(key){
+  const cols = ccDraft[ccActiveType];
+  const col = cols.find(c => c.key === key);
+  if (!col || col.fixed) return;
+  if (col.selected && ccSelectedCount(ccActiveType) <= 1){
+    showToast('Minimum 1 column');
+    return;
+  }
+  col.selected = !col.selected;
+  ccDirty = true;
+  setCcSaveActive(true);
+  // Toggle row class without a full re-render to keep order stable.
+  const row = document.querySelector(`#ccList .cc-row[data-key="${key}"]`);
+  if (row) row.classList.toggle('selected', col.selected);
+  updateCcCount();
+}
+// Reorder a non-fixed column by one position via the up/down arrows (mirrors moveCatRow + drag).
+function moveCcRow(key, dir){
+  const cols = ccDraft[ccActiveType];
+  const i = cols.findIndex(c => c.key === key);
+  if (i < 0 || cols[i].fixed) return;
+  const target = i + dir;
+  // Keep the pinned Symbol (index 0) at the top and stay in bounds.
+  if (target < 1 || target >= cols.length) return;
+  const [item] = cols.splice(i, 1);
+  cols.splice(target, 0, item);
+  ccDirty = true;
+  setCcSaveActive(true);
+  renderCcList(); // re-render so disabled end-states refresh
+}
+
+// ----- Drag to reorder (pointer events; works with mouse + touch) -----
+let ccDrag = null;
+function attachCcDrag(){
+  document.querySelectorAll('#ccList .cc-row .cc-handle').forEach(h => {
+    h.addEventListener('pointerdown', onCcPointerDown);
+  });
+}
+function onCcPointerDown(e){
+  e.preventDefault();
+  const row = e.target.closest('.cc-row');
+  if (!row || row.classList.contains('disabled')) return;
+  const list = document.getElementById('ccList');
+  const rows = [...list.querySelectorAll('.cc-row')];
+  const startIndex = rows.indexOf(row);
+  const rect = row.getBoundingClientRect();
+  ccDrag = {
+    row, list, rows,
+    startIndex,
+    currentIndex: startIndex,
+    rowHeight: rect.height,
+    startY: e.clientY,
+    baseTop: rect.top,
+    pointerId: e.pointerId,
+  };
+  row.setPointerCapture(e.pointerId);
+  row.classList.add('cc-dragging');
+  // Other rows animate when shifting.
+  rows.forEach(r => { if (r !== row) r.classList.add('cc-shift'); });
+  row.addEventListener('pointermove', onCcPointerMove);
+  row.addEventListener('pointerup', onCcPointerUp);
+  row.addEventListener('pointercancel', onCcPointerUp);
+}
+function onCcPointerMove(e){
+  if (!ccDrag) return;
+  const dy = e.clientY - ccDrag.startY;
+  ccDrag.row.style.transform = `translateY(${dy}px)`;
+  // Determine target index by how many row-slots the pointer has moved.
+  const { rows, rowHeight, startIndex } = ccDrag;
+  let moved = Math.round(dy / rowHeight);
+  let target = startIndex + moved;
+  const minIndex = ccDrag.rows.findIndex(r => !r.classList.contains('disabled')); // first non-fixed
+  target = Math.max(minIndex, Math.min(rows.length - 1, target));
+  if (target === ccDrag.currentIndex) return;
+  ccDrag.currentIndex = target;
+  // Shift the non-dragged rows visually to open a gap at `target`.
+  rows.forEach((r, i) => {
+    if (r === ccDrag.row) return;
+    let shift = 0;
+    if (startIndex < target && i > startIndex && i <= target) shift = -rowHeight;
+    else if (startIndex > target && i >= target && i < startIndex) shift = rowHeight;
+    r.style.transform = shift ? `translateY(${shift}px)` : '';
+  });
+}
+function onCcPointerUp(){
+  if (!ccDrag) return;
+  const { row, rows, startIndex, currentIndex, list } = ccDrag;
+  row.releasePointerCapture(ccDrag.pointerId);
+  row.removeEventListener('pointermove', onCcPointerMove);
+  row.removeEventListener('pointerup', onCcPointerUp);
+  row.removeEventListener('pointercancel', onCcPointerUp);
+  // Clear inline transforms / classes.
+  rows.forEach(r => { r.style.transform = ''; r.classList.remove('cc-shift'); });
+  row.classList.remove('cc-dragging');
+  const movedDrag = ccDrag;
+  ccDrag = null;
+  if (currentIndex !== startIndex){
+    // Reorder the draft array to match.
+    const cols = ccDraft[ccActiveType];
+    const [item] = cols.splice(startIndex, 1);
+    cols.splice(currentIndex, 0, item);
+    ccDirty = true;
+    setCcSaveActive(true);
+    renderCcList();
+  }
+}
+
+function saveCustomizeColumns(){
+  if (!document.getElementById('ccSaveBtn').classList.contains('active')) return; // inactive = no-op
+  // Commit working edits into this group's live config only.
+  if (!COLUMN_CONFIG[ccGroup]) COLUMN_CONFIG[ccGroup] = {};
+  CC_TYPES.forEach(v => { COLUMN_CONFIG[ccGroup][v] = ccDraft[v].map(c => ({ ...c })); });
+  // Re-render only this watchlist's expanded inline table (if a column view is showing).
+  const g = document.querySelector(`.wl-group[data-group="${ccGroup}"]`);
+  if (g){
+    const activeChip = g.querySelector('.sw-chip.active');
+    if (activeChip && activeChip.dataset.view && activeChip.dataset.view !== 'basic'){
+      const content = g.querySelector('.wl-group-expanded-content');
+      if (content) content.innerHTML = renderInlineTable(ccGroup, activeChip.dataset.view);
+    }
+  }
+  // Re-render the full-screen detail table if it's open and showing this group.
+  const detailScreen = document.getElementById('wlDetailScreen');
+  if (detailScreen && detailScreen.classList.contains('active') &&
+      String(currentDetailGroup) === String(ccGroup) &&
+      currentDetailView && currentDetailView !== 'basic'){
+    renderDetailTable(currentDetailView);
+  }
+  closeCustomizeColumns();
+  showToast('Columns updated');
+}
+
+// ===== TOP STRIP SETTINGS SCREEN WIRING =====
+document.getElementById('stripSettingsRow').addEventListener('click', () => {
+  renderStripSettingsGrid();
+  settingsScreen.style.transform = 'translateX(-30%)';
+  stripSettingsScreen.classList.add('active');
+});
+document.getElementById('stripSettingsBackBtn').addEventListener('click', () => {
+  settingsScreen.style.transform = '';
+  stripSettingsScreen.classList.remove('active');
+});
+// General toggles. Both change the height of the sticky chrome (news indirectly,
+// instruments directly), so renderStrip() re-measures --wl-sticky-top.
+document.getElementById('newsToggle').addEventListener('click', function() {
+  showNews = !showNews;
+  this.classList.toggle('on', showNews);
+  renderStrip();
+});
+document.getElementById('instrumentsToggle').addEventListener('click', function() {
+  showStrip = !showStrip;
+  this.classList.toggle('on', showStrip);
+  renderStrip();
+});
+// Reorder Holdings (no-op tap feedback, same as the donor)
+document.getElementById('reorderHoldingsRow').addEventListener('click', () => {});
+
+// ===== INIT: strip + sticky offset + chips-strip fades =====
+renderStrip();
+updateWlStickyTop();
+updateAllSwitchFades();
+window.addEventListener('resize', updateAllSwitchFades);
 </script>
 </body>
 </html>
