@@ -1162,7 +1162,7 @@ function chartModuleHTML(id, land) {
   const div       = `<span class="tb-div"></span>`;
 
   const topBar = land
-    ? `<div class="chart-toolbar top">${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}${exitBtn}</div>`
+    ? `<div class="chart-toolbar top">${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}<span class="tb-sep"></span>${exitBtn}</div>`
     : `<div class="chart-toolbar top three"><div class="tb-l">${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div></div>`;
   const bottomBar = land ? '' :
     `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${indBtn}${layersBtn}${exitBtn}</div>`;
