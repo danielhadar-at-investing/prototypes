@@ -327,10 +327,11 @@ svg { display: block; }
 .lg-toggle { height: 28px; padding: 0 9px 0 7px; border-radius: 14px; margin-left: -6px; background: var(--head-tint); border: .5px solid var(--divider); display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 510; color: var(--text-secondary-2); }
 .lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary); transition: transform .2s var(--ease-ios); }
 .ch-legend.collapsed .lg-toggle svg { transform: rotate(-90deg); }
-/* the crosshair rows overlay the swap slot; with a legend the slot keeps their height so the legend stays put */
-.chart-head.has-legend .ch-swap { min-height: 40px; }
-#viewLandscape .chart-head.has-legend .ch-swap { min-height: 22px; }
-.chart-head.has-legend.cmp .ch-swap { min-height: 0; }
+/* no reserved band: at rest the legend sits right under the price row; while the crosshair rows show (and no chips fill the slot)
+   the legend slides down by the rows' height with the same timings as the fade, then back */
+.ch-legend { transition: transform .2s ease; }
+.chart-head.xh:not(.cmp) .ch-legend { transform: translateY(22px); transition-duration: .15s; }   /* one crosshair row (O/H/L/C); the legend's Vol row already follows the crosshair */
+#viewLandscape .chart-head.xh:not(.cmp) .ch-legend { transform: translateY(22px); }
 /* layers button badge: active indicator count */
 .ind-badge { position: absolute; top: 3px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--text-secondary); color: #FFF; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; letter-spacing: 0; }
 .ind-badge:empty { display: none; }
@@ -1131,12 +1132,11 @@ function chartModuleHTML(id, land) {
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
   const header = land
     ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span></div>` +
-      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ch-detail ch-row2"><span class="ohlc-line"></span><span class="ch-vol">Vol <span class="vol-v vol-line"></span></span></div></div></div>` +
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ch-detail ch-row2"><span class="ohlc-line"></span></div></div></div>` +
       `<div class="ch-legend"></div>`
     : `<div class="ch-l1 ch-main">${logo}<span class="ch-name">SanDisk Corporation</span></div>` +
       `<div class="ch-price"><span class="ch-px live-px">${fmt(LAST.c)}</span><span class="ch-pchg live-chg ${chgCls()}">${chgText()}</span></div>` +
-      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ohlc-line ch-detail"></div>` +
-      `<div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>` +
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ohlc-line ch-detail"></div></div></div>` +
       `<div class="ch-legend"></div>`;
 
   return `
@@ -1210,7 +1210,7 @@ Chart.prototype.draw = function () {
   const AX = 64, XA = 24;
   /* the plot runs up behind the translucent header; the legend makes the header taller, so HEAD follows its bottom */
   let HEAD = this.land ? 20 : 40;
-  if (this.head && this.head.getBoundingClientRect) { const hr = this.head.getBoundingClientRect(), sr = svg.getBoundingClientRect(); if (sr.height > 0 && hr.height > 0) { const sc = sr.height / H; const hb = (hr.bottom - sr.top) / sc; if (hb + 8 > HEAD) HEAD = Math.round(hb + 8); } }
+  if (this.head && this.head.offsetHeight) { const hb = this.head.offsetTop + this.head.offsetHeight; if (hb + 8 > HEAD) HEAD = hb + 8; }   /* resting layout (offsets ignore the legend's slide transform), so a redraw during a long press cannot jump */
   const plotW = W - AX;
   const plotBottom = H - XA;
   const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
@@ -1497,7 +1497,7 @@ Chart.prototype.updateHead = function (i) {
     `<span><b>H:</b> <span class="v">${fmt(b.h)}</span></span>` +
     `<span><b>L:</b> <span class="v">${fmt(b.l)}</span></span>` +
     `<span><b>C:</b> <span class="v ${c}">${fmt(b.c)}</span> <span class="${pcls}">(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span></span>`;
-  this.volEl.textContent = fmtVol(b.v);
+  if (this.volEl) this.volEl.textContent = fmtVol(b.v);
   this.root.querySelectorAll('.lg-row').forEach(row => { const v = row.querySelector('.lg-val'); if (v) v.textContent = studyValue(row.dataset.code, i); });
 };
 
@@ -1524,7 +1524,7 @@ Chart.prototype.setHover = function (i, py) {
   this.xh.classList.add('on');
   this.head.classList.add('xh');
   /* rows 3-4 overlay the plot top: hide any y label in that band (landscape only adds the Vol line) */
-  const lim = g.HEAD + (this.land ? 34 : 38);
+  const lim = g.HEAD + 22;
   this.svg.querySelectorAll('text.ylab').forEach(t => t.classList.toggle('under-head', +t.getAttribute('y') - 4 < lim));
   if (this.pill.classList.contains('show')) this.placePill(yy);
 };
