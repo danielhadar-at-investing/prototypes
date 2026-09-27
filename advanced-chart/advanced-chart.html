@@ -561,6 +561,10 @@ svg { display: block; }
 .tcard-ico svg { width: 28px; height: 28px; color: var(--icon-primary); display: block; }
 .tcard-label { font-size: 15px; font-weight: 510; line-height: 18px; }
 .tcard-label.sm { font-size: 14px; font-weight: 400; line-height: 16px; }
+/* drawing tool cards: fixed height so rows stay even, hint pinned at the bottom (empty hint keeps the slot) */
+.tcard.tool-card { height: 124px; justify-content: flex-start; padding-top: 12px; gap: 6px; }
+.tcard.tool-card.sel { padding-top: 11px; }
+.tcard-hint { margin-top: auto; height: 12px; max-width: 100%; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; line-height: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .search-field.input input { flex: 1; min-width: 0; background: transparent; border: 0; font: inherit; color: var(--text-primary); outline: none; -webkit-appearance: none; appearance: none; }
 .search-field.input input::placeholder { color: var(--text-secondary); }
 .cat-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px var(--margin) 10px; scrollbar-width: none; }
@@ -1982,6 +1986,11 @@ function openDrawTools() {
   renderDrawTools();
   document.getElementById('drawSearch').addEventListener('input', e => { drawQuery = e.target.value.trim().toLowerCase(); renderDrawTools(); });
 }
+/* "Trend-Based Fib Time (3-click)" -> label "Trend-Based Fib Time", hint "3-click"; derived at render time, data stays one string */
+function splitTool(name) {
+  const m = name.match(/^(.*?)\s*\((.*)\)\s*$/);
+  return m ? { label: m[1], hint: m[2] } : { label: name, hint: '' };
+}
 function renderDrawTools() {
   const q = drawQuery;
   const catRow = document.getElementById('catRow');
@@ -1993,14 +2002,14 @@ function renderDrawTools() {
   }
   const list = q ? DRAW_CATS.flatMap(c => c.tools).filter(t => t.name.toLowerCase().includes(q)) : DRAW_CATS.find(c => c.name === drawCat).tools;
   document.getElementById('toolGrid').innerHTML = list.length
-    ? list.map(t => `<div class="tcard ${state.tool === t.name ? 'sel' : ''}" data-tool="${t.name.replace(/"/g, '&quot;')}"><div class="tcard-ico">${GL[t.g]}</div><div class="tcard-label sm">${t.name}</div></div>`).join('')
+    ? list.map(t => { const p = splitTool(t.name); return `<div class="tcard tool-card ${state.tool === t.name ? 'sel' : ''}" data-tool="${t.name.replace(/"/g, '&quot;')}"><div class="tcard-ico">${GL[t.g]}</div><div class="tcard-label sm">${p.label}</div><div class="tcard-hint">${p.hint}</div></div>`; }).join('')
     : `<div class="empty">No tools match "${drawQuery}"</div>`;
 }
 function selectTool(name) {
   state.tool = name;
   markDirty();
   closeOverlays();
-  toast(name + ' selected');
+  toast(splitTool(name).label + ' selected');
   document.querySelectorAll('.pencil-btn').forEach(b => b.classList.add('tool-on'));
 }
 
