@@ -43,7 +43,6 @@
   --pro-orange:      #FF6B00;
   --brand-sndk:      #E11B22;   /* SanDisk brand red, logo placeholder only */
   --accent-orange:   #F5822A;   /* Investing.com switch accent */
-  --head-tint:       rgba(255,255,255,.72);
   --accent-bg:       rgba(255,107,0,.12);   /* active layout row tint (web uses #FFE4D1) */
   --cmp-1: #3A5BE0; --cmp-2: #D63864; --cmp-3: #F07B1F; --cmp-4: #3DBCC9; --cmp-5: #8BBE45;   /* compare series palette, in order of addition */
   --chip-bg: #F2F3F5; --chip-border: #E3E5E8;
@@ -256,7 +255,7 @@ svg { display: block; }
 /* SVG styling */
 .chart-svg line.grid { stroke: var(--divider-secondary); stroke-width: 1; shape-rendering: crispEdges; }
 .chart-svg text.ax  { font-size: 11px; fill: var(--text-secondary); font-variant-numeric: tabular-nums; font-family: var(--font); }
-.chart-svg text.ylab.under-pill, .chart-svg text.ylab.under-head { visibility: hidden; }
+.chart-svg text.ylab.under-pill { visibility: hidden; }
 .chart-svg .wm { font-size: 22px; font-weight: 700; fill: rgba(0,0,0,.09); letter-spacing: -.6px; font-family: var(--font); }
 .chart-svg .cd.up   { fill: var(--price-up);   stroke: var(--price-up); }
 .chart-svg .cd.down { fill: var(--price-down); stroke: var(--price-down); }
@@ -309,8 +308,8 @@ svg { display: block; }
   white-space: nowrap; overflow: visible;   /* the crosshair rows are positioned over the chips row */
   display: flex; flex-direction: column; align-items: flex-start;
 }
-/* translucent panels: the plot runs behind the header, candles show through */
-.ch-main, .ch-detail, .ch-price { background: var(--head-tint); border-radius: 6px; margin-left: -6px; }   /* one panel per row, each hugging its own text */
+.ch-main, .ch-detail, .ch-price { margin-left: -6px; }   /* fully transparent overlay: no panels, text sits over the candles */
+.chart-head { text-shadow: 0 0 2px var(--bg-primary), 0 0 2px var(--bg-primary); }   /* legibility over candles without a panel */
 .ch-main { padding: 3px 6px; display: inline-flex; align-items: center; gap: 6px; }
 .ch-l1.one-line .ch-main { gap: 7px; }
 .ch-price { padding: 0 6px 1px; }
@@ -319,11 +318,11 @@ svg { display: block; }
 .ch-legend { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 3px; pointer-events: auto; }
 .lg-rows { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
 .ch-legend.collapsed .lg-rows { display: none; }
-.lg-row { display: inline-flex; align-items: center; gap: 6px; height: 17px; padding: 0 6px; margin-left: -6px; border-radius: 5px; background: var(--head-tint); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lg-row { display: inline-flex; align-items: center; gap: 6px; height: 17px; padding: 0 6px; margin-left: -6px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lg-bar { width: 3px; height: 14px; border-radius: 1.5px; flex-shrink: 0; }
 .lg-name { font-weight: 600; color: var(--text-primary); }
 .lg-val { font-weight: 510; }
-.lg-toggle { width: 28px; height: 28px; border-radius: 14px; margin-left: -6px; background: var(--head-tint); border: .5px solid var(--divider); display: inline-flex; align-items: center; justify-content: center; }   /* chevron only */
+.lg-toggle { width: 28px; height: 28px; border-radius: 14px; margin-left: -6px; background: transparent; border: .5px solid var(--divider); display: inline-flex; align-items: center; justify-content: center; }   /* chevron only */
 .lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary); transition: transform .2s var(--ease-ios); }
 .ch-legend.collapsed .lg-toggle svg { transform: rotate(180deg); }   /* down = collapse, up = expand */
 /* no reserved band: at rest the legend sits right under the price row; while the crosshair rows show (and no chips fill the slot)
@@ -1245,9 +1244,7 @@ Chart.prototype.draw = function () {
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
   const AX = 64, XA = 24;
-  /* the plot runs up behind the translucent header; the legend makes the header taller, so HEAD follows its bottom */
-  let HEAD = this.land ? 20 : 40;
-  if (this.head && this.head.offsetHeight) { const hb = this.head.offsetTop + this.head.offsetHeight; if (hb + 8 > HEAD) HEAD = hb + 8; }   /* resting layout (offsets ignore the legend's slide transform), so a redraw during a long press cannot jump */
+  const HEAD = this.land ? 20 : 40;   /* constant: the header (name, price, chips, legend, crosshair row) is a transparent overlay and never pushes the plot down */
   const plotW = W - AX;
   const plotBottom = H - XA;
   const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
@@ -1332,7 +1329,6 @@ Chart.prototype.draw = function () {
     const y = r(yAt(v)) + .5;
     if (y < yMin || y > yMax) continue;
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
-    if (y < HEAD + 4) continue;   /* gridline may run under the header, the label may not */
     if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the gear / reset buttons */
     if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
   }
@@ -1561,9 +1557,6 @@ Chart.prototype.setHover = function (i, py) {
   clearTimeout(this._xhT);
   this.xh.classList.add('on');
   this.head.classList.add('xh');
-  /* rows 3-4 overlay the plot top: hide any y label in that band (landscape only adds the Vol line) */
-  const lim = g.HEAD + 22;
-  this.svg.querySelectorAll('text.ylab').forEach(t => t.classList.toggle('under-head', +t.getAttribute('y') - 4 < lim));
   if (this.pill.classList.contains('show')) this.placePill(yy);
 };
 
@@ -1663,7 +1656,6 @@ Chart.prototype.clear = function () {
   this.hover = null;
   this.frozen = false;
   this.head.classList.remove('xh');
-  this.svg.querySelectorAll('text.ylab.under-head').forEach(t => t.classList.remove('under-head'));
   if (this.xh) {
     const xh = this.xh;
     xh.classList.remove('on');
@@ -2245,6 +2237,7 @@ function renderLegend() {
   renderBadges();
 }
 function addStudy(code) {
+  if (code === 'Vol' && countStudy('Vol')) return;   /* one volume pane only */
   if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); return; }
   const used = new Set(state.studies.map(s => s.color)); const color = code === 'Vol' ? 'var(--gray-1)' : (IND_COLORS.find(c => !used.has(c)) || IND_COLORS[state.studies.length % IND_COLORS.length]);
   state.studies.push({ id: uid('s'), code, color, hidden: false }); recentInd(code);
@@ -2270,7 +2263,7 @@ function indRowsHTML() {
   else if (indCat === 'Recent') list = indRecent.map(c => IND_BY_CODE[c]).filter(Boolean);
   else list = INDICATORS.filter(d => indCat === 'All indicators' || d.cat === indCat);
   if (!list.length) return `<div class="empty">${q ? `No indicators match "${indQuery}"` : indCat === 'Favorites' ? 'No favorites yet' : 'Nothing here yet'}</div>`;
-  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-cnt">${n}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}">&minus;</button>` : ''}<button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}">+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
+  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-cnt">${n}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}">&minus;</button>` : ''}${d.code === 'Vol' && n ? '' : `<button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}">+</button>`}<button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
 }
 function renderIndicators() {
   const q = indQuery;
