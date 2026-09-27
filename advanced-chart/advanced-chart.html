@@ -934,6 +934,9 @@ const INDICATORS = [
   ['KVO', 'Klinger Volume Oscillator', 'Oscillator', 'osc', [34, 55]], ['BSP', 'Buy Sell Pressure', 'Oscillator', 'osc', []], ['ChaikinOsc', 'Chaikin Oscillator', 'Oscillator', 'osc', [3, 10]], ['EOM', 'Ease of Movement', 'Oscillator', 'osc', [14]], ['FI', 'Force Index', 'Oscillator', 'osc', [13]],
   ['PVO', 'Percentage Volume Oscillator', 'Oscillator', 'osc', [12, 26]], ['A/D Ratio', 'Advance/Decline Ratio (Bars)', 'Oscillator', 'osc', [9]]
 ].map(([code, name, cat, kind, params]) => ({ code, name, cat, kind, params }));
+/* "All indicators" order exactly as the web interleaves it (each category tab keeps its own relative order) */
+const IND_ALL_ORDER = ['Vol', 'SMA', 'EMA', 'WMA', 'SMMA', 'MA Cross', 'BB', 'KC', 'DC', 'Alligator', 'VWAP', 'AVWAP', 'PSAR', 'Ichimoku', 'ZZ', 'ST', 'Pivots', 'Gaps', 'PP', 'RSI', 'MACD', 'DeM', 'Stoch', 'StochRSI', 'ADX', 'CCI', 'ATR', '%R', 'ROC', 'UO', 'BBP', 'MOM', 'AO', 'TRIX', 'TSI', 'RVGI', 'Aroon', 'PPO', 'OBV', 'Accum/Dist', 'CMF', 'MFI', 'BOP', 'KVO', 'RVI', 'BB%B', 'BBW', 'AroonOsc', 'ASI', 'BSP', 'ChaikinOsc', 'CV', 'DPO', 'EOM', 'FI', 'MeanDev', 'TR', 'W A/D', 'Env', 'PVO', 'Gator', 'A/D Ratio'];
+INDICATORS.sort((a, b) => IND_ALL_ORDER.indexOf(a.code) - IND_ALL_ORDER.indexOf(b.code));
 const IND_BY_CODE = Object.fromEntries(INDICATORS.map(i => [i.code, i]));
 const IND_COLORS = ['var(--ind-1)', 'var(--ind-2)', 'var(--ind-3)', 'var(--ind-4)', 'var(--ind-5)', 'var(--ind-6)'];
 function indLabel(code) { const d = IND_BY_CODE[code]; return d.params.length ? `${code}(${d.params.join(', ')})` : code; }
@@ -2027,8 +2030,10 @@ const TYPES = [
 ];
 function openTypeSheet() {
   pickHandler = v => { state.type = v; refreshLabels(); drawAll(); markDirty(); };
-  openSheet('Chart type', `<div class="card-grid">${TYPES.map(t =>
-    `<div class="tcard ${state.type === t.value ? 'sel' : ''}" data-pick="${t.value}"><div class="tcard-ico">${t.icon}</div><div class="tcard-label">${t.label}</div></div>`).join('')}</div>`, null, 'type');
+  /* web groups: Standard / OHLC / Advanced */
+  const groups = [['Standard', ['area', 'line', 'baseline']], ['OHLC', ['candles', 'bars', 'hollow', 'heikin']], ['Advanced', ['renko', 'linebreak', 'kagi', 'pnf']]];
+  openSheet('Chart type', groups.map(([name, vals]) => `<div class="iv-title">${name}</div><div class="card-grid">${vals.map(v => TYPES.find(t => t.value === v)).map(t =>
+    `<div class="tcard ${state.type === t.value ? 'sel' : ''}" data-pick="${t.value}"><div class="tcard-ico">${t.icon}</div><div class="tcard-label">${t.label}</div></div>`).join('')}</div>`).join(''), null, 'type');
 }
 
 /* ---- Drawing tools drawer ---- */
