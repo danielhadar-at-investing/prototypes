@@ -549,6 +549,7 @@ svg { display: block; }
 .iv-chip.active { background: var(--text-primary); color: var(--bg-primary); }
 .iv-chip.disabled { opacity: .35; }
 .iv-div { height: .5px; background: var(--divider); margin: 0 var(--margin); }
+.iv-wrap { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px var(--margin) 12px; }
 .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 4px var(--margin) 12px; }
 .tcard { background: var(--bg-primary); border: 1px solid var(--divider); border-radius: 12px; min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; text-align: center; transition: background .15s; }
 .tcard:active { background: var(--bg-tertiary); }
@@ -1843,7 +1844,8 @@ function drawerBodyHTML() {
       s.items.map(v => `<button class="iv-chip ${v === state.interval ? 'active' : ''} ${s.disabled ? 'disabled' : ''}" data-iv="${v}" ${s.disabled ? 'disabled' : ''}>${v}</button>`).join('') +
       `</div></div>`).join('');
   }
-  return RANGES.map(v => `<div class="row" data-range="${v}"><span>${v}</span>${state.range === v ? ICO.check : ''}</div>`).join('');
+  /* Date Range: the same chip cells as the Interval tab, wrapping into rows, no titles, no horizontal scroll */
+  return `<div class="iv-wrap">${RANGES.map(v => `<button class="iv-chip ${state.range === v ? 'active' : ''}" data-range="${v}">${v}</button>`).join('')}</div>`;
 }
 function openIntervalDrawer(tab) {
   drawerTab = tab || 'interval';
