@@ -394,6 +394,13 @@ svg { display: block; }
   color: var(--icon-secondary); z-index: 3;
 }
 .gear-btn::after { content: ""; position: absolute; inset: -8px; }   /* 44pt hit area */
+/* zoom to default: same 28px circle, 8px above the cog; only while the bar count differs from the orientation default */
+.zoom-btn { position: absolute; right: 10px; bottom: 64px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg-primary); border: .5px solid var(--divider); box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; color: var(--icon-secondary); z-index: 3; opacity: 0; pointer-events: none; transition: opacity .15s ease, background .15s; }
+.zoom-btn::after { content: ""; position: absolute; inset: -8px; }
+.zoom-btn.show { opacity: 1; pointer-events: auto; }
+.chart-module.settings-open .zoom-btn { opacity: 0; pointer-events: none; }
+.zoom-btn:active { background: var(--bg-secondary); }
+.zoom-btn svg { width: 18px; height: 18px; }
 .gear-btn:active { background: var(--bg-secondary); }
 .gear-btn svg { width: 18px; height: 18px; }
 /* popover cards (settings, event details) - normal light app UI */
@@ -656,13 +663,12 @@ svg { display: block; }
 }
 .orient-thumb {
   position: absolute; top: 2px; left: 2px;
-  width: calc(33.333% - 1.4px); height: 32px; border-radius: 7px;
+  width: calc(50% - 2px); height: 32px; border-radius: 7px;
   background: #FFF;
   box-shadow: 0 3px 8px rgba(0,0,0,.12), 0 3px 1px rgba(0,0,0,.04);
   transition: transform .32s var(--ease-ios);
 }
 .orient-picker[data-sel="landscape"] .orient-thumb { transform: translateX(100%); }
-.orient-picker[data-sel="notes"] .orient-thumb { transform: translateX(200%); }
 .orient-opt {
   position: relative; flex: 1; z-index: 1;
   display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -674,20 +680,6 @@ svg { display: block; }
 .orient-opt:not(.active):active { opacity: .6; }
 
 /* ---------- 15. NOTES PANEL (picker third option) ---------- */
-.page.hidden { display: none; }
-#notesPanel {
-  position: absolute; inset: 0 0 110px 0;
-  display: none; justify-content: center; align-items: flex-start;
-  padding: 48px 24px 24px; overflow-y: auto;
-}
-#notesPanel.show { display: flex; }
-.notes-doc { width: 100%; max-width: 640px; }
-.notes-file { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: #6B6B70; margin-bottom: 14px; }
-.notes-text {
-  font-family: var(--font); font-size: 15px; line-height: 1.55; color: #1C1C1E;
-  white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
-}
-.notes-text.muted { color: #6B6B70; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -741,13 +733,6 @@ svg { display: block; }
   </div>
 </div>
 
-<div id="notesPanel">
-  <div class="notes-doc">
-    <div class="notes-file">notes.txt</div>
-    <pre class="notes-text" id="notesText"></pre>
-  </div>
-</div>
-
 <div class="picker-wrap">
   <div class="picker-caption">View</div>
   <div class="orient-picker" id="orientPicker" data-sel="portrait">
@@ -759,10 +744,6 @@ svg { display: block; }
     <button class="orient-opt" data-o="landscape" onclick="setMode('landscape')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6.5" width="19" height="11" rx="2.2"/><path d="M18.5 10.5v3" stroke-linecap="round"/></svg>
       Landscape
-    </button>
-    <button class="orient-opt" data-o="notes" onclick="setMode('notes')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4.5" y="3" width="15" height="18" rx="2.2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
-      Notes
     </button>
   </div>
 </div>
@@ -1005,6 +986,7 @@ const ICO = {
   trash:    `<svg viewBox="0 0 24 24" ${S}><path d="M4 7h16M9 7V4.5h6V7M6.5 7l.8 12.5h9.4L17.5 7"/></svg>`,
   clock:    `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
   plus:     `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>`,
+  zoomReset: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.3 15.3 5.2 5.2"/><path d="M8.2 8.6v3.8M12.8 8.6v3.8"/><circle cx="10.5" cy="9.4" r=".55" fill="currentColor" stroke="none"/><circle cx="10.5" cy="11.6" r=".55" fill="currentColor" stroke="none"/></svg>`,
   cog:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M22.06 10.32 L22.06 13.68 L19.41 13.71 L18.45 16.03 L20.30 17.92 L17.92 20.30 L16.03 18.45 L13.71 19.41 L13.68 22.06 L10.32 22.06 L10.29 19.41 L7.97 18.45 L6.08 20.30 L3.70 17.92 L5.55 16.03 L4.59 13.71 L1.94 13.68 L1.94 10.32 L4.59 10.29 L5.55 7.97 L3.70 6.08 L6.08 3.70 L7.97 5.55 L10.29 4.59 L10.32 1.94 L13.68 1.94 L13.71 4.59 L16.03 5.55 L17.92 3.70 L20.30 6.08 L18.45 7.97 L19.41 10.29 Z"/><circle cx="12" cy="12" r="3.2"/></svg>`,
   chevrons: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 6 6 6-6 6M13 6l6 6-6 6"/></svg>`,
   baseline: `<svg viewBox="0 0 24 24" ${S}><path d="M3 12h18" stroke-dasharray="2.5 2.5"/><path d="M3 16l4-5 4 3 4-8 6 4" stroke-dasharray="1 2.4" stroke-width="2"/></svg>`,
@@ -1055,6 +1037,7 @@ function chartModuleHTML(id, land) {
       <svg class="chart-svg" xmlns="http://www.w3.org/2000/svg"></svg>
       <div class="chart-head">${header}</div>
       <button class="latest-btn" data-act="latest" aria-label="Scroll to latest bar">${ICO.chevrons}</button>
+      <button class="zoom-btn" data-act="zoom-default" aria-label="Zoom to default">${ICO.zoomReset}</button>
       <button class="gear-btn" data-act="settings" aria-label="Chart settings">${ICO.cog}</button>
       <div class="pop settings-pop"></div>
       <div class="pop ev-card"></div>
@@ -1080,6 +1063,8 @@ function Chart(root, land) {
   this.evCard = root.querySelector('.ev-card');
   this.evOpen = null;
   this.latestBtn = root.querySelector('.latest-btn');
+  this.zoomBtn = root.querySelector('.zoom-btn');
+  this._zoomAnim = 0;
   this._anim = 0;
   this.hover = null;
   this.frozen = false;      /* long-press crosshair left on screen after finger lift */
@@ -1375,6 +1360,7 @@ Chart.prototype.draw = function () {
   this.first = false;
   if (this.evOpen !== null && this.evOpen !== undefined) this.placeEvent();
   this.latestBtn.classList.toggle('show', !this.atLatest());
+  this.zoomBtn.classList.toggle('show', Math.round(this.view.count) !== this.defaultCount);
   if (this.hover !== null) this.setHover(this.hover.i, this.hover.y); else this.updateHead(N - 1);
 };
 
@@ -1568,7 +1554,28 @@ Chart.prototype.scrollToLatest = function () {
   };
   this._anim = requestAnimationFrame(step);
 };
-Chart.prototype.cancelScroll = function () { if (this._anim) { cancelAnimationFrame(this._anim); this._anim = 0; } };
+Chart.prototype.cancelScroll = function () { if (this._anim) { cancelAnimationFrame(this._anim); this._anim = 0; } if (this._zoomAnim) { cancelAnimationFrame(this._zoomAnim); this._zoomAnim = 0; } };
+/* animated zoom back to the orientation default, right edge anchored; clears the picked range, keeps compare; not layout state */
+Chart.prototype.zoomToDefault = function () {
+  this.cancelScroll();
+  if (this.stopInertia) this.stopInertia();
+  this.clear(); this.closeEvent();
+  const N = BARS.length, from = this.view.count, to = Math.min(this.defaultCount, N);
+  state.range = null;
+  if (Math.abs(to - from) < 0.01) { this.view.count = to; this.draw(); return; }
+  const rightEdge = this.view.start + from;   /* fractional index of the right edge: stays put */
+  const dur = clamp(400 + Math.abs(to - from) * 4, 400, 600), t0 = performance.now();
+  const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    const count = k >= 1 ? to : from + (to - from) * ease(k);
+    this.view.count = count;
+    this.view.start = clamp(rightEdge - count, 0, N - count);
+    this.draw();
+    this._zoomAnim = k < 1 ? requestAnimationFrame(step) : 0;
+  };
+  this._zoomAnim = requestAnimationFrame(step);
+};
 Chart.prototype.resetView = function () { this.scrollToLatest(); };
 
 /* Gestures:
@@ -1776,7 +1783,7 @@ function setOrientation(o) {
 window.addEventListener('resize', applyScale);
 
 /* ============================================================
-   VIEW MODE: portrait | landscape | notes (picker below the phone)
+   VIEW MODE: portrait | landscape (picker below the phone)
    ============================================================ */
 let mode = 'portrait';
 function syncPicker(m) {
@@ -1785,31 +1792,10 @@ function syncPicker(m) {
   picker.querySelectorAll('.orient-opt').forEach(b => b.classList.toggle('active', b.dataset.o === m));
 }
 function setMode(m) {
-  if (m === mode) return;
-  if (m !== 'notes' && switching) return;
+  if (m === mode || switching) return;
   mode = m;
   syncPicker(m);
-  const page = document.querySelector('.page');
-  const panel = document.getElementById('notesPanel');
-  if (m === 'notes') {
-    closeOverlays();
-    page.classList.add('hidden');
-    panel.classList.add('show');
-    loadNotes();
-  } else {
-    panel.classList.remove('show');
-    page.classList.remove('hidden');
-    setOrientation(m);
-  }
-}
-function loadNotes() {
-  const el = document.getElementById('notesText');
-  const fail = () => { el.textContent = 'Could not load notes.txt. Open this page via the local server (python3 -m http.server) instead of file://.'; el.classList.add('muted'); };
-  if (!window.fetch) { fail(); return; }
-  fetch('notes.txt', { cache: 'no-store' })
-    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
-    .then(t => { el.textContent = t; el.classList.remove('muted'); })
-    .catch(fail);
+  setOrientation(m);
 }
 
 /* ============================================================
@@ -2238,7 +2224,7 @@ document.addEventListener('click', e => {
   if (cta) { toast(cta.dataset.evcta); Object.values(charts).forEach(c => c.closeEvent()); }
 });
 document.addEventListener('pointerdown', e => {
-  if (e.target.closest && e.target.closest('.pop, .gear-btn, [data-ev], .chart-svg')) return;
+  if (e.target.closest && e.target.closest('.pop, .gear-btn, .zoom-btn, [data-ev], .chart-svg')) return;
   Object.values(charts).forEach(c => { c.closeEvent(); c.closeSettings(); });
 });
 
@@ -2507,6 +2493,7 @@ document.addEventListener('click', e => {
     case 'alert':      openAlertDrawer(); break;
     case 'exitfs':     toast('Close full screen'); break;
     case 'latest':     charts[state.orientation].scrollToLatest(); break;
+    case 'zoom-default': charts[state.orientation].zoomToDefault(); break;
     case 'settings':   { const c = charts[state.orientation]; if (c.settingsEl.classList.contains('open')) c.closeSettings(); else c.openSettings(); } break;
     case 'analyze':    openAnalyze(); break;
   }
@@ -2520,7 +2507,7 @@ const LIVE0 = LAST.c;
 let liveTimer = 0;
 function tickOnce() {
   const xhActive = Object.values(charts).some(c => c.hover);
-  if (!xhActive && mode !== 'notes' && document.visibilityState !== 'hidden') {
+  if (!xhActive && document.visibilityState !== 'hidden') {
     let np = LAST.c * (1 + (0.05 + Math.random() * 0.15) / 100 * (Math.random() < 0.5 ? -1 : 1));
     if (Math.abs(np - LIVE0) / LIVE0 > 0.004) np = LAST.c - (LAST.c - LIVE0) * 0.5;   /* leash: never drifts far from the real close */
     np = Math.round(np * 100) / 100;
