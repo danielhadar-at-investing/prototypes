@@ -1134,11 +1134,12 @@ Chart.prototype.draw = function () {
   const sndkC = D.map(b => b.c);
   for (let i = i0; i <= i1; i++) {
     const x = xAt(i); if (x < -bw / 2 || x > plotW + bw / 2) continue;
+    vmax = Math.max(vmax, D[i].v);   /* volume scale is the same in every view */
     if (cmpPct) {
       const p = pctOf(sndkC, i); lo = Math.min(lo, p); hi = Math.max(hi, p);
       cmpData.forEach(c => { const q = pctOf(c.data, i); lo = Math.min(lo, q); hi = Math.max(hi, q); });
     } else {
-      const b = D[i]; lo = Math.min(lo, b.l); hi = Math.max(hi, b.h); vmax = Math.max(vmax, b.v);
+      const b = D[i]; lo = Math.min(lo, b.l); hi = Math.max(hi, b.h);
       cmpData.forEach(c => { lo = Math.min(lo, c.data[i]); hi = Math.max(hi, c.data[i]); });   /* shared price axis */
     }
   }
