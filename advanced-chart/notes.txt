@@ -3,3 +3,4 @@ Raw bullets, to be turned into requirements later.
 
 - Add chevron to collapse/expand O, H, L, C, Vol, next to quote. Default expanded (down-pointing chevron).
 - Touch gestures: hold + move scrolls the chart. Long press freezes the chart and shows the same dashed lines as the regular chart, with create alert.
+- Create alert (bell in top bar): opens the app's existing native Create New Alert drawer (Price / %-Change / Volume / Earnings Report). Prototype only mocks it; the client reuses the native component.

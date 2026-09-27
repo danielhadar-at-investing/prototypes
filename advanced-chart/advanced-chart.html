@@ -41,6 +41,12 @@
   --icon-secondary:    #8C8C8C;
 
   --pro-orange:      #FF6B00;
+  --brand-sndk:      #E11B22;   /* SanDisk brand red, logo placeholder only */
+  --accent-orange:   #F5822A;   /* Investing.com switch accent */
+  --head-tint:       rgba(255,255,255,.72);
+  --accent-bg:       rgba(255,107,0,.12);   /* active layout row tint (web uses #FFE4D1) */
+  --cmp-1: #3A5BE0; --cmp-2: #D63864; --cmp-3: #F07B1F; --cmp-4: #3DBCC9; --cmp-5: #8BBE45;   /* compare series palette, in order of addition */
+  --chip-bg: #F2F3F5; --chip-border: #E3E5E8;
   --chrome-bg:       rgba(249,249,249,.94);
   --scrim:           rgba(0,0,0,.45);
 
@@ -85,7 +91,7 @@ svg { display: block; }
   width: 393px; height: 852px;
   border-radius: 47px;
   background: var(--bg-primary-3);
-  overflow: hidden;
+  overflow: hidden; overflow: clip;
   box-shadow: 0 0 0 1px rgba(0,0,0,.05), 0 0 0 10px #1A1A1E, 0 0 0 11px rgba(255,255,255,.35), 0 30px 80px rgba(0,0,0,.22);
   transition: width .5s var(--ease-ios), height .5s var(--ease-ios);
 }
@@ -125,25 +131,23 @@ svg { display: block; }
 .home-indicator::after { content: ""; width: 134px; height: 5px; border-radius: 100px; background: var(--text-primary); opacity: .9; margin-bottom: 3px; }
 
 /* ---------- 6. AI PILL ---------- */
-.ai-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  height: 32px; padding: 0 12px 0 6px;
-  border-radius: 16px;
-  border: .5px solid var(--divider);
+/* "Analyze chart" pill over the plot, top-right, gradient border blue -> orange */
+.an-wrap { position: absolute; top: 4px; right: 8px; display: flex; align-items: center; z-index: 3; transition: opacity .15s; }
+#viewLandscape .an-wrap { right: 70px; }
+.an-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px 0 7px;   /* centre y=18, same as header row 1 (panel y 8 to 28); 4px below the top bar line */
+  border-radius: 10px; border: 1.5px solid var(--text-primary);
   background: var(--bg-primary);
-  font-size: 13px; font-weight: 510; color: var(--text-primary);
-  transition: background .15s, transform .15s;
+  font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap;   /* same type as the company name */
+  transition: transform .15s, opacity .15s;
 }
-.ai-pill:active { background: var(--bg-secondary); transform: scale(.98); }
-.ai-badge {
-  height: 20px; padding: 0 6px; border-radius: 6px;
-  background: var(--text-active); color: #FFF;
-  font-size: 11px; font-weight: 700; letter-spacing: .2px;
-  display: inline-flex; align-items: center; gap: 3px;
-}
-.ai-badge svg { width: 10px; height: 10px; }
-.ai-pill.compact { height: 28px; border-radius: 14px; padding: 0 10px 0 5px; font-size: 12px; }
-.ai-pill.compact .ai-badge { height: 18px; font-size: 10px; }
+.an-pill:active { transform: scale(.97); opacity: .85; }
+.an-badge { width: 18px; height: 18px; border-radius: 5px; background: var(--text-primary); color: #FFF; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; letter-spacing: .2px; }
+/* the name gives way (ellipsis) before the pill ever shrinks */
+.ch-l1.ch-main { max-width: calc(100% - 140px); }
+.ch-l1.one-line .ch-main { max-width: calc(100% - 140px); }
+.ch-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- 9. CHART MODULE ---------- */
 .chart-module {
@@ -161,18 +165,77 @@ svg { display: block; }
 .chart-toolbar.top    { box-shadow: inset 0 -.5px 0 0 var(--divider); }
 .chart-toolbar.bottom { box-shadow: inset 0 .5px 0 0 var(--divider); }
 .tb-btn {
-  height: 36px; min-width: 36px; padding: 0 7px;
+  height: 44px; min-width: 36px; padding: 0 7px; position: relative;   /* 36px layout width, 44pt hit area via ::before */
   display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-  border-radius: 8px; color: var(--icon-primary);
+  border-radius: 10px; color: var(--icon-primary);
   font-size: 15px; font-weight: 510; letter-spacing: -.2px;
   transition: background .15s;
   white-space: nowrap;
 }
+.tb-btn::before { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; right: -1px; }   /* full 44px height, each button owns half the 2px gap */
 .tb-btn:active { background: rgba(128,128,128,.14); }
 .tb-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 .tb-btn svg.chev { width: 12px; height: 12px; color: var(--text-secondary); margin-left: 1px; }
 .tb-btn.tb-text { padding: 0 8px; }
+.tb-btn.tb-sym { font-weight: 700; letter-spacing: -.2px; height: 32px; padding: 0 9px; margin-left: 4px; border: 1px solid var(--text-primary); border-radius: 8px; }   /* 1px black outline; the box's left edge sits on the header's left padding line (logo circle left edge) */
+.tb-btn.tb-sym::before { top: -6px; bottom: -6px; }   /* keep the 44pt hit height */
+#viewLandscape .tb-sym { margin-left: 12px; }
+.chart-toolbar.three { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.tb-l, .tb-c, .tb-r { display: flex; align-items: center; gap: 2px; }
+.tb-r { justify-self: end; }
+.chart-toolbar.spread { justify-content: space-between; padding: 0 12px; }
+.pencil-btn { position: relative; }
+.pencil-btn.tool-on::after { content: ""; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--text-active); border: 1.5px solid var(--bg-primary); }
+.save-btn { position: relative; }
+.save-dot { position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--green-up); border: 1.5px solid var(--bg-primary); opacity: 0; transform: scale(.5); transition: opacity .15s, transform .15s var(--ease-spring); }
+.save-btn.dirty .save-dot { opacity: 1; transform: none; }
+.layout-btn { padding: 0 5px; }
+.layout-btn .layout-name { font-size: 14px; font-weight: 510; letter-spacing: -.2px; max-width: 48px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 2px; }
+.layout-btn .layout-name:empty, .layout-btn .layout-name:empty + .chev { display: none; }
+#viewLandscape .layout-btn .layout-name { max-width: 110px; }
+/* layouts list rows */
+.lay-row { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px var(--margin); position: relative; transition: background .15s; }
+.lay-row:active { background: rgba(128,128,128,.1); }
+.lay-row + .lay-row::before { content: ""; position: absolute; top: 0; left: var(--margin); right: 0; height: .5px; background: var(--divider); }
+.lay-glyph { width: 26px; height: 20px; border-radius: 3px; border: 1px solid var(--text-secondary-2); flex-shrink: 0; }
+.lay-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.lay-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lay-sub { font-size: 12px; color: var(--text-secondary); }
+.lay-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-active); flex-shrink: 0; }
+.lay-empty { text-align: center; color: var(--text-secondary); font-size: 14px; line-height: 20px; padding: 40px 24px; }
+.lay-empty b { display: block; color: var(--text-primary); font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+/* manage layouts */
+.manage-body { display: flex; flex-direction: column; min-height: 0; height: 100%; }   /* fills the sheet body so the footer pins to the bottom */
+.manage-list { flex: 1; overflow-y: auto; min-height: 0; padding: 4px 8px; }
+.manage-list .lay-row { border-radius: 10px; padding: 6px 8px 6px 10px; }
+.manage-list .lay-row + .lay-row::before { display: none; }
+.manage-list .lay-row.active { background: var(--accent-bg); }
+.lay-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.sort-row { display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 14px; font-size: 15px; }
+.sort-row .check { width: 20px; height: 20px; color: var(--text-active); }
+.lay-act { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--icon-secondary); }
+.lay-act:active { background: rgba(128,128,128,.14); }
+.lay-act.danger { color: var(--red-down); }
+.lay-act svg { width: 18px; height: 18px; }
+/* small menu inside a sheet ("..." on Layouts) */
+.sheet-menu { position: absolute; top: 48px; right: 12px; width: 240px; z-index: 5; }
+/* Layout Name modal */
+.modal-scrim { position: absolute; inset: 0; background: var(--scrim); z-index: 60; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; padding: 24px; }
+.modal-scrim.open { opacity: 1; pointer-events: auto; }
+.modal { width: 100%; max-width: 340px; background: var(--bg-primary); border-radius: 16px; padding: 20px 20px 16px; box-shadow: 0 12px 40px rgba(0,0,0,.22); transform: scale(.96); transition: transform .2s var(--ease-spring); }
+.modal-scrim.open .modal { transform: none; }
+.modal-title { font-size: 17px; font-weight: 600; letter-spacing: -.3px; }
+.modal-sub { font-size: 15px; color: var(--text-secondary); line-height: 20px; margin: 4px 0 14px; }
+.modal-input { width: 100%; height: 44px; border-radius: 10px; border: 1.5px solid var(--divider); padding: 0 12px; font: inherit; font-size: 16px; color: var(--text-primary); background: var(--bg-primary); outline: none; -webkit-appearance: none; appearance: none; }
+.modal-input:focus { border-color: var(--text-active); box-shadow: 0 0 0 3px rgba(51,114,246,.18); }
+.modal-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.btn-secondary { height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--divider); font-size: 15px; font-weight: 510; color: var(--text-primary); }
+.btn-primary { height: 40px; padding: 0 16px; border-radius: 10px; background: var(--text-active); color: #FFF; font-size: 15px; font-weight: 600; transition: opacity .15s; }
+.btn-primary:disabled { opacity: .4; }
+/* toast with an action */
+#toast .toast-act { margin-left: 12px; color: #7FB2FF; font-weight: 600; }
 .tb-div { width: .5px; height: 20px; background: var(--divider); margin: 0 4px; flex-shrink: 0; }
+.tb-sep { width: 1px; height: 20px; background: var(--divider); margin: 0 2px; flex-shrink: 0; align-self: center; }
 .tb-spacer { flex: 1; }
 .sym-pill {
   height: 32px; padding: 0 9px 0 8px;
@@ -185,12 +248,14 @@ svg { display: block; }
 .sym-pill svg { width: 16px; height: 16px; color: var(--icon-primary); }
 .sym-pill svg.chev { width: 12px; height: 12px; color: var(--text-secondary); }
 
-.chart-area { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--bg-primary); }
-.chart-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: pan-y; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.chart-area { position: relative; flex: 1; min-height: 0; overflow: hidden; overflow: clip; background: var(--bg-primary); }
+.chart-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.chart-svg.panning { cursor: grabbing; }
 
 /* SVG styling */
 .chart-svg line.grid { stroke: var(--divider-secondary); stroke-width: 1; shape-rendering: crispEdges; }
 .chart-svg text.ax  { font-size: 11px; fill: var(--text-secondary); font-variant-numeric: tabular-nums; font-family: var(--font); }
+.chart-svg text.ylab.under-pill, .chart-svg text.ylab.under-head { visibility: hidden; }
 .chart-svg .wm { font-size: 22px; font-weight: 700; fill: rgba(0,0,0,.09); letter-spacing: -.6px; font-family: var(--font); }
 .chart-svg .cd.up   { fill: var(--price-up);   stroke: var(--price-up); }
 .chart-svg .cd.down { fill: var(--price-down); stroke: var(--price-down); }
@@ -209,49 +274,185 @@ svg { display: block; }
 .chart-svg .tag.dark rect { fill: var(--icon-primary); }
 .chart-svg .tag.blue rect { fill: var(--dark-blue); }
 .chart-svg .tag.blue text { font-size: 12px; font-weight: 510; }
-.chart-svg .xh { stroke: var(--gray-1); stroke-width: 1; stroke-dasharray: 4 3; shape-rendering: crispEdges; }
+.chart-svg .xhg { opacity: 0; transition: opacity .2s ease; }
+.chart-svg .xhg.on { opacity: 1; transition-duration: .15s; }
+.chart-svg .xh { stroke: var(--text-secondary-2); stroke-opacity: .6; stroke-width: 1; stroke-dasharray: 4 3; shape-rendering: crispEdges; }
+.chart-svg .tag.dark.flick { animation: tagFlick .24s var(--ease-ios); transform-box: fill-box; transform-origin: center; }
+@keyframes tagFlick { 0% { transform: scale(1); opacity: .6; } 45% { transform: scale(1.14); opacity: 1; } 100% { transform: scale(1); } }
 .chart-svg .pline { fill: none; stroke: var(--text-active); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
 .chart-svg .parea { fill: url(#areaGrad); }
+.chart-svg .pline.up { stroke: var(--price-up); }
+.chart-svg .pline.down { stroke: var(--price-down); }
+.chart-svg .bfill.up { fill: var(--price-up); opacity: .12; }
+.chart-svg .bfill.down { fill: var(--price-down); opacity: .12; }
+.chart-svg .baseline { stroke: var(--gray-1); stroke-width: 1; stroke-dasharray: 3 3; shape-rendering: crispEdges; }
+.chart-svg .bricks rect { stroke-width: 1; stroke: var(--bg-primary); }
+.chart-svg .bricks rect.up { fill: var(--price-up); }
+.chart-svg .bricks rect.down { fill: var(--price-down); }
+.chart-svg .bricks rect.down.hollow { fill: var(--bg-primary); stroke: var(--price-down); }
+.chart-svg .kagi path { fill: none; stroke-linejoin: round; }
+.chart-svg .kagi path.thick { stroke: var(--price-up); stroke-width: 2.4; }
+.chart-svg .kagi path.thin { stroke: var(--price-down); stroke-width: 1; }
+.chart-svg .pf line { stroke: var(--price-up); stroke-width: 1.2; }
+.chart-svg .pf circle { stroke: var(--price-down); fill: none; stroke-width: 1.2; }
 .chart-svg .ohlc line { stroke-width: 1.4; }
 .chart-svg .candles.intro > g { animation: candleIn .5s var(--ease-ios) both; transform-box: fill-box; transform-origin: center bottom; }
 @keyframes candleIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 /* Header overlay inside the chart */
 .chart-head {
-  position: absolute; top: 8px; left: 12px; right: 8px;
+  position: absolute; top: 8px; left: 12px; right: 8px;   /* starts at row 1's panel top so the logo circle is never clipped */
   pointer-events: none;
   font-size: 12px; line-height: 17px;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap; overflow: hidden;
+  white-space: nowrap; overflow: visible;   /* the crosshair rows are positioned over the chips row */
+  display: flex; flex-direction: column; align-items: flex-start;
 }
-.ch-l1 { display: flex; align-items: baseline; gap: 6px; }
+/* translucent panels: the plot runs behind the header, candles show through */
+.ch-main, .ch-detail, .ch-price { background: var(--head-tint); border-radius: 6px; margin-left: -6px; }   /* one panel per row, each hugging its own text */
+.ch-main { padding: 3px 6px; display: inline-flex; align-items: center; gap: 6px; }
+.ch-l1.one-line .ch-main { gap: 7px; }
+.ch-price { padding: 0 6px 1px; }
+.ch-detail { padding: 2px 6px; margin-top: 2px; }
+/* chips row and the long-press rows share one slot and cross-fade */
+.ch-swap { position: relative; align-self: stretch; width: 100%; min-width: 0; }
+.ch-details { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.ch-cmprow { display: none; align-items: center; gap: 8px; margin-top: 4px; width: 100%; min-width: 0; pointer-events: auto; opacity: 1; transition: opacity .2s ease; }
+.chart-head.cmp .ch-cmprow { display: flex; }
+.chart-head.xh .ch-cmprow { opacity: 0; pointer-events: none; transition-duration: .15s; }
+.cmp-scroll { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1 1 0; width: 0; min-width: 0; padding: 2px 0; }   /* definite width so the row scrolls instead of growing past the header */
+.cmp-scroll::-webkit-scrollbar { display: none; }
+.cmp-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 10px; border-radius: 8px; background: var(--chip-bg); border: 1px solid var(--chip-border); font-size: 13px; font-weight: 600; color: var(--text-primary); flex-shrink: 0; }
+.cmp-sw { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+.cmp-div { width: 1px; height: 14px; background: var(--chip-border); margin-left: 2px; }
+.cmp-x { width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 15px; position: relative; }
+.cmp-x::after { content: ""; position: absolute; inset: -8px -10px; }   /* 44pt hit area */
+.cmp-x svg { width: 12px; height: 12px; }
+.cmp-toggle { display: inline-flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--chip-border); flex-shrink: 0; align-self: center; }
+.cmp-toggle button { width: 32px; font-size: 13px; font-weight: 600; background: var(--chip-bg); color: var(--text-primary); position: relative; }
+.cmp-toggle button::after { content: ""; position: absolute; inset: -8px 0; }
+.cmp-toggle button.active { background: var(--text-active); color: #FFF; }
+/* compare series on the chart */
+.chart-svg .cline { fill: none; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.chart-svg .cline.base { stroke: var(--text-primary); }
+.chart-svg .zero { stroke: var(--gray-1); stroke-width: 1; shape-rendering: crispEdges; }
+.chart-svg .tag.cmp text { font-size: 10.5px; }
+.chart-head.xh ~ .an-wrap { opacity: 0; pointer-events: none; }   /* pill steps aside while the crosshair rows are showing */
+.ch-l1 { display: flex; align-items: center; gap: 6px; height: 20px; }
 .ch-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.sym-logo { border-radius: 50%; color: #FFF; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0; }
+.sym-logo svg { width: 60%; height: 60%; }
+.sheet.drawer.h-symbol { height: min(640px, 94%); }
+/* O/H/L/C + Vol rows: hidden at rest, fade in and out together with the crosshair lines (same timings as .xhg) */
+.ch-detail { opacity: 0; transition: opacity .2s ease; }
+.chart-head.xh .ch-detail { opacity: 1; transition-duration: .15s; }
+/* live tick flash on the price */
+.live-px.flash-up { animation: flashUp .3s ease-out; }
+.live-px.flash-down { animation: flashDown .3s ease-out; }
+@keyframes flashUp { 0%, 40% { color: var(--price-up); } 100% { color: var(--text-primary); } }
+@keyframes flashDown { 0%, 40% { color: var(--price-down); } 100% { color: var(--text-primary); } }
 .ch-chg  { font-size: 12px; font-weight: 510; }
-.ch-int  { color: var(--text-secondary); }
 .ch-l1.one-line { gap: 7px; }
 .ch-l1.one-line .ch-l2 { margin-left: 2px; }
 .ch-px-inline { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.ch-price { display: flex; align-items: baseline; gap: 8px; margin: 1px 0 3px; }
+.ch-price { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 3px -6px; }   /* row 2 starts at y=31, below the Analyze pill (bottom y=29) */
 .ch-px { font-size: 22px; font-weight: 700; letter-spacing: -.4px; line-height: 26px; color: var(--text-primary); }
 .ch-pchg { font-size: 13px; font-weight: 510; }
-.ch-l2 { display: flex; gap: 7px; color: var(--text-secondary); }
+.ch-l2 { display: flex; gap: 7px; color: var(--text-secondary); font-size: 11px; }
+.ch-l1.one-line .ch-l2 { font-size: 12px; }
 .ch-l2 b { font-weight: 510; }
 .ch-l2 .v { color: var(--text-primary); font-weight: 510; }
 .ch-l3 { display: flex; align-items: center; gap: 6px; margin-top: 2px; color: var(--text-secondary-2); font-size: 11px; font-weight: 510; }
 .ch-l3 .vol-v { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .ch-l3::before { content: ""; width: 2px; height: 12px; border-radius: 1px; background: var(--gray-1); }
 
-.reset-btn {
-  position: absolute; right: 10px; bottom: 6px;
-  width: 32px; height: 32px; border-radius: 50%;
+/* "Back to latest bar" (TradingView style): over the volume pane, just left of the price axis;
+   only visible while the view is scrolled away from the latest bar */
+.latest-btn {
+  position: absolute; right: 70px; bottom: 38px;
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--bg-primary); border: 1px solid var(--divider);
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--icon-primary); z-index: 3;
+  opacity: 0; pointer-events: none;
+  transition: opacity .15s ease, transform .15s, background .15s;
+}
+.latest-btn.show { opacity: 1; pointer-events: auto; }
+.chart-module.settings-open .latest-btn { opacity: 0; pointer-events: none; }   /* keep clear of the settings popover */
+.latest-btn:active { transform: scale(.94); background: var(--bg-secondary); }
+.latest-btn svg { width: 22px; height: 22px; }
+.gear-btn {
+  position: absolute; right: 10px; bottom: 28px;
+  width: 28px; height: 28px; border-radius: 50%;
   background: var(--bg-primary); border: .5px solid var(--divider);
   box-shadow: 0 1px 3px rgba(0,0,0,.08);
   display: flex; align-items: center; justify-content: center;
-  color: var(--icon-primary); z-index: 3;
-  transition: transform .15s, background .15s;
+  color: var(--icon-secondary); z-index: 3;
 }
-.reset-btn:active { transform: scale(.94); background: var(--bg-secondary); }
-.reset-btn svg { width: 18px; height: 18px; }
+.gear-btn::after { content: ""; position: absolute; inset: -8px; }   /* 44pt hit area */
+.gear-btn:active { background: var(--bg-secondary); }
+.gear-btn svg { width: 18px; height: 18px; }
+/* popover cards (settings, event details) - normal light app UI */
+.pop {
+  position: absolute; z-index: 6; width: 260px;
+  background: var(--bg-primary); border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.16), 0 0 0 .5px var(--divider);
+  padding: 10px 0 8px;
+  opacity: 0; transform: translateY(6px) scale(.97); transform-origin: bottom right;
+  pointer-events: none; transition: opacity .16s var(--ease-ios), transform .2s var(--ease-spring);
+}
+.pop.open { opacity: 1; transform: none; pointer-events: auto; }
+.pop-head { font-size: 11px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--text-secondary); padding: 2px 14px 6px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; padding: 0 14px; }   /* one cell height for every row, single-line rows centred */
+.set-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.set-label { font-size: 14px; font-weight: 400; color: var(--text-primary); }
+.set-sub { font-size: 11px; color: var(--text-secondary); }
+.sw { width: 40px; height: 24px; border-radius: 12px; background: var(--gray-4); position: relative; flex-shrink: 0; transition: background .2s; }
+.sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #FFF; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s var(--ease-ios); }
+.sw.on { background: var(--accent-orange); }
+.sw.on::after { transform: translateX(16px); }
+.settings-pop { right: 10px; bottom: 62px; }
+.set-div { height: .5px; background: var(--divider); margin: 4px 0; }
+.set-row.set-action .set-label { color: var(--text-primary); }
+.set-row.set-action svg { width: 14px; height: 14px; color: var(--text-secondary); }
+/* event badges on the x-axis */
+.chart-svg .ev circle { stroke: var(--bg-primary); stroke-width: 1.5; }
+.chart-svg .ev.E circle { fill: var(--orange); }
+.chart-svg .ev.D circle { fill: var(--dark-blue); }
+.chart-svg .ev text { fill: #FFF; font-size: 10px; font-weight: 700; font-family: var(--font); pointer-events: none; }
+.chart-svg .ev rect { fill: transparent; pointer-events: all; }
+.ev-card { transform-origin: bottom center; padding: 12px 0 10px; }
+.ev-card .ev-title { display: flex; align-items: center; gap: 8px; padding: 0 14px 8px; font-size: 15px; font-weight: 600; }
+.ev-dot { width: 18px; height: 18px; border-radius: 50%; color: #FFF; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.ev-dot.E { background: var(--orange); }
+.ev-dot.D { background: var(--dark-blue); }
+.ev-row { display: flex; justify-content: space-between; padding: 5px 14px; font-size: 13px; color: var(--text-secondary); }
+.ev-row b { font-weight: 510; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.ev-row b.down { color: var(--price-down); }
+.ev-row b.up { color: var(--price-up); }
+.ev-div { height: .5px; background: var(--divider); margin: 6px 14px; }
+.ev-sub { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--text-secondary); padding: 2px 14px 2px; }
+.ev-btn { display: block; width: calc(100% - 28px); margin: 8px 14px 0; height: 38px; border-radius: 10px; background: var(--bg-secondary); font-size: 13px; font-weight: 510; color: var(--text-primary); }
+.ev-btn:active { opacity: .7; }
+.chart-svg .countdown text { fill: var(--text-secondary); font-size: 10px; font-variant-numeric: tabular-nums; font-family: var(--font); }
+
+/* Create alert pill - attached to the crosshair price tag while the long-press crosshair is frozen */
+.alert-pill {
+  position: absolute; right: 3px; top: 0;
+  height: 26px; padding: 0 10px 0 7px;
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: 13px; background: var(--icon-primary); color: #FFF;
+  font-size: 12px; font-weight: 600; letter-spacing: -.1px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  opacity: 0; transform: translateY(-6px) scale(.86); transform-origin: right top;
+  pointer-events: none; z-index: 4;
+  transition: opacity .18s var(--ease-ios), transform .26s var(--ease-spring);
+}
+.alert-pill.above { transform-origin: right bottom; transform: translateY(6px) scale(.86); }
+.alert-pill.show { opacity: 1; transform: none; pointer-events: auto; }
+.alert-pill:active { opacity: .82; }
+.alert-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
 
 /* ---------- 7. FULL-SCREEN LAYOUT ---------- */
 .chart-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -285,6 +486,11 @@ svg { display: block; }
   z-index: 41;
 }
 #phone.landscape .sheet { padding-bottom: 14px; }
+/* drawers keep a fixed height across tabs, categories and search: the body scrolls inside */
+.sheet.drawer.h-interval { height: min(560px, 94%); }
+.sheet.drawer.h-type { height: min(500px, 94%); }
+.sheet.drawer.h-draw { height: min(690px, 94%); }
+.sheet.drawer .sheet-body { flex: 1; }
 .sheet.open { transform: translateY(0); }
 .sheet-grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--gray-3); margin: 0 auto 10px; flex-shrink: 0; }
 .sheet-title { font-size: 17px; font-weight: 510; letter-spacing: -.4px; text-align: center; padding: 0 16px 6px; flex-shrink: 0; }
@@ -308,8 +514,54 @@ svg { display: block; }
 .row .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 22px; height: 22px; border-radius: 50%; background: #FFF; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s var(--ease-ios); }
 .row .toggle.on { background: var(--green-up); }
 .row .toggle.on::after { transform: translateX(18px); }
-.sheet-cancel { margin: 10px var(--margin) 0; height: 50px; border-radius: 6px; background: var(--glass); font-size: 17px; font-weight: 510; letter-spacing: -.4px; flex-shrink: 0; }
-.sheet-cancel:active { opacity: .7; }
+.sheet-x { position: absolute; top: 12px; left: 12px; width: 30px; height: 30px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--icon-primary); z-index: 1; }   /* every sheet: X top-left */
+.sheet-x::after { content: ""; position: absolute; inset: -7px; }   /* 44pt hit area */
+.sheet-x svg { width: 14px; height: 14px; }
+.sheet-actions { position: absolute; top: 9px; right: 10px; display: flex; align-items: center; gap: 2px; z-index: 1; }
+.sheet-actions .tb-btn { height: 36px; min-width: 36px; }
+.sheet-title { padding: 0 52px 6px; }
+.sheet.share-sheet .sheet-x { top: 14px; background: rgba(120,120,128,.16); }
+.sheet.drawer { padding-bottom: var(--home-h); }
+.sheet-title.has-seg { padding: 0 52px 8px; }
+.sheet.drawer.h-layouts { height: min(560px, 94%); }
+.sheet.drawer.h-manage { height: 94%; }
+/* native "Create New Alert" drawer mock */
+.sheet.drawer.h-alert { height: min(560px, 94%); }
+.sheet.h-alert .sheet-title { font-size: 20px; font-weight: 600; letter-spacing: -.4px; padding-bottom: 12px; }
+.alert-cards { display: flex; flex-direction: column; gap: 12px; padding: 4px var(--margin) 12px; }
+.alert-card { display: flex; align-items: center; gap: 14px; background: #F7F7F8; border-radius: 14px; padding: 16px; text-align: left; transition: background .15s; }
+.alert-card:active { background: var(--bg-secondary); }
+.alert-ico { width: 28px; height: 28px; flex-shrink: 0; color: var(--text-primary); }
+.alert-ico svg { width: 28px; height: 28px; }
+.alert-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.alert-title { font-size: 17px; font-weight: 600; letter-spacing: -.3px; color: var(--text-primary); }
+.alert-sub { font-size: 15px; line-height: 20px; color: var(--text-secondary); white-space: normal; }
+.alert-card .chev { width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0; }
+.seg { display: flex; padding: 2px; background: var(--bg-secondary); border-radius: 9px; }
+.seg-opt { flex: 1; height: 32px; border-radius: 7px; font-size: 13px; font-weight: 510; letter-spacing: -.1px; color: var(--text-primary); }
+.seg-opt { position: relative; }
+.seg-opt::after { content: ""; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px; }   /* 44pt hit area */
+.seg-opt.active { background: var(--bg-primary); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.iv-title { font-size: 12px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--text-secondary); padding: 10px var(--margin) 8px; }
+.iv-row { display: flex; gap: 8px; overflow-x: auto; padding: 0 var(--margin) 12px; scrollbar-width: none; }
+.iv-row::-webkit-scrollbar { display: none; }
+.iv-chip { flex-shrink: 0; height: 44px; min-width: 54px; padding: 0 16px; border-radius: 12px; background: var(--bg-secondary); font-size: 15px; font-weight: 510; color: var(--text-primary); transition: background .15s; }
+.iv-chip.active { background: var(--text-primary); color: var(--bg-primary); }
+.iv-chip.disabled { opacity: .35; }
+.iv-div { height: .5px; background: var(--divider); margin: 0 var(--margin); }
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 4px var(--margin) 12px; }
+.tcard { background: var(--bg-primary); border: 1px solid var(--divider); border-radius: 12px; min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; text-align: center; transition: background .15s; }
+.tcard:active { background: var(--bg-tertiary); }
+.tcard.sel { border: 2px solid var(--price-up); padding: 9px 5px; }
+.tcard-ico svg { width: 28px; height: 28px; color: var(--icon-primary); display: block; }
+.tcard-label { font-size: 15px; font-weight: 510; line-height: 18px; }
+.tcard-label.sm { font-size: 14px; font-weight: 400; line-height: 16px; }
+.search-field.input input { flex: 1; min-width: 0; background: transparent; border: 0; font: inherit; color: var(--text-primary); outline: none; -webkit-appearance: none; appearance: none; }
+.search-field.input input::placeholder { color: var(--text-secondary); }
+.cat-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px var(--margin) 10px; scrollbar-width: none; }
+.cat-row::-webkit-scrollbar { display: none; }
+.cat-row .chip { flex-shrink: 0; }
+.empty { grid-column: 1 / -1; text-align: center; color: var(--text-secondary); font-size: 14px; padding: 24px 0; }
 .search-field {
   margin: 4px var(--margin) 8px; height: 36px; border-radius: 10px;
   background: var(--bg-secondary); display: flex; align-items: center; gap: 6px; padding: 0 10px;
@@ -323,6 +575,8 @@ svg { display: block; }
   font-size: 14px; font-weight: 510; color: var(--text-primary);
   transition: background .15s;
 }
+.chip { position: relative; }
+.chip::after { content: ""; position: absolute; left: 0; right: 0; top: -5px; bottom: -5px; }   /* 44pt hit area */
 .chip.active { background: var(--text-primary); color: var(--bg-primary); border-color: transparent; }
 .chip:active { opacity: .8; }
 .ai-body { padding: 4px var(--margin) 8px; font-size: 14px; line-height: 20px; }
@@ -333,6 +587,39 @@ svg { display: block; }
   background: linear-gradient(90deg, rgba(128,128,128,.10) 25%, rgba(128,128,128,.20) 37%, rgba(128,128,128,.10) 63%);
   background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
 @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+/* ---------- 12b. SHARE SHEET (iOS style) ---------- */
+.share-sheet {
+  background: rgba(242,242,247,.94); -webkit-backdrop-filter: blur(24px) saturate(1.6); backdrop-filter: blur(24px) saturate(1.6);
+  border-radius: 24px 24px 0 0; padding: 8px 0 var(--home-h); max-height: 94%; overflow-y: auto; scrollbar-width: none;
+  transition: transform .34s var(--ease-ios);
+}
+.share-sheet::-webkit-scrollbar { display: none; }
+.share-sheet.dragging { transition: none; }
+.sh-top { display: flex; align-items: center; gap: 12px; padding: 4px 16px 12px; }
+.sh-thumb { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--gray-4); flex-shrink: 0; box-shadow: 0 0 0 .5px var(--divider); }
+.sh-meta { min-width: 0; flex: 1; }
+.sh-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sh-sub { font-size: 13px; color: var(--text-secondary); margin: 1px 0 6px; }
+.sh-options { height: 26px; padding: 0 10px; border-radius: 13px; background: rgba(120,120,128,.16); font-size: 13px; font-weight: 510; display: inline-flex; align-items: center; gap: 3px; }
+.sh-options svg { width: 11px; height: 11px; color: var(--text-secondary); }
+.sh-div { height: .5px; background: rgba(60,60,67,.2); margin: 0 16px; }
+.sh-row { display: flex; gap: 14px; padding: 14px 16px; overflow-x: auto; scrollbar-width: none; }
+.sh-row::-webkit-scrollbar { display: none; }
+.sh-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 64px; flex-shrink: 0; }
+.sh-label { font-size: 11px; color: var(--text-primary); text-align: center; line-height: 13px; max-height: 26px; overflow: hidden; }
+.sh-avatar { width: 60px; height: 60px; border-radius: 50%; background: #C7C7CC; color: #FFF; font-size: 22px; font-weight: 600; display: flex; align-items: center; justify-content: center; position: relative; }
+.sh-badge { position: absolute; right: -3px; bottom: -3px; width: 24px; height: 24px; border-radius: 7px; border: 2px solid #F2F2F7; display: flex; align-items: center; justify-content: center; }
+.sh-badge svg, .sh-app svg { width: 60%; height: 60%; }
+.sh-app { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.airdrop { background: radial-gradient(circle at 50% 45%, #6FB3FF 0, #1E6EF4 60%, #0F4FCC 100%); color: #FFF; }
+.messages { background: linear-gradient(#5AF777, #34C759); color: #FFF; }
+.mail { background: linear-gradient(#5DB3FF, #1E6EF4); color: #FFF; }
+.telegram { background: #2AABEE; color: #FFF; }
+.notesapp { background: linear-gradient(#FFF3B0 0 30%, #FFFFFF 30%); color: #FFB300; }
+.sh-action { width: 60px; height: 60px; border-radius: 50%; background: rgba(120,120,128,.14); color: var(--text-primary); display: flex; align-items: center; justify-content: center; }
+.sh-action svg { width: 26px; height: 26px; }
+.sh-item:active .sh-app, .sh-item:active .sh-action, .sh-item:active .sh-avatar { opacity: .7; }
 
 /* ---------- 13. TOAST ---------- */
 #toast {
@@ -426,10 +713,20 @@ svg { display: block; }
       <div class="backdrop" id="backdrop" onclick="closeOverlays()"></div>
       <div class="sheet" id="sheet">
         <div class="sheet-grabber"></div>
+        <button class="sheet-x" onclick="closeOverlays()" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
         <div class="sheet-title" id="sheetTitle"></div>
+        <div class="sheet-actions" id="sheetActions"></div>
         <div class="sheet-body" id="sheetBody"></div>
-        <button class="sheet-cancel" onclick="closeOverlays()">Cancel</button>
       </div>
+      <div class="modal-scrim" id="nameScrim">
+        <div class="modal" role="dialog" aria-labelledby="nameTitle">
+          <div class="modal-title" id="nameTitle">Layout Name</div>
+          <div class="modal-sub">Give this layout a name so you can find it again.</div>
+          <input class="modal-input" id="nameInput" type="text" placeholder="Layout name" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="40">
+          <div class="modal-btns"><button class="btn-secondary" id="nameCancel">Cancel</button><button class="btn-primary" id="nameSave" disabled>Save layout</button></div>
+        </div>
+      </div>
+      <div class="sheet share-sheet" id="shareSheet"></div>
 
     </div>
   </div>
@@ -465,9 +762,11 @@ svg { display: block; }
 
 <script>
 /* ============================================================
-   DATA - SNDK daily bars, Jul 24 to Sep 23 2026 (43 sessions)
+   DATA - SNDK daily bars, Jul 24 to Sep 23 2026 (43 real sessions)
    [month, day, open, high, low, close, volume(M)]
    Last close 1,553.50; prev close 1,633.35 -> -79.85 (-4.89%)
+   Earlier history (120 sessions back to Jan 30 2026) is generated
+   deterministically so the chart has room to pan.
    ============================================================ */
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const RAW = [
@@ -515,7 +814,43 @@ const RAW = [
   [8,22, 1620.00,1660.00,1605.00,1633.35, 5.7],
   [8,23, 1518.00,1575.00,1508.00,1553.50, 9.4]
 ];
-const BARS = RAW.map(r => ({ date: MON[r[0]] + ' ' + r[1], o: r[2], h: r[3], l: r[4], c: r[5], v: r[6] }));
+const REAL = RAW.map(r => ({ date: MON[r[0]] + ' ' + r[1], o: r[2], h: r[3], l: r[4], c: r[5], v: r[6] }));
+
+/* Seeded random walk backwards from the first real open. Weekdays only, US market holidays skipped,
+   mild forward drift (so earlier prices sit lower, like the run-up into July) and a soft anchor
+   around 1,350 so the walk never wanders off to silly levels. Same bar schema as REAL. */
+function seededRng(seed) {
+  return function () {
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function genHistory(count) {
+  const rnd = seededRng(20260724);
+  const gauss = () => { let u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const HOL = ['2026-07-03', '2026-06-19', '2026-05-25', '2026-04-03', '2026-02-16', '2026-01-19'];
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const r2 = x => Math.round(x * 100) / 100;
+  const out = [];
+  const d = new Date(2026, RAW[0][0], RAW[0][1]);
+  let nextOpen = RAW[0][2];
+  while (out.length < count) {
+    d.setDate(d.getDate() - 1);
+    if (d.getDay() === 0 || d.getDay() === 6 || HOL.includes(iso(d))) continue;
+    const c = nextOpen / (1 + gauss() * 0.006);
+    const ret = 0.0025 + gauss() * 0.022 + (c - 1350) / 1350 * 0.01;
+    const o = c / (1 + ret);
+    const h = Math.max(o, c) * (1 + Math.abs(gauss()) * 0.011 + 0.002);
+    const l = Math.min(o, c) * (1 - Math.abs(gauss()) * 0.011 - 0.002);
+    const v = 3.5 + Math.abs(ret) * 180 + Math.abs(gauss()) * 1.5;
+    out.unshift({ date: MON[d.getMonth()] + ' ' + d.getDate(), o: r2(o), h: r2(h), l: r2(l), c: r2(c), v: Math.round(v * 10) / 10 });
+    nextOpen = o;
+  }
+  return out;
+}
+const BARS = genHistory(120).concat(REAL);
 const LAST = BARS[BARS.length - 1];
 const PREV = BARS[BARS.length - 2];
 
@@ -523,15 +858,85 @@ const state = {
   orientation: 'portrait',
   interval: '1D',
   type: 'candles',
-  range: '3M',
+  range: null,            /* a date range is "selected" only after picking it in the drawer; pinch zoom clears it */
+  tool: null,             /* active drawing tool */
+  settings: { extended: true, events: true, log: false, invert: false, countdown: false },
+  compare: [],            /* [{ sym, ci }] up to 5, ci = palette slot */
+  cmpMode: '%',           /* '%' rebased percent view, '$' shared price axis */
   indicators: { 'Volume': true }
 };
+const MIN_BARS = 12;
+
+/* Calendar events shown as badges on the date axis (real sessions only) */
+const EVENTS = [
+  { date: 'Aug 17', type: 'E', title: 'Earnings', rows: [['Date', 'Aug 17, 2026']], sub: 'Actual', detail: [['EPS', '-0.08', 'down'], ['Revenue', '93.94M', '']], cta: 'View all SNDK earnings' },
+  { date: 'Jul 30', type: 'D', title: 'Dividend', rows: [['Date', 'Jul 30, 2026'], ['Amount', '0.15'], ['Ex-date', 'Jul 30, 2026']], sub: '', detail: [], cta: 'View all SNDK dividends' }
+].map(ev => ({ ...ev, i: BARS.findIndex((b, k) => k >= 120 && b.date === ev.date) })).filter(ev => ev.i >= 0);
+
+/* Symbol logo placeholders: brand colour + initial (or a line glyph for indices). Hex values mirror the DS tokens
+   so the same colours can be painted on the screenshot canvas. */
+const SYMBOL_LOGOS = {
+  SNDK:  { color: '#E11B22', text: 'S' },
+  WDC:   { color: '#3C5C99', text: 'W' },
+  MU:    { color: '#3372F6', text: 'M' },
+  STX:   { color: '#008932', text: 'S' },
+  NVDA:  { color: '#008932', text: 'N' },
+  AAPL:  { color: '#0D1016', text: 'A' },
+  TSLA:  { color: '#E9152D', text: 'T' },
+  MSFT:  { color: '#3372F6', text: 'M' },
+  AMZN:  { color: '#F5822A', text: 'a' },
+  META:  { color: '#1E6EF4', text: 'M' },
+  GOOGL: { color: '#3372F6', text: 'G' },
+  SPX:   { color: '#3C5C99', glyph: true },
+  SOX:   { color: '#3C5C99', glyph: true }
+};
+const SYMBOLS = {
+  SNDK: 'SanDisk Corp', WDC: 'Western Digital Corp', MU: 'Micron Technology Inc', STX: 'Seagate Technology Holdings',
+  NVDA: 'NVIDIA Corp', AAPL: 'Apple Inc', TSLA: 'Tesla Inc', MSFT: 'Microsoft Corp', AMZN: 'Amazon.com Inc', META: 'Meta Platforms Inc', GOOGL: 'Alphabet Inc',
+  SPX: 'S&amp;P 500', SOX: 'PHLX Semiconductor Index'
+};
+/* Compared instruments: deterministic close series over the same 163-session calendar */
+const CMP_LEVELS = { AAPL: [340, 0.014], NVDA: [190, 0.024], TSLA: [410, 0.03], MSFT: [520, 0.012], AMZN: [230, 0.016], META: [740, 0.018], GOOGL: [250, 0.015], WDC: [90, 0.022], MU: [180, 0.026], STX: [150, 0.02], SPX: [7700, 0.008], SOX: [5900, 0.016] };
+const CMP_SERIES = {};
+function cmpSeries(sym) {
+  if (CMP_SERIES[sym]) return CMP_SERIES[sym];
+  const [level, vol] = CMP_LEVELS[sym] || [100, 0.015];
+  let seed = 7; for (const ch of sym) seed = seed * 31 + ch.charCodeAt(0);
+  const rnd = seededRng(seed | 0);
+  const gauss = () => { let u = 0, v = 0; while (!u) u = rnd(); while (!v) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const n = BARS.length, out = new Array(n);
+  let p = level * (1 + (gauss() * 0.04));
+  for (let i = 0; i < n; i++) { p = p * (1 + gauss() * vol + (level - p) / level * 0.004); out[i] = Math.round(p * 100) / 100; }
+  /* land near the nominal level on the latest bar so the tag reads like the reference */
+  const k = level / out[n - 1]; for (let i = 0; i < n; i++) out[i] = Math.round(out[i] * k * 100) / 100;
+  CMP_SERIES[sym] = out; return out;
+}
+const CMP_MAX = 5;
+function fmtPct(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
+const SYMBOL_SECTIONS = [['Recent', ['SNDK', 'WDC', 'MU', 'STX']], ['Popular', ['NVDA', 'AAPL', 'TSLA', 'MSFT', 'AMZN', 'META', 'GOOGL']], ['Indices', ['SPX', 'SOX']]];
+function logoHTML(t, size) {
+  const l = SYMBOL_LOGOS[t] || { color: '#8C8C8C', text: t[0] };
+  return `<span class="sym-logo" style="width:${size}px;height:${size}px;font-size:${Math.round(size * .55)}px;background:${l.color}">${l.glyph ? ICO.spark : l.text}</span>`;
+}
+
+/* Heikin Ashi series derived from the daily bars */
+const HA = (() => {
+  const out = [];
+  BARS.forEach((b, i) => {
+    const c = (b.o + b.h + b.l + b.c) / 4;
+    const o = i ? (out[i - 1].o + out[i - 1].c) / 2 : (b.o + b.c) / 2;
+    out.push({ date: b.date, o, h: Math.max(b.h, o, c), l: Math.min(b.l, o, c), c, v: b.v });
+  });
+  return out;
+})();
 
 /* ============================================================
    HELPERS
    ============================================================ */
 function fmt(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function fmtVol(v) { return v.toFixed(1) + 'M'; }
+function chgText() { const d = LAST.c - PREV.c, p = d / PREV.c * 100; return (d >= 0 ? '+' : '-') + fmt(Math.abs(d)) + ' (' + (p >= 0 ? '+' : '') + p.toFixed(2) + '%)'; }
+function chgCls() { return LAST.c >= PREV.c ? 'up' : 'down'; }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function r(v) { return Math.round(v); }
 function niceStep(raw) {
@@ -541,12 +946,17 @@ function niceStep(raw) {
   return s * p;
 }
 let toastTimer;
-function toast(msg) {
+function toast(msg, action) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  if (action) {
+    const b = document.createElement('button'); b.className = 'toast-act'; b.textContent = action.label;
+    b.addEventListener('click', () => { action.fn(); t.classList.remove('show'); });
+    t.appendChild(b);
+  }
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), action ? 3500 : 1800);
 }
 
 /* ---- Icons (SF-Symbol-like, 24 viewBox, stroke 1.7) ---- */
@@ -557,7 +967,15 @@ const ICO = {
   candle:   `<svg viewBox="0 0 24 24" ${S}><path d="M7 3v4M7 17v4M17 2v3M17 15v7"/><rect x="4.5" y="7" width="5" height="10" rx="1"/><rect x="14.5" y="5" width="5" height="10" rx="1"/></svg>`,
   layers:   `<svg viewBox="0 0 24 24" ${S}><path d="m12 3 9 4.8-9 4.8-9-4.8L12 3Z"/><path d="m3 12.4 9 4.8 9-4.8"/><path d="m3 16.8 9 4.8 9-4.8"/></svg>`,
   folder:   `<svg viewBox="0 0 24 24" ${S}><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.6l2.2 2.4h7.2A2.5 2.5 0 0 1 21 9.9v6.6a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 16.5v-9Z"/></svg>`,
-  dots:     `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="18.5" cy="12" r="1.9"/></svg>`,
+  bell:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 16v-6a5.5 5.5 0 0 1 11 0v6l1.7 2.3H3.8L5.5 16Z"/><path d="M9 20.5a2 2 0 0 0 4 0"/><circle cx="19" cy="19" r="4.2" fill="var(--bg-primary)" stroke="none"/><path d="M19 16v6M16 19h6"/></svg>`,   /* bell-plus: 6px plus just outside the bottom-right of the skirt */
+  floppy:   `<svg viewBox="0 0 24 24" ${S}><path d="M5 4h11l3 3v13H5V4Z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>`,
+  dotsH:    `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="18.5" cy="12" r="1.9"/></svg>`,
+  plusSm:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  dup:      `<svg viewBox="0 0 24 24" ${S}><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg>`,
+  camera:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5A2 2 0 0 1 6 6.5h2.2l1.3-2h5l1.3 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9Z"/><circle cx="12" cy="12.5" r="3.4"/></svg>`,
+  chevSm:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>`,
+  spark:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-6 4 4 4-7 5 3"/></svg>`,
+  bellPlus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 16.5v-6a5.5 5.5 0 0 1 11 0v6l1.7 2.3H4.8l1.7-2.3Z"/><path d="M10 21a2 2 0 0 0 4 0"/><path d="M12 8.6v5M9.5 11.1h5"/></svg>`,
   bars:     `<svg viewBox="0 0 24 24" ${S}><rect x="3.5" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="16.5" y="3" width="4" height="18" rx="1"/></svg>`,
   pencil:   `<svg viewBox="0 0 24 24" ${S}><path d="M4 20h3.8L19 8.8a2.2 2.2 0 0 0-3.1-3.1L4.7 16.9 4 20Z"/><path d="m14.2 7.4 3.1 3.1"/></svg>`,
   calendar: `<svg viewBox="0 0 24 24" ${S}><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
@@ -576,48 +994,50 @@ const ICO = {
   rect:     `<svg viewBox="0 0 24 24" ${S}><rect x="4" y="6" width="16" height="12" rx="1"/></svg>`,
   text:     `<svg viewBox="0 0 24 24" ${S}><path d="M5 6h14M12 6v13M9 19h6"/></svg>`,
   trash:    `<svg viewBox="0 0 24 24" ${S}><path d="M4 7h16M9 7V4.5h6V7M6.5 7l.8 12.5h9.4L17.5 7"/></svg>`,
-  share:    `<svg viewBox="0 0 24 24" ${S}><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8.5h12V11"/></svg>`,
-  gear:     `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>`,
-  compare:  `<svg viewBox="0 0 24 24" ${S}><path d="M3 15l4-5 4 3 5-8 5 4"/><path d="M3 19l4-3 4 2 5-5 5 2" stroke-dasharray="2.5 2.5"/></svg>`,
-  reset:    `<svg viewBox="0 0 24 24" ${S}><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/></svg>`,
-  save:     `<svg viewBox="0 0 24 24" ${S}><path d="M5 4h11l3 3v13H5V4Z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>`,
-  clock:    `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`
+  clock:    `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
+  plus:     `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>`,
+  cog:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M22.06 10.32 L22.06 13.68 L19.41 13.71 L18.45 16.03 L20.30 17.92 L17.92 20.30 L16.03 18.45 L13.71 19.41 L13.68 22.06 L10.32 22.06 L10.29 19.41 L7.97 18.45 L6.08 20.30 L3.70 17.92 L5.55 16.03 L4.59 13.71 L1.94 13.68 L1.94 10.32 L4.59 10.29 L5.55 7.97 L3.70 6.08 L6.08 3.70 L7.97 5.55 L10.29 4.59 L10.32 1.94 L13.68 1.94 L13.71 4.59 L16.03 5.55 L17.92 3.70 L20.30 6.08 L18.45 7.97 L19.41 10.29 Z"/><circle cx="12" cy="12" r="3.2"/></svg>`,
+  chevrons: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 6 6 6-6 6M13 6l6 6-6 6"/></svg>`,
+  baseline: `<svg viewBox="0 0 24 24" ${S}><path d="M3 12h18" stroke-dasharray="2.5 2.5"/><path d="M3 16l4-5 4 3 4-8 6 4" stroke-dasharray="1 2.4" stroke-width="2"/></svg>`,
+  heikin:   `<svg viewBox="0 0 24 24" ${S}><path d="M7 3v4M7 17v4M17 2v3M17 15v7"/><rect x="4.5" y="7" width="5" height="10" rx="1" fill="currentColor"/><rect x="14.5" y="5" width="5" height="10" rx="1"/></svg>`,
+  renko:    `<svg viewBox="0 0 24 24" ${S}><rect x="3" y="15" width="5" height="5"/><rect x="7.5" y="10.5" width="5" height="5"/><rect x="12" y="6" width="5" height="5"/><rect x="16.5" y="1.5" width="5" height="5"/></svg>`,
+  lbreak:   `<svg viewBox="0 0 24 24" ${S}><rect x="3" y="11" width="4" height="9"/><rect x="8.5" y="7" width="4" height="9" fill="currentColor"/><rect x="14" y="4" width="4" height="9"/><rect x="19.5" y="8" width="2" height="9"/></svg>`,
+  kagi:     `<svg viewBox="0 0 24 24" ${S}><path d="M3 20V10h5v9h5V5" stroke-width="2.4"/><path d="M13 5v11h5V8h3" stroke-width="1.1"/></svg>`,
+  pnf:      `<svg viewBox="0 0 24 24" ${S}><path d="m4 14 4 4M8 14l-4 4M4 8l4 4M8 8l-4 4"/><circle cx="13" cy="10" r="1.9"/><circle cx="13" cy="15" r="1.9"/><path d="m17 6 4 4M21 6l-4 4M17 11l4 4M21 11l-4 4"/></svg>`
 };
 
 /* ============================================================
    CHART MODULE MARKUP (shared by portrait + landscape)
    ============================================================ */
 function chartModuleHTML(id, land) {
-  const symbolGroup =
-    `<button class="sym-pill" data-act="symbol">${ICO.search}<span>SNDK</span>${ICO.chev}</button>` +
-    `<span class="tb-div"></span>` +
-    `<button class="tb-btn tb-text" data-act="interval"><span class="interval-label">${state.interval}</span>${ICO.chev}</button>` +
-    `<span class="tb-div"></span>` +
-    `<button class="tb-btn" data-act="type"><span class="type-icon">${ICO.candle}</span>${ICO.chev}</button>` +
-    `<span class="tb-div"></span>`;
-  const compareBtn   = `<button class="tb-btn" data-act="compare" aria-label="Compare">${ICO.bars}</button>`;
-  const layersBtn    = `<button class="tb-btn" data-act="indicators" aria-label="Indicators">${ICO.layers}</button>`;
-  const pencilBtn    = `<button class="tb-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}</button>`;
-  const rangeBtn     = `<button class="tb-btn tb-text" data-act="range">${ICO.calendar}<span class="range-label">Date range</span>${ICO.chev}</button>`;
-  const folderBtn    = `<button class="tb-btn" data-act="templates" aria-label="Templates">${ICO.folder}</button>`;
-  const moreBtn      = `<button class="tb-btn" data-act="more" aria-label="More">${ICO.dots}</button>`;
-  const exitBtn      = `<button class="tb-btn" data-act="exitfs" aria-label="Close full-screen chart">${ICO.compress}</button>`;
-  const aiPill       = `<button class="ai-pill compact" data-act="analyze"><span class="ai-badge">${ICO.sparkle}AI</span>Analyze</button>`;
+  /* Portrait: top bar = [SNDK][+] | (empty centre) | [bell | separator | save][layouts][camera]; bottom bar = [interval][type][pencil][layers][close].
+     Landscape merges both into one bar in that order. */
+  const plusBtn   = `<button class="tb-btn" data-act="add" aria-label="Add symbol">${ICO.plus}</button>`;
+  const bellBtn   = `<button class="tb-btn" data-act="alert" aria-label="Create alert">${ICO.bell}</button><span class="tb-sep"></span>`;
+  const saveBtn   = `<button class="tb-btn save-btn" data-act="save-layout" aria-label="Save layout">${ICO.floppy}<span class="save-dot"></span></button>`;
+  const folderBtn = `<button class="tb-btn layout-btn" data-act="layouts" aria-label="Layouts">${ICO.folder}<span class="layout-name"></span>${ICO.chev}</button>`;
+  const cameraBtn = `<button class="tb-btn" data-act="camera" aria-label="Share a screenshot">${ICO.camera}</button>`;
+  const symBtn    = `<button class="tb-btn tb-text tb-sym" data-act="symbol">SNDK</button>`;
+  const ivBtn     = `<button class="tb-btn tb-text" data-act="interval" aria-label="Interval and date range"><span class="interval-label">${state.interval}</span></button>`;
+  const typeBtn   = `<button class="tb-btn" data-act="type" aria-label="Chart type"><span class="type-icon">${ICO.candle}</span></button>`;
+  const pencilBtn = `<button class="tb-btn pencil-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}</button>`;
+  const layersBtn = `<button class="tb-btn" data-act="layers" aria-label="Layers">${ICO.layers}</button>`;
+  const exitBtn   = `<button class="tb-btn" data-act="exitfs" aria-label="Close full screen">${ICO.compress}</button>`;
+  const div       = `<span class="tb-div"></span>`;
 
-  /* Landscape: one merged toolbar (web wide layout), no bottom bar, one-line header.
-     Portrait: web narrow split - top toolbar + bottom toolbar, stacked header. */
   const topBar = land
-    ? `<div class="chart-toolbar top">${symbolGroup}${compareBtn}${layersBtn}${pencilBtn}${rangeBtn}<div class="tb-spacer"></div>${aiPill}${folderBtn}${exitBtn}${moreBtn}</div>`
-    : `<div class="chart-toolbar top">${symbolGroup}${layersBtn}${folderBtn}${moreBtn}</div>`;
+    ? `<div class="chart-toolbar top">${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}${exitBtn}</div>`
+    : `<div class="chart-toolbar top three"><div class="tb-l">${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div></div>`;
   const bottomBar = land ? '' :
-    `<div class="chart-toolbar bottom">${compareBtn}${pencilBtn}${rangeBtn}<div class="tb-spacer"></div>${aiPill}${exitBtn}</div>`;
+    `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${layersBtn}${exitBtn}</div>`;
+  const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
   const header = land
-    ? `<div class="ch-l1 one-line"><span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline">${fmt(LAST.c)}</span><span class="ch-chg down">-79.85 (-4.89%)</span><span class="ch-int">&middot; ${state.interval}</span><span class="ch-l2 ohlc-line"></span></div>` +
-      `<div class="ch-l3">Vol <span class="vol-v vol-line"></span></div>`
-    : `<div class="ch-l1"><span class="ch-name">SanDisk Corporation</span><span class="ch-int">&middot; ${state.interval}</span></div>` +
-      `<div class="ch-price"><span class="ch-px">${fmt(LAST.c)}</span><span class="ch-pchg down">-79.85 (-4.89%)</span></div>` +
-      `<div class="ch-l2 ohlc-line"></div>` +
-      `<div class="ch-l3">Vol <span class="vol-v vol-line"></span></div>`;
+    ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span><span class="ch-l2 ohlc-line ch-detail"></span></div>` +
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>`
+    : `<div class="ch-l1 ch-main">${logo}<span class="ch-name">SanDisk Corporation</span></div>` +
+      `<div class="ch-price"><span class="ch-px live-px">${fmt(LAST.c)}</span><span class="ch-pchg live-chg ${chgCls()}">${chgText()}</span></div>` +
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ohlc-line ch-detail"></div>` +
+      `<div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>`;
 
   return `
   <div class="chart-module" id="${id}">
@@ -625,7 +1045,11 @@ function chartModuleHTML(id, land) {
     <div class="chart-area">
       <svg class="chart-svg" xmlns="http://www.w3.org/2000/svg"></svg>
       <div class="chart-head">${header}</div>
-      <button class="reset-btn" data-act="reset" aria-label="Scroll to latest">${ICO.target}</button>
+      <button class="latest-btn" data-act="latest" aria-label="Scroll to latest bar">${ICO.chevrons}</button>
+      <button class="gear-btn" data-act="settings" aria-label="Chart settings">${ICO.cog}</button>
+      <div class="pop settings-pop"></div>
+      <div class="pop ev-card"></div>
+      <div class="an-wrap"><button class="an-pill" data-act="analyze"><span class="an-badge">AI</span>Analyze Chart</button></div>
     </div>
     ${bottomBar}
   </div>`;
@@ -640,8 +1064,28 @@ function Chart(root, land) {
   this.svg = root.querySelector('.chart-svg');
   this.ohlcEl = root.querySelector('.ohlc-line');
   this.volEl = root.querySelector('.vol-line');
+  this.head = root.querySelector('.chart-head');
+  this.pxEl = root.querySelector('.live-px');
+  this.chgEl = root.querySelector('.live-chg');
+  this.settingsEl = root.querySelector('.settings-pop');
+  this.evCard = root.querySelector('.ev-card');
+  this.evOpen = null;
+  this.latestBtn = root.querySelector('.latest-btn');
+  this._anim = 0;
   this.hover = null;
+  this.frozen = false;      /* long-press crosshair left on screen after finger lift */
   this.first = true;
+  /* Visible window: `count` bars, `start` = absolute index of the left-most bar (fractional while panning). */
+  const count = land ? 56 : 30;
+  this.defaultCount = count;
+  this.view = { count, start: Math.max(0, BARS.length - count) };
+  /* Create alert pill lives in the DOM (not the SVG) so it is a real tap target above the chart. */
+  this.pill = document.createElement('button');
+  this.pill.className = 'alert-pill';
+  this.pill.setAttribute('aria-label', 'Create alert');
+  this.pill.innerHTML = ICO.bellPlus + '<span>Create alert</span>';
+  root.querySelector('.chart-area').appendChild(this.pill);
+  this.pill.addEventListener('click', e => { e.stopPropagation(); this.createAlert(); });
   this.bind();
   /* Redraw whenever the SVG's box changes (orientation switch, window resize, late layout). */
   if (window.ResizeObserver) {
@@ -660,96 +1104,268 @@ Chart.prototype.draw = function () {
   this.W = W; this.H = H;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  const AX = 64, XA = 24, HEAD = this.land ? 46 : 88;
+  const AX = 64, XA = 24, HEAD = this.land ? 20 : 40;   /* the plot runs up behind the translucent header */
   const plotW = W - AX;
   const plotBottom = H - XA;
-  const volH = Math.round((plotBottom - HEAD) * 0.17);
+  const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
+  const cmpData = cmp.map(c => ({ ci: c.ci, sym: c.sym, data: cmpSeries(c.sym) }));
+  const volH = Math.round((plotBottom - HEAD) * 0.17);   /* the volume pane stays in both compare views */
   const priceBottom = plotBottom - volH - 10;
-  const n = BARS.length;
-  const slot = plotW / (n + 1.6);
-  const xAt = i => slot * (i + 0.6);
+  const N = BARS.length;
+  const view = this.view;
+  view.count = Math.min(view.count, N);
+  view.start = clamp(view.start, 0, N - view.count);
+  const slot = plotW / (view.count + 1.6);
+  const xAt = i => slot * (i - view.start + 0.6);
+  const bw = Math.max(3, Math.round(slot * 0.62));
+  /* bars to draw: one extra on each side so a half-clipped candle still renders mid-pan */
+  const i0 = clamp(Math.floor(view.start) - 1, 0, N - 1);
+  const i1 = clamp(Math.ceil(view.start + view.count) + 1, 0, N - 1);
+  /* bars fully inside the plot (crosshair range) */
+  const vis0 = clamp(Math.ceil(view.start - 0.6), 0, N - 1);
+  const vis1 = clamp(Math.floor(view.start + view.count + 1), 0, N - 1);
 
+  /* y-scale from the bars actually inside the plot (Heikin Ashi draws its own derived series) */
+  const D = state.type === 'heikin' ? HA : BARS;
   let lo = Infinity, hi = -Infinity, vmax = 0;
-  BARS.forEach(b => { lo = Math.min(lo, b.l); hi = Math.max(hi, b.h); vmax = Math.max(vmax, b.v); });
+  /* percent view: every series rebased on its first visible bar */
+  const baseI = vis0;
+  const pctOf = (arr, i) => (arr[i] / arr[baseI] - 1) * 100;
+  const sndkC = D.map(b => b.c);
+  for (let i = i0; i <= i1; i++) {
+    const x = xAt(i); if (x < -bw / 2 || x > plotW + bw / 2) continue;
+    if (cmpPct) {
+      const p = pctOf(sndkC, i); lo = Math.min(lo, p); hi = Math.max(hi, p);
+      cmpData.forEach(c => { const q = pctOf(c.data, i); lo = Math.min(lo, q); hi = Math.max(hi, q); });
+    } else {
+      const b = D[i]; lo = Math.min(lo, b.l); hi = Math.max(hi, b.h); vmax = Math.max(vmax, b.v);
+      cmpData.forEach(c => { lo = Math.min(lo, c.data[i]); hi = Math.max(hi, c.data[i]); });   /* shared price axis */
+    }
+  }
+  if (!isFinite(lo)) { lo = cmpPct ? -1 : LAST.l; hi = cmpPct ? 1 : LAST.h; vmax = LAST.v; }
+  if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
   const pad = (hi - lo) * 0.05; lo -= pad; hi += pad;
-  const yAt = p => priceBottom - (p - lo) / (hi - lo) * (priceBottom - HEAD);
-  const pAt = y => lo + (priceBottom - y) / (priceBottom - HEAD) * (hi - lo);
-  this.geom = { AX, XA, plotW, plotBottom, slot, xAt, yAt, pAt, HEAD, priceBottom, n };
+  if (!cmpPct && lo < 0) lo = 0;   /* a shared price axis never dips below zero */
+  /* price <-> y, with optional logarithmic and inverted scale */
+  const S = state.settings, useLog = S.log && lo > 0 && !cmpPct;
+  const f = useLog ? Math.log : (v => v), fi = useLog ? Math.exp : (v => v);
+  const flo = f(lo), fhi = f(hi);
+  const yLin = p => priceBottom - (f(p) - flo) / (fhi - flo) * (priceBottom - HEAD);
+  const pLin = y => fi(flo + (priceBottom - y) / (priceBottom - HEAD) * (fhi - flo));
+  const yAt = S.invert ? (p => HEAD + priceBottom - yLin(p)) : yLin;
+  const pAt = S.invert ? (y => pLin(HEAD + priceBottom - y)) : pLin;
+  this.geom = { AX, XA, plotW, plotBottom, slot, xAt, yAt, pAt, HEAD, priceBottom, n: N, vis0, vis1, pct: cmpPct };
+
+  /* last price line + tag (only while the latest close is inside the visible price range) */
+  const yMin = 8, yMax = plotBottom - 4;
+  const ly = r(yAt(LAST.c)) + .5;
+  const showLast = !cmpPct && ly >= yMin + 6 && ly <= yMax - 6;
+
+  /* compare tags at the right axis: one per series at its last visible value, stacked apart */
+  const lastVis = Math.min(vis1, N - 1);
+  const tagItems = [];
+  if (cmp.length) {
+    if (cmpPct) tagItems.push({ color: 'var(--text-primary)', text: fmtPct(pctOf(sndkC, lastVis)), y: yAt(pctOf(sndkC, lastVis)) });
+    cmpData.forEach(c => { const v = cmpPct ? pctOf(c.data, lastVis) : c.data[lastVis]; tagItems.push({ color: `var(--cmp-${c.ci + 1})`, text: cmpPct ? fmtPct(v) : fmt(v), y: yAt(v) }); });
+    tagItems.sort((a, b) => a.y - b.y);
+    /* keep the stack below the chips row (it overlays the plot top) and inside the plot */
+    const cr = this.root.querySelector('.ch-cmprow'); const crB = cr && cr.offsetParent ? cr.getBoundingClientRect().bottom - svg.getBoundingClientRect().top : 0;
+    const minTagY = Math.max(yMin + 10, crB + 12);
+    for (let k = 0; k < tagItems.length; k++) { const lim = k ? tagItems[k - 1].y + 21 : minTagY; if (tagItems[k].y < lim) tagItems[k].y = lim; }
+    const maxY = plotBottom - 44;   /* above the gear / latest buttons in the bottom-right corner */
+    for (let k = tagItems.length - 1; k >= 0; k--) { const lim = k === tagItems.length - 1 ? maxY : tagItems[k + 1].y - 21; if (tagItems[k].y > lim) tagItems[k].y = lim; }
+  }
+  const cmpTags = tagItems.map(it => `<g class="tag cmp"><rect x="${plotW + 3}" y="${(r(it.y) - 9.5).toFixed(1)}" width="${AX - 6}" height="19" rx="4" style="fill:${it.color}"/><text x="${plotW + AX / 2}" y="${(r(it.y) + 3.5).toFixed(1)}" text-anchor="middle">${it.text}</text></g>`).join('');
+  const nearTag = y => (showLast && Math.abs(y - ly) <= 15) || tagItems.some(it => Math.abs(y - it.y) <= 10);   /* compare tags are drawn over the labels; only hide a label the tag would cover */
 
   /* grid + y labels (extend below the price domain, like the web chart) */
   const step = niceStep((hi - lo) / 5);
   let grid = '', ylab = '';
-  const yMin = 8, yMax = plotBottom - 4;
-  const lastY = r(yAt(LAST.c)) + .5;
-  const vStart = Math.floor(pAt(yMax) / step) * step, vEnd = pAt(yMin);
+  const vLo = Math.min(pAt(yMin), pAt(yMax)), vHi = Math.max(pAt(yMin), pAt(yMax));
+  const vStart = Math.floor(vLo / step) * step, vEnd = vHi;
   for (let v = vStart; v <= vEnd; v += step) {
     const y = r(yAt(v)) + .5;
     if (y < yMin || y > yMax) continue;
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
-    if (Math.abs(y - lastY) > 15) ylab += `<text class="ax" x="${plotW + 8}" y="${y + 4}">${fmt(v)}</text>`;
+    if (y < HEAD + 4) continue;   /* gridline may run under the header, the label may not */
+    if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the gear / reset buttons */
+    if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
   }
 
   /* volume */
-  const bw = Math.max(3, Math.round(slot * 0.62));
   let vol = '';
-  BARS.forEach((b, i) => {
+  for (let i = i0; i <= i1; i++) {
+    const b = BARS[i];
     const h = Math.max(1, (b.v / vmax) * volH);
     vol += `<rect class="${b.c >= b.o ? 'up' : 'down'}" x="${(xAt(i) - bw / 2).toFixed(1)}" y="${(plotBottom - h).toFixed(1)}" width="${bw}" height="${h.toFixed(1)}"/>`;
-  });
+  }
 
   /* price series */
   let series = '';
-  const type = state.type;
-  if (type === 'candles' || type === 'hollow') {
-    BARS.forEach((b, i) => {
-      const x = r(xAt(i)) + .5;
-      const up = b.c >= b.o;
-      const yo = yAt(b.o), yc = yAt(b.c);
-      const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
-      series += `<g class="cd ${up ? 'up' : 'down'}" style="animation-delay:${(i * 9)}ms">` +
-        `<line x1="${x}" x2="${x}" y1="${yAt(b.h).toFixed(1)}" y2="${yAt(b.l).toFixed(1)}"/>` +
-        `<rect x="${(x - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw}" height="${hgt.toFixed(1)}" rx=".5"/></g>`;
-    });
-    series = `<g class="candles ${type === 'hollow' ? 'hollow' : ''} ${this.first ? 'intro' : ''}">${series}</g>`;
+  const type = cmpPct ? 'pctline' : state.type;   /* the chart type is kept but ignored in the percent view */
+  const intro = this.first ? 'intro' : '';
+  const brick = niceStep((hi - lo) / 12);      /* box size for Renko, Line Break, Kagi and P&F, from the visible range */
+  const clipId = 'plotClip-' + this.root.id;
+  const candle = (b, i, hollowUp) => {
+    const x = r(xAt(i)) + .5;
+    const up = b.c >= b.o;
+    const yo = yAt(b.o), yc = yAt(b.c);
+    const top = Math.min(yo, yc), hgt = Math.max(1, Math.abs(yo - yc));
+    return `<g class="cd ${up ? 'up' : 'down'}" style="animation-delay:${((i - i0) * 9)}ms">` +
+      `<line x1="${x}" x2="${x}" y1="${yAt(b.h).toFixed(1)}" y2="${yAt(b.l).toFixed(1)}"/>` +
+      `<rect x="${(x - bw / 2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw}" height="${hgt.toFixed(1)}" rx=".5"/></g>`;
+  };
+  if (type === 'candles' || type === 'hollow' || type === 'heikin') {
+    for (let i = i0; i <= i1; i++) series += candle(D[i], i);
+    series = `<g class="candles ${type === 'hollow' ? 'hollow' : ''} ${intro}">${series}</g>`;
   } else if (type === 'bars') {
-    BARS.forEach((b, i) => {
+    for (let i = i0; i <= i1; i++) {
+      const b = D[i];
       const x = r(xAt(i)) + .5, up = b.c >= b.o, t = Math.max(2, bw / 2);
-      series += `<g class="cd ohlc ${up ? 'up' : 'down'}" style="animation-delay:${(i * 9)}ms">` +
+      series += `<g class="cd ohlc ${up ? 'up' : 'down'}" style="animation-delay:${((i - i0) * 9)}ms">` +
         `<line x1="${x}" x2="${x}" y1="${yAt(b.h).toFixed(1)}" y2="${yAt(b.l).toFixed(1)}"/>` +
         `<line x1="${x - t}" x2="${x}" y1="${yAt(b.o).toFixed(1)}" y2="${yAt(b.o).toFixed(1)}"/>` +
         `<line x1="${x}" x2="${x + t}" y1="${yAt(b.c).toFixed(1)}" y2="${yAt(b.c).toFixed(1)}"/></g>`;
-    });
-    series = `<g class="candles ${this.first ? 'intro' : ''}">${series}</g>`;
-  } else {
-    const pts = BARS.map((b, i) => `${xAt(i).toFixed(1)},${yAt(b.c).toFixed(1)}`).join(' ');
+    }
+    series = `<g class="candles ${intro}">${series}</g>`;
+  } else if (type === 'line' || type === 'area') {
+    const pts = [];
+    for (let i = i0; i <= i1; i++) pts.push(`${xAt(i).toFixed(1)},${yAt(D[i].c).toFixed(1)}`);
     if (type === 'area') {
       series += `<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3372F6" stop-opacity=".22"/><stop offset="1" stop-color="#3372F6" stop-opacity="0"/></linearGradient></defs>`;
-      series += `<path class="parea" d="M${xAt(0).toFixed(1)},${priceBottom} L${pts.replace(/ /g, ' L')} L${xAt(n - 1).toFixed(1)},${priceBottom} Z"/>`;
+      series += `<path class="parea" d="M${xAt(i0).toFixed(1)},${priceBottom} L${pts.join(' L')} L${xAt(i1).toFixed(1)},${priceBottom} Z"/>`;
     }
-    series += `<polyline class="pline" points="${pts}"/>`;
+    series += `<polyline class="pline" points="${pts.join(' ')}"/>`;
+  } else if (type === 'baseline') {
+    /* baseline at the middle of the visible range: green above, red below */
+    const by = yAt((lo + hi) / 2).toFixed(1);
+    const pts = [];
+    for (let i = i0; i <= i1; i++) pts.push(`${xAt(i).toFixed(1)},${yAt(D[i].c).toFixed(1)}`);
+    const fillPath = `M${xAt(i0).toFixed(1)},${by} L${pts.join(' L')} L${xAt(i1).toFixed(1)},${by} Z`;
+    series += `<defs><clipPath id="${clipId}-up"><rect x="0" y="0" width="${plotW}" height="${by}"/></clipPath>` +
+      `<clipPath id="${clipId}-dn"><rect x="0" y="${by}" width="${plotW}" height="${(plotBottom - by).toFixed(1)}"/></clipPath></defs>`;
+    series += `<line class="baseline" x1="0" x2="${plotW}" y1="${by}" y2="${by}"/>`;
+    series += `<g clip-path="url(#${clipId}-up)"><path class="bfill up" d="${fillPath}"/><polyline class="pline up" points="${pts.join(' ')}"/></g>`;
+    series += `<g clip-path="url(#${clipId}-dn)"><path class="bfill down" d="${fillPath}"/><polyline class="pline down" points="${pts.join(' ')}"/></g>`;
+  } else if (type === 'renko') {
+    /* time-aligned Renko: the bricks a session completes are stacked in that session's slot */
+    let level = Math.round(D[i0].c / brick) * brick;
+    const bh = (yAt(0) - yAt(brick)).toFixed(1), brw = 9;   /* fixed brick width so bricks read as bricks at any density */
+    for (let i = i0 + 1; i <= i1; i++) {
+      const c = D[i].c, x = (xAt(i) - brw / 2).toFixed(1);
+      while (c >= level + brick) { level += brick; series += `<rect class="up" x="${x}" y="${yAt(level).toFixed(1)}" width="${brw}" height="${bh}"/>`; }
+      while (c <= level - brick) { series += `<rect class="down" x="${x}" y="${yAt(level).toFixed(1)}" width="${brw}" height="${bh}"/>`; level -= brick; }
+    }
+    series = `<g class="bricks">${series}</g>`;
+  } else if (type === 'linebreak') {
+    /* three-line break: a new line only when the close breaks the last three lines */
+    const lines = [D[i0].c];
+    for (let i = i0 + 1; i <= i1; i++) {
+      const c = D[i].c, recent = lines.slice(-3), prev = lines[lines.length - 1];
+      if (c > Math.max(...recent) || c < Math.min(...recent)) {
+        const up = c > prev;
+        const y1 = yAt(Math.max(c, prev)), y2 = yAt(Math.min(c, prev));
+        const brw = Math.max(6, bw);
+        series += `<rect class="${up ? 'up' : 'down hollow'}" x="${(xAt(i) - brw / 2).toFixed(1)}" y="${y1.toFixed(1)}" width="${brw}" height="${Math.max(1, y2 - y1).toFixed(1)}"/>`;
+        lines.push(c);
+      }
+    }
+    series = `<g class="bricks">${series}</g>`;
+  } else if (type === 'kagi') {
+    /* step line: extend in the current direction, reverse only after a move of one box against it;
+       up moves thick (yang), down moves thin (yin) */
+    let dir = 0, lvl = D[i0].c, x = xAt(i0), thick = '', thin = '';
+    for (let i = i0 + 1; i <= i1; i++) {
+      const c = D[i].c;
+      const cont = (dir >= 0 && c > lvl) || (dir <= 0 && c < lvl);
+      const rev = !cont && Math.abs(c - lvl) >= brick;
+      if (!cont && !rev) continue;
+      const nx = xAt(i);
+      const seg = `M${x.toFixed(1)},${yAt(lvl).toFixed(1)} H${nx.toFixed(1)} V${yAt(c).toFixed(1)}`;
+      if (c > lvl) thick += seg; else thin += seg;
+      if (rev || dir === 0) dir = c > lvl ? 1 : -1;
+      lvl = c; x = nx;
+    }
+    series = `<g class="kagi"><path class="thin" d="${thin}"/><path class="thick" d="${thick}"/></g>`;
+  } else if (type === 'pctline') {
+    const pts = [];
+    for (let i = i0; i <= i1; i++) pts.push(`${xAt(i).toFixed(1)},${yAt(pctOf(sndkC, i)).toFixed(1)}`);
+    const zy = yAt(0);
+    series += (zy >= HEAD && zy <= priceBottom) ? `<line class="zero" x1="0" x2="${plotW}" y1="${(r(zy) + .5)}" y2="${(r(zy) + .5)}"/>` : '';
+    series += `<polyline class="cline base" points="${pts.join(' ')}"/>`;
+  } else if (type === 'pnf') {
+    /* point and figure, 3-box reversal, each column drawn in the slot of the session that opened it;
+       half the Renko box so a 3M window still shows several columns */
+    const brick = niceStep((hi - lo) / 24);
+    const cols = [];
+    let cur = null;
+    for (let i = i0; i <= i1; i++) {
+      const c = D[i].c;
+      if (!cur) { cur = { i, kind: 'X', lo: Math.floor(c / brick) * brick, hi: Math.floor(c / brick) * brick }; cols.push(cur); continue; }
+      if (cur.kind === 'X') {
+        if (c >= cur.hi + brick) cur.hi = Math.floor(c / brick) * brick;
+        else if (c <= cur.hi - 3 * brick) { cur = { i, kind: 'O', hi: cur.hi - brick, lo: Math.ceil(c / brick) * brick }; cols.push(cur); }
+      } else {
+        if (c <= cur.lo - brick) cur.lo = Math.ceil(c / brick) * brick;
+        else if (c >= cur.lo + 3 * brick) { cur = { i, kind: 'X', lo: cur.lo + brick, hi: Math.floor(c / brick) * brick }; cols.push(cur); }
+      }
+    }
+    const bh = yAt(0) - yAt(brick), hw = Math.max(4, Math.min(bw, bh) / 2 - .8);   /* legible X and O even at 64 bars */
+    cols.forEach(col => {
+      const cx = xAt(col.i);
+      for (let lv = col.lo; lv <= col.hi + 1e-9; lv += brick) {
+        const cy = yAt(lv + brick / 2);
+        series += col.kind === 'X'
+          ? `<line x1="${(cx - hw).toFixed(1)}" y1="${(cy - hw).toFixed(1)}" x2="${(cx + hw).toFixed(1)}" y2="${(cy + hw).toFixed(1)}"/><line x1="${(cx - hw).toFixed(1)}" y1="${(cy + hw).toFixed(1)}" x2="${(cx + hw).toFixed(1)}" y2="${(cy - hw).toFixed(1)}"/>`
+          : `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${hw.toFixed(1)}"/>`;
+      }
+    });
+    series = `<g class="pf">${series}</g>`;
   }
 
-  /* last price line + tag */
-  const ly = r(yAt(LAST.c)) + .5;
+  /* compared series as coloured lines (percent or shared price axis) */
+  let clines = '';
+  cmpData.forEach(c => {
+    const pts = [];
+    for (let i = i0; i <= i1; i++) pts.push(`${xAt(i).toFixed(1)},${yAt(cmpPct ? pctOf(c.data, i) : c.data[i]).toFixed(1)}`);
+    clines += `<polyline class="cline" style="stroke:var(--cmp-${c.ci + 1})" points="${pts.join(' ')}"/>`;
+  });
+
   const lcls = LAST.c >= PREV.c ? 'up' : 'down';
-  const lastp = `<line class="lastline ${lcls}" x1="0" x2="${plotW}" y1="${ly}" y2="${ly}"/>` +
+  const lastp = !showLast ? '' :
+    `<line class="lastline ${lcls}" x1="0" x2="${plotW}" y1="${ly}" y2="${ly}"/>` +
     `<g class="tag ${lcls}"><rect x="${plotW + 3}" y="${ly - 10}" width="${AX - 6}" height="20" rx="4"/>` +
     `<text x="${plotW + AX / 2}" y="${ly + 4}" text-anchor="middle">${fmt(LAST.c)}</text></g>`;
 
-  /* x labels */
-  const every = Math.max(1, Math.round(n / Math.max(2, Math.floor(plotW / (this.land ? 56 : 62)))));
+  /* x labels - anchored to absolute bar indices so they travel with their bars while panning */
+  const every = Math.max(1, Math.round(view.count / Math.max(2, Math.floor(plotW / (this.land ? 56 : 62)))));
   let xlab = '';
-  for (let i = 0; i < n - 1; i += every) {
-    const lx = xAt(i), edge = lx < 18;
-    xlab += `<text class="ax" x="${(edge ? 2 : lx).toFixed(1)}" y="${H - 8}" text-anchor="${edge ? 'start' : 'middle'}">${BARS[i].date}</text>`;
+  for (let i = i0; i <= i1; i++) {
+    if (i % every) continue;
+    const lx = xAt(i);
+    if (lx < 22 || lx > plotW - 22) continue;
+    xlab += `<text class="ax" x="${lx.toFixed(1)}" y="${H - 8}" text-anchor="middle">${BARS[i].date}</text>`;
   }
 
+  /* event badges on the axis line (Events setting) */
+  let evs = '';
+  if (S.events) EVENTS.forEach((ev, k) => {
+    if (ev.i < i0 || ev.i > i1) return;
+    const ex = xAt(ev.i); if (ex < 8 || ex > plotW - 8) return;
+    const ey = plotBottom;   /* centred on the volume baseline, over the bottom of the bars, above the date labels */
+    evs += `<g class="ev ${ev.type}" data-ev="${k}"><circle cx="${ex.toFixed(1)}" cy="${ey}" r="8"/><text x="${ex.toFixed(1)}" y="${ey + 3.5}" text-anchor="middle">${ev.type}</text><rect x="${(ex - 22).toFixed(1)}" y="${ey - 22}" width="44" height="44"/></g>`;
+  });
+  /* countdown to bar close under the last-price tag */
+  const cdown = (S.countdown && showLast) ? `<g class="countdown"><text x="${W - 4}" y="${ly + 22}" text-anchor="end">Closes in</text><text class="cd-time" x="${W - 4}" y="${ly + 33}" text-anchor="end">${countdownText()}</text></g>` : '';   /* two lines, right-aligned inside the axis column */
   const wm = `<text class="wm" x="12" y="${plotBottom - 8}">Investing.com</text>`;
+  const clip = `<defs><clipPath id="${clipId}"><rect x="0" y="0" width="${plotW}" height="${plotBottom}"/></clipPath></defs>`;
 
-  svg.innerHTML = `<g class="gridg">${grid}</g>${wm}<g class="vol">${vol}</g>${series}${lastp}<g class="axes">${ylab}${xlab}</g><g class="xhg"></g>`;
+  svg.innerHTML = `${clip}<g class="gridg">${grid}</g>${wm}<g clip-path="url(#${clipId})"><g class="vol">${vol}</g>${series}${clines}</g>${lastp}<g class="axes">${ylab}${xlab}</g>${cmpTags}${cdown}<g class="events">${evs}</g><g class="xhg"></g>`;
   this.xh = svg.querySelector('.xhg');
   this.first = false;
-  if (this.hover !== null) this.setHover(this.hover.i, this.hover.y); else this.updateHead(n - 1);
+  if (this.evOpen !== null && this.evOpen !== undefined) this.placeEvent();
+  this.latestBtn.classList.toggle('show', !this.atLatest());
+  if (this.hover !== null) this.setHover(this.hover.i, this.hover.y); else this.updateHead(N - 1);
 };
 
 Chart.prototype.updateHead = function (i) {
@@ -768,51 +1384,328 @@ Chart.prototype.updateHead = function (i) {
 
 Chart.prototype.setHover = function (i, py) {
   const g = this.geom; if (!g) return;
-  i = clamp(i, 0, g.n - 1);
+  i = clamp(i, g.vis0, g.vis1);
   py = clamp(py, 10, g.plotBottom - 2);
-  this.hover = { i, y: py };
+  const price = g.pAt(py);
+  this.hover = { i, y: py, price };
   const b = BARS[i];
   const x = r(g.xAt(i)) + .5;
   const yy = r(py) + .5;
-  const price = g.pAt(py);
   const pw = 100;
   const px = clamp(x - pw / 2, 2, g.plotW - pw - 2);
   this.xh.innerHTML =
     `<line class="xh" x1="${x}" x2="${x}" y1="0" y2="${g.plotBottom}"/>` +
     `<line class="xh" x1="0" x2="${g.plotW}" y1="${yy}" y2="${yy}"/>` +
     `<g class="tag dark"><rect x="${g.plotW + 3}" y="${yy - 10}" width="${g.AX - 6}" height="20" rx="4"/>` +
-    `<text x="${g.plotW + g.AX / 2}" y="${yy + 4}" text-anchor="middle">${fmt(price)}</text></g>` +
+    `<text x="${g.plotW + g.AX / 2}" y="${yy + 4}" text-anchor="middle">${g.pct ? fmtPct(price) : fmt(price)}</text></g>` +
     `<g class="tag blue"><rect x="${px}" y="${g.plotBottom + 2}" width="${pw}" height="21" rx="5"/>` +
     `<text x="${px + pw / 2}" y="${g.plotBottom + 17}" text-anchor="middle">${b.date}, 2026</text></g>`;
   this.updateHead(i);
+  clearTimeout(this._xhT);
+  this.xh.classList.add('on');
+  this.head.classList.add('xh');
+  /* rows 3-4 overlay the plot top: hide any y label in that band (landscape only adds the Vol line) */
+  const lim = g.HEAD + (this.land ? 20 : 38);
+  this.svg.querySelectorAll('text.ylab').forEach(t => t.classList.toggle('under-head', +t.getAttribute('y') - 4 < lim));
+  if (this.pill.classList.contains('show')) this.placePill(yy);
 };
 
+/* Pill sits just under the crosshair price tag, right-aligned to the axis; flips above near the bottom. */
+Chart.prototype.placePill = function (yy) {
+  const g = this.geom, ph = 26;
+  let top = yy + 13, above = false;
+  if (top + ph > g.plotBottom - 2) { top = yy - 13 - ph; above = true; }
+  this.pill.style.top = top.toFixed(0) + 'px';
+  this.pill.classList.toggle('above', above);
+  /* hide any y-axis label whose band overlaps the pill, like the last-price tag does for its neighbour */
+  this.svg.querySelectorAll('text.ylab').forEach(t => {
+    const cy = +t.getAttribute('y') - 4;
+    t.classList.toggle('under-pill', cy > top - 8 && cy < top + ph + 8);
+  });
+};
+Chart.prototype.showPill = function () {
+  if (this.hover) this.placePill(r(this.hover.y) + .5);
+  this.pill.classList.add('show');
+};
+Chart.prototype.hidePill = function () {
+  this.pill.classList.remove('show');
+  this.svg.querySelectorAll('text.ylab.under-pill').forEach(t => t.classList.remove('under-pill'));
+};
+Chart.prototype.createAlert = function () {
+  const price = this.hover ? this.hover.price : (this.pillPrice != null ? this.pillPrice : LAST.c);
+  toast('Alert set at ' + (this.geom && this.geom.pct ? fmtPct(price) : fmt(price)));
+  clearTimeout(this._pillT);
+  this.clear();
+};
+
+/* ---- Event card ---- */
+Chart.prototype.openEvent = function (k) {
+  const ev = EVENTS[k]; if (!ev) return;
+  this.closeSettings();
+  this.evOpen = k;
+  this.evCard.innerHTML =
+    `<div class="ev-title"><span class="ev-dot ${ev.type}">${ev.type}</span>${ev.title}</div>` +
+    ev.rows.map(r => `<div class="ev-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('') +
+    (ev.detail.length ? `<div class="ev-div"></div><div class="ev-sub">${ev.sub}</div>` + ev.detail.map(r => `<div class="ev-row"><span>${r[0]}</span><b class="${r[2]}">${r[1]}</b></div>`).join('') : '') +
+    `<button class="ev-btn" data-evcta="${ev.cta}">${ev.cta}</button>`;
+  this.placeEvent();
+  this.evCard.classList.add('open');
+};
+Chart.prototype.placeEvent = function () {
+  const ev = EVENTS[this.evOpen]; const g = this.geom; if (!ev || !g) return;
+  const x = g.xAt(ev.i);
+  if (x < 8 || x > g.plotW - 8 || !state.settings.events) { this.closeEvent(); return; }
+  const w = 260;
+  this.evCard.style.left = clamp(x - w / 2, 8, this.W - w - 8).toFixed(0) + 'px';
+  this.evCard.style.bottom = (g.XA + 18).toFixed(0) + 'px';
+};
+Chart.prototype.closeEvent = function () { this.evOpen = null; this.evCard.classList.remove('open'); };
+
+/* ---- Settings popover ---- */
+const SETTINGS_ROWS = [
+  ['extended', 'Extended hours', 'Intraday timeframes only'],
+  ['events', 'Events', 'Dividends, splits, earnings, news'],
+  ['log', 'Logarithmic price scale', ''],
+  ['invert', 'Invert scale', ''],
+  ['countdown', 'Countdown to bar close', '']
+];
+Chart.prototype.renderSettings = function () {
+  this.settingsEl.innerHTML = `<div class="pop-head">Settings</div>` + SETTINGS_ROWS.map(([k, label, sub]) =>
+    `<div class="set-row" data-set="${k}"><div class="set-main"><span class="set-label">${label}</span>${sub ? `<span class="set-sub">${sub}</span>` : ''}</div><span class="sw ${state.settings[k] ? 'on' : ''}"></span></div>`).join('') +
+    `<div class="set-div"></div><div class="set-row set-action" data-setact="reset"><span class="set-label">Reset chart</span>${ICO.chevSm}</div>`;
+};
+Chart.prototype.openSettings = function () { this.closeEvent(); this.renderSettings(); this.settingsEl.classList.add('open'); this.root.classList.add('settings-open'); };
+Chart.prototype.closeSettings = function () { this.settingsEl.classList.remove('open'); this.root.classList.remove('settings-open'); };
+function toggleSetting(k) {
+  state.settings[k] = !state.settings[k];
+  markDirty();
+  Object.values(charts).forEach(c => { if (c.settingsEl.classList.contains('open')) c.renderSettings(); });
+  if (k === 'events' && !state.settings.events) Object.values(charts).forEach(c => c.closeEvent());
+  drawAll();
+}
+const CLOSE_AT = Date.now() + (4 * 3600 + 12 * 60 + 33) * 1000;
+function countdownText() {
+  const s = Math.max(0, Math.floor((CLOSE_AT - Date.now()) / 1000));
+  const p = n => String(n).padStart(2, '0');
+  return p(Math.floor(s / 3600)) + ':' + p(Math.floor(s % 3600 / 60)) + ':' + p(s % 60);
+}
+setInterval(() => { if (!state.settings.countdown) return; document.querySelectorAll('.countdown .cd-time').forEach(t => t.textContent = countdownText()); }, 1000);
+
+/* Finger lift in crosshair mode: lines, rows and chips cross-fade back at once; the Create alert pill stays 1.5s. */
+Chart.prototype.releaseCrosshair = function () {
+  this.pillPrice = this.hover ? this.hover.price : null;
+  const keepTop = this.pill.style.top;
+  this.clear();
+  this.pill.style.top = keepTop;
+  this.pill.classList.add('show');
+  clearTimeout(this._pillT);
+  this._pillT = setTimeout(() => this.hidePill(), 1500);
+};
 Chart.prototype.clear = function () {
+  clearTimeout(this._pillT);
   this.hover = null;
-  if (this.xh) this.xh.innerHTML = '';
-  if (this.geom) this.updateHead(this.geom.n - 1);
+  this.frozen = false;
+  this.head.classList.remove('xh');
+  this.svg.querySelectorAll('text.ylab.under-head').forEach(t => t.classList.remove('under-head'));
+  if (this.xh) {
+    const xh = this.xh;
+    xh.classList.remove('on');
+    clearTimeout(this._xhT);
+    this._xhT = setTimeout(() => { if (!this.hover) xh.innerHTML = ''; }, 220);   /* keep the lines while they fade */
+  }
+  this.hidePill();
+  if (this.geom) this.updateHead(BARS.length - 1);
 };
 
+/* Live tick: refresh the price row (with a flash) and redraw so the last candle and price tag follow. */
+Chart.prototype.tick = function (dir) {
+  this.pxEl.textContent = fmt(LAST.c);
+  this.chgEl.textContent = chgText();
+  this.chgEl.classList.remove('up', 'down'); this.chgEl.classList.add(chgCls());
+  if (dir) {
+    this.pxEl.classList.remove('flash-up', 'flash-down');
+    void this.pxEl.offsetWidth;
+    this.pxEl.classList.add('flash-' + dir);
+  }
+  if (this.geom && this.W && !this.hover) this.draw();
+};
+
+/* Scroll back to the latest bar (reset button). */
+Chart.prototype.atLatest = function () { return Math.abs(this.view.start - Math.max(0, BARS.length - this.view.count)) < 0.01; };
+/* synchronous jump (used by range picks and tests) */
+Chart.prototype.snapToLatest = function () {
+  this.cancelScroll();
+  if (this.stopInertia) this.stopInertia();
+  this.clear();
+  this.view.start = Math.max(0, BARS.length - this.view.count);
+  this.draw();
+};
+/* animated ease-in-out scroll back to the latest bar; keeps the bar count, cancels inertia, clears crosshair + cards */
+Chart.prototype.scrollToLatest = function () {
+  this.cancelScroll();
+  if (this.stopInertia) this.stopInertia();
+  this.clear(); this.closeEvent();
+  const from = this.view.start, to = Math.max(0, BARS.length - this.view.count);
+  if (Math.abs(to - from) < 0.01) { this.view.start = to; this.draw(); return; }
+  const dur = clamp(400 + Math.abs(to - from) * 2, 400, 600);
+  const t0 = performance.now();
+  const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    this.view.start = k >= 1 ? to : from + (to - from) * ease(k);
+    this.draw();
+    this._anim = k < 1 ? requestAnimationFrame(step) : 0;
+  };
+  this._anim = requestAnimationFrame(step);
+};
+Chart.prototype.cancelScroll = function () { if (this._anim) { cancelAnimationFrame(this._anim); this._anim = 0; } };
+Chart.prototype.resetView = function () { this.scrollToLatest(); };
+
+/* Gestures:
+   - pointer down + move beyond 8px slop  -> pan (drag scrolls through history, inertia on release)
+   - pointer held still ~380ms            -> crosshair mode: dashed crosshair + Create alert pill,
+                                             finger movement drives the crosshair
+   - lift in crosshair mode               -> crosshair + pill stay frozen until the next tap on the chart
+   - mouse behaves like touch: no hover crosshair, a plain tap only dismisses a frozen one */
 Chart.prototype.bind = function () {
   const svg = this.svg;
   const self = this;
-  let down = false;
+  const SLOP = 8, HOLD = 380;
+  let ptr = null, holdTimer = 0, raf = 0, inertia = 0;
+
   function local(e) {
     const rect = svg.getBoundingClientRect();
     return { x: (e.clientX - rect.left) / rect.width * self.W, y: (e.clientY - rect.top) / rect.height * self.H };
   }
-  function move(e) {
+  function barAt(px) { return Math.round(px / self.geom.slot - 0.6 + self.view.start); }
+  function hoverAt(p) {
+    if (!self.geom || p.x > self.geom.plotW) return;
+    self.setHover(barAt(p.x), p.y);
+  }
+  function scheduleDraw() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; self.draw(); }); }
+  function stopInertia() { if (inertia) { cancelAnimationFrame(inertia); inertia = 0; } }
+  this.stopInertia = stopInertia;
+  function startInertia(v) {      /* v: bars per ms */
+    stopInertia();
+    const maxStart = BARS.length - self.view.count;
+    let last = performance.now();
+    function step(now) {
+      const dt = Math.min(48, now - last); last = now;
+      const raw = self.view.start + v * dt;
+      self.view.start = clamp(raw, 0, maxStart);
+      v *= Math.pow(0.994, dt);
+      self.draw();
+      if (Math.abs(v) < 0.0004 || raw !== self.view.start) { inertia = 0; return; }
+      inertia = requestAnimationFrame(step);
+    }
+    inertia = requestAnimationFrame(step);
+  }
+  function engage() {
+    ptr.mode = 'xh';
+    hoverAt({ x: ptr.x, y: ptr.y });
+    const tag = self.xh && self.xh.querySelector('.tag.dark');
+    if (tag) tag.classList.add('flick');
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (_) {} }
+    self.showPill();
+  }
+  function release(e, cancelled) {
+    if (!ptr || e.pointerId !== ptr.id) return;
+    clearTimeout(holdTimer);
+    const g = ptr; ptr = null;
+    svg.classList.remove('panning');
+    try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (g.mode === 'pan') {
+      if (raf) { cancelAnimationFrame(raf); raf = 0; self.draw(); }
+      if (!cancelled && g.samples.length >= 2) {
+        const a = g.samples[0], b = g.samples[g.samples.length - 1];
+        const dt = b.t - a.t;
+        if (dt > 0 && performance.now() - b.t < 100) startInertia(clamp((b.s - a.s) / dt, -0.12, 0.12));
+      }
+    } else if (g.mode === 'xh') {
+      if (cancelled) self.clear(); else self.releaseCrosshair();   /* auto fade; only the pill lingers */
+    }
+  }
+
+  /* two-finger pinch: scale the visible bar count around the midpoint; clears the picked date range */
+  const pts = new Map();
+  let pinch = null;
+  svg.addEventListener('pointerdown', e => {
+    if (!self.geom) return;
+    const badge = e.target.closest && e.target.closest('[data-ev]');
+    if (badge) { self.openEvent(+badge.dataset.ev); return; }   /* badge tap: card, no gesture */
+    self.closeEvent(); self.closeSettings(); self.cancelScroll();
+    clearTimeout(self._pillT); self.hidePill();   /* a new touch cancels a lingering Create alert pill */
+    const p = local(e);
+    if (p.x > self.geom.plotW) return;       /* price axis is not a gesture surface */
+    pts.set(e.pointerId, p);
+    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+    if (pts.size === 2 && !pinch) {
+      clearTimeout(holdTimer);
+      stopInertia();
+      if (self.hover) self.clear();
+      ptr = null;
+      svg.classList.remove('panning');
+      const [a, b] = [...pts.values()];
+      pinch = { d0: Math.max(20, Math.hypot(a.x - b.x, a.y - b.y)), count0: self.view.count,
+                anchorBar: (a.x + b.x) / 2 / self.geom.slot - 0.6 + self.view.start };
+      return;
+    }
+    if (pts.size > 1 || !e.isPrimary) return;
+    stopInertia();
+    if (self.hover) self.clear();            /* a tap anywhere dismisses a frozen crosshair; hover gets out of the way */
+    ptr = { id: e.pointerId, x0: p.x, y0: p.y, x: p.x, y: p.y, start0: self.view.start, mode: 'pending', samples: [] };
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => { if (ptr && ptr.mode === 'pending') engage(); }, HOLD);
+  });
+  svg.addEventListener('pointermove', e => {
     if (!self.geom) return;
     const p = local(e);
-    if (p.x > self.geom.plotW) return;
-    const i = Math.round(p.x / self.geom.slot - 0.6);
-    self.setHover(i, p.y);
+    if (pinch) {
+      if (!pts.has(e.pointerId)) return;
+      pts.set(e.pointerId, p);
+      const [a, b] = [...pts.values()];
+      const d = Math.max(20, Math.hypot(a.x - b.x, a.y - b.y));
+      const N = BARS.length;
+      const count = clamp(Math.round(pinch.count0 * pinch.d0 / d), MIN_BARS, Math.max(self.defaultCount, pinch.count0));   /* never zoom out past the default (or past a wider picked range) */
+      const slot = self.geom.plotW / (count + 1.6);
+      self.view.count = count;
+      self.view.start = clamp(pinch.anchorBar - ((a.x + b.x) / 2 / slot - 0.6), 0, N - count);
+      state.range = null;                    /* zoomed by hand: no preset date range applies any more */
+      scheduleDraw();
+      return;
+    }
+    if (!ptr || e.pointerId !== ptr.id) return;   /* no hover crosshair: the crosshair is entered only by a long press */
+    ptr.x = p.x; ptr.y = p.y;
+    if (ptr.mode === 'pending') {
+      if (Math.hypot(p.x - ptr.x0, p.y - ptr.y0) <= SLOP) return;
+      ptr.mode = 'pan';
+      clearTimeout(holdTimer);
+      svg.classList.add('panning');
+    }
+    if (ptr.mode === 'pan') {
+      const maxStart = BARS.length - self.view.count;
+      const raw = ptr.start0 - (p.x - ptr.x0) / self.geom.slot;
+      const s = clamp(raw, 0, maxStart);
+      if (s !== raw) { ptr.start0 = s; ptr.x0 = p.x; }   /* rebase at the edges so reversing responds immediately */
+      self.view.start = s;
+      ptr.samples.push({ t: performance.now(), s });
+      if (ptr.samples.length > 6) ptr.samples.shift();
+      scheduleDraw();
+    } else if (ptr.mode === 'xh') {
+      hoverAt(p);
+    }
+  });
+  function endPointer(e, cancelled) {
+    pts.delete(e.pointerId);
+    try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (pinch) {
+      if (pts.size < 2) { pinch = null; if (raf) { cancelAnimationFrame(raf); raf = 0; self.draw(); } }
+      return;                                /* a finger left over after a pinch is ignored until lifted */
+    }
+    release(e, cancelled);
   }
-  svg.addEventListener('pointerdown', e => { down = true; move(e); });
-  svg.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || down) move(e); });
-  svg.addEventListener('pointerup', e => { down = false; if (e.pointerType !== 'mouse') self.clear(); });
-  svg.addEventListener('pointercancel', () => { down = false; self.clear(); });
-  svg.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') self.clear(); });
+  svg.addEventListener('pointerup', e => endPointer(e, false));
+  svg.addEventListener('pointercancel', e => endPointer(e, true));
 };
 
 /* ============================================================
@@ -827,8 +1720,6 @@ const charts = {
 function drawAll() { charts[state.orientation].draw(); charts[state.orientation === 'portrait' ? 'landscape' : 'portrait'].first = true; }
 function refreshLabels() {
   document.querySelectorAll('.interval-label').forEach(el => el.textContent = state.interval);
-  document.querySelectorAll('.ch-int').forEach(el => el.innerHTML = '&middot; ' + state.interval);
-  document.querySelectorAll('.range-label').forEach(el => el.textContent = state.range === 'Date range' ? 'Date range' : state.range);
   const t = TYPES.find(t => t.value === state.type);
   document.querySelectorAll('.type-icon').forEach(el => el.innerHTML = t.icon);
 }
@@ -916,8 +1807,13 @@ function loadNotes() {
    ============================================================ */
 const sheetEl = document.getElementById('sheet');
 const sheetBody = document.getElementById('sheetBody');
-function openSheet(title, bodyHTML, sub) {
-  document.getElementById('sheetTitle').innerHTML = title + (sub ? `<div class="sheet-sub">${sub}</div>` : '');
+function openSheet(title, bodyHTML, sub, drawer, actionsHTML) {
+  sheetEl.className = 'sheet' + (drawer ? ' drawer h-' + drawer : '');
+  const t = document.getElementById('sheetTitle');
+  t.classList.toggle('has-seg', title.indexOf('class="seg"') !== -1);
+  t.innerHTML = title + (sub ? `<div class="sheet-sub">${sub}</div>` : '');
+  document.getElementById('sheetActions').innerHTML = actionsHTML || '';
+  sheetEl.querySelector('.sheet-menu')?.remove();
   sheetBody.innerHTML = bodyHTML;
   document.getElementById('backdrop').classList.add('open');
   sheetEl.classList.add('open');
@@ -925,63 +1821,387 @@ function openSheet(title, bodyHTML, sub) {
 function closeOverlays() {
   document.querySelectorAll('.sheet.open, .backdrop.open').forEach(el => el.classList.remove('open'));
 }
-function rowsHTML(items, selected) {
-  return items.map(it =>
-    `<div class="row ${it.destructive ? 'destructive' : ''}" data-pick="${it.value}">` +
-      `<div class="row-lead">${it.icon || ''}<div class="row-main"><span>${it.label}</span>${it.sub ? `<span class="row-sub">${it.sub}</span>` : ''}</div></div>` +
-      `${selected === it.value ? ICO.check : ''}` +
-    `</div>`).join('');
+/* ---- Interval + date range drawer ---- */
+const IV_SECTIONS = [
+  { title: 'Seconds', items: ['1s', '5s', '10s', '15s', '30s', '45s'] },
+  { title: 'Minutes', items: ['1m', '2m', '3m', '5m', '10m', '15m', '30m', '45m'] },
+  { title: 'Hours',   items: ['1H', '2H', '3H', '4H'] },
+  { title: 'Days',    items: ['1D', '1W', '1M', '3M', '6M', '12M'] }
+];
+const RANGES = ['1D', '1W', '1M', '3M', '6M', 'YTD', '1Y', '2Y', '3Y', '5Y', 'Max'];
+/* trading days per range on daily bars; 1D/1W fall back to the smallest sensible window, everything is capped at the loaded history */
+const RANGE_BARS = { '1D': MIN_BARS, '1W': MIN_BARS, '1M': 22, '3M': 64, '6M': 128, 'YTD': BARS.length, '1Y': 252, '2Y': 504, '3Y': 756, '5Y': 1260, 'Max': Infinity };
+let drawerTab = 'interval';
+function drawerSegHTML() {
+  return `<div class="seg"><button class="seg-opt ${drawerTab === 'interval' ? 'active' : ''}" data-tab="interval">Interval</button><button class="seg-opt ${drawerTab === 'range' ? 'active' : ''}" data-tab="range">Date Range</button></div>`;
+}
+function drawerBodyHTML() {
+  if (drawerTab === 'interval') {
+    return IV_SECTIONS.map((s, k) =>
+      `${k ? '<div class="iv-div"></div>' : ''}<div class="iv-sec"><div class="iv-title">${s.title}</div><div class="iv-row">` +
+      s.items.map(v => `<button class="iv-chip ${v === state.interval ? 'active' : ''} ${s.disabled ? 'disabled' : ''}" data-iv="${v}" ${s.disabled ? 'disabled' : ''}>${v}</button>`).join('') +
+      `</div></div>`).join('');
+  }
+  return RANGES.map(v => `<div class="row" data-range="${v}"><span>${v}</span>${state.range === v ? ICO.check : ''}</div>`).join('');
+}
+function openIntervalDrawer(tab) {
+  drawerTab = tab || 'interval';
+  pickHandler = null;
+  openSheet(drawerSegHTML(), drawerBodyHTML(), null, 'interval');
+}
+function applyRange(v) {
+  state.range = v;
+  const count = clamp(RANGE_BARS[v], MIN_BARS, BARS.length);
+  Object.values(charts).forEach(c => { c.cancelScroll(); if (c.stopInertia) c.stopInertia(); c.clear(); c.view.count = count; c.view.start = BARS.length - count; });
+  drawAll();
 }
 
-const INTERVALS = ['1m','5m','15m','30m','1H','4H','1D','1W','1M'].map(v => ({ label: v === '1m' ? '1 minute' : v === '5m' ? '5 minutes' : v === '15m' ? '15 minutes' : v === '30m' ? '30 minutes' : v === '1H' ? '1 hour' : v === '4H' ? '4 hours' : v === '1D' ? '1 day' : v === '1W' ? '1 week' : '1 month', value: v, sub: v }));
+/* ---- Chart type sheet (3-column cards) ---- */
 const TYPES = [
-  { label: 'Candles', value: 'candles', icon: ICO.candle },
-  { label: 'Hollow candles', value: 'hollow', icon: ICO.hollow },
-  { label: 'Bars', value: 'bars', icon: ICO.ohlc },
+  { label: 'Area', value: 'area', icon: ICO.area },
   { label: 'Line', value: 'line', icon: ICO.line },
-  { label: 'Area', value: 'area', icon: ICO.area }
+  { label: 'Baseline', value: 'baseline', icon: ICO.baseline },
+  { label: 'Candles', value: 'candles', icon: ICO.candle },
+  { label: 'Bars', value: 'bars', icon: ICO.ohlc },
+  { label: 'Hollow Candles', value: 'hollow', icon: ICO.hollow },
+  { label: 'Heikin Ashi', value: 'heikin', icon: ICO.heikin },
+  { label: 'Renko', value: 'renko', icon: ICO.renko },
+  { label: 'Line Break', value: 'linebreak', icon: ICO.lbreak },
+  { label: 'Kagi', value: 'kagi', icon: ICO.kagi },
+  { label: 'Point & Figure', value: 'pnf', icon: ICO.pnf }
 ];
+function openTypeSheet() {
+  pickHandler = v => { state.type = v; refreshLabels(); drawAll(); markDirty(); };
+  openSheet('Chart type', `<div class="card-grid">${TYPES.map(t =>
+    `<div class="tcard ${state.type === t.value ? 'sel' : ''}" data-pick="${t.value}"><div class="tcard-ico">${t.icon}</div><div class="tcard-label">${t.label}</div></div>`).join('')}</div>`, null, 'type');
+}
 const INDICATORS = ['Volume', 'Moving Average (20)', 'Moving Average (50)', 'Bollinger Bands', 'RSI (14)', 'MACD', 'VWAP'];
-const RANGES = ['1D','5D','1M','3M','6M','YTD','1Y','5Y','Max'];
+
+/* ---- Drawing tools drawer ---- */
+/* Glyph primitives (24 viewBox, 1.5 stroke); every tool maps to one. */
+const GS = 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"';
+const g = inner => `<svg viewBox="0 0 24 24" ${GS}>${inner}</svg>`;
+const dot = (x, y) => `<circle cx="${x}" cy="${y}" r="1.5" fill="currentColor" stroke="none"/>`;
+const FIBC = ['var(--red-down)', 'var(--orange)', 'var(--green-up)', 'var(--text-active)', 'var(--dark-blue)'];
+const stacked = (ys, xs = [3, 21]) => ys.map((y, k) => `<path d="M${xs[0]} ${y}H${xs[1]}" style="stroke:${FIBC[k % 5]}"/>`).join('');
+const fan = (ox, oy, ends, colored) => ends.map(([x, y], k) => `<path d="M${ox} ${oy}L${x} ${y}" ${colored ? `style="stroke:${FIBC[k % 5]}"` : ''}/>`).join('');
+const zig = pts => `<path d="M${pts.map(p => p.join(' ')).join('L')}"/>` + pts.map(p => dot(p[0], p[1])).join('');
+const GL = {
+  trend: g(`<path d="M4 19 20 5"/>${dot(4, 19)}${dot(20, 5)}`),
+  ray: g(`<path d="M4 19 22 3"/>${dot(4, 19)}`),
+  arrow: g(`<path d="M4 19 19 6M13 5h6.5v6.5"/>`),
+  hline: g(`<path d="M2 12h20"/>${dot(12, 12)}`),
+  hray: g(`<path d="M5 12h17"/>${dot(5, 12)}`),
+  plabel: g(`<path d="M9 12h13"/><path d="M2 9.5h5.5l1.5 2.5-1.5 2.5H2Z"/>`),
+  vline: g(`<path d="M12 2v20"/>${dot(12, 12)}`),
+  extline: g(`<path d="M2 20 22 4" stroke-dasharray="3 2"/>${dot(9, 14.4)}${dot(15, 9.6)}`),
+  infoline: g(`<path d="M4 19 20 5"/><rect x="8" y="9" width="8" height="5" rx="1" fill="var(--bg-primary)"/>`),
+  angle: g(`<path d="M4 19h16M4 19 18 6"/><path d="M11 19a7 7 0 0 0-2.4-5.3"/>`),
+  cross: g(`<path d="M2 12h20M12 2v20"/>${dot(12, 12)}`),
+  channel: g(`<path d="M3 15 21 6M3 20l18-9"/>${dot(3, 15)}${dot(21, 6)}`),
+  regression: g(`<path d="M3 15 21 6M3 19l18-9M3 11l18-9" stroke-dasharray="3 2"/>`),
+  fibchannel: g(`<path d="M3 21 21 9" style="stroke:${FIBC[0]}"/><path d="M3 17 21 5" style="stroke:${FIBC[1]}"/><path d="M3 13 21 1.5" style="stroke:${FIBC[2]}"/>`),
+  flatchannel: g(`<path d="M3 8h18M3 17h18"/>${dot(3, 8)}${dot(21, 8)}`),
+  disjoint: g(`<path d="M3 6 21 10M3 20l18-8"/>`),
+  pitchfork: g(`<path d="M3 20 12 11M8 6l13 13M8 6 4 10M21 19l4-4M12 11l9-9" transform="translate(-1 0) scale(.92)"/>`),
+  rect: g(`<rect x="3.5" y="6" width="17" height="12" rx="1"/>`),
+  ellipse: g(`<ellipse cx="12" cy="12" rx="9" ry="6"/>`),
+  triangle: g(`<path d="M12 4 21 19H3Z"/>`),
+  arc: g(`<path d="M3 18a9 9 0 0 1 18 0"/>${dot(3, 18)}${dot(21, 18)}`),
+  circle: g(`<circle cx="12" cy="12" r="8"/>`),
+  rotrect: g(`<rect x="5" y="5" width="14" height="10" rx="1" transform="rotate(-25 12 12)"/>`),
+  sector: g(`<path d="M12 12V4a8 8 0 0 1 7 4l-7 4Z"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/>`),
+  curve: g(`<path d="M3 18C7 4 11 20 15 8s4 6 6 2"/>${dot(3, 18)}${dot(21, 10)}`),
+  polyline: g(zig([[3, 18], [8, 8], [13, 14], [21, 5]])),
+  brush: g(`<path d="M3 16c4-8 6 6 9-2s5 4 9-6" stroke-width="2.2"/>`),
+  highlighter: g(`<path d="M3 12h18" stroke="#FFD60A" stroke-width="8" stroke-opacity=".55"/>`),
+  sine: g(`<path d="M2 12c2.5-8 5-8 7.5 0s5 8 7.5 0 4-6 5 0"/>`),
+  timecycles: g(`<path d="M2 18a5 5 0 0 1 10 0a5 5 0 0 1 10 0"/><path d="M2 18h20" stroke-dasharray="2 2"/>`),
+  cyclic: g(`<path d="M4 3v18M12 3v18M20 3v18"/>`),
+  fibret: g(stacked([4, 8, 12, 16, 20])),
+  fibproj: g(stacked([5, 9, 13]) + `<path d="M3 21 21 13"/>`),
+  fibarc: g(`<path d="M4 20a8 8 0 0 1 16 0" style="stroke:${FIBC[0]}"/><path d="M7 20a5 5 0 0 1 10 0" style="stroke:${FIBC[2]}"/><path d="M10 20a2 2 0 0 1 4 0" style="stroke:${FIBC[3]}"/>`),
+  fibfan: g(fan(3, 21, [[21, 4], [21, 9], [21, 14], [21, 19]], true)),
+  fibtime: g(`<path d="M4 3v18" style="stroke:${FIBC[0]}"/><path d="M9 3v18" style="stroke:${FIBC[1]}"/><path d="M15 3v18" style="stroke:${FIBC[2]}"/><path d="M21 3v18" style="stroke:${FIBC[3]}"/>`),
+  fibspeed: g(fan(3, 21, [[21, 3], [21, 10], [21, 17]], true) + `<path d="M3 3v18h18"/>`),
+  fibcircles: g(`<circle cx="12" cy="12" r="3" style="stroke:${FIBC[0]}"/><circle cx="12" cy="12" r="6.5" style="stroke:${FIBC[2]}"/><circle cx="12" cy="12" r="10" style="stroke:${FIBC[3]}"/>`),
+  fibspiral: g(`<path d="M12 12c0-2 3-2 3 0s-3 5-6 3-3-8 2-9 10 3 9 9-7 9-13 6"/>`),
+  fibwedge: g(`<path d="M3 21 21 4M3 21h18"/><path d="M3 21a12 12 0 0 1 8-11" style="stroke:${FIBC[1]}"/><path d="M3 21a17 17 0 0 1 11.5-15.5" style="stroke:${FIBC[3]}"/>`),
+  pitchfan: g(fan(3, 21, [[21, 3], [21, 8], [21, 13]], true) + `<path d="M3 21 21 18"/>`),
+  gannfan: g(fan(3, 21, [[21, 3], [21, 9], [21, 15], [9, 3], [15, 3]], false)),
+  gannbox: g(`<rect x="3" y="3" width="18" height="18"/><path d="M3 21 21 3" style="stroke:var(--red-down)"/><path d="M3 3l18 18" style="stroke:var(--text-active)"/>`),
+  gannsq: g(`<rect x="3" y="3" width="18" height="18"/><path d="M3 12h18M12 3v18"/><path d="M3 21 21 3" style="stroke:var(--red-down)"/><path d="M3 3l18 18" style="stroke:var(--text-active)"/>`),
+  abcd: g(zig([[3, 19], [8, 7], [13, 14], [21, 4]])),
+  xabcd: g(zig([[2, 16], [6, 5], [11, 13], [16, 7], [22, 19]])),
+  hs: g(`<path d="M2 20l3-6 3 6 4-15 4 15 3-6 3 6"/>`),
+  threedrives: g(`<path d="M2 20l4-9 3 6 4-12 3 7 4-9 2 5"/>`),
+  barpattern: g(`<path d="M5 6v12M3 10h2M5 14h2M12 4v14M10 9h2M12 12h2M19 7v12M17 12h2M19 15h2"/>`),
+  elliott: g(zig([[2, 20], [6, 9], [9, 14], [14, 4], [17, 10], [22, 6]])),
+  tripattern: g(`<path d="M3 5l18 6M3 19l18-7"/><path d="M5 12l3-4 3 6 3-4 3 4"/>`),
+  longpos: g(`<rect x="3" y="4" width="18" height="7" fill="var(--green-up)" fill-opacity=".35" stroke="none"/><rect x="3" y="13" width="18" height="7" fill="var(--red-down)" fill-opacity=".35" stroke="none"/><path d="M3 12h18" stroke-width="2"/>`),
+  shortpos: g(`<rect x="3" y="4" width="18" height="7" fill="var(--red-down)" fill-opacity=".35" stroke="none"/><rect x="3" y="13" width="18" height="7" fill="var(--green-up)" fill-opacity=".35" stroke="none"/><path d="M3 12h18" stroke-width="2"/>`),
+  forecast: g(`<path d="M3 18l5-6 4 3 6-9" stroke-dasharray="3 2"/>${dot(3, 18)}${dot(18, 6)}<rect x="15" y="3" width="6" height="6" rx="1"/>`),
+  pricerange: g(`<path d="M12 4v16M8 4h8M8 20h8M9.5 7.5 12 4l2.5 3.5M9.5 16.5 12 20l2.5-3.5"/>`),
+  daterange: g(`<path d="M3 12h18M3 8v8M21 8v8M6.5 9.5 3 12l3.5 2.5M17.5 9.5 21 12l-3.5 2.5"/>`),
+  dprange: g(`<rect x="3" y="5" width="18" height="14"/><path d="M6 16 18 8M14 8h4v4"/>`),
+  volprofile: g(`<path d="M3 5h9M3 9h15M3 13h11M3 17h6"/>`),
+  avwap: g(`<path d="M4 18c4-1 6-9 9-9s4 5 8 3"/>${dot(4, 18)}`),
+  measure: g(`<rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/>`),
+  text: g(`<path d="M5 6h14M12 6v13M9 19h6"/>`),
+  callout: g(`<path d="M4 5h16v10H11l-4 4v-4H4Z"/>`),
+  anchoredtext: g(`<path d="M7 8h10M12 8v10M9.5 18h5"/><circle cx="4" cy="4" r="1.6" fill="currentColor" stroke="none"/>`),
+  arrowmarker: g(`<path d="M5 4l15 8-15 8Z" fill="currentColor" stroke="none"/>`),
+  markup: g(`<path d="M12 4l9 15H3Z" fill="var(--green-up)" stroke="none"/>`),
+  markdown: g(`<path d="M12 20 3 5h18Z" fill="var(--red-down)" stroke="none"/>`)
+};
+const DRAW_CATS = [
+  { name: 'Lines', tools: [['Trend Line', 'trend'], ['Ray', 'ray'], ['Arrow', 'arrow'], ['Horizontal Line', 'hline'], ['Horizontal Ray', 'hray'], ['Price Label', 'plabel'], ['Vertical Line', 'vline'], ['Extended Line', 'extline'], ['Info Line', 'infoline'], ['Trend Angle', 'angle'], ['Cross Line', 'cross']] },
+  { name: 'Channels', tools: [['Parallel Channel', 'channel'], ['Regression Channel', 'regression'], ['Fib Channel (3-click)', 'fibchannel'], ['Flat Top/Bottom Channel (3-click)', 'flatchannel'], ['Disjoint Channel (4-click)', 'disjoint'], ["Andrews' Pitchfork (3-click)", 'pitchfork'], ['Schiff Pitchfork (3-click)', 'pitchfork'], ['Inside Pitchfork (3-click)', 'pitchfork'], ['Modified Schiff Pitchfork (3-click)', 'pitchfork']] },
+  { name: 'Shapes', tools: [['Rectangle', 'rect'], ['Ellipse', 'ellipse'], ['Triangle', 'triangle'], ['Arc', 'arc'], ['Circle', 'circle'], ['Rotated Rectangle', 'rotrect'], ['Sector (3-click pie wedge)', 'sector'], ['Double Curve (Bezier - 4-click)', 'curve'], ['Polyline (click to add, double-click to finish)', 'polyline'], ['Brush (freehand)', 'brush'], ['Highlighter (freehand, thick + translucent)', 'highlighter'], ['Sine Line (cycle drawing)', 'sine'], ['Time Cycles (semicircles)', 'timecycles'], ['Cyclic Lines', 'cyclic']] },
+  { name: 'Fibonacci', tools: [['Fibonacci Retracement', 'fibret'], ['Fibonacci Projection (3-click)', 'fibproj'], ['Fibonacci Arc', 'fibarc'], ['Fibonacci Fan', 'fibfan'], ['Fibonacci Time Zone', 'fibtime'], ['Fib Speed/Resistance Fan', 'fibspeed'], ['Trend-Based Fib Time (3-click)', 'fibtime'], ['Fib Speed/Resistance Arcs', 'fibarc'], ['Fibonacci Circles', 'fibcircles'], ['Fibonacci Spiral', 'fibspiral'], ['Fibonacci Wedge', 'fibwedge'], ['Pitchfan (3-click)', 'pitchfan']] },
+  { name: 'Gann', tools: [['Gann Fan', 'gannfan'], ['Gann Box', 'gannbox'], ['Gann Square', 'gannsq']] },
+  { name: 'Patterns', tools: [['ABCD Pattern (4-click)', 'abcd'], ['XABCD Pattern (5-click)', 'xabcd'], ['Cypher Pattern (5-click)', 'xabcd'], ['Head & Shoulders (5-click)', 'hs'], ['Three Drives (7-click)', 'threedrives'], ['Bar Pattern (clone source bars, 3-click)', 'barpattern'], ['Elliott Wave (5-click)', 'elliott'], ['Elliott Correction (A-B-C)', 'abcd'], ['Elliott Triangle (A-B-C-D-E)', 'tripattern'], ['Triangle Pattern (4-click converging)', 'tripattern']] },
+  { name: 'Forecast', tools: [['Long Position (entry / stop / target)', 'longpos'], ['Short Position (entry / stop / target)', 'shortpos'], ['Position Forecast', 'forecast'], ['Price Range', 'pricerange'], ['Date Range', 'daterange'], ['Date & Price Range', 'dprange'], ['Fixed Range Volume Profile (2-click)', 'volprofile'], ['Anchored Volume Profile (1-click anchor)', 'volprofile'], ['Anchored VWAP', 'avwap']] },
+  { name: 'Tools', tools: [['Measure', 'measure']] },
+  { name: 'Annotations', tools: [['Text Annotation', 'text'], ['Callout', 'callout'], ['Anchored Text', 'anchoredtext'], ['Arrow Marker', 'arrowmarker'], ['Mark Up', 'markup'], ['Mark Down', 'markdown']] }
+].map(c => ({ name: c.name, tools: c.tools.map(([name, gl]) => ({ name, g: gl })) }));
+let drawCat = 'Lines', drawQuery = '';
+function openDrawTools() {
+  pickHandler = null;
+  drawQuery = '';
+  openSheet('Drawing tools',
+    `<div class="search-field input">${ICO.search}<input id="drawSearch" type="search" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false"></div>` +
+    `<div class="cat-row" id="catRow"></div><div class="card-grid" id="toolGrid"></div>`, null, 'draw');
+  renderDrawTools();
+  document.getElementById('drawSearch').addEventListener('input', e => { drawQuery = e.target.value.trim().toLowerCase(); renderDrawTools(); });
+}
+function renderDrawTools() {
+  const q = drawQuery;
+  const catRow = document.getElementById('catRow');
+  catRow.innerHTML = DRAW_CATS.map(c => `<button class="chip ${!q && c.name === drawCat ? 'active' : ''}" data-cat="${c.name}">${c.name}</button>`).join('');
+  const active = catRow.querySelector('.chip.active');
+  if (active) {   /* scroll the row only - scrollIntoView would push the leftover offset into the phone frame */
+    const target = active.offsetLeft - catRow.offsetLeft - (catRow.clientWidth - active.offsetWidth) / 2;
+    catRow.scrollLeft = clamp(target, 0, Math.max(0, catRow.scrollWidth - catRow.clientWidth));
+  }
+  const list = q ? DRAW_CATS.flatMap(c => c.tools).filter(t => t.name.toLowerCase().includes(q)) : DRAW_CATS.find(c => c.name === drawCat).tools;
+  document.getElementById('toolGrid').innerHTML = list.length
+    ? list.map(t => `<div class="tcard ${state.tool === t.name ? 'sel' : ''}" data-tool="${t.name.replace(/"/g, '&quot;')}"><div class="tcard-ico">${GL[t.g]}</div><div class="tcard-label sm">${t.name}</div></div>`).join('')
+    : `<div class="empty">No tools match "${drawQuery}"</div>`;
+}
+function selectTool(name) {
+  state.tool = name;
+  markDirty();
+  closeOverlays();
+  toast(name + ' selected');
+  document.querySelectorAll('.pencil-btn').forEach(b => b.classList.add('tool-on'));
+}
 
 let pickHandler = null;
-function openPicker(title, items, selected, onPick, sub) {
-  pickHandler = onPick;
-  openSheet(title, rowsHTML(items, selected), sub);
-}
-function openMenu(title, items, sub) {
-  pickHandler = v => toast(v);
-  openSheet(title, rowsHTML(items.map(it => ({ label: it.label, value: it.toast || it.label, icon: it.icon, sub: it.sub, destructive: it.destructive })), null), sub);
-}
 function openIndicators() {
   pickHandler = null;
   openSheet('Indicators', INDICATORS.map(name =>
     `<div class="row" data-ind="${name}"><span>${name}</span><span class="toggle ${state.indicators[name] ? 'on' : ''}"></span></div>`).join(''),
     'Overlays and studies on the current chart');
 }
-function openRange() {
+/* One renderer for the Symbol search drawer and the "+" Add symbol drawer: only title and row action differ */
+let symMode = 'search';
+function symbolRowsHTML(q) {
+  const ql = (q || '').toLowerCase();
+  return SYMBOL_SECTIONS.map(([title, list]) => {
+    const rows = list.filter(t => !ql || t.toLowerCase().includes(ql) || SYMBOLS[t].toLowerCase().includes(ql));
+    if (!rows.length) return '';
+    return `<div class="iv-title">${title}</div>` + rows.map(t =>
+      `<div class="row" data-sym="${t}"><div class="row-lead">${logoHTML(t, 30)}<div class="row-main"><span>${t}</span><span class="row-sub">${SYMBOLS[t]}</span></div></div>${symMode === 'search' && t === 'SNDK' ? ICO.check : ''}</div>`).join('');
+  }).join('') || `<div class="empty">No symbols match "${q}"</div>`;
+}
+function openSymbolDrawer(mode) {
+  symMode = mode;
   pickHandler = null;
-  openSheet('Date range',
-    `<div class="chip-grid">${RANGES.map(v => `<button class="chip ${state.range === v ? 'active' : ''}" data-range="${v}">${v}</button>`).join('')}</div>` +
-    `<div class="row" data-pick="__custom">${'<div class="row-lead">' + ICO.calendar + '<div class="row-main"><span>Custom range</span><span class="row-sub">Pick start and end dates</span></div></div>'}</div>`,
-    'Showing daily bars, Jul 24 - Sep 23, 2026');
+  openSheet(mode === 'search' ? 'Symbol' : 'Add symbol',
+    `<div class="search-field input">${ICO.search}<input id="symSearch" type="search" placeholder="Search symbol or company" autocomplete="off" autocorrect="off" spellcheck="false"></div><div id="symList">${symbolRowsHTML('')}</div>`,
+    null, 'symbol');
+  document.getElementById('symSearch').addEventListener('input', e => { document.getElementById('symList').innerHTML = symbolRowsHTML(e.target.value.trim()); });
 }
-function openSymbolSearch() {
-  pickHandler = v => toast('Switch to ' + v + ' (mock only)');
-  const recents = [
-    { label: 'SNDK', value: 'SNDK', sub: 'SanDisk Corp' },
-    { label: 'WDC',  value: 'WDC',  sub: 'Western Digital Corp' },
-    { label: 'MU',   value: 'MU',   sub: 'Micron Technology Inc' },
-    { label: 'STX',  value: 'STX',  sub: 'Seagate Technology Holdings' },
-    { label: 'NVDA', value: 'NVDA', sub: 'NVIDIA Corp' }
-  ];
-  openSheet('Symbol', `<div class="search-field">${ICO.search}<span>Search symbol or company</span></div>` + rowsHTML(recents, 'SNDK'));
+function pickSymbol(t) {
+  closeOverlays();
+  if (symMode === 'search') { toast('Switch to ' + t + ' (mock only)'); return; }
+  addCompare(t);
 }
+/* ---- Compare ---- */
+function addCompare(t) {
+  if (t === 'SNDK') { toast('SNDK is already on the chart'); return; }
+  if (state.compare.some(c => c.sym === t)) { toast(t + ' is already compared'); return; }
+  if (state.compare.length >= CMP_MAX) { toast('You can compare up to ' + CMP_MAX + ' instruments'); return; }
+  const used = new Set(state.compare.map(c => c.ci)); let ci = 0; while (used.has(ci)) ci++;
+  if (!state.compare.length) state.cmpMode = '%';
+  state.compare.push({ sym: t, ci });
+  cmpSeries(t);
+  renderCompare(); drawAll(); markDirty();
+  toast(t + ' added');
+}
+function removeCompare(t) {
+  const k = state.compare.findIndex(c => c.sym === t); if (k < 0) return;
+  state.compare.splice(k, 1);
+  renderCompare(); drawAll(); markDirty();
+}
+function setCmpMode(m) {
+  if (state.cmpMode === m) return;
+  state.cmpMode = m; renderCompare(); drawAll(); markDirty();
+}
+function renderCompare() {
+  const on = state.compare.length > 0;
+  document.querySelectorAll('.chart-module').forEach(root => {
+    root.querySelector('.chart-head').classList.toggle('cmp', on);
+    const row = root.querySelector('.ch-cmprow');
+    row.innerHTML = !on ? '' :
+      `<div class="cmp-scroll">${state.compare.map(c => `<span class="cmp-chip" data-cmp="${c.sym}"><span class="cmp-sw" style="background:var(--cmp-${c.ci + 1})"></span>${c.sym}<span class="cmp-div"></span><button class="cmp-x" data-cmprm="${c.sym}" aria-label="Remove ${c.sym}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>`).join('')}<div class="cmp-toggle"><button data-cmpmode="%" class="${state.cmpMode === '%' ? 'active' : ''}">%</button><button data-cmpmode="$" class="${state.cmpMode === '$' ? 'active' : ''}">$</button></div></div>`;   /* toggle travels with the chips as the last item of the scrolling row */
+  });
+}
+document.addEventListener('click', e => {
+  const rm = e.target.closest('[data-cmprm]'); if (rm) { removeCompare(rm.dataset.cmprm); return; }
+  const md = e.target.closest('[data-cmpmode]'); if (md) setCmpMode(md.dataset.cmpmode);
+});
+
+/* ---- Create New Alert (mock of the native iOS drawer; copy is the app's) ---- */
+const ALERT_ICO = {
+  price: `<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20V6M5 9l3-3 3 3M20 8v14M17 19l3 3 3-3"/><path d="M14 11.5c-1.6 0-2.4.7-2.4 1.6 0 2 4.8.9 4.8 3 0 1-.9 1.7-2.4 1.7M14 10v1.5M14 17.8v1.4"/></svg>`,
+  pct: `<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 21 21 7"/><circle cx="9" cy="9" r="2.6"/><circle cx="19" cy="19" r="2.6"/></svg>`,
+  volume: `<svg viewBox="0 0 28 28" fill="currentColor"><rect x="4" y="15" width="5" height="9" rx="1"/><rect x="11.5" y="9" width="5" height="15" rx="1"/><rect x="19" y="4" width="5" height="20" rx="1"/></svg>`,
+  earnings: `<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v4a2 2 0 0 0 2 2h2l10 5V5L8 10H6a2 2 0 0 0-2 2Z"/><path d="M8 18l1.5 5M21 10.5a4 4 0 0 1 0 7"/></svg>`
+};
+const ALERT_TYPES = [
+  ['Price Alert', 'Notifies when an Instrument goes above, below or crosses a price', 'price'],
+  ['%-Change Alert', 'Notifies when an Instrument goes above, below or crosses a percentage', 'pct'],
+  ['Volume Alert', 'Notifies when an Instrument goes above, below or crosses the trading volume', 'volume'],
+  ['Earnings Report', "Notifies when an instrument's earnings report is released", 'earnings']
+];
+function openAlertDrawer() {
+  pickHandler = null;
+  openSheet('Create New Alert', `<div class="alert-cards">${ALERT_TYPES.map(([title, sub, ico]) =>
+    `<button class="alert-card" data-alert="${title}"><span class="alert-ico">${ALERT_ICO[ico]}</span><span class="alert-main"><span class="alert-title">${title}</span><span class="alert-sub">${sub}</span></span>${ICO.chevSm.replace('<svg', '<svg class="chev"')}</button>`).join('')}</div>`, null, 'alert');
+}
+
+/* ---- Screenshot + share sheet ---- */
+const SVG_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'visibility', 'font-family', 'font-size', 'font-weight', 'font-variant-numeric', 'shape-rendering'];
+function inlineSvgStyles(srcEl, dstEl) {
+  const cs = getComputedStyle(srcEl);
+  dstEl.setAttribute('style', SVG_PROPS.map(p => p + ':' + cs.getPropertyValue(p)).join(';'));
+  const a = srcEl.children, b = dstEl.children;
+  for (let i = 0; i < a.length; i++) inlineSvgStyles(a[i], b[i]);
+}
+const CAPTURE_FONT = '-apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif';
+function captureChart() {
+  const c = charts[state.orientation];
+  return new Promise((resolve, reject) => {
+    const W = c.W, H = c.H, BAND = 56, scale = 2;
+    if (!W || !H) return reject(new Error('chart not drawn'));
+    const cv = document.createElement('canvas'); cv.width = W * scale; cv.height = (BAND + H) * scale;
+    const ctx = cv.getContext('2d'); if (!ctx) return reject(new Error('no canvas'));
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, BAND + H);
+    /* Investing.com logotype band */
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.font = '700 22px ' + CAPTURE_FONT; ctx.fillStyle = '#0D1016'; ctx.fillText('Investing', 16, BAND / 2);
+    const wInv = ctx.measureText('Investing').width, wI = ctx.measureText('Invest').width;
+    ctx.fillStyle = '#8C8C8C'; ctx.fillText('.com', 16 + wInv, BAND / 2);
+    ctx.fillStyle = '#FF6B00'; ctx.beginPath(); ctx.arc(16 + wI + 2.4, BAND / 2 - 10.5, 2.4, 0, Math.PI * 2); ctx.fill();   /* orange dot over the i */
+    ctx.fillStyle = '#DEDEDE'; ctx.fillRect(0, BAND - .5, W, .5);
+    /* chart SVG with computed styles inlined */
+    const clone = c.svg.cloneNode(true);
+    inlineSvgStyles(c.svg, clone);
+    clone.querySelectorAll('.xhg, .events rect').forEach(n => n.remove());
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); clone.setAttribute('width', W); clone.setAttribute('height', H);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        ctx.drawImage(img, 0, BAND, W, H);
+        /* header block */
+        const l = SYMBOL_LOGOS.SNDK, hy = BAND + 8;
+        ctx.fillStyle = l.color; ctx.beginPath(); ctx.arc(22, hy + 10, 10, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#FFF'; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.textAlign = 'center'; ctx.fillText(l.text, 22, hy + 10.5);
+        ctx.textAlign = 'left'; ctx.fillStyle = '#000'; ctx.font = '600 13px ' + CAPTURE_FONT; ctx.fillText('SanDisk Corporation', 38, hy + 10.5);
+        const chgColor = LAST.c >= PREV.c ? '#008932' : '#E9152D';
+        if (c.land) {
+          const wName = ctx.measureText('SanDisk Corporation').width;
+          ctx.font = '700 13px ' + CAPTURE_FONT; ctx.fillText(fmt(LAST.c), 38 + wName + 8, hy + 10.5);
+          const wPx = ctx.measureText(fmt(LAST.c)).width;
+          ctx.font = '510 12px ' + CAPTURE_FONT; ctx.fillStyle = chgColor; ctx.fillText(chgText(), 38 + wName + 8 + wPx + 7, hy + 10.5);
+        } else {
+          ctx.font = '700 22px ' + CAPTURE_FONT; ctx.fillText(fmt(LAST.c), 12, hy + 36);
+          const wPx = ctx.measureText(fmt(LAST.c)).width;
+          ctx.font = '510 13px ' + CAPTURE_FONT; ctx.fillStyle = chgColor; ctx.fillText(chgText(), 12 + wPx + 8, hy + 38);
+        }
+        resolve(cv.toDataURL('image/png'));
+      } catch (err) { reject(err); }
+    };
+    img.onerror = () => reject(new Error('svg image failed'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+  });
+}
+/* static fallback if the canvas path fails (jsdom, tainted canvas) */
+const CAPTURE_FALLBACK = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="393" height="300"><rect width="100%" height="100%" fill="#F8F8F8"/><text x="16" y="34" font-family="sans-serif" font-size="20" font-weight="700" fill="#0D1016">Investing<tspan fill="#8C8C8C">.com</tspan></text><text x="16" y="160" font-family="sans-serif" font-size="14" fill="#8C8C8C">Chart screenshot placeholder</text></svg>');
+let shareImage = '', shareIsFallback = false;
+const SHARE_PEOPLE = [
+  { name: "Daniel's MacBook Pro", initials: 'DM', badge: 'airdrop' },
+  { name: 'Noa Levi', initials: 'NL', badge: 'telegram' },
+  { name: 'Omer Katz', initials: 'OK', badge: 'telegram' },
+  { name: 'Saved Messages', initials: '', badge: 'telegram', saved: true }
+];
+const SHARE_GLYPH = {
+  airdrop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 4.9a10 10 0 0 1 0 14.2"/></svg>`,
+  telegram: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 4.2 3.6 10.7c-1 .4-1 1 0 1.3l4.3 1.3 1.6 5c.2.6.6.7 1 .3l2.3-2.2 4.6 3.4c.8.4 1.4.2 1.6-.8l2.9-13.6c.3-1.2-.4-1.7-1.4-1.2ZM9 12.9l8.9-5.6c.4-.3.8 0 .5.3l-7.4 6.7-.3 3.2-1.7-4.6Z"/></svg>`,
+  messages: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5c-5 0-9 3.3-9 7.5 0 2.3 1.2 4.3 3.1 5.7-.2 1.2-.8 2.4-1.7 3.3 1.9-.2 3.6-1 4.9-2.1.9.2 1.8.3 2.7.3 5 0 9-3.3 9-7.5s-4-7.2-9-7.2Z"/></svg>`,
+  mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>`,
+  notes: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 10h12M6 14h12M6 18h8"/></svg>`,
+  copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg>`,
+  contact: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="9" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M19 4v4M17 6h4"/></svg>`,
+  print: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M7 8V4h10v4M5 8h14a2 2 0 0 1 2 2v6h-4v4H7v-4H3v-6a2 2 0 0 1 2-2Z"/><path d="M7 14h10"/></svg>`,
+  more: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>`
+};
+function shareSheetHTML() {
+  const people = SHARE_PEOPLE.map(p =>
+    `<button class="sh-item" data-share="${p.name}"><span class="sh-avatar ${p.saved ? 'saved' : ''}" ${p.saved ? 'style="background:#2AABEE"' : ''}>${p.saved ? SHARE_GLYPH.telegram.replace('<svg', '<svg style="width:55%;height:55%"') : p.initials}<span class="sh-badge ${p.badge}">${SHARE_GLYPH[p.badge]}</span></span><span class="sh-label">${p.name}</span></button>`).join('');
+  const apps = [['AirDrop', 'airdrop'], ['Messages', 'messages'], ['Mail', 'mail'], ['Telegram', 'telegram'], ['Notes', 'notes']].map(([n, k]) =>
+    `<button class="sh-item" data-share="${n}"><span class="sh-app ${k === 'notes' ? 'notesapp' : k}">${SHARE_GLYPH[k]}</span><span class="sh-label">${n}</span></button>`).join('');
+  const actions = [['Copy', 'copy'], ['Assign to Contact', 'contact'], ['Print', 'print'], ['View More', 'more']].map(([n, k]) =>
+    `<button class="sh-item" data-share="${n}"><span class="sh-action">${SHARE_GLYPH[k]}</span><span class="sh-label">${n}</span></button>`).join('');
+  return `<div class="sheet-grabber"></div><button class="sheet-x" onclick="closeOverlays()" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>` +
+    `<div class="sh-top"><img class="sh-thumb" id="shThumb" src="${shareImage}" alt="Chart screenshot" data-share="thumb"><div class="sh-meta"><div class="sh-title">SanDisk Corporation Advanced Chart - Investing.com</div><div class="sh-sub">Image</div><button class="sh-options" data-share="Options">Options ${ICO.chevSm}</button></div></div>` +
+    `<div class="sh-div"></div><div class="sh-row people">${people}</div><div class="sh-div"></div><div class="sh-row apps">${apps}</div><div class="sh-div"></div><div class="sh-row actions">${actions}</div>`;
+}
+const shareEl = document.getElementById('shareSheet');
+function openShareSheet(url, fallback) {
+  shareImage = url; shareIsFallback = !!fallback;
+  closeOverlays();
+  shareEl.innerHTML = shareSheetHTML();
+  shareEl.style.transform = '';
+  document.getElementById('backdrop').classList.add('open');
+  shareEl.classList.add('open');
+}
+function shareChart() {
+  captureChart().then(url => openShareSheet(url, false)).catch(() => openShareSheet(CAPTURE_FALLBACK, true));
+}
+shareEl.addEventListener('click', e => {
+  const it = e.target.closest('[data-share]'); if (!it) return;
+  const k = it.dataset.share;
+  if (k === 'thumb') { const win = window.open(shareImage, '_blank'); if (!win) toast('Pop-up blocked'); return; }
+  if (k === 'Copy') { toast('Image copied'); return; }
+  toast(k);
+});
+/* swipe down to dismiss */
+(() => {
+  let y0 = null, dy = 0;
+  shareEl.addEventListener('pointerdown', e => { if (shareEl.scrollTop > 0) return; y0 = e.clientY; dy = 0; shareEl.classList.add('dragging'); });
+  shareEl.addEventListener('pointermove', e => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); shareEl.style.transform = `translateY(${dy}px)`; });
+  const end = () => { if (y0 === null) return; shareEl.classList.remove('dragging'); y0 = null; if (dy > 80) closeOverlays(); shareEl.style.transform = ''; };
+  shareEl.addEventListener('pointerup', end); shareEl.addEventListener('pointercancel', end);
+})();
 function openAnalyze() {
   pickHandler = null;
   openSheet('AI chart analysis',
     `<div class="ai-body" id="aiBody"><div class="skeleton" style="width:92%"></div><div class="skeleton" style="width:78%"></div><div class="skeleton" style="width:86%"></div><div class="skeleton" style="width:60%"></div></div>`,
-    'SNDK &middot; ' + state.interval + ' &middot; last 43 sessions');
+    'SNDK &middot; ' + state.interval + ' &middot; last ' + BARS.length + ' sessions');
   setTimeout(() => {
     const el = document.getElementById('aiBody'); if (!el) return;
     el.innerHTML =
@@ -992,7 +2212,215 @@ function openAnalyze() {
   }, 900);
 }
 
+/* Popover interactions: settings switches, event card CTA, tap-away dismiss */
+document.addEventListener('click', e => {
+  const row = e.target.closest('[data-set]');
+  if (row) { toggleSetting(row.dataset.set); return; }
+  const sa = e.target.closest('[data-setact]');
+  if (sa) { const c = charts[state.orientation]; c.closeSettings(); c.scrollToLatest(); return; }
+  const cta = e.target.closest('[data-evcta]');
+  if (cta) { toast(cta.dataset.evcta); Object.values(charts).forEach(c => c.closeEvent()); }
+});
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest && e.target.closest('.pop, .gear-btn, [data-ev], .chart-svg')) return;
+  Object.values(charts).forEach(c => { c.closeEvent(); c.closeSettings(); });
+});
+
+/* ============================================================
+   LAYOUTS - saved chart layouts (replaces templates)
+   ============================================================ */
+const LAYOUTS_KEY = 'ac-layouts';
+const layouts = { list: [], activeId: null, autosave: false, order: 'manual', dirty: false };
+let autosaveTimer = 0;
+function loadLayoutsStore() {
+  try {
+    const raw = localStorage.getItem(LAYOUTS_KEY); if (!raw) return;
+    const s = JSON.parse(raw);
+    if (Array.isArray(s.list)) layouts.list = s.list;
+    layouts.activeId = s.activeId || null; layouts.autosave = !!s.autosave; layouts.order = s.order || 'manual';
+  } catch (_) {}
+}
+function saveLayoutsStore() {
+  try { localStorage.setItem(LAYOUTS_KEY, JSON.stringify({ list: layouts.list, activeId: layouts.activeId, autosave: layouts.autosave, order: layouts.order })); } catch (_) {}
+}
+function snapshotState() {
+  return { type: state.type, interval: state.interval, range: state.range, indicators: { ...state.indicators }, settings: { ...state.settings }, tool: state.tool, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
+}
+function restoreState(s) {
+  state.type = s.type; state.interval = s.interval; state.range = s.range || null;
+  state.indicators = { ...s.indicators }; state.settings = { ...state.settings, ...s.settings }; state.tool = s.tool || null;
+  state.compare = (s.compare || []).slice(0, CMP_MAX).map(c => ({ ...c })); state.cmpMode = s.cmpMode || '%';
+  state.compare.forEach(c => cmpSeries(c.sym)); renderCompare();
+  document.querySelectorAll('.pencil-btn').forEach(b => b.classList.toggle('tool-on', !!state.tool));
+  refreshLabels();
+  if (state.range) applyRange(state.range);
+  else Object.values(charts).forEach(c => { c.cancelScroll(); c.view.count = clamp(s.count || c.defaultCount, MIN_BARS, BARS.length); c.view.start = BARS.length - c.view.count; });
+  drawAll();
+}
+const DEFAULT_STATE = { type: 'candles', interval: '1D', range: null, indicators: { 'Volume': true }, settings: { extended: true, events: true, log: false, invert: false, countdown: false }, tool: null, count: 0, compare: [], cmpMode: '%' };
+const activeLayout = () => layouts.list.find(l => l.id === layouts.activeId) || null;
+function relTime(ts) {
+  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if (s < 45) return 'just now';
+  const m = Math.round(s / 60); if (m < 60) return m + 'm ago';
+  const h = Math.round(m / 60); if (h < 24) return h + 'h ago';
+  return Math.round(h / 24) + 'd ago';
+}
+function refreshLayoutBtn() {
+  const a = activeLayout();
+  /* no layout applied (before any save and after "+"): portrait shows the folder icon alone, landscape shows "Untitled" */
+  document.querySelectorAll('.layout-btn .layout-name').forEach(el => { const txt = a ? a.name : (el.closest('#chartModuleL') ? 'Untitled' : ''); if (el.textContent !== txt) el.textContent = txt; });
+  document.querySelectorAll('.save-btn').forEach(b => b.classList.toggle('dirty', layouts.dirty && !layouts.autosave));
+}
+function markDirty() {
+  layouts.dirty = true;
+  refreshLayoutBtn();
+  if (layouts.autosave && activeLayout()) { clearTimeout(autosaveTimer); autosaveTimer = setTimeout(() => saveCurrentLayout(true), 1000); }
+}
+function saveCurrentLayout(silent) {
+  const a = activeLayout(); if (!a) return;
+  a.state = snapshotState(); a.savedAt = Date.now(); a.usedAt = Date.now();
+  layouts.dirty = false; saveLayoutsStore(); refreshLayoutBtn();
+  if (!silent) toast('Layout saved');
+}
+function createLayout(name) {
+  const l = { id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name, createdAt: Date.now(), savedAt: Date.now(), usedAt: Date.now(), state: snapshotState() };
+  layouts.list.push(l); layouts.activeId = l.id; layouts.dirty = false;
+  saveLayoutsStore(); refreshLayoutBtn();
+  return l;
+}
+function saveLayoutTap() {
+  const a = activeLayout();
+  if (!a) { openNameDialog('', name => { createLayout(name); toast('Layout saved'); }); return; }
+  if (layouts.dirty) saveCurrentLayout(false); else toast('Layout is up to date');
+}
+function applyLayout(id) {
+  const l = layouts.list.find(x => x.id === id); if (!l) return;
+  layouts.activeId = id; l.usedAt = Date.now();
+  restoreState(l.state);
+  layouts.dirty = false; saveLayoutsStore(); refreshLayoutBtn();
+}
+function newLayout() {
+  layouts.activeId = null;
+  restoreState(DEFAULT_STATE);
+  layouts.dirty = true; saveLayoutsStore(); refreshLayoutBtn();
+  toast('New layout');
+}
+function setAutosave(on) {
+  layouts.autosave = on; saveLayoutsStore(); refreshLayoutBtn();
+  if (on && layouts.dirty && activeLayout()) saveCurrentLayout(true);
+}
+/* Layout Name dialog (new + rename) */
+let nameCb = null;
+const nameScrim = document.getElementById('nameScrim'), nameInput = document.getElementById('nameInput'), nameSave = document.getElementById('nameSave');
+function openNameDialog(value, cb) {
+  nameCb = cb; nameInput.value = value || ''; nameSave.disabled = !nameInput.value.trim();
+  nameScrim.classList.add('open');
+  setTimeout(() => { nameInput.focus(); nameInput.select(); }, 60);
+}
+function closeNameDialog() { nameScrim.classList.remove('open'); nameCb = null; }
+nameInput.addEventListener('input', () => { nameSave.disabled = !nameInput.value.trim(); });
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !nameSave.disabled) nameSave.click(); if (e.key === 'Escape') closeNameDialog(); });
+nameSave.addEventListener('click', () => { const v = nameInput.value.trim(); if (!v) return; const cb = nameCb; closeNameDialog(); if (cb) cb(v); });
+document.getElementById('nameCancel').addEventListener('click', closeNameDialog);
+nameScrim.addEventListener('click', e => { if (e.target === nameScrim) closeNameDialog(); });
+
+/* Layouts drawer */
+function sortedLayouts() {
+  const l = layouts.list.slice();
+  if (layouts.order === 'used') l.sort((a, b) => b.usedAt - a.usedAt);
+  else if (layouts.order === 'saved') l.sort((a, b) => b.savedAt - a.savedAt);
+  return l;
+}
+function layoutRowHTML(l, manage) {
+  const active = l.id === layouts.activeId;
+  return `<div class="lay-row ${active ? 'active' : ''}" data-layout="${l.id}"><span class="lay-glyph"></span><div class="lay-main"><span class="lay-name">${l.name}</span><span class="lay-sub">${l.state.interval} &middot; ${relTime(l.savedAt)}</span></div>` +
+    (manage ? `<div class="lay-actions"><button class="lay-act" data-layact="rename" aria-label="Rename">${ICO.pencil}</button><button class="lay-act" data-layact="duplicate" aria-label="Duplicate">${ICO.dup}</button><button class="lay-act danger" data-layact="delete" aria-label="Delete">${ICO.trash}</button>${active ? '<span class="lay-dot"></span>' : ''}</div>` : (active ? '<span class="lay-dot"></span>' : '')) + `</div>`;
+}
+function layoutsListHTML(manage) {
+  const l = sortedLayouts();
+  if (!l.length) return `<div class="lay-empty"><b>No saved layouts yet</b>Tap the save icon in the toolbar to keep the current chart setup.</div>`;
+  return l.map(x => layoutRowHTML(x, manage)).join('');
+}
+function openLayoutsDrawer() {
+  pickHandler = null;
+  openSheet('Layouts', `<div id="layoutsList">${layoutsListHTML(false)}</div>`, null, 'layouts',
+    `<button class="tb-btn" data-lay="new" aria-label="New layout">${ICO.plusSm}</button><button class="tb-btn" data-lay="menu" aria-label="More">${ICO.dotsH}</button>`);
+}
+function layoutsMenuHTML() {
+  return `<div class="set-row" data-lay="autosave"><div class="set-main"><span class="set-label">Auto-save changes</span></div><span class="sw ${layouts.autosave ? 'on' : ''}"></span></div><div class="set-div"></div><div class="set-row set-action" data-lay="manage"><span class="set-label">Manage layouts</span>${ICO.chevSm}</div>`;
+}
+function toggleLayoutsMenu() {
+  let m = sheetEl.querySelector('.sheet-menu');
+  if (m) { m.remove(); return; }
+  m = document.createElement('div'); m.className = 'pop open sheet-menu'; m.innerHTML = layoutsMenuHTML();
+  sheetEl.appendChild(m);
+}
+/* Manage layouts (full-height drawer, modelled on the web "Workspaces" modal) */
+function openManageLayouts() {
+  pickHandler = null;
+  openSheet('Manage layouts',
+    `<div class="manage-body"><div class="manage-list" id="manageList">${layoutsListHTML(true)}</div></div>`,
+    null, 'manage',
+    `<button class="tb-btn" data-lay="sortmenu" aria-label="Sort">${ICO.dotsH}</button>`);
+}
+const SORT_OPTIONS = [['manual', 'Manual'], ['used', 'Last used'], ['saved', 'Save date']];
+function sortMenuHTML() {
+  return SORT_OPTIONS.map(([v, label]) => `<div class="sort-row" data-sort="${v}"><span>${label}</span>${layouts.order === v ? ICO.check : ''}</div>`).join('');
+}
+function toggleSortMenu() {
+  let m = sheetEl.querySelector('.sheet-menu');
+  if (m) { m.remove(); return; }
+  m = document.createElement('div'); m.className = 'pop open sheet-menu'; m.innerHTML = sortMenuHTML();
+  sheetEl.appendChild(m);
+}
+function rerenderLayouts() {
+  const a = document.getElementById('layoutsList'); if (a) a.innerHTML = layoutsListHTML(false);
+  const m = document.getElementById('manageList'); if (m) m.innerHTML = layoutsListHTML(true);
+  sheetEl.querySelectorAll('[data-lay="autosave"] .sw').forEach(s => s.classList.toggle('on', layouts.autosave));
+}
+function deleteLayout(id) {
+  const idx = layouts.list.findIndex(l => l.id === id); if (idx < 0) return;
+  const [removed] = layouts.list.splice(idx, 1);
+  const wasActive = layouts.activeId === id; if (wasActive) layouts.activeId = null;
+  saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts();
+  toast('Layout deleted', { label: 'Undo', fn: () => { layouts.list.splice(idx, 0, removed); if (wasActive) layouts.activeId = id; saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts(); } });
+}
+sheetEl.addEventListener('click', e => {
+  const act = e.target.closest('[data-lay]');
+  if (act) {
+    const k = act.dataset.lay;
+    if (k === 'new') { closeOverlays(); newLayout(); }
+    else if (k === 'menu') toggleLayoutsMenu();
+    else if (k === 'autosave') { setAutosave(!layouts.autosave); rerenderLayouts(); }
+    else if (k === 'manage') openManageLayouts();
+    else if (k === 'sortmenu') toggleSortMenu();
+    return;
+  }
+  const so = e.target.closest('[data-sort]');
+  if (so) { layouts.order = so.dataset.sort; saveLayoutsStore(); sheetEl.querySelector('.sheet-menu')?.remove(); rerenderLayouts(); return; }
+  const la = e.target.closest('[data-layact]');
+  if (la) {
+    const id = la.closest('[data-layout]').dataset.layout, l = layouts.list.find(x => x.id === id); if (!l) return;
+    const k = la.dataset.layact;
+    if (k === 'rename') openNameDialog(l.name, name => { l.name = name; saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts(); toast('Layout renamed'); });
+    else if (k === 'duplicate') { const copy = { ...l, id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: l.name + ' copy', createdAt: Date.now(), savedAt: Date.now(), usedAt: Date.now(), state: JSON.parse(JSON.stringify(l.state)) }; layouts.list.splice(layouts.list.indexOf(l) + 1, 0, copy); saveLayoutsStore(); rerenderLayouts(); toast('Layout duplicated'); }
+    else if (k === 'delete') deleteLayout(id);
+    return;
+  }
+  const row = e.target.closest('[data-layout]');
+  if (row && !e.target.closest('.lay-actions')) { applyLayout(row.dataset.layout); closeOverlays(); toast('Layout applied'); }
+});
+
 /* Sheet interactions */
+sheetEl.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) {
+    drawerTab = tab.dataset.tab;
+    document.getElementById('sheetTitle').innerHTML = drawerSegHTML();
+    sheetBody.innerHTML = drawerBodyHTML();
+  }
+});
 sheetBody.addEventListener('click', e => {
   const ind = e.target.closest('[data-ind]');
   if (ind) {
@@ -1000,16 +2428,40 @@ sheetBody.addEventListener('click', e => {
     state.indicators[name] = !state.indicators[name];
     ind.querySelector('.toggle').classList.toggle('on', state.indicators[name]);
     toast((state.indicators[name] ? 'Added ' : 'Removed ') + name);
+    markDirty();
     return;
   }
-  const chip = e.target.closest('[data-range]');
-  if (chip) {
-    state.range = chip.dataset.range;
-    sheetBody.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.range === state.range));
-    refreshLabels();
+  const rg = e.target.closest('[data-range]');
+  if (rg) {
+    applyRange(rg.dataset.range);
+    markDirty();
+    sheetBody.innerHTML = drawerBodyHTML();
     setTimeout(closeOverlays, 160);
     return;
   }
+  const iv = e.target.closest('[data-iv]');
+  if (iv) {
+    if (iv.disabled) return;
+    state.interval = iv.dataset.iv;          /* the interval can only change from this drawer */
+    markDirty();
+    refreshLabels();
+    sheetBody.querySelectorAll('.iv-chip').forEach(c => c.classList.toggle('active', c.dataset.iv === state.interval));
+    setTimeout(closeOverlays, 160);
+    return;
+  }
+  const cat = e.target.closest('[data-cat]');
+  if (cat) {
+    drawCat = cat.dataset.cat; drawQuery = '';
+    const inp = document.getElementById('drawSearch'); if (inp) inp.value = '';
+    renderDrawTools();
+    return;
+  }
+  const tool = e.target.closest('[data-tool]');
+  if (tool) { selectTool(tool.dataset.tool); return; }
+  const sym = e.target.closest('[data-sym]');
+  if (sym) { pickSymbol(sym.dataset.sym); return; }
+  const al = e.target.closest('[data-alert]');
+  if (al) { closeOverlays(); toast(al.dataset.alert + ' (native flow)'); return; }
   const row = e.target.closest('[data-pick]');
   if (row) {
     const v = row.dataset.pick;
@@ -1027,46 +2479,51 @@ document.addEventListener('click', e => {
   if (!btn) return;
   const act = btn.dataset.act;
   switch (act) {
-    case 'symbol':     openSymbolSearch(); break;
-    case 'interval':   openPicker('Interval', INTERVALS, state.interval, v => { state.interval = v; refreshLabels(); toast('Interval: ' + v); }); break;
-    case 'type':       openPicker('Chart type', TYPES, state.type, v => { state.type = v; refreshLabels(); drawAll(); }); break;
-    case 'indicators': openIndicators(); break;
-    case 'templates':  openMenu('Templates', [
-                         { label: 'Default', icon: ICO.folder, sub: 'Candles, Volume', toast: 'Template: Default' },
-                         { label: 'Swing setup', icon: ICO.folder, sub: 'MA 20/50, RSI', toast: 'Template: Swing setup' },
-                         { label: 'Momentum', icon: ICO.folder, sub: 'MACD, VWAP, Volume', toast: 'Template: Momentum' },
-                         { label: 'Save current as template', icon: ICO.save, toast: 'Template saved' }
-                       ]); break;
-    case 'more':       openMenu('More', [
-                         { label: 'Compare symbol', icon: ICO.compare, toast: 'Compare symbol' },
-                         { label: 'Chart settings', icon: ICO.gear, toast: 'Chart settings' },
-                         { label: 'Share chart', icon: ICO.share, toast: 'Share chart' },
-                         { label: 'Reset chart', icon: ICO.reset, toast: 'Chart reset', destructive: true }
-                       ]); break;
-    case 'compare':    openMenu('Compare', [
-                         { label: 'WDC', sub: 'Western Digital Corp', icon: ICO.compare, toast: 'Compare with WDC' },
-                         { label: 'MU', sub: 'Micron Technology Inc', icon: ICO.compare, toast: 'Compare with MU' },
-                         { label: 'SOX', sub: 'PHLX Semiconductor Index', icon: ICO.compare, toast: 'Compare with SOX' },
-                         { label: 'Search another symbol', icon: ICO.search, toast: 'Search symbol' }
-                       ], 'Overlay a second instrument'); break;
-    case 'draw':       openMenu('Drawing tools', [
-                         { label: 'Trend line', icon: ICO.trend, toast: 'Trend line' },
-                         { label: 'Horizontal line', icon: ICO.hline, toast: 'Horizontal line' },
-                         { label: 'Fibonacci retracement', icon: ICO.fib, toast: 'Fibonacci retracement' },
-                         { label: 'Rectangle', icon: ICO.rect, toast: 'Rectangle' },
-                         { label: 'Text', icon: ICO.text, toast: 'Text' },
-                         { label: 'Clear all drawings', icon: ICO.trash, toast: 'Drawings cleared', destructive: true }
-                       ]); break;
-    case 'range':      openRange(); break;
-    case 'exitfs':     toast('Would close the full-screen chart'); break;
-    case 'reset':      charts[state.orientation].clear(); toast('Back to latest bar'); break;
+    case 'add':        openSymbolDrawer('add'); break;
+    case 'symbol':     openSymbolDrawer('search'); break;
+    case 'interval':   openIntervalDrawer('interval'); break;
+    case 'type':       openTypeSheet(); break;
+    case 'draw':       openDrawTools(); break;
+    case 'layers':     openIndicators(); break;
+    case 'save-layout': saveLayoutTap(); break;
+    case 'layouts':    openLayoutsDrawer(); break;
+    case 'camera':     shareChart(); break;
+    case 'alert':      openAlertDrawer(); break;
+    case 'exitfs':     toast('Close full screen'); break;
+    case 'latest':     charts[state.orientation].scrollToLatest(); break;
+    case 'settings':   { const c = charts[state.orientation]; if (c.settingsEl.classList.contains('open')) c.closeSettings(); else c.openSettings(); } break;
     case 'analyze':    openAnalyze(); break;
   }
 });
 
 /* ============================================================
+   LIVE TICKS - small random nudges to the last close every 1-2 s,
+   paused while any crosshair is active so hovered values stay put
+   ============================================================ */
+const LIVE0 = LAST.c;
+let liveTimer = 0;
+function tickOnce() {
+  const xhActive = Object.values(charts).some(c => c.hover);
+  if (!xhActive && mode !== 'notes' && document.visibilityState !== 'hidden') {
+    let np = LAST.c * (1 + (0.05 + Math.random() * 0.15) / 100 * (Math.random() < 0.5 ? -1 : 1));
+    if (Math.abs(np - LIVE0) / LIVE0 > 0.004) np = LAST.c - (LAST.c - LIVE0) * 0.5;   /* leash: never drifts far from the real close */
+    np = Math.round(np * 100) / 100;
+    const dir = np > LAST.c ? 'up' : np < LAST.c ? 'down' : '';
+    LAST.c = np; LAST.h = Math.max(LAST.h, np); LAST.l = Math.min(LAST.l, np);
+    state.compare.forEach(c => { const a = CMP_SERIES[c.sym]; if (a) a[a.length - 1] = Math.round(a[a.length - 1] * (1 + (Math.random() - 0.5) * 0.001) * 100) / 100; });
+    const hb = HA[HA.length - 1]; hb.c = (LAST.o + LAST.h + LAST.l + LAST.c) / 4; hb.h = Math.max(LAST.h, hb.o, hb.c); hb.l = Math.min(LAST.l, hb.o, hb.c);
+    Object.keys(charts).forEach(k => { if (k === state.orientation) charts[k].tick(dir); else { charts[k].pxEl.textContent = fmt(LAST.c); charts[k].chgEl.textContent = chgText(); } });
+  }
+  liveTimer = setTimeout(tickOnce, 1000 + Math.random() * 1000);
+}
+liveTimer = setTimeout(tickOnce, 1500);
+
+/* ============================================================
    INIT
    ============================================================ */
+loadLayoutsStore();
+if (activeLayout()) restoreState(activeLayout().state);
+refreshLayoutBtn();
 refreshLabels();
 applyScale();
 requestAnimationFrame(() => charts.portrait.draw());
