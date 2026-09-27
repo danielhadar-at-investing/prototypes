@@ -47,6 +47,7 @@
   --accent-bg:       rgba(255,107,0,.12);   /* active layout row tint (web uses #FFE4D1) */
   --cmp-1: #3A5BE0; --cmp-2: #D63864; --cmp-3: #F07B1F; --cmp-4: #3DBCC9; --cmp-5: #8BBE45;   /* compare series palette, in order of addition */
   --chip-bg: #F2F3F5; --chip-border: #E3E5E8;
+  --ind-1: #F5A623; --ind-2: #3372F6; --ind-3: #8E44AD; --ind-4: #1ABC9C; --ind-5: #E91E63; --ind-6: #2E7D32;   /* indicator palette (web: SMA orange, EMA blue) */
   --chrome-bg:       rgba(249,249,249,.94);
   --scrim:           rgba(0,0,0,.45);
 
@@ -315,6 +316,24 @@ svg { display: block; }
 .ch-l1.one-line .ch-main { gap: 7px; }
 .ch-price { padding: 0 6px 1px; }
 .ch-detail { padding: 2px 6px; margin-top: 2px; }
+/* active-indicator legend: one row per study, under the chips / O-H-L-C slot */
+.ch-legend { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 3px; pointer-events: auto; }
+.lg-rows { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.ch-legend.collapsed .lg-rows { display: none; }
+.lg-row { display: inline-flex; align-items: center; gap: 6px; height: 17px; padding: 0 6px; margin-left: -6px; border-radius: 5px; background: var(--head-tint); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lg-bar { width: 3px; height: 14px; border-radius: 1.5px; flex-shrink: 0; }
+.lg-name { font-weight: 600; color: var(--text-primary); }
+.lg-val { font-weight: 510; }
+.lg-toggle { height: 28px; padding: 0 9px 0 7px; border-radius: 14px; margin-left: -6px; background: var(--head-tint); border: .5px solid var(--divider); display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 510; color: var(--text-secondary-2); }
+.lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary); transition: transform .2s var(--ease-ios); }
+.ch-legend.collapsed .lg-toggle svg { transform: rotate(-90deg); }
+/* the crosshair rows overlay the swap slot; with a legend the slot keeps their height so the legend stays put */
+.chart-head.has-legend .ch-swap { min-height: 40px; }
+#viewLandscape .chart-head.has-legend .ch-swap { min-height: 22px; }
+.chart-head.has-legend.cmp .ch-swap { min-height: 0; }
+/* layers button badge: active indicator count */
+.ind-badge { position: absolute; top: 3px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--text-secondary); color: #FFF; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; letter-spacing: 0; }
+.ind-badge:empty { display: none; }
 /* chips row and the long-press rows share one slot and cross-fade */
 .ch-swap { position: relative; align-self: stretch; width: 100%; min-width: 0; }
 .ch-details { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: flex-start; }
@@ -344,6 +363,18 @@ svg { display: block; }
 .sym-logo { border-radius: 50%; color: #FFF; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: 0; }
 .sym-logo svg { width: 60%; height: 60%; }
 .sheet.drawer.h-symbol { height: min(640px, 94%); }
+.sheet.drawer.h-indicators { height: min(640px, 94%); }
+.ind-row { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 var(--margin); position: relative; transition: background .15s; }
+.ind-row:active { background: rgba(128,128,128,.1); }
+.ind-row + .ind-row::before { content: ""; position: absolute; top: 0; left: var(--margin); right: 0; height: .5px; background: var(--divider); }
+.ind-code { width: 74px; flex-shrink: 0; font-size: 13px; font-weight: 700; letter-spacing: -.2px; }
+.ind-name { flex: 1; min-width: 0; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ind-add { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--text-active); font-size: 20px; font-weight: 400; flex-shrink: 0; }
+.ind-row.active .ind-add { background: var(--text-active); color: #FFF; }
+.ind-row.active .ind-add svg { width: 14px; height: 14px; }
+.ind-sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.chart-svg .study { fill: none; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.chart-svg .study.band { stroke-width: 1; stroke-dasharray: 4 3; }
 /* O/H/L/C + Vol rows: hidden at rest, fade in and out together with the crosshair lines (same timings as .xhg) */
 .ch-detail { opacity: 0; transition: opacity .2s ease; }
 .chart-head.xh .ch-detail { opacity: 1; transition-duration: .15s; }
@@ -578,6 +609,8 @@ svg { display: block; }
 .cat-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px var(--margin) 10px; scrollbar-width: none; }
 .cat-row::-webkit-scrollbar { display: none; }
 .cat-row .chip { flex-shrink: 0; }
+.chip .chip-n { color: var(--text-secondary); font-weight: 400; margin-left: 2px; }
+.chip.active .chip-n { color: rgba(255,255,255,.7); }
 .empty { grid-column: 1 / -1; text-align: center; color: var(--text-secondary); font-size: 14px; padding: 24px 0; }
 .search-field {
   margin: 4px var(--margin) 8px; height: 36px; border-radius: 10px;
@@ -853,10 +886,82 @@ const state = {
   tool: null,             /* active drawing tool */
   settings: { extended: true, events: true, log: false, invert: false, countdown: false },
   compare: [],            /* [{ sym, ci }] up to 5, ci = palette slot */
+  legendOpen: true,
   cmpMode: '%',           /* '%' rebased percent view, '$' shared price axis */
-  indicators: { 'Volume': true }
+  studies: [{ code: 'Vol', color: 'var(--gray-1)' }]   /* active indicators in legend order; Volume is on by default */
 };
 const MIN_BARS = 12;
+
+/* Indicator catalogue, captured from the Investing.com web chart (Oracle advanced chart, Indicators panel):
+   62 studies, tabs All indicators 62 / Trend 24 / Volatility 11 / Momentum 9 / Oscillator 17 (Favorites ignored). */
+const IND_CATS = ['All indicators', 'Trend', 'Volatility', 'Momentum', 'Oscillator'];
+const IND_MAX = 8;
+const INDICATORS = [
+  ['Vol', 'Volume', '', 'vol', []],
+  ['SMA', 'Simple Moving Average', 'Trend', 'ma', [14]], ['EMA', 'Exponential Moving Average', 'Trend', 'ma', [14]], ['WMA', 'Weighted Moving Average', 'Trend', 'ma', [14]], ['SMMA', 'Smoothed Moving Average', 'Trend', 'ma', [14]],
+  ['MA Cross', 'MA Cross', 'Trend', 'osc', [9, 21]], ['Alligator', 'Williams Alligator', 'Trend', 'osc', [13, 8, 5]], ['VWAP', 'VWAP', 'Trend', 'vwap', []], ['AVWAP', 'Anchored VWAP', 'Trend', 'osc', []], ['PSAR', 'Parabolic SAR', 'Trend', 'osc', [0.02, 0.2]],
+  ['Ichimoku', 'Ichimoku Cloud', 'Trend', 'osc', [9, 26, 52]], ['ZZ', 'ZigZag', 'Trend', 'osc', [5]], ['ST', 'Supertrend', 'Trend', 'osc', [10, 3]], ['Pivots', 'Pivots HL', 'Trend', 'osc', [10]], ['PP', 'Pivot Points', 'Trend', 'osc', []],
+  ['ADX', 'Average Directional Index', 'Trend', 'osc', [14]], ['Aroon', 'Aroon', 'Trend', 'osc', [14]], ['PPO', 'Price Oscillator', 'Trend', 'osc', [12, 26]], ['OBV', 'On Balance Volume', 'Trend', 'osc', []], ['Accum/Dist', 'Accumulation/Distribution', 'Trend', 'osc', []],
+  ['AroonOsc', 'Aroon Oscillator', 'Trend', 'osc', [14]], ['ASI', 'Accumulative Swing Index', 'Trend', 'osc', []], ['W A/D', 'Williams Accumulation/Distribution', 'Trend', 'osc', []], ['Env', 'Moving Average Envelopes', 'Trend', 'osc', [20, 2.5]], ['Gator', 'Gator Oscillator', 'Trend', 'osc', [13, 8, 5]],
+  ['BB', 'Bollinger Bands', 'Volatility', 'bb', [20, 2]], ['KC', 'Keltner Channel', 'Volatility', 'osc', [20, 1]], ['DC', 'Donchian Channels', 'Volatility', 'osc', [20]], ['Gaps', 'Gaps', 'Volatility', 'osc', []], ['ATR', 'Average True Range', 'Volatility', 'atr', [14]],
+  ['RVI', 'Relative Volatility Index', 'Volatility', 'osc', [10]], ['BB%B', 'Bollinger %B', 'Volatility', 'osc', [20, 2]], ['BBW', 'Bollinger Bandwidth', 'Volatility', 'osc', [20, 2]], ['CV', 'Chaikin Volatility', 'Volatility', 'osc', [10]], ['MeanDev', 'Mean Deviation', 'Volatility', 'osc', [20]], ['TR', 'True Range', 'Volatility', 'tr', []],
+  ['RSI', 'Relative Strength Index', 'Momentum', 'rsi', [14]], ['MACD', 'MACD', 'Momentum', 'macd', [12, 26, 9]], ['ROC', 'Rate of Change', 'Momentum', 'roc', [9]], ['MOM', 'Momentum', 'Momentum', 'mom', [10]], ['AO', 'Awesome Oscillator', 'Momentum', 'osc', [5, 34]],
+  ['TRIX', 'TRIX', 'Momentum', 'osc', [18]], ['TSI', 'True Strength Index', 'Momentum', 'osc', [25, 13]], ['RVGI', 'Relative Vigor Index', 'Momentum', 'osc', [10]], ['DPO', 'Detrended Price Oscillator', 'Momentum', 'osc', [21]],
+  ['DeM', 'DeMarker', 'Oscillator', 'osc', [14]], ['Stoch', 'Stochastic', 'Oscillator', 'stoch', [14, 3]], ['StochRSI', 'Stochastic RSI', 'Oscillator', 'osc', [14, 14, 3, 3]], ['CCI', 'Commodity Channel Index', 'Oscillator', 'cci', [20]], ['%R', 'Williams %R', 'Oscillator', 'wpr', [14]],
+  ['UO', 'Ultimate Oscillator', 'Oscillator', 'osc', [7, 14, 28]], ['BBP', 'Bull Bear Power', 'Oscillator', 'osc', [13]], ['CMF', 'Chaikin Money Flow', 'Oscillator', 'osc', [20]], ['MFI', 'Money Flow Index', 'Oscillator', 'osc', [14]], ['BOP', 'Balance of Power', 'Oscillator', 'osc', []],
+  ['KVO', 'Klinger Volume Oscillator', 'Oscillator', 'osc', [34, 55]], ['BSP', 'Buy Sell Pressure', 'Oscillator', 'osc', []], ['ChaikinOsc', 'Chaikin Oscillator', 'Oscillator', 'osc', [3, 10]], ['EOM', 'Ease of Movement', 'Oscillator', 'osc', [14]], ['FI', 'Force Index', 'Oscillator', 'osc', [13]],
+  ['PVO', 'Percentage Volume Oscillator', 'Oscillator', 'osc', [12, 26]], ['A/D Ratio', 'Advance/Decline Ratio (Bars)', 'Oscillator', 'osc', [9]]
+].map(([code, name, cat, kind, params]) => ({ code, name, cat, kind, params }));
+const IND_BY_CODE = Object.fromEntries(INDICATORS.map(i => [i.code, i]));
+const IND_COLORS = ['var(--ind-1)', 'var(--ind-2)', 'var(--ind-3)', 'var(--ind-4)', 'var(--ind-5)', 'var(--ind-6)'];
+function indLabel(code) { const d = IND_BY_CODE[code]; return d.params.length ? `${code}(${d.params.join(', ')})` : code; }
+const hasStudy = code => state.studies.some(s => s.code === code);
+
+/* ---- study series over the full bar set (cached until the last bar ticks) ---- */
+const STUDY_CACHE = {};
+function studySeries(code) {
+  const d = IND_BY_CODE[code]; const key = code + ':' + LAST.c + ':' + LAST.h + ':' + LAST.l;
+  if (STUDY_CACHE[code] && STUDY_CACHE[code].key === key) return STUDY_CACHE[code].s;
+  const n = BARS.length, C = BARS.map(b => b.c), H = BARS.map(b => b.h), L = BARS.map(b => b.l), V = BARS.map(b => b.v);
+  const out = { main: null, upper: null, lower: null };
+  const sma = (arr, p) => arr.map((_, i) => i < p - 1 ? null : arr.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
+  const ema = (arr, p) => { const k = 2 / (p + 1); let e = null; return arr.map((v, i) => { if (i < p - 1) return null; if (e === null) { e = arr.slice(0, p).reduce((a, b) => a + b, 0) / p; return e; } e = v * k + e * (1 - k); return e; }); };
+  const p = d.params[0];
+  if (d.kind === 'ma') {
+    if (code === 'SMA') out.main = sma(C, p);
+    else if (code === 'EMA') out.main = ema(C, p);
+    else if (code === 'WMA') out.main = C.map((_, i) => { if (i < p - 1) return null; let s = 0, w = 0; for (let k = 0; k < p; k++) { s += C[i - k] * (p - k); w += p - k; } return s / w; });
+    else { let m = null; out.main = C.map((v, i) => { if (i < p - 1) return null; if (m === null) { m = C.slice(0, p).reduce((a, b) => a + b, 0) / p; return m; } m = (m * (p - 1) + v) / p; return m; }); }
+  } else if (d.kind === 'bb') {
+    const mid = sma(C, p); out.main = mid;
+    out.upper = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] + d.params[1] * sd; });
+    out.lower = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] - d.params[1] * sd; });
+  } else if (d.kind === 'vwap') {
+    let pv = 0, vv = 0; out.main = C.map((_, i) => { pv += (H[i] + L[i] + C[i]) / 3 * V[i]; vv += V[i]; return pv / vv; });
+  } else if (d.kind === 'rsi') {
+    let g = 0, l = 0; out.main = C.map((v, i) => { if (!i) return null; const ch = v - C[i - 1]; if (i <= p) { g += Math.max(ch, 0); l += Math.max(-ch, 0); if (i < p) return null; g /= p; l /= p; } else { g = (g * (p - 1) + Math.max(ch, 0)) / p; l = (l * (p - 1) + Math.max(-ch, 0)) / p; } return l === 0 ? 100 : 100 - 100 / (1 + g / l); });
+  } else if (d.kind === 'macd') {
+    const f = ema(C, d.params[0]), s = ema(C, d.params[1]); out.main = C.map((_, i) => (f[i] === null || s[i] === null) ? null : f[i] - s[i]);
+  } else if (d.kind === 'atr' || d.kind === 'tr') {
+    const tr = C.map((_, i) => i ? Math.max(H[i] - L[i], Math.abs(H[i] - C[i - 1]), Math.abs(L[i] - C[i - 1])) : H[i] - L[i]);
+    out.main = d.kind === 'tr' ? tr : sma(tr, p);
+  } else if (d.kind === 'roc') { out.main = C.map((v, i) => i < p ? null : (v - C[i - p]) / C[i - p] * 100); }
+  else if (d.kind === 'mom') { out.main = C.map((v, i) => i < p ? null : v - C[i - p]); }
+  else if (d.kind === 'stoch') { out.main = C.map((v, i) => { if (i < p - 1) return null; const hh = Math.max(...H.slice(i - p + 1, i + 1)), ll = Math.min(...L.slice(i - p + 1, i + 1)); return hh === ll ? 50 : (v - ll) / (hh - ll) * 100; }); }
+  else if (d.kind === 'wpr') { out.main = C.map((v, i) => { if (i < p - 1) return null; const hh = Math.max(...H.slice(i - p + 1, i + 1)), ll = Math.min(...L.slice(i - p + 1, i + 1)); return hh === ll ? -50 : (hh - v) / (hh - ll) * -100; }); }
+  else if (d.kind === 'cci') { const tp = C.map((_, i) => (H[i] + L[i] + C[i]) / 3), m = sma(tp, p); out.main = tp.map((v, i) => { if (m[i] === null) return null; const md = tp.slice(i - p + 1, i + 1).reduce((a, x) => a + Math.abs(x - m[i]), 0) / p; return md === 0 ? 0 : (v - m[i]) / (0.015 * md); }); }
+  STUDY_CACHE[code] = { key, s: out }; return out;
+}
+/* legend value for a study at bar i ("-" when the study is legend-only or not yet computable) */
+function studyValue(code, i) {
+  const d = IND_BY_CODE[code];
+  if (d.kind === 'vol') return fmtVol(BARS[i].v);
+  if (d.kind === 'osc') return '-';
+  const s = studySeries(code); const v = s.main[i];
+  if (v === null || v === undefined) return '-';
+  if (d.kind === 'roc' || d.kind === 'stoch' || d.kind === 'wpr' || d.kind === 'rsi') return v.toFixed(2);
+  return fmt(v);
+}
 
 /* Calendar events shown as badges on the date axis (real sessions only) */
 const EVENTS = [
@@ -988,6 +1093,7 @@ const ICO = {
   clock:    `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`,
   plus:     `<svg viewBox="0 0 24 24" ${S}><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>`,
   zoomReset: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.3 15.3 5.2 5.2"/><path d="M8.2 8.6v3.8M12.8 8.6v3.8"/><circle cx="10.5" cy="9.4" r=".55" fill="currentColor" stroke="none"/><circle cx="10.5" cy="11.6" r=".55" fill="currentColor" stroke="none"/></svg>`,
+  resetArrow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4.2h4.2"/></svg>`,
   cog:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M22.06 10.32 L22.06 13.68 L19.41 13.71 L18.45 16.03 L20.30 17.92 L17.92 20.30 L16.03 18.45 L13.71 19.41 L13.68 22.06 L10.32 22.06 L10.29 19.41 L7.97 18.45 L6.08 20.30 L3.70 17.92 L5.55 16.03 L4.59 13.71 L1.94 13.68 L1.94 10.32 L4.59 10.29 L5.55 7.97 L3.70 6.08 L6.08 3.70 L7.97 5.55 L10.29 4.59 L10.32 1.94 L13.68 1.94 L13.71 4.59 L16.03 5.55 L17.92 3.70 L20.30 6.08 L18.45 7.97 L19.41 10.29 Z"/><circle cx="12" cy="12" r="3.2"/></svg>`,
   chevrons: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5.5 6 6 6-6 6M13 6l6 6-6 6"/></svg>`,
   baseline: `<svg viewBox="0 0 24 24" ${S}><path d="M3 12h18" stroke-dasharray="2.5 2.5"/><path d="M3 16l4-5 4 3 4-8 6 4" stroke-dasharray="1 2.4" stroke-width="2"/></svg>`,
@@ -1013,7 +1119,7 @@ function chartModuleHTML(id, land) {
   const ivBtn     = `<button class="tb-btn tb-text" data-act="interval" aria-label="Interval and date range"><span class="interval-label">${state.interval}</span></button>`;
   const typeBtn   = `<button class="tb-btn" data-act="type" aria-label="Chart type"><span class="type-icon">${ICO.candle}</span></button>`;
   const pencilBtn = `<button class="tb-btn pencil-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}</button>`;
-  const layersBtn = `<button class="tb-btn" data-act="layers" aria-label="Layers">${ICO.layers}</button>`;
+  const layersBtn = `<button class="tb-btn layers-btn" data-act="layers" aria-label="Indicators">${ICO.layers}<span class="ind-badge"></span></button>`;
   const exitBtn   = `<button class="tb-btn" data-act="exitfs" aria-label="Close full screen">${ICO.compress}</button>`;
   const div       = `<span class="tb-div"></span>`;
 
@@ -1025,11 +1131,13 @@ function chartModuleHTML(id, land) {
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
   const header = land
     ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span></div>` +
-      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ch-detail ch-row2"><span class="ohlc-line"></span><span class="ch-vol">Vol <span class="vol-v vol-line"></span></span></div></div></div>`
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ch-detail ch-row2"><span class="ohlc-line"></span><span class="ch-vol">Vol <span class="vol-v vol-line"></span></span></div></div></div>` +
+      `<div class="ch-legend"></div>`
     : `<div class="ch-l1 ch-main">${logo}<span class="ch-name">SanDisk Corporation</span></div>` +
       `<div class="ch-price"><span class="ch-px live-px">${fmt(LAST.c)}</span><span class="ch-pchg live-chg ${chgCls()}">${chgText()}</span></div>` +
       `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ohlc-line ch-detail"></div>` +
-      `<div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>`;
+      `<div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>` +
+      `<div class="ch-legend"></div>`;
 
   return `
   <div class="chart-module" id="${id}">
@@ -1099,13 +1207,17 @@ Chart.prototype.draw = function () {
   this.W = W; this.H = H;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-  const AX = 64, XA = 24, HEAD = this.land ? 20 : 40;   /* the plot runs up behind the translucent header */
+  const AX = 64, XA = 24;
+  /* the plot runs up behind the translucent header; the legend makes the header taller, so HEAD follows its bottom */
+  let HEAD = this.land ? 20 : 40;
+  if (this.head && this.head.getBoundingClientRect) { const hr = this.head.getBoundingClientRect(), sr = svg.getBoundingClientRect(); if (sr.height > 0 && hr.height > 0) { const sc = sr.height / H; const hb = (hr.bottom - sr.top) / sc; if (hb + 8 > HEAD) HEAD = Math.round(hb + 8); } }
   const plotW = W - AX;
   const plotBottom = H - XA;
   const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
   const cmpData = cmp.map(c => ({ ci: c.ci, sym: c.sym, data: cmpSeries(c.sym) }));
-  const volH = Math.round((plotBottom - HEAD) * 0.17);   /* the volume pane stays in both compare views */
-  const priceBottom = plotBottom - volH - 10;
+  const volOn = hasStudy('Vol');
+  const volH = volOn ? Math.round((plotBottom - HEAD) * 0.17) : 0;   /* the volume pane stays in both compare views; off when the Vol study is removed */
+  const priceBottom = plotBottom - volH - (volOn ? 10 : 4);
   const N = BARS.length;
   const view = this.view;
   view.count = Math.min(view.count, N);
@@ -1190,7 +1302,7 @@ Chart.prototype.draw = function () {
 
   /* volume */
   let vol = '';
-  for (let i = i0; i <= i1; i++) {
+  for (let i = volOn ? i0 : i1 + 1; i <= i1; i++) {
     const b = BARS[i];
     const h = Math.max(1, (b.v / vmax) * volH);
     vol += `<rect class="${b.c >= b.o ? 'up' : 'down'}" x="${(xAt(i) - bw / 2).toFixed(1)}" y="${(plotBottom - h).toFixed(1)}" width="${bw}" height="${h.toFixed(1)}"/>`;
@@ -1319,6 +1431,15 @@ Chart.prototype.draw = function () {
     series = `<g class="pf">${series}</g>`;
   }
 
+  /* price overlays: moving averages, VWAP, Bollinger Bands (price scale only, so not in the percent view) */
+  let studies = '';
+  if (!cmpPct) state.studies.forEach(st => {
+    const d = IND_BY_CODE[st.code]; if (!d || !(d.kind === 'ma' || d.kind === 'bb' || d.kind === 'vwap')) return;
+    const s = studySeries(st.code);
+    const line = (arr, cls) => { const pts = []; for (let i = i0; i <= i1; i++) if (arr[i] !== null && arr[i] !== undefined) pts.push(`${xAt(i).toFixed(1)},${yAt(arr[i]).toFixed(1)}`); return pts.length > 1 ? `<polyline class="study ${cls}" style="stroke:${st.color}" points="${pts.join(' ')}"/>` : ''; };
+    if (d.kind === 'bb') studies += line(s.upper, 'band') + line(s.lower, 'band'); else studies += line(s.main, '');
+  });
+
   /* compared series as coloured lines (percent or shared price axis) */
   let clines = '';
   cmpData.forEach(c => {
@@ -1356,7 +1477,7 @@ Chart.prototype.draw = function () {
   const wm = `<text class="wm" x="12" y="${plotBottom - 8}">Investing.com</text>`;
   const clip = `<defs><clipPath id="${clipId}"><rect x="0" y="0" width="${plotW}" height="${plotBottom}"/></clipPath></defs>`;
 
-  svg.innerHTML = `${clip}<g class="gridg">${grid}</g>${wm}<g clip-path="url(#${clipId})"><g class="vol">${vol}</g>${series}${clines}</g>${lastp}<g class="axes">${ylab}${xlab}</g>${cmpTags}${cdown}<g class="events">${evs}</g><g class="xhg"></g>`;
+  svg.innerHTML = `${clip}<g class="gridg">${grid}</g>${wm}<g clip-path="url(#${clipId})"><g class="vol">${vol}</g>${series}${studies}${clines}</g>${lastp}<g class="axes">${ylab}${xlab}</g>${cmpTags}${cdown}<g class="events">${evs}</g><g class="xhg"></g>`;
   this.xh = svg.querySelector('.xhg');
   this.first = false;
   if (this.evOpen !== null && this.evOpen !== undefined) this.placeEvent();
@@ -1377,6 +1498,7 @@ Chart.prototype.updateHead = function (i) {
     `<span><b>L:</b> <span class="v">${fmt(b.l)}</span></span>` +
     `<span><b>C:</b> <span class="v ${c}">${fmt(b.c)}</span> <span class="${pcls}">(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span></span>`;
   this.volEl.textContent = fmtVol(b.v);
+  this.root.querySelectorAll('.lg-row').forEach(row => { const v = row.querySelector('.lg-val'); if (v) v.textContent = studyValue(row.dataset.code, i); });
 };
 
 Chart.prototype.setHover = function (i, py) {
@@ -1873,7 +1995,6 @@ function openTypeSheet() {
   openSheet('Chart type', `<div class="card-grid">${TYPES.map(t =>
     `<div class="tcard ${state.type === t.value ? 'sel' : ''}" data-pick="${t.value}"><div class="tcard-ico">${t.icon}</div><div class="tcard-label">${t.label}</div></div>`).join('')}</div>`, null, 'type');
 }
-const INDICATORS = ['Volume', 'Moving Average (20)', 'Moving Average (50)', 'Bollinger Bands', 'RSI (14)', 'MACD', 'VWAP'];
 
 /* ---- Drawing tools drawer ---- */
 /* Glyph primitives (24 viewBox, 1.5 stroke); every tool maps to one. */
@@ -2004,12 +2125,6 @@ function selectTool(name) {
 }
 
 let pickHandler = null;
-function openIndicators() {
-  pickHandler = null;
-  openSheet('Indicators', INDICATORS.map(name =>
-    `<div class="row" data-ind="${name}"><span>${name}</span><span class="toggle ${state.indicators[name] ? 'on' : ''}"></span></div>`).join(''),
-    null);
-}
 /* One renderer for the Symbol search drawer and the "+" Add symbol drawer: only title and row action differ */
 let symMode = 'search';
 function symbolRowsHTML(q) {
@@ -2068,6 +2183,58 @@ document.addEventListener('click', e => {
   const rm = e.target.closest('[data-cmprm]'); if (rm) { removeCompare(rm.dataset.cmprm); return; }
   const md = e.target.closest('[data-cmpmode]'); if (md) setCmpMode(md.dataset.cmpmode);
 });
+
+/* ---- Indicators: legend, badge, drawer ---- */
+function renderLegend() {
+  const n = state.studies.length;
+  document.querySelectorAll('.chart-module').forEach(root => {
+    const head = root.querySelector('.chart-head'), lg = root.querySelector('.ch-legend');
+    head.classList.toggle('has-legend', n > 0);
+    lg.classList.toggle('collapsed', !state.legendOpen);
+    lg.innerHTML = !n ? '' :
+      `<div class="lg-rows">${state.studies.map(s => `<div class="lg-row" data-code="${s.code}"><span class="lg-bar" style="background:${s.color}"></span><span class="lg-name">${indLabel(s.code)}</span><span class="lg-val" style="color:${s.color === 'var(--gray-1)' ? 'var(--text-primary)' : s.color}">${studyValue(s.code, BARS.length - 1)}</span></div>`).join('')}</div>` +
+      `<button class="lg-toggle" data-act="legend-toggle" aria-label="Collapse indicators">${state.legendOpen ? '' : `${n} indicator${n === 1 ? '' : 's'}`}${ICO.chev.replace('class="chev"', '')}</button>`;
+  });
+  document.querySelectorAll('.layers-btn .ind-badge').forEach(b => b.textContent = n ? String(n) : '');
+  document.querySelectorAll('.ind-count').forEach(el => el.textContent = n ? ` (${n})` : '');
+}
+function addStudy(code) {
+  if (hasStudy(code)) return;
+  if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); return; }
+  const used = new Set(state.studies.map(s => s.color)); const color = code === 'Vol' ? 'var(--gray-1)' : (IND_COLORS.find(c => !used.has(c)) || IND_COLORS[state.studies.length % IND_COLORS.length]);
+  state.studies.push({ code, color }); recentInd(code);
+  renderLegend(); drawAll(); markDirty();
+}
+function removeStudy(code) {
+  const k = state.studies.findIndex(s => s.code === code); if (k < 0) return;
+  state.studies.splice(k, 1); renderLegend(); drawAll(); markDirty();
+}
+function toggleStudy(code) { if (hasStudy(code)) removeStudy(code); else addStudy(code); }
+function resetStudies() { state.studies = [{ code: 'Vol', color: 'var(--gray-1)' }]; renderLegend(); drawAll(); markDirty(); toast('Indicators reset'); }
+const indRecent = ['Vol', 'SMA', 'EMA'];
+function recentInd(code) { const k = indRecent.indexOf(code); if (k >= 0) indRecent.splice(k, 1); indRecent.unshift(code); if (indRecent.length > 6) indRecent.length = 6; }
+let indCat = 'All indicators', indQuery = '';
+function indRowsHTML() {
+  const q = indQuery.toLowerCase();
+  let list = INDICATORS.filter(d => indCat === 'All indicators' || indCat === 'Recent' ? true : d.cat === indCat);
+  if (indCat === 'Recent') list = indRecent.map(c => IND_BY_CODE[c]).filter(Boolean);
+  if (q) list = INDICATORS.filter(d => d.code.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
+  return list.length ? list.map(d => { const on = hasStudy(d.code); const st = state.studies.find(s => s.code === d.code); return `<div class="ind-row ${on ? 'active' : ''}" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${on ? `<span class="ind-sw" style="background:${st.color}"></span>` : ''}<span class="ind-add">${on ? ICO.check.replace('class="check"', '') : '+'}</span></div>`; }).join('') : `<div class="empty">No indicators match "${indQuery}"</div>`;
+}
+function renderIndicators() {
+  const q = indQuery;
+  const counts = { 'All indicators': INDICATORS.length, Recent: indRecent.length }; IND_CATS.slice(1).forEach(c => counts[c] = INDICATORS.filter(d => d.cat === c).length);
+  const cats = ['Recent'].concat(IND_CATS);
+  document.getElementById('indCats').innerHTML = cats.map(c => `<button class="chip ${!q && c === indCat ? 'active' : ''}" data-indcat="${c}">${c} <span class="chip-n">${counts[c]}</span></button>`).join('');
+  document.getElementById('indList').innerHTML = indRowsHTML();
+}
+function openIndicators() {
+  pickHandler = null; indQuery = '';
+  openSheet('Indicators', `<div class="search-field input">${ICO.search}<input id="indSearch" type="search" placeholder="Search" autocomplete="off" autocorrect="off" spellcheck="false"></div><div class="cat-row" id="indCats"></div><div id="indList"></div>`, null, 'indicators',
+    `<button class="tb-btn" data-act="ind-reset" aria-label="Reset indicators">${ICO.resetArrow}</button>`);
+  renderIndicators();
+  document.getElementById('indSearch').addEventListener('input', e => { indQuery = e.target.value.trim(); renderIndicators(); });
+}
 
 /* ---- Create New Alert (mock of the native iOS drawer; copy is the app's) ---- */
 const ALERT_ICO = {
@@ -2138,6 +2305,10 @@ function captureChart() {
           const wPx = ctx.measureText(fmt(LAST.c)).width;
           ctx.font = '510 13px ' + CAPTURE_FONT; ctx.fillStyle = chgColor; ctx.fillText(chgText(), 12 + wPx + 8, hy + 38);
         }
+        /* legend rows */
+        const lgY0 = c.land ? hy + 26 : hy + 60; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.textAlign = 'left';
+        const cssVar = v => { const m = v.match(/--[\w-]+/); return m ? getComputedStyle(document.documentElement).getPropertyValue(m[0]).trim() || '#8C8C8C' : v; };
+        state.studies.forEach((st, k) => { const y = lgY0 + k * 16; const col = cssVar(st.color); ctx.fillStyle = col; ctx.fillRect(12, y - 7, 3, 14); ctx.fillStyle = '#000'; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.fillText(indLabel(st.code), 21, y); const wl = ctx.measureText(indLabel(st.code)).width; ctx.fillStyle = st.code === 'Vol' ? '#000' : col; ctx.font = '510 11px ' + CAPTURE_FONT; ctx.fillText(studyValue(st.code, BARS.length - 1), 21 + wl + 6, y); });
         resolve(cv.toDataURL('image/png'));
       } catch (err) { reject(err); }
     };
@@ -2250,11 +2421,12 @@ function saveLayoutsStore() {
   try { localStorage.setItem(LAYOUTS_KEY, JSON.stringify({ list: layouts.list, activeId: layouts.activeId, autosave: layouts.autosave, order: layouts.order })); } catch (_) {}
 }
 function snapshotState() {
-  return { type: state.type, interval: state.interval, range: state.range, indicators: { ...state.indicators }, settings: { ...state.settings }, tool: state.tool, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
+  return { type: state.type, interval: state.interval, range: state.range, studies: state.studies.map(s => ({ ...s })), settings: { ...state.settings }, tool: state.tool, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
 }
 function restoreState(s) {
   state.type = s.type; state.interval = s.interval; state.range = s.range || null;
-  state.indicators = { ...s.indicators }; state.settings = { ...state.settings, ...s.settings }; state.tool = s.tool || null;
+  state.studies = (s.studies || [{ code: 'Vol', color: 'var(--gray-1)' }]).filter(x => IND_BY_CODE[x.code]).slice(0, IND_MAX).map(x => ({ ...x })); state.settings = { ...state.settings, ...s.settings }; state.tool = s.tool || null;
+  renderLegend();
   state.compare = (s.compare || []).slice(0, CMP_MAX).map(c => ({ ...c })); state.cmpMode = s.cmpMode || '%';
   state.compare.forEach(c => cmpSeries(c.sym)); renderCompare();
   document.querySelectorAll('.pencil-btn').forEach(b => b.classList.toggle('tool-on', !!state.tool));
@@ -2263,7 +2435,7 @@ function restoreState(s) {
   else Object.values(charts).forEach(c => { c.cancelScroll(); c.view.count = clamp(s.count || c.defaultCount, MIN_BARS, BARS.length); c.view.start = BARS.length - c.view.count; });
   drawAll();
 }
-const DEFAULT_STATE = { type: 'candles', interval: '1D', range: null, indicators: { 'Volume': true }, settings: { extended: true, events: true, log: false, invert: false, countdown: false }, tool: null, count: 0, compare: [], cmpMode: '%' };
+const DEFAULT_STATE = { type: 'candles', interval: '1D', range: null, studies: [{ code: 'Vol', color: 'var(--gray-1)' }], settings: { extended: true, events: true, log: false, invert: false, countdown: false }, tool: null, count: 0, compare: [], cmpMode: '%' };
 const activeLayout = () => layouts.list.find(l => l.id === layouts.activeId) || null;
 function relTime(ts) {
   const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
@@ -2429,14 +2601,9 @@ sheetEl.addEventListener('click', e => {
 });
 sheetBody.addEventListener('click', e => {
   const ind = e.target.closest('[data-ind]');
-  if (ind) {
-    const name = ind.dataset.ind;
-    state.indicators[name] = !state.indicators[name];
-    ind.querySelector('.toggle').classList.toggle('on', state.indicators[name]);
-    toast((state.indicators[name] ? 'Added ' : 'Removed ') + name);
-    markDirty();
-    return;
-  }
+  if (ind) { toggleStudy(ind.dataset.ind); renderIndicators(); return; }
+  const ic = e.target.closest('[data-indcat]');
+  if (ic) { indCat = ic.dataset.indcat; indQuery = ''; const inp = document.getElementById('indSearch'); if (inp) inp.value = ''; renderIndicators(); return; }
   const rg = e.target.closest('[data-range]');
   if (rg) {
     applyRange(rg.dataset.range);
@@ -2498,6 +2665,8 @@ document.addEventListener('click', e => {
     case 'exitfs':     toast('Close full screen'); break;
     case 'latest':     charts[state.orientation].scrollToLatest(); break;
     case 'zoom-default': charts[state.orientation].zoomToDefault(); break;
+    case 'ind-reset':  resetStudies(); renderIndicators(); break;
+    case 'legend-toggle': state.legendOpen = !state.legendOpen; renderLegend(); drawAll(); break;
     case 'settings':   { const c = charts[state.orientation]; if (c.settingsEl.classList.contains('open')) c.closeSettings(); else c.openSettings(); } break;
     case 'analyze':    openAnalyze(); break;
   }
@@ -2530,6 +2699,7 @@ liveTimer = setTimeout(tickOnce, 1500);
    ============================================================ */
 loadLayoutsStore();
 if (activeLayout()) restoreState(activeLayout().state);
+renderLegend();
 refreshLayoutBtn();
 refreshLabels();
 applyScale();
