@@ -146,6 +146,7 @@ svg { display: block; }
 .an-badge { width: 18px; height: 18px; border-radius: 5px; background: var(--text-primary); color: #FFF; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; letter-spacing: .2px; }
 /* the name gives way (ellipsis) before the pill ever shrinks */
 .ch-l1.ch-main { max-width: calc(100% - 140px); }
+.ch-l1.one-line { align-self: stretch; }   /* full header width, so the panel's max-width resolves against the header, not its own content */
 .ch-l1.one-line .ch-main { max-width: calc(100% - 140px); }
 .ch-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -353,13 +354,15 @@ svg { display: block; }
 @keyframes flashDown { 0%, 40% { color: var(--price-down); } 100% { color: var(--text-primary); } }
 .ch-chg  { font-size: 12px; font-weight: 510; }
 .ch-l1.one-line { gap: 7px; }
-.ch-l1.one-line .ch-l2 { margin-left: 2px; }
 .ch-px-inline { font-size: 13px; font-weight: 700; color: var(--text-primary); }
 .ch-price { display: flex; align-items: baseline; gap: 8px; margin: 6px 0 3px -6px; }   /* row 2 starts at y=31, below the Analyze pill (bottom y=29) */
 .ch-px { font-size: 22px; font-weight: 700; letter-spacing: -.4px; line-height: 26px; color: var(--text-primary); }
 .ch-pchg { font-size: 13px; font-weight: 510; }
 .ch-l2 { display: flex; gap: 7px; color: var(--text-secondary); font-size: 11px; }
-.ch-l1.one-line .ch-l2 { font-size: 12px; }
+.ch-row2 .ohlc-line { display: inline-flex; gap: 7px; }
+.ch-vol { display: inline-flex; align-items: center; gap: 5px; margin-left: 10px; color: var(--text-secondary-2); font-weight: 510; }
+.ch-vol::before { content: ""; width: 2px; height: 11px; border-radius: 1px; background: var(--gray-1); }
+.ch-vol .vol-v { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .ch-l2 b { font-weight: 510; }
 .ch-l2 .v { color: var(--text-primary); font-weight: 510; }
 .ch-l3 { display: flex; align-items: center; gap: 6px; margin-top: 2px; color: var(--text-secondary-2); font-size: 11px; font-weight: 510; }
@@ -1033,8 +1036,8 @@ function chartModuleHTML(id, land) {
     `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${layersBtn}${exitBtn}</div>`;
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
   const header = land
-    ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span><span class="ch-l2 ohlc-line ch-detail"></span></div>` +
-      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l3 ch-detail">Vol <span class="vol-v vol-line"></span></div></div></div>`
+    ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span></div>` +
+      `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ch-detail ch-row2"><span class="ohlc-line"></span><span class="ch-vol">Vol <span class="vol-v vol-line"></span></span></div></div></div>`
     : `<div class="ch-l1 ch-main">${logo}<span class="ch-name">SanDisk Corporation</span></div>` +
       `<div class="ch-price"><span class="ch-px live-px">${fmt(LAST.c)}</span><span class="ch-pchg live-chg ${chgCls()}">${chgText()}</span></div>` +
       `<div class="ch-swap"><div class="ch-cmprow"></div><div class="ch-details"><div class="ch-l2 ohlc-line ch-detail"></div>` +
@@ -1380,7 +1383,7 @@ Chart.prototype.updateHead = function (i) {
     `<span><b>O:</b> <span class="v ${c}">${fmt(b.o)}</span></span>` +
     `<span><b>H:</b> <span class="v">${fmt(b.h)}</span></span>` +
     `<span><b>L:</b> <span class="v">${fmt(b.l)}</span></span>` +
-    `<span><b>C:</b> <span class="v ${c}">${fmt(b.c)}</span>${this.land ? '' : ` <span class="${pcls}">(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span>`}</span>`;
+    `<span><b>C:</b> <span class="v ${c}">${fmt(b.c)}</span> <span class="${pcls}">(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span></span>`;
   this.volEl.textContent = fmtVol(b.v);
 };
 
@@ -1407,7 +1410,7 @@ Chart.prototype.setHover = function (i, py) {
   this.xh.classList.add('on');
   this.head.classList.add('xh');
   /* rows 3-4 overlay the plot top: hide any y label in that band (landscape only adds the Vol line) */
-  const lim = g.HEAD + (this.land ? 20 : 38);
+  const lim = g.HEAD + (this.land ? 34 : 38);
   this.svg.querySelectorAll('text.ylab').forEach(t => t.classList.toggle('under-head', +t.getAttribute('y') - 4 < lim));
   if (this.pill.classList.contains('show')) this.placePill(yy);
 };
