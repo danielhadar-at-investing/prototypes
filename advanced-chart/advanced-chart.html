@@ -180,7 +180,11 @@ svg { display: block; }
 .tb-btn.tb-text { padding: 0 8px; }
 .tb-btn.tb-sym { font-weight: 700; letter-spacing: -.2px; height: 32px; padding: 0 9px; margin-left: 4px; border: 1px solid var(--text-primary); border-radius: 8px; }   /* 1px black outline; the box's left edge sits on the header's left padding line (logo circle left edge) */
 .tb-btn.tb-sym::before { top: -6px; bottom: -6px; }   /* keep the 44pt hit height */
-#viewLandscape .tb-sym { margin-left: 12px; }
+#viewLandscape .tb-sym { margin-left: 0; }
+.tb-btn.tb-back { min-width: 36px; width: 36px; margin-left: -6px; color: var(--icon-primary); }   /* chevron at the bar's left padding (glyph inset), SNDK follows it; the logo-edge alignment rule no longer applies */
+.tb-btn.tb-back svg { width: 22px; height: 22px; }
+.tb-btn.tb-back::before { left: -4px; right: -4px; }
+.tb-back + .tb-sym { margin-left: 0; }
 .chart-toolbar.three { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .tb-l, .tb-c, .tb-r { display: flex; align-items: center; gap: 2px; }
 .tb-r { justify-self: end; }
@@ -342,8 +346,10 @@ svg { display: block; }
 .lg-bar { width: 3px; height: 14px; border-radius: 1.5px; flex-shrink: 0; }
 .lg-name { font-weight: 600; color: var(--text-primary); }
 .lg-val { font-weight: 510; }
-.lg-toggle { width: 28px; height: 28px; border-radius: 14px; margin-left: -6px; background: transparent; border: .5px solid var(--divider); display: inline-flex; align-items: center; justify-content: center; }   /* chevron only */
-.lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary); transition: transform .2s var(--ease-ios); }
+.lg-toggle { width: 24px; height: 24px; border-radius: 12px; margin: 3px 0 0 -2px; background: #FFF; border: 1px solid rgba(140,140,140,.4); box-shadow: 0 1px 3px rgba(0,0,0,.16); display: inline-flex; align-items: center; justify-content: center; position: relative; z-index: 1; }   /* chevron only: solid white lifts it off gridlines and candles */
+.lg-toggle::before { content: ""; position: absolute; inset: -10px; }   /* 44pt hit area */
+.lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary-2); transition: transform .2s var(--ease-ios); }
+.lg-toggle svg path { stroke-width: 3.8; }   /* ~2px rendered stroke */
 .ch-legend:not(.collapsed) .lg-toggle svg { transform: rotate(180deg); }   /* collapsed = down (expand), expanded = up (collapse) */
 /* no reserved band: at rest the legend sits right under the price row; while the crosshair rows show (and no chips fill the slot)
    the legend slides down by the rows' height with the same timings as the fade, then back */
@@ -367,6 +373,26 @@ svg { display: block; }
 .cmp-x { width: 24px; height: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 15px; position: relative; }
 .cmp-x::after { content: ""; position: absolute; inset: -8px -10px; }   /* 44pt hit area */
 .cmp-x svg { width: 12px; height: 12px; }
+.cmp-tog-wrap { position: sticky; right: 0; z-index: 2; flex-shrink: 0; display: inline-flex; align-self: center; background: var(--bg-primary); }   /* solid behind the rounded toggle so chips never show at its corners */   /* inline after the last chip; sticks at the row's right edge when the chips overflow */
+.cmp-tog-wrap.stuck .cmp-toggle { box-shadow: -4px 0 8px -2px rgba(0,0,0,.16); }
+.cmp-tog-wrap.stuck::before { content: ""; position: absolute; right: 100%; top: -2px; bottom: -2px; width: 24px; background: linear-gradient(to left, var(--bg-primary), rgba(255,255,255,0)); pointer-events: none; }   /* chips slide under the toggle */
+.cmp-sw { position: relative; cursor: pointer; }
+.cmp-sw::after { content: ""; position: absolute; inset: -9px -6px; }   /* 32pt hit on the swatch; the chip still reads as one pill */
+/* shared colour palette sheet (compare series + indicator settings): 10 x 10 grid, X closes without choosing */
+.cs-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.25); z-index: 45; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.cs-scrim.open { opacity: 1; pointer-events: auto; }
+.sheet.csheet { z-index: 46; padding-bottom: calc(var(--home-h) + 4px); }
+#phone.landscape .sheet.csheet { max-width: 460px; padding-bottom: 12px; }
+.cs-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 4px var(--margin) 8px; }
+.cs-sw { aspect-ratio: 1; border-radius: 7px; border: .5px solid rgba(0,0,0,.12); position: relative; }
+.cs-sw.sel { box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--text-active); z-index: 1; }
+#phone.landscape .cs-grid { gap: 4px; padding-top: 0; }
+#phone.landscape .cs-sw { border-radius: 5px; }
+.cs-opa { display: none; }
+.cs-opa.on { display: block; }
+.cs-opa .is-row { min-height: 36px; }
+.cs-opa .is-slider { padding-bottom: 4px; }
+#phone.landscape .cs-opa .is-row { min-height: 28px; }
 .cmp-toggle { display: inline-flex; height: 28px; border-radius: 6px; overflow: hidden; border: 1px solid var(--chip-border); flex-shrink: 0; align-self: center; }
 .cmp-toggle button { width: 32px; font-size: 13px; font-weight: 600; background: var(--chip-bg); color: var(--text-primary); position: relative; }
 .cmp-toggle button::after { content: ""; position: absolute; inset: -8px 0; }
@@ -607,6 +633,70 @@ svg { display: block; }
 .sheet-title.has-seg { padding: 0 52px 8px; }
 .sheet.drawer.h-layouts { height: min(560px, 94%); }
 .sheet.drawer.h-manage { height: 94%; }
+/* indicator settings drawer: fixed height, inner screens slide inside it */
+.sheet.drawer.h-indset { height: min(640px, 94%); }
+.sheet.drawer.h-indset .sheet-body { display: flex; flex-direction: column; overflow: hidden; }
+.is-name { font-size: 17px; font-weight: 510; letter-spacing: -.4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 22px; line-height: 22px; }
+.is-tabs { margin: 10px var(--margin) 0; }
+.sheet.is-sheet .sheet-title { padding: 0 52px 8px; }
+.sheet.is-sheet .is-tabs { margin: 10px -36px 0; }
+.is-back { display: none; position: absolute; top: 11px; left: 6px; height: 32px; padding: 0 8px 0 2px; align-items: center; gap: 0; color: var(--text-active); font-size: 16px; font-weight: 400; z-index: 2; }
+.is-back svg { width: 22px; height: 22px; }
+.sheet.is-inner .is-back { display: inline-flex; }
+.sheet.is-inner .sheet-x, .sheet.is-inner .is-tabs, .sheet.is-inner .sheet-actions { display: none; }
+.is-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.is-screens { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.is-screen { position: absolute; inset: 0; overflow-y: auto; background: var(--bg-primary); transition: transform .32s var(--ease-ios); scrollbar-width: none; padding-bottom: 8px; }
+.is-screen::-webkit-scrollbar { display: none; }
+.is-sub { transform: translateX(100%); box-shadow: -8px 0 16px rgba(0,0,0,.06); }
+.sheet.is-inner .is-main { transform: translateX(-30%); }
+.sheet.is-inner .is-sub { transform: none; }
+.is-grp { padding: 4px 0; }
+.is-grp + .is-grp { border-top: 6px solid var(--bg-tertiary); }
+.is-row { gap: 10px; min-height: 48px; }
+.is-row .is-lbl { flex: 1; min-width: 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.is-row .row-main { flex: 1; min-width: 0; }
+.is-row .row-main .is-lbl { flex: none; }
+.is-row .is-val { font-size: 15px; color: var(--text-secondary); white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis; }
+.is-chev { display: inline-flex; width: 14px; height: 14px; color: var(--gray-3); flex-shrink: 0; }
+.is-chev svg { width: 14px; height: 14px; }
+.is-sw { width: 26px; height: 26px; border-radius: 50%; border: .5px solid rgba(0,0,0,.14); flex-shrink: 0; }
+.is-sw.none { background: linear-gradient(135deg, transparent 45%, var(--red-down) 45%, var(--red-down) 55%, transparent 55%), #FFF; }
+.is-seg { width: 150px; flex-shrink: 0; }
+.is-seg.wide { width: auto; flex: 0 1 230px; }
+.is-seg .seg-opt { height: 30px; display: inline-flex; align-items: center; justify-content: center; }
+.is-seg svg { width: 26px; height: 10px; }
+.is-step { display: inline-flex; align-items: center; height: 32px; border-radius: 8px; background: var(--bg-secondary); flex-shrink: 0; }
+.is-step button { width: 40px; height: 32px; font-size: 20px; color: var(--icon-primary); display: inline-flex; align-items: center; justify-content: center; position: relative; }
+.is-step button::after { content: ""; position: absolute; inset: -6px 0; }
+.is-step button:disabled { color: var(--gray-3); }
+.is-num { width: 64px; height: 32px; border: 0; background: transparent; text-align: center; font: inherit; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text-primary); border-left: .5px solid var(--gray-3); border-right: .5px solid var(--gray-3); outline: none; }
+.is-num:focus { box-shadow: inset 0 0 0 2px var(--text-active); border-radius: 4px; }
+.is-slider { padding: 0 var(--margin) 12px; }
+.is-slider input { width: 100%; -webkit-appearance: none; appearance: none; height: 28px; background: transparent; }
+.is-slider input::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--text-active) var(--p, 50%), var(--gray-4) var(--p, 50%)); }
+.is-slider input::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #FFF; box-shadow: 0 .5px 4px rgba(0,0,0,.14), 0 5px 12px rgba(0,0,0,.12); margin-top: -11px; }
+.is-slider input::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: #FFF; border: 0; box-shadow: 0 .5px 4px rgba(0,0,0,.14), 0 5px 12px rgba(0,0,0,.12); }
+.is-opa { min-height: 40px; }
+.is-opt .check { color: var(--text-active); }
+.is-actrow { justify-content: flex-start; }
+.is-action { height: 36px; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--divider); font-size: 15px; font-weight: 600; color: var(--text-active); }
+.is-foot { padding: 10px var(--margin) 0; border-top: .5px solid var(--divider-secondary); flex-shrink: 0; }
+.is-ok { width: 100%; }
+#phone.landscape .is-foot .lf-btn { height: 42px; }
+.is-menu { width: 220px; }
+.is-saved { color: var(--green-up) !important; display: inline-flex; align-items: center; gap: 6px; }
+.is-saved .check { width: 18px; height: 18px; color: var(--green-up); }
+.is-dt { padding: 12px var(--margin); }
+.is-dt-val { text-align: center; font-size: 15px; color: var(--text-secondary-2); margin-bottom: 10px; }
+.is-wheels { position: relative; display: flex; gap: 6px; height: 216px; }
+.is-wheel-band { position: absolute; left: 0; right: 0; top: 90px; height: 36px; border-radius: 8px; background: var(--bg-secondary); pointer-events: none; }
+.is-wheel { position: relative; flex: 1; overflow-y: auto; scroll-snap-type: y mandatory; padding: 90px 0; scrollbar-width: none; }
+.is-wheel[data-wheel="d"] { flex: 1.6; }
+.is-wheel::-webkit-scrollbar { display: none; }
+.is-wi { display: block; width: 100%; height: 36px; scroll-snap-align: center; font-size: 17px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.is-wi.sel { color: var(--text-primary); font-weight: 600; }
+.chart-svg .study-fill { stroke: none; }
 /* native "Create New Alert" drawer mock */
 .sheet.drawer.h-alert { height: min(560px, 94%); }
 .sheet.h-alert .sheet-title { font-size: 20px; font-weight: 600; letter-spacing: -.4px; padding-bottom: 12px; }
@@ -794,6 +884,14 @@ svg { display: block; }
         <div class="sheet-actions" id="sheetActions"></div>
         <div class="sheet-body" id="sheetBody"></div>
       </div>
+      <div class="cs-scrim" id="csScrim"></div>
+      <div class="sheet csheet" id="colorSheet" role="dialog" aria-label="Colour">
+        <div class="sheet-grabber"></div>
+        <button class="sheet-x" data-cs="close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div class="sheet-title">Colour</div>
+        <div class="cs-grid" id="csGrid"></div>
+        <div class="cs-opa" id="csOpa"><div class="row is-row is-opa"><span class="is-lbl">Opacity</span><span class="is-val is-pct" id="csOpaPct"></span></div><div class="is-slider"><input type="range" id="csOpaIn" min="0" max="100" step="5" aria-label="Opacity"></div></div>
+      </div>
       <div class="modal-scrim" id="nameScrim">
         <div class="modal" role="dialog" aria-labelledby="nameTitle">
           <div class="modal-title" id="nameTitle">Layout Name</div>
@@ -929,6 +1027,7 @@ const state = {
   settings: { extended: true, events: true, log: false, invert: false, countdown: false },
   compare: [],            /* [{ sym, ci }] up to 5, ci = palette slot */
   legendOpen: false,   /* collapsed by default; session-only, not layout state */
+  indDefaults: {},     /* per-indicator saved defaults ("Save as default"), part of the layout state */
   cmpMode: '%',           /* '%' rebased percent view, '$' shared price axis */
   studies: [{ id: 's0', code: 'Vol', color: 'var(--gray-1)', hidden: false }],   /* indicator instances in legend order; Volume is on by default */
   drawings: [],           /* drawing layers: { id, name, hidden } */
@@ -968,29 +1067,33 @@ let uidN = 1; const uid = p => p + (Date.now().toString(36)) + (uidN++);
 
 /* ---- study series over the full bar set (cached until the last bar ticks) ---- */
 const STUDY_CACHE = {};
-function studySeries(code) {
-  const d = IND_BY_CODE[code]; const key = code + ':' + LAST.c + ':' + LAST.h + ':' + LAST.l;
-  if (STUDY_CACHE[code] && STUDY_CACHE[code].key === key) return STUDY_CACHE[code].s;
-  const n = BARS.length, C = BARS.map(b => b.c), H = BARS.map(b => b.h), L = BARS.map(b => b.l), V = BARS.map(b => b.v);
+const SRC_OF = { 'Close': b => b.c, 'Open': b => b.o, 'High': b => b.h, 'Low': b => b.l, 'HL/2': b => (b.h + b.l) / 2, 'HLC/3': b => (b.h + b.l + b.c) / 3, 'OHLC/4': b => (b.o + b.h + b.l + b.c) / 4, 'Volume': b => b.v };
+function studySeries(code, P, src, maType) {   /* P = numeric params (instance inputs), src = Source input, maType = BB Basis MA */
+  const d = IND_BY_CODE[code]; P = P || d.params; src = SRC_OF[src] ? src : 'Close';
+  const ck = code + '|' + P.join(',') + '|' + src + '|' + (maType || ''), key = ck + ':' + LAST.c + ':' + LAST.h + ':' + LAST.l;
+  if (STUDY_CACHE[ck] && STUDY_CACHE[ck].key === key) return STUDY_CACHE[ck].s;
+  const n = BARS.length, C = BARS.map(SRC_OF[src]), H = BARS.map(b => b.h), L = BARS.map(b => b.l), V = BARS.map(b => b.v);
   const out = { main: null, upper: null, lower: null };
   const sma = (arr, p) => arr.map((_, i) => i < p - 1 ? null : arr.slice(i - p + 1, i + 1).reduce((a, b) => a + b, 0) / p);
   const ema = (arr, p) => { const k = 2 / (p + 1); let e = null; return arr.map((v, i) => { if (i < p - 1) return null; if (e === null) { e = arr.slice(0, p).reduce((a, b) => a + b, 0) / p; return e; } e = v * k + e * (1 - k); return e; }); };
-  const p = d.params[0];
+  const p = Math.max(1, Math.round(P[0] || d.params[0] || 1));
+  const wmaF = (arr, q) => arr.map((_, i) => { if (i < q - 1) return null; let s2 = 0, w = 0; for (let k = 0; k < q; k++) { s2 += arr[i - k] * (q - k); w += q - k; } return s2 / w; });
+  const smmaF = (arr, q) => { let m = null; return arr.map((v, i) => { if (i < q - 1) return null; if (m === null) { m = arr.slice(0, q).reduce((a, b) => a + b, 0) / q; return m; } m = (m * (q - 1) + v) / q; return m; }); };
   if (d.kind === 'ma') {
     if (code === 'SMA') out.main = sma(C, p);
     else if (code === 'EMA') out.main = ema(C, p);
     else if (code === 'WMA') out.main = C.map((_, i) => { if (i < p - 1) return null; let s = 0, w = 0; for (let k = 0; k < p; k++) { s += C[i - k] * (p - k); w += p - k; } return s / w; });
     else { let m = null; out.main = C.map((v, i) => { if (i < p - 1) return null; if (m === null) { m = C.slice(0, p).reduce((a, b) => a + b, 0) / p; return m; } m = (m * (p - 1) + v) / p; return m; }); }
   } else if (d.kind === 'bb') {
-    const mid = sma(C, p); out.main = mid;
-    out.upper = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] + d.params[1] * sd; });
-    out.lower = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] - d.params[1] * sd; });
+    const mid = (maType === 'EMA' ? ema : maType === 'WMA' ? wmaF : maType === 'SMMA' ? smmaF : sma)(C, p); out.main = mid; const mult = P[1] !== undefined ? P[1] : d.params[1];
+    out.upper = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] + mult * sd; });
+    out.lower = C.map((_, i) => { if (i < p - 1) return null; const sl = C.slice(i - p + 1, i + 1); const sd = Math.sqrt(sl.reduce((a, v) => a + (v - mid[i]) ** 2, 0) / p); return mid[i] - mult * sd; });
   } else if (d.kind === 'vwap') {
-    let pv = 0, vv = 0; out.main = C.map((_, i) => { pv += (H[i] + L[i] + C[i]) / 3 * V[i]; vv += V[i]; return pv / vv; });
+    let pv = 0, vv = 0, p2 = 0; const sdv = []; out.main = C.map((_, i) => { const tp = src === 'Close' ? (H[i] + L[i] + BARS[i].c) / 3 : C[i]; pv += tp * V[i]; vv += V[i]; p2 += tp * tp * V[i]; const m = pv / vv; sdv.push(Math.sqrt(Math.max(0, p2 / vv - m * m))); return m; }); out.sd = sdv;   /* cumulative (anchor not modelled) */
   } else if (d.kind === 'rsi') {
     let g = 0, l = 0; out.main = C.map((v, i) => { if (!i) return null; const ch = v - C[i - 1]; if (i <= p) { g += Math.max(ch, 0); l += Math.max(-ch, 0); if (i < p) return null; g /= p; l /= p; } else { g = (g * (p - 1) + Math.max(ch, 0)) / p; l = (l * (p - 1) + Math.max(-ch, 0)) / p; } return l === 0 ? 100 : 100 - 100 / (1 + g / l); });
   } else if (d.kind === 'macd') {
-    const f = ema(C, d.params[0]), s = ema(C, d.params[1]); out.main = C.map((_, i) => (f[i] === null || s[i] === null) ? null : f[i] - s[i]);
+    const f = ema(C, Math.round(P[0] || d.params[0])), s = ema(C, Math.round(P[1] || d.params[1])); out.main = C.map((_, i) => (f[i] === null || s[i] === null) ? null : f[i] - s[i]);
   } else if (d.kind === 'atr' || d.kind === 'tr') {
     const tr = C.map((_, i) => i ? Math.max(H[i] - L[i], Math.abs(H[i] - C[i - 1]), Math.abs(L[i] - C[i - 1])) : H[i] - L[i]);
     out.main = d.kind === 'tr' ? tr : sma(tr, p);
@@ -999,17 +1102,19 @@ function studySeries(code) {
   else if (d.kind === 'stoch') { out.main = C.map((v, i) => { if (i < p - 1) return null; const hh = Math.max(...H.slice(i - p + 1, i + 1)), ll = Math.min(...L.slice(i - p + 1, i + 1)); return hh === ll ? 50 : (v - ll) / (hh - ll) * 100; }); }
   else if (d.kind === 'wpr') { out.main = C.map((v, i) => { if (i < p - 1) return null; const hh = Math.max(...H.slice(i - p + 1, i + 1)), ll = Math.min(...L.slice(i - p + 1, i + 1)); return hh === ll ? -50 : (hh - v) / (hh - ll) * -100; }); }
   else if (d.kind === 'cci') { const tp = C.map((_, i) => (H[i] + L[i] + C[i]) / 3), m = sma(tp, p); out.main = tp.map((v, i) => { if (m[i] === null) return null; const md = tp.slice(i - p + 1, i + 1).reduce((a, x) => a + Math.abs(x - m[i]), 0) / p; return md === 0 ? 0 : (v - m[i]) / (0.015 * md); }); }
-  STUDY_CACHE[code] = { key, s: out }; return out;
+  STUDY_CACHE[ck] = { key, s: out }; return out;
 }
 /* legend value for a study at bar i ("-" when the study is legend-only or not yet computable) */
-function studyValue(code, i) {
-  const d = IND_BY_CODE[code];
+function studyValue(st, i) {   /* st: instance (or a code, for callers without one) */
+  if (typeof st === 'string') st = { code: st };
+  const d = IND_BY_CODE[st.code];
   if (d.kind === 'vol') return fmtVol(BARS[i].v);
   if (d.kind === 'osc') return '-';
-  const s = studySeries(code); const v = s.main[i];
+  const cfg = st.id ? instCfg(st) : null;
+  const s = cfg ? studySeries(st.code, instParams(st), cfg.i.Source, cfg.i['Basis MA']) : studySeries(st.code); const v = s.main[i];
   if (v === null || v === undefined) return '-';
-  if (d.kind === 'roc' || d.kind === 'stoch' || d.kind === 'wpr' || d.kind === 'rsi') return v.toFixed(2);
-  return fmt(v);
+  const prec = cfg && isFinite(cfg.s.Precision) ? clamp(Math.round(cfg.s.Precision), 0, 8) : 2;   /* Style > Precision */
+  return v.toLocaleString('en-US', { minimumFractionDigits: prec, maximumFractionDigits: prec });
 }
 
 /* Calendar events shown as badges on the date axis (real sessions only) */
@@ -1179,14 +1284,14 @@ function chartModuleHTML(id, land) {
   const pencilBtn = `<button class="tb-btn pencil-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}</button>`;
   const indBtn    = `<button class="tb-btn layers-btn" data-act="layers" aria-label="Indicators">${ICO.bars}</button>`;   /* climbing bars = indicators */
   const layersBtn = `<button class="tb-btn lyr-btn" data-act="layers-panel" aria-label="Layers">${ICO.layers}<span class="ind-badge ly-badge"></span></button>`;
-  const exitBtn   = `<button class="tb-btn" data-act="exitfs" aria-label="Close full screen">${ICO.compress}</button>`;
+  const backBtn   = `<button class="tb-btn tb-back" data-act="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5 7.5 12l7.5 7.5"/></svg></button>`;   /* iOS back chevron: hands over to the app (replaces Close full screen) */
   const div       = `<span class="tb-div"></span>`;
 
   const topBar = land
-    ? `<div class="chart-toolbar top">${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}<span class="tb-sep"></span>${exitBtn}</div>`
-    : `<div class="chart-toolbar top three"><div class="tb-l">${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div></div>`;
+    ? `<div class="chart-toolbar top">${backBtn}${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div>`
+    : `<div class="chart-toolbar top three"><div class="tb-l">${backBtn}${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div></div>`;
   const bottomBar = land ? '' :
-    `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${indBtn}${layersBtn}${exitBtn}</div>`;
+    `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${indBtn}${layersBtn}</div>`;
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
   const header = land
     ? `<div class="ch-l1 one-line"><span class="ch-main">${logo}<span class="ch-name">SanDisk Corporation</span><span class="ch-px-inline live-px">${fmt(LAST.c)}</span><span class="ch-chg live-chg ${chgCls()}">${chgText()}</span></span></div>` +
@@ -1270,7 +1375,7 @@ Chart.prototype.draw = function () {
   const plotW = W - AX;
   const plotBottom = H - XA;
   const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
-  const cmpData = cmp.map(c => ({ ci: c.ci, sym: c.sym, data: cmpSeries(c.sym) }));
+  const cmpData = cmp.map(c => ({ ci: c.ci, sym: c.sym, col: cmpColor(c), data: cmpSeries(c.sym) }));
   const volOn = hasStudy('Vol');   /* one shared pane while any Vol instance is visible */
   const volH = volOn ? Math.round((plotBottom - HEAD) * 0.17) : 0;   /* the volume pane stays in both compare views; off when the Vol study is removed */
   const priceBottom = plotBottom - volH - (volOn ? 10 : 4);
@@ -1336,7 +1441,7 @@ Chart.prototype.draw = function () {
   const tagItems = [];
   if (cmp.length) {
     if (cmpPct) tagItems.push({ color: 'var(--text-primary)', text: fmtPct(pctOf(sndkC, lastVis)), y: yAt(pctOf(sndkC, lastVis)) });
-    cmpData.forEach(c => { const v = cmpPct ? pctOf(c.data, lastVis) : c.data[lastVis]; tagItems.push({ color: `var(--cmp-${c.ci + 1})`, text: cmpPct ? fmtPct(v) : fmt(v), y: yAt(v) }); });
+    cmpData.forEach(c => { const v = cmpPct ? pctOf(c.data, lastVis) : c.data[lastVis]; tagItems.push({ color: c.col, text: cmpPct ? fmtPct(v) : fmt(v), y: yAt(v) }); });
     tagItems.sort((a, b) => a.y - b.y);
     /* keep the stack below the chips row (it overlays the plot top) and inside the plot */
     const cr = this.root.querySelector('.ch-cmprow'); const crB = cr && cr.offsetParent ? cr.getBoundingClientRect().bottom - svg.getBoundingClientRect().top : 0;
@@ -1497,7 +1602,26 @@ Chart.prototype.draw = function () {
   if (!cmpPct) state.studies.forEach(st => {
     if (st.hidden) return;
     const d = IND_BY_CODE[st.code]; if (!d || !(d.kind === 'ma' || d.kind === 'bb' || d.kind === 'vwap')) return;
-    const s = studySeries(st.code);
+    const cfg = instCfg(st), S = cfg.s, I = cfg.i;
+    const s = studySeries(st.code, instParams(st), I.Source, I['Basis MA']);
+    /* Style tab drives the drawn line: colour, line style, width, opacity, visibility (+ Chart type, fills, VWAP bands, BB offset) */
+    const wPx = [1.5, 2.5, 3.5][clamp((S['#width'] || 1) - 1, 0, 2)], op = (S['#opacity'] === undefined ? 100 : S['#opacity']) / 100, off = Math.round(I.Offset || 0);
+    const pts = arr => { const out = []; for (let i = i0; i <= i1; i++) { const j = i - off; if (j >= 0 && j < arr.length && arr[j] !== null && arr[j] !== undefined) out.push([xAt(i), yAt(arr[j])]); } return out; };
+    const styled = (arr, pl) => { if (!pl || pl.v === false) return ''; const P2 = pts(arr); if (P2.length < 2) return ''; const w2 = pl.w ? [1.5, 2.5, 3.5][clamp(pl.w - 1, 0, 2)] : wPx, o2 = pl.o !== undefined ? pl.o / 100 : op; return `<polyline class="study" style="stroke:${pl.c};stroke-width:${w2};stroke-opacity:${o2};stroke-dasharray:${IS_DASH[pl.s] || 'none'}" points="${P2.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ')}"/>`; };
+    const band = (a, b, fl) => { if (!fl || !fl.v || !fl.c || fl.c === 'transparent') return ''; const A = pts(a), B = pts(b).reverse(); if (A.length < 2) return ''; return `<polygon class="study-fill" style="fill:${fl.c};fill-opacity:${(fl.o || 0) / 100}" points="${A.concat(B).map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ')}"/>`; };
+    if (d.kind === 'ma') {
+      const pl = S['Line color'], ct = S['Chart type'], opm = pl && pl.o !== undefined ? pl.o / 100 : op;
+      if (ct === 'Histogram Chart') { const P2 = pts(s.main); studies += P2.map(q => `<line class="study-bar" x1="${q[0].toFixed(1)}" x2="${q[0].toFixed(1)}" y1="${q[1].toFixed(1)}" y2="${priceBottom}" style="stroke:${pl.c};stroke-opacity:${opm * .6};stroke-width:${Math.max(1, slot * .5).toFixed(1)}"/>`).join(''); }
+      else { if (ct === 'Area') { const P2 = pts(s.main); if (P2.length > 1) studies += `<polygon class="study-fill" style="fill:${pl.c};fill-opacity:${.12 * opm}" points="${P2.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ')} ${P2[P2.length - 1][0].toFixed(1)},${priceBottom} ${P2[0][0].toFixed(1)},${priceBottom}"/>`; } studies += styled(s.main, pl); }
+      return;
+    }
+    if (d.kind === 'bb') { studies += band(s.upper, s.lower, S.Background) + styled(s.upper, S.Upper) + styled(s.main, S.Middle) + styled(s.lower, S.Lower); return; }
+    if (d.kind === 'vwap') {
+      const pct = I.Bands === 'Percent', bandArr = (k, sign) => s.main.map((m, i) => m === null ? null : m + sign * (pct ? m * k / 100 : k * s.sd[i]));
+      let out = '';
+      [1, 2, 3].forEach(n => { if (I['Band ' + n] !== 'On') return; const k = +I['Mult ' + n] || n; const up = bandArr(k, 1), lo = bandArr(k, -1); if (n === 1) out = band(up, lo, S.Background) + out; out += styled(up, S['Upper ' + n]) + styled(lo, S['Lower ' + n]); });
+      studies += out + styled(s.main, S.VWAP); return;
+    }
     const line = (arr, cls) => { const pts = []; for (let i = i0; i <= i1; i++) if (arr[i] !== null && arr[i] !== undefined) pts.push(`${xAt(i).toFixed(1)},${yAt(arr[i]).toFixed(1)}`); return pts.length > 1 ? `<polyline class="study ${cls}" style="stroke:${st.color}" points="${pts.join(' ')}"/>` : ''; };
     if (d.kind === 'bb') studies += line(s.upper, 'band') + line(s.lower, 'band'); else studies += line(s.main, '');
   });
@@ -1507,7 +1631,7 @@ Chart.prototype.draw = function () {
   cmpData.forEach(c => {
     const pts = [];
     for (let i = i0; i <= i1; i++) pts.push(`${xAt(i).toFixed(1)},${yAt(cmpPct ? pctOf(c.data, i) : c.data[i]).toFixed(1)}`);
-    clines += `<polyline class="cline" style="stroke:var(--cmp-${c.ci + 1})" points="${pts.join(' ')}"/>`;
+    clines += `<polyline class="cline" style="stroke:${c.col}" points="${pts.join(' ')}"/>`;
   });
 
   const lcls = LAST.c >= PREV.c ? 'up' : 'down';
@@ -1560,7 +1684,7 @@ Chart.prototype.updateHead = function (i) {
     `<span><b>L:</b> <span class="v">${fmt(b.l)}</span></span>` +
     `<span><b>C:</b> <span class="v ${c}">${fmt(b.c)}</span> <span class="${pcls}">(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</span></span>`;
   if (this.volEl) this.volEl.textContent = fmtVol(b.v);
-  this.root.querySelectorAll('.lg-row').forEach(row => { const v = row.querySelector('.lg-val'); if (v) v.textContent = studyValue(row.dataset.code, i); });
+  this.root.querySelectorAll('.lg-row').forEach(row => { const v = row.querySelector('.lg-val'); if (v) { const st = state.studies.find(x => x.id === row.dataset.id); if (st) v.textContent = studyValue(st, i); } });
 };
 
 Chart.prototype.setHover = function (i, py) {
@@ -1820,6 +1944,10 @@ Chart.prototype.bind = function () {
         const dt = b.t - a.t;
         if (dt > 0 && performance.now() - b.t < 100) startInertia(clamp((b.s - a.s) / dt, -0.12, 0.12));
       }
+    } else if (g.mode === 'pending' && !cancelled && anchorPick) {   /* AVWAP "Pick on chart": this tap sets Anchor time */
+      const st = state.studies.find(x => x.id === anchorPick); anchorPick = null;
+      const i = clamp(barAt(g.x0), 0, BARS.length - 1);
+      if (st) { instCfg(st).i['Anchor by'] = 'Date'; st.cfg.i['Anchor time'] = BARS[i].date + ', 2026 09:30'; markDirty(); renderLegend(); toast('Anchor set to ' + BARS[i].date); }
     } else if (g.mode === 'xh') {
       if (cancelled) self.clear(); else self.releaseCrosshair();   /* auto fade; only the pill lingers */
     }
@@ -2056,6 +2184,7 @@ function applyScale() {
 }
 function setOrientation(o) {
   if (o === state.orientation || switching) return;
+  setTimeout(() => document.querySelectorAll('.chart-module').forEach(updateCmpStuck), 650);
   switching = true;
   closeOverlays();
   const prev = state.orientation;
@@ -2117,7 +2246,7 @@ function openSheet(title, bodyHTML, sub, drawer, actionsHTML) {
   sheetEl.classList.add('open');
 }
 function closeOverlays() {
-  document.querySelectorAll('.sheet.open, .backdrop.open').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.sheet.open, .backdrop.open, .cs-scrim.open').forEach(el => el.classList.remove('open'));
 }
 /* ---- Interval + date range drawer ---- */
 const IV_SECTIONS = [
@@ -2359,18 +2488,328 @@ function setCmpMode(m) {
   if (state.cmpMode === m) return;
   state.cmpMode = m; renderCompare(); drawAll(); markDirty();
 }
+/* ---- one colour palette for the whole app (web advanced chart grid): row 1 neutrals white to black,
+   then 9 rows of the same 10 hues from lightest tint to darkest shade ---- */
+const PAL_HUES = ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#10B981', '#06B6D4', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899'];
+const PAL_NEUTRALS = ['#FFFFFF', '#E5E7EB', '#D1D5DB', '#9CA3AF', '#6B7280', '#4B5563', '#374151', '#1F2937', '#111827', '#000000'];
+const palMix = (hex, t) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, n >> 8 & 255, n & 255], m = t > 0 ? 255 : 0, a = Math.abs(t); return '#' + c.map(v => Math.round(v + (m - v) * a).toString(16).padStart(2, '0')).join('').toUpperCase(); };
+const PALETTE = [...PAL_NEUTRALS, ...[.8, .62, .44, .24, 0, -.2, -.38, -.54, -.68].flatMap(t => PAL_HUES.map(h => palMix(h, t)))];
+const resolveColor = v => { if (!v) return ''; const m = String(v).match(/--[\w-]+/); const out = m ? getComputedStyle(document.documentElement).getPropertyValue(m[0]).trim() : String(v); return out.toUpperCase(); };
+let csCtx = null;
+function openColorSheet(ctx) {   /* ctx: { color, onPick(hex), opacity?: { value, max, onChange(v) } } - tapping a swatch applies and closes; X closes without choosing (and restores the opacity) */
+  csCtx = ctx;
+  const cur = resolveColor(ctx.color);
+  document.getElementById('csGrid').innerHTML = PALETTE.map(c => `<button class="cs-sw ${c === cur ? 'sel' : ''}" data-csc="${c}" style="background:${c}" aria-label="${c}"></button>`).join('');
+  const op = ctx.opacity, box = document.getElementById('csOpa'), inp = document.getElementById('csOpaIn');
+  box.classList.toggle('on', !!op);
+  if (op) { ctx.op0 = op.value; inp.max = op.max || 100; inp.step = op.step || 5; inp.value = op.value; csOpaPaint(); }
+  document.getElementById('csScrim').classList.add('open');
+  document.getElementById('colorSheet').classList.add('open');
+}
+function csOpaPaint() { const inp = document.getElementById('csOpaIn'); document.getElementById('csOpaPct').textContent = inp.value + '%'; inp.style.setProperty('--p', inp.value / +inp.max * 100 + '%'); }
+document.getElementById('csOpaIn').addEventListener('input', e => { if (!csCtx || !csCtx.opacity) return; csOpaPaint(); csCtx.opacity.onChange(+e.target.value); });
+function cancelColorSheet() { if (csCtx && csCtx.opacity && csCtx.op0 !== undefined) csCtx.opacity.onChange(csCtx.op0); closeColorSheet(); }
+function closeColorSheet() { csCtx = null; document.getElementById('csScrim').classList.remove('open'); document.getElementById('colorSheet').classList.remove('open'); }
+document.getElementById('colorSheet').addEventListener('click', e => {
+  if (e.target.closest('[data-cs="close"]')) { cancelColorSheet(); return; }
+  const sw = e.target.closest('[data-csc]'); if (!sw || !csCtx) return;
+  const cb = csCtx.onPick; closeColorSheet(); cb(sw.dataset.csc);
+});
+document.getElementById('csScrim').addEventListener('click', cancelColorSheet);
+const cmpColor = c => c.color || `var(--cmp-${c.ci + 1})`;   /* a picked colour overrides the palette slot; part of layout state */
+/* the toggle sticks (with fade + shadow) only while chips are hidden to its right edge's left, i.e. the row still has content to scroll */
+function updateCmpStuck(root) {
+  const sc = root.querySelector('.cmp-scroll'), w = root.querySelector('.cmp-tog-wrap'); if (!sc || !w) return;
+  w.classList.toggle('stuck', sc.scrollWidth - sc.clientWidth - sc.scrollLeft > 1);
+}
+window.addEventListener('resize', () => document.querySelectorAll('.chart-module').forEach(updateCmpStuck));
 function renderCompare() {
   const on = state.compare.length > 0;
   document.querySelectorAll('.chart-module').forEach(root => {
     root.querySelector('.chart-head').classList.toggle('cmp', on);
     const row = root.querySelector('.ch-cmprow');
     row.innerHTML = !on ? '' :
-      `<div class="cmp-scroll">${state.compare.map(c => `<span class="cmp-chip" data-cmp="${c.sym}"><span class="cmp-sw" style="background:var(--cmp-${c.ci + 1})"></span>${c.sym}<span class="cmp-div"></span><button class="cmp-x" data-cmprm="${c.sym}" aria-label="Remove ${c.sym}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>`).join('')}<div class="cmp-toggle"><button data-cmpmode="%" class="${state.cmpMode === '%' ? 'active' : ''}">%</button><button data-cmpmode="$" class="${state.cmpMode === '$' ? 'active' : ''}">$</button></div></div>`;   /* toggle travels with the chips as the last item of the scrolling row */
+      `<div class="cmp-scroll">${state.compare.map(c => `<span class="cmp-chip" data-cmp="${c.sym}"><span class="cmp-sw" data-cmpsw="${c.sym}" style="background:${cmpColor(c)}" role="button" aria-label="Change ${c.sym} colour"></span>${c.sym}<span class="cmp-div"></span><button class="cmp-x" data-cmprm="${c.sym}" aria-label="Remove ${c.sym}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>`).join('')}<div class="cmp-tog-wrap"><div class="cmp-toggle"><button data-cmpmode="%" class="${state.cmpMode === '%' ? 'active' : ''}">%</button><button data-cmpmode="$" class="${state.cmpMode === '$' ? 'active' : ''}">$</button></div></div></div>`;
+    const sc = row.querySelector('.cmp-scroll'); if (sc) sc.addEventListener('scroll', () => updateCmpStuck(root), { passive: true });
+    updateCmpStuck(root);   /* toggle travels with the chips as the last item of the scrolling row */
   });
 }
 document.addEventListener('click', e => {
+  const csw = e.target.closest('[data-cmpsw]');
+  if (csw) { const c = state.compare.find(x => x.sym === csw.dataset.cmpsw); if (c) openColorSheet({ color: cmpColor(c), onPick: col => { c.color = col; renderCompare(); drawAll(); markDirty(); } }); return; }
   const rm = e.target.closest('[data-cmprm]'); if (rm) { removeCompare(rm.dataset.cmprm); return; }
   const md = e.target.closest('[data-cmpmode]'); if (md) setCmpMode(md.dataset.cmpmode);
+});
+
+/* ============================================================
+   INDICATOR SETTINGS DRAWER
+   Schema = QA's web catalogue (Output/2026-09-28-advanced-chart-indicator-settings.json), compacted:
+   { c: code, n: name, tf: title format, tabs, s: Style fields, i: Inputs fields }, field { t, l, d, o, mn, mx, st }
+   t: div | line | lineNC | colVis | fill | colour | width | opa | bool | num | list | seg | toggle | datetime | action
+   ============================================================ */
+const IND_SETTINGS = [{"c":"Vol","n":"Volume","tf":"Vol","tabs":[],"s":[{"t":"seg","l":"Placement","d":"Merge up","o":["Merge up","Unmerge down"]},{"t":"div"},{"t":"colour","l":"Up color","d":"#00A651"},{"t":"colour","l":"Down color","d":"#E2001A"},{"t":"opa","l":"Opacity","d":0.5,"mn":0,"mx":1,"st":0.05},{"t":"div"},{"t":"bool","l":"Volume MA","d":false},{"t":"num","l":"MA length","d":20,"mn":1,"mx":400},{"t":"colour","l":"MA color","d":"#2962FF"}],"i":[]},{"c":"SMA","n":"Simple Moving Average","tf":"SMA({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#F39C12","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"EMA","n":"Exponential Moving Average","tf":"EMA({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#3498DB","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"WMA","n":"Weighted Moving Average","tf":"WMA({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#9B59B6","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"SMMA","n":"Smoothed Moving Average","tf":"SMMA({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#E67E22","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"MA Cross","n":"MA Cross","tf":"MA Cross({Short Length}, {Long Length})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Short MA","d":{"v":true,"c":"#F57F17","s":"solid"}},{"t":"line","l":"Long MA","d":{"v":true,"c":"#2962FF","s":"solid"}},{"t":"colVis","l":"Cross","d":{"v":true,"c":"#787B86"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Short Length","d":9,"mn":1,"mx":500,"st":1},{"t":"num","l":"Long Length","d":21,"mn":1,"mx":500,"st":1},{"t":"seg","l":"MA Type","d":"SMA","o":["SMA","EMA","WMA","SMMA"]}]},{"c":"BB","n":"Bollinger Bands","tf":"BB({Length}, {StdDev})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Upper","d":{"v":true,"c":"#27AE60","s":"solid"}},{"t":"line","l":"Middle","d":{"v":true,"c":"#2980B9","s":"dashed"}},{"t":"line","l":"Lower","d":{"v":true,"c":"#27AE60","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"fill","l":"Background","d":{"v":true,"c":"transparent","o":9},"mn":0,"mx":50,"st":1},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Length","d":20,"mn":2,"mx":500,"st":1},{"t":"seg","l":"Basis MA","d":"SMA","o":["SMA","EMA","WMA","SMMA"]},{"t":"num","l":"StdDev","d":2,"mn":0.5,"mx":5,"st":0.5},{"t":"num","l":"Offset","d":0,"mn":-50,"mx":50,"st":1}]},{"c":"KC","n":"Keltner Channel","tf":"KC({Period}, {ATR Period}, {Multiplier})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#0891B2","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#0369A1","s":"solid"}},{"t":"line","l":"Line 3","d":{"v":true,"c":"#0891B2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1},{"t":"num","l":"ATR Period","d":10,"mn":2,"mx":200,"st":1},{"t":"num","l":"Multiplier","d":2,"mn":0.5,"mx":5,"st":0.5}]},{"c":"DC","n":"Donchian Channels","tf":"DC({Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#7C3AED","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#6D28D9","s":"solid"}},{"t":"line","l":"Line 3","d":{"v":true,"c":"#7C3AED","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1}]},{"c":"Alligator","n":"Williams Alligator","tf":"Alligator({Jaw Length}, {Jaw Offset}, {Teeth Length}, {Teeth Offset}, {Lips Length}, {Lips Offset})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Jaw","d":{"v":true,"c":"#2962FF","s":"solid"}},{"t":"line","l":"Teeth","d":{"v":true,"c":"#E91E63","s":"solid"}},{"t":"line","l":"Lips","d":{"v":true,"c":"#4CAF50","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"fill","l":"Background","d":{"v":true,"c":"transparent","o":9},"mn":0,"mx":50,"st":1},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Jaw Length","d":13,"mn":1,"mx":500,"st":1},{"t":"num","l":"Jaw Offset","d":8,"mn":0,"mx":50,"st":1},{"t":"num","l":"Teeth Length","d":8,"mn":1,"mx":500,"st":1},{"t":"num","l":"Teeth Offset","d":5,"mn":0,"mx":50,"st":1},{"t":"num","l":"Lips Length","d":5,"mn":1,"mx":500,"st":1},{"t":"num","l":"Lips Offset","d":3,"mn":0,"mx":50,"st":1}]},{"c":"VWAP","n":"VWAP","tf":"VWAP","tabs":["Style","Inputs"],"s":[{"t":"line","l":"VWAP","d":{"v":true,"c":"#2563EB","s":"solid"}},{"t":"line","l":"Upper 1","d":{"v":true,"c":"#3B82F6","s":"solid"}},{"t":"line","l":"Lower 1","d":{"v":true,"c":"#3B82F6","s":"solid"}},{"t":"line","l":"Upper 2","d":{"v":true,"c":"#60A5FA","s":"solid"}},{"t":"line","l":"Lower 2","d":{"v":true,"c":"#60A5FA","s":"solid"}},{"t":"line","l":"Upper 3","d":{"v":true,"c":"#93C5FD","s":"solid"}},{"t":"line","l":"Lower 3","d":{"v":true,"c":"#93C5FD","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"fill","l":"Background","d":{"v":true,"c":"transparent","o":9},"mn":0,"mx":50,"st":1},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"seg","l":"Anchor","d":"Session","o":["Session","Week","Month","Quarter","Year","Decade","Century"]},{"t":"num","l":"Offset","d":0,"mn":-50,"mx":50,"st":1},{"t":"seg","l":"Bands","d":"StdDev","o":["StdDev","Percent"]},{"t":"toggle","l":"Band 1","d":"Off","o":["Off","On"]},{"t":"num","l":"Mult 1","d":1,"mn":0.1,"mx":10,"st":0.1},{"t":"toggle","l":"Band 2","d":"Off","o":["Off","On"]},{"t":"num","l":"Mult 2","d":2,"mn":0.1,"mx":10,"st":0.1},{"t":"toggle","l":"Band 3","d":"Off","o":["Off","On"]},{"t":"num","l":"Mult 3","d":3,"mn":0.1,"mx":10,"st":0.1},{"t":"toggle","l":"Hide ≥1D","d":"Off","o":["Off","On"]}]},{"c":"AVWAP","n":"Anchored VWAP","tf":"AVWAP","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#A855F7","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#9333EA","s":"solid"}},{"t":"line","l":"Line 3","d":{"v":true,"c":"#A855F7","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"seg","l":"Anchor by","d":"Date","o":["Bars back","Date"]},{"t":"datetime","l":"Anchor time","d":null},{"t":"num","l":"StdDev mult","d":0,"mn":0,"mx":4,"st":0.1},{"t":"action","l":null,"d":null}]},{"c":"PSAR","n":"Parabolic SAR","tf":"PSAR({Start}, {Increment}, {Max})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#0F172A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Start","d":0.02,"mn":0.001,"mx":0.1,"st":0.001},{"t":"num","l":"Increment","d":0.02,"mn":0.001,"mx":0.1,"st":0.001},{"t":"num","l":"Max","d":0.2,"mn":0.05,"mx":0.5,"st":0.01}]},{"c":"Ichimoku","n":"Ichimoku Cloud","tf":"Ichimoku({Tenkan}, {Kijun}, {Senkou B}, {Displacement})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Tenkan","d":{"v":true,"c":"#2563EB","s":"solid"}},{"t":"line","l":"Kijun","d":{"v":true,"c":"#DC2626","s":"solid"}},{"t":"line","l":"Senkou A","d":{"v":true,"c":"#16A34A","s":"solid"}},{"t":"line","l":"Senkou B","d":{"v":true,"c":"#DC2626","s":"solid"}},{"t":"line","l":"Chikou","d":{"v":true,"c":"#43A047","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Tenkan","d":9,"mn":2,"mx":100,"st":1},{"t":"num","l":"Kijun","d":26,"mn":2,"mx":200,"st":1},{"t":"num","l":"Senkou B","d":52,"mn":2,"mx":500,"st":1},{"t":"num","l":"Displacement","d":26,"mn":1,"mx":100,"st":1}]},{"c":"ZZ","n":"ZigZag","tf":"ZZ({Deviation %}, {Depth})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#64748B","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Deviation %","d":5,"mn":0.1,"mx":50,"st":0.1},{"t":"num","l":"Depth","d":10,"mn":1,"mx":100,"st":1}]},{"c":"ST","n":"Supertrend","tf":"ST({ATR Length}, {Multiplier}, {Show Cloud})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#26A69A","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#EF5350","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"ATR Length","d":10,"mn":2,"mx":200,"st":1},{"t":"num","l":"Multiplier","d":3,"mn":0.1,"mx":20,"st":0.1},{"t":"num","l":"Show Cloud","d":1,"mn":0,"mx":1,"st":1}]},{"c":"Pivots","n":"Pivots HL","tf":"Pivots({Left Bars}, {Right Bars})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#EF5350","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#26A69A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Left Bars","d":5,"mn":1,"mx":100,"st":1},{"t":"num","l":"Right Bars","d":5,"mn":1,"mx":100,"st":1}]},{"c":"Gaps","n":"Gaps","tf":"Gaps({Min Deviation %}, {Max Gaps}, {Max Trail Bars})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#34D399","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#CA8A04","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":3},{"t":"opa","l":"Opacity","d":35,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Min Deviation %","d":30,"mn":0,"mx":500,"st":1},{"t":"num","l":"Max Gaps","d":15,"mn":1,"mx":500,"st":1},{"t":"num","l":"Max Trail Bars","d":300,"mn":10,"mx":5000,"st":10}]},{"c":"PP","n":"Pivot Points","tf":"PP({Pivots Back})","tabs":["Style","Inputs"],"s":[{"t":"colVis","l":"P","d":{"v":true,"c":"#F59E0B"}},{"t":"colVis","l":"S1","d":{"v":true,"c":"#22C55E"}},{"t":"colVis","l":"S2","d":{"v":true,"c":"#16A34A"}},{"t":"colVis","l":"S3","d":{"v":true,"c":"#EF4444"}},{"t":"colVis","l":"S4","d":{"v":true,"c":"#DC2626"}},{"t":"colVis","l":"S5","d":{"v":true,"c":"#991B1B"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"seg","l":"Type","d":"Traditional","o":["Traditional","Fibonacci","Woodie","Classic","Camarilla"]},{"t":"seg","l":"Pivots Timeframe","d":"Auto","o":["Auto","Daily","Weekly","Monthly","Yearly"]},{"t":"num","l":"Pivots Back","d":15,"mn":1,"mx":200,"st":1}]},{"c":"RSI","n":"Relative Strength Index","tf":"RSI({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#8E44AD","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"MACD","n":"MACD","tf":"MACD({Fast}, {Slow}, {Signal})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Fast","d":12,"mn":2,"mx":200,"st":1},{"t":"num","l":"Slow","d":26,"mn":3,"mx":200,"st":1},{"t":"num","l":"Signal","d":9,"mn":2,"mx":100,"st":1}]},{"c":"DeM","n":"DeMarker","tf":"DeM({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#E67E22","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":1,"mx":500,"st":1}]},{"c":"Stoch","n":"Stochastic","tf":"Stoch({%K Period}, {%D Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"%K Period","d":14,"mn":2,"mx":200,"st":1},{"t":"num","l":"%D Period","d":3,"mn":1,"mx":50,"st":1}]},{"c":"StochRSI","n":"Stochastic RSI","tf":"StochRSI({RSI Period}, {Stoch Period}, {K Smooth}, {D Smooth})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"RSI Period","d":14,"mn":2,"mx":200,"st":1},{"t":"num","l":"Stoch Period","d":14,"mn":2,"mx":200,"st":1},{"t":"num","l":"K Smooth","d":3,"mn":1,"mx":50,"st":1},{"t":"num","l":"D Smooth","d":3,"mn":1,"mx":50,"st":1}]},{"c":"ADX","n":"Average Directional Index","tf":"ADX({ADX Smoothing}, {DI Length})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"ADX","d":{"v":true,"c":"#E67E22","s":"solid"}},{"t":"line","l":"+DI","d":{"v":false,"c":"#27AE60","s":"solid"}},{"t":"line","l":"-DI","d":{"v":false,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"ADX Smoothing","d":14,"mn":1,"mx":100,"st":1},{"t":"num","l":"DI Length","d":14,"mn":1,"mx":200,"st":1}]},{"c":"CCI","n":"Commodity Channel Index","tf":"CCI({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#16A085","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1}]},{"c":"ATR","n":"Average True Range","tf":"ATR({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#D35400","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":2,"mx":200,"st":1}]},{"c":"%R","n":"Williams %R","tf":"%R({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#2C3E50","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":2,"mx":200,"st":1}]},{"c":"ROC","n":"Rate of Change","tf":"ROC({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#1ABC9C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":1,"mx":500,"st":1}]},{"c":"UO","n":"Ultimate Oscillator","tf":"UO({Period 1}, {Period 2}, {Period 3})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#8E44AD","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period 1","d":7,"mn":1,"mx":100,"st":1},{"t":"num","l":"Period 2","d":14,"mn":2,"mx":200,"st":1},{"t":"num","l":"Period 3","d":28,"mn":3,"mx":400,"st":1}]},{"c":"BBP","n":"Bull Bear Power","tf":"BBP({Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#27AE60","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":13,"mn":2,"mx":200,"st":1}]},{"c":"MOM","n":"Momentum","tf":"MOM({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#2563EB","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":10,"mn":1,"mx":500,"st":1}]},{"c":"AO","n":"Awesome Oscillator","tf":"AO({Fast}, {Slow})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#27AE60","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Fast","d":5,"mn":1,"mx":100,"st":1},{"t":"num","l":"Slow","d":34,"mn":2,"mx":200,"st":1}]},{"c":"TRIX","n":"TRIX","tf":"TRIX({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#7C3AED","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":18,"mn":2,"mx":200,"st":1}]},{"c":"TSI","n":"True Strength Index","tf":"TSI({Long Length}, {Short Length}, {Signal Length})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"TSI","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Signal","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Long Length","d":25,"mn":1,"mx":200,"st":1},{"t":"num","l":"Short Length","d":13,"mn":1,"mx":200,"st":1},{"t":"num","l":"Signal Length","d":13,"mn":1,"mx":100,"st":1}]},{"c":"RVGI","n":"Relative Vigor Index","tf":"RVGI({Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":10,"mn":2,"mx":200,"st":1}]},{"c":"Aroon","n":"Aroon","tf":"Aroon({Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2563EB","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#DC2626","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"PPO","n":"Price Oscillator","tf":"PPO({Fast}, {Slow}, {Signal})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Fast","d":12,"mn":1,"mx":200,"st":1},{"t":"num","l":"Slow","d":26,"mn":2,"mx":200,"st":1},{"t":"num","l":"Signal","d":9,"mn":1,"mx":100,"st":1}]},{"c":"OBV","n":"On Balance Volume","tf":"OBV","tabs":["Style"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#0891B2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[]},{"c":"Accum/Dist","n":"Accumulation/Distribution","tf":"Accum/Dist","tabs":["Style"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#16A34A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[]},{"c":"CMF","n":"Chaikin Money Flow","tf":"CMF({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#0891B2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":20,"mn":2,"mx":200,"st":1}]},{"c":"MFI","n":"Money Flow Index","tf":"MFI({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#F59E0B","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":2,"mx":200,"st":1}]},{"c":"BOP","n":"Balance of Power","tf":"BOP","tabs":["Style"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#10B981","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[]},{"c":"KVO","n":"Klinger Volume Oscillator","tf":"KVO({Fast}, {Slow}, {Signal})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Fast","d":34,"mn":2,"mx":200,"st":1},{"t":"num","l":"Slow","d":55,"mn":3,"mx":200,"st":1},{"t":"num","l":"Signal","d":13,"mn":1,"mx":100,"st":1}]},{"c":"RVI","n":"Relative Volatility Index","tf":"RVI({Length}, {MA Length})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#7E57C2","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#F59E0B","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Length","d":10,"mn":2,"mx":500,"st":1},{"t":"num","l":"MA Length","d":14,"mn":1,"mx":200,"st":1}]},{"c":"BB%B","n":"Bollinger %B","tf":"BB%B({Period}, {StdDev})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#7C3AED","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1},{"t":"num","l":"StdDev","d":2,"mn":0.5,"mx":5,"st":0.5}]},{"c":"BBW","n":"Bollinger Bandwidth","tf":"BBW({Period}, {StdDev}, {Lookback})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Width","d":{"v":true,"c":"#D97706","s":"solid"}},{"t":"line","l":"Highest Expansion","d":{"v":true,"c":"#F23645","s":"solid"}},{"t":"line","l":"Lowest Contraction","d":{"v":true,"c":"#089981","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1},{"t":"num","l":"StdDev","d":2,"mn":0.5,"mx":5,"st":0.5},{"t":"num","l":"Lookback","d":125,"mn":2,"mx":1000,"st":1}]},{"c":"AroonOsc","n":"Aroon Oscillator","tf":"AroonOsc({Period})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#22AB94","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#F7525F","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1}]},{"c":"ASI","n":"Accumulative Swing Index","tf":"ASI({Limit Move})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#26A69A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Limit Move","d":10000,"mn":0.1,"mx":1000000,"st":1}]},{"c":"BSP","n":"Buy Sell Pressure","tf":"BSP({Length})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#26A69A","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#EF5350","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Length","d":14,"mn":1,"mx":500,"st":1}]},{"c":"ChaikinOsc","n":"Chaikin Oscillator","tf":"ChaikinOsc({Fast Length}, {Slow Length})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#0891B2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Fast Length","d":3,"mn":1,"mx":100,"st":1},{"t":"num","l":"Slow Length","d":10,"mn":2,"mx":200,"st":1}]},{"c":"CV","n":"Chaikin Volatility","tf":"CV({EMA Length}, {ROC Length})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#7E57C2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"EMA Length","d":10,"mn":1,"mx":200,"st":1},{"t":"num","l":"ROC Length","d":12,"mn":1,"mx":200,"st":1}]},{"c":"DPO","n":"Detrended Price Oscillator","tf":"DPO({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#7C3AED","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":21,"mn":1,"mx":500,"st":1}]},{"c":"EOM","n":"Ease of Movement","tf":"EOM({Period}, {Divisor})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#0891B2","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":14,"mn":1,"mx":200,"st":1},{"t":"num","l":"Divisor","d":10000,"mn":1,"mx":1000000,"st":1000}]},{"c":"FI","n":"Force Index","tf":"FI({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#E67E22","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":13,"mn":1,"mx":200,"st":1}]},{"c":"MeanDev","n":"Mean Deviation","tf":"MeanDev({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#16A085","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":20,"mn":2,"mx":500,"st":1}]},{"c":"TR","n":"True Range","tf":"TR","tabs":["Style"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#D35400","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[]},{"c":"W A/D","n":"Williams Accumulation/Distribution","tf":"W A/D","tabs":["Style"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#16A34A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[]},{"c":"Env","n":"Moving Average Envelopes","tf":"Env({Period}, {Percent})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2962FF","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#787B86","s":"solid"}},{"t":"line","l":"Line 3","d":{"v":true,"c":"#2962FF","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Period","d":14,"mn":2,"mx":500,"st":1},{"t":"num","l":"Percent","d":1,"mn":0.1,"mx":50,"st":0.1}]},{"c":"PVO","n":"Percentage Volume Oscillator","tf":"PVO({Fast}, {Slow}, {Signal})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#2980B9","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#E74C3C","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Fast","d":12,"mn":1,"mx":200,"st":1},{"t":"num","l":"Slow","d":26,"mn":2,"mx":200,"st":1},{"t":"num","l":"Signal","d":9,"mn":1,"mx":100,"st":1}]},{"c":"Gator","n":"Gator Oscillator","tf":"Gator({Jaw Length}, {Jaw Offset}, {Teeth Length}, {Teeth Offset}, {Lips Length}, {Lips Offset})","tabs":["Style","Inputs"],"s":[{"t":"line","l":"Line 1","d":{"v":true,"c":"#26A69A","s":"solid"}},{"t":"line","l":"Line 2","d":{"v":true,"c":"#EF5350","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"list","l":"Source","d":"Close","o":["Close","Open","High","Low","HL/2","HLC/3","OHLC/4","Volume"]},{"t":"num","l":"Jaw Length","d":13,"mn":1,"mx":500,"st":1},{"t":"num","l":"Jaw Offset","d":8,"mn":0,"mx":50,"st":1},{"t":"num","l":"Teeth Length","d":8,"mn":1,"mx":500,"st":1},{"t":"num","l":"Teeth Offset","d":5,"mn":0,"mx":50,"st":1},{"t":"num","l":"Lips Length","d":5,"mn":1,"mx":500,"st":1},{"t":"num","l":"Lips Offset","d":3,"mn":0,"mx":50,"st":1}]},{"c":"A/D Ratio","n":"Advance/Decline Ratio (Bars)","tf":"A/D Ratio({Period})","tabs":["Style","Inputs"],"s":[{"t":"seg","l":"Chart type","d":"Line","o":["Line","Area","Histogram Chart"]},{"t":"div"},{"t":"lineNC","l":"Line color","d":{"c":"#26A69A","s":"solid"}},{"t":"div"},{"t":"width","l":"Width","d":1},{"t":"opa","l":"Opacity","d":100,"mn":0,"mx":100,"st":5},{"t":"div"},{"t":"bool","l":"Y-axis label","d":true},{"t":"num","l":"Precision","d":2,"mn":0,"mx":8,"st":1}],"i":[{"t":"num","l":"Period","d":9,"mn":1,"mx":500,"st":1}]}];
+const IS_BY = Object.fromEntries(IND_SETTINGS.map(e => [e.c, e]));
+(() => {
+  /* Gaps factory style: width 1, opacity 100% (the catalogue's 3 / 35% came from a saved default on that account) */
+  IS_BY.Gaps.s.forEach(f => { if (f.t === 'width') f.d = 1; if (f.t === 'opa') f.d = 100; });
+  /* Vol: opacity stored 0-1 on web, shown as percent; MA length / MA color only while Volume MA is on */
+  IS_BY.Vol.s.forEach(f => { if (f.t === 'opa') { f.d = Math.round(f.d * 100); f.mn = 0; f.mx = 100; f.st = 5; } if (f.l === 'MA length') { f.st = 1; f.when = ['Volume MA', true]; } if (f.l === 'MA color') f.when = ['Volume MA', true]; });
+  /* AVWAP: Anchor by = Date shows Anchor time + Pick on chart; Bars back swaps both for a Bars back number */
+  const av = IS_BY.AVWAP.i;
+  av.forEach(f => { if (f.t === 'datetime' || f.t === 'action') f.when = ['Anchor by', 'Date']; });
+  av.splice(av.findIndex(f => f.t === 'datetime'), 0, { t: 'num', l: 'Bars back', d: 50, mn: 1, mx: 5000, st: 1, when: ['Anchor by', 'Bars back'] });
+  /* plot rows carry their own width + opacity (sub-screen); they start from the indicator's shared Width / Opacity */
+  IND_SETTINGS.forEach(e => { const wf = e.s.find(f => f.t === 'width'), of = e.s.find(f => f.t === 'opa'); e.s.forEach(f => { if (f.t === 'line' || f.t === 'lineNC') { f.d.w = wf ? wf.d : 1; f.d.o = of ? of.d : 100; } }); });
+})();
+const isPlots = code => IS_BY[code].s.filter(f => f.t === 'line' || f.t === 'lineNC');
+const isKey = f => f.t === 'width' ? '#width' : f.t === 'opa' ? '#opacity' : f.t === 'action' ? '#action' : f.l;
+const isClone = v => JSON.parse(JSON.stringify(v));
+function isFactory(code) {
+  const e = IS_BY[code], out = { s: {}, i: {} };
+  ['s', 'i'].forEach(sec => (e[sec] || []).forEach(f => { if (f.t !== 'div' && f.t !== 'action') out[sec][isKey(f)] = f.d === undefined ? null : isClone(f.d); }));
+  return out;
+}
+function instCfg(st) {
+  if (!st.cfg || !st.cfg.s) st.cfg = isClone((state.indDefaults || {})[st.code] || isFactory(st.code));
+  return st.cfg;
+}
+const isNumTxt = v => (v === null || v === undefined || v === '' || !isFinite(+v)) ? '-' : String(+(+v).toFixed(6));
+function isTitle(code, cfg) {
+  const e = IS_BY[code]; if (!e) return code;
+  return e.tf.replace(/\{([^}]+)\}/g, (_, l) => isNumTxt(cfg.i[l]));
+}
+function instLabel(st) { return IS_BY[st.code] ? isTitle(st.code, instCfg(st)) : indLabel(st.code); }
+/* numeric params for the series math = the numbers in the title, in order (SMA: Period; BB: Length, StdDev; MACD: fast, slow, signal) */
+function instParams(st) {
+  const e = IS_BY[st.code], cfg = instCfg(st); if (!e) return IND_BY_CODE[st.code].params;
+  const P = [...e.tf.matchAll(/\{([^}]+)\}/g)].map(m => +cfg.i[m[1]]).filter(v => isFinite(v));
+  return P.length ? P : IND_BY_CODE[st.code].params;
+}
+/* first visible line / colour field = the legend colour */
+function isMainColor(code, cfg) {
+  if (code === 'Vol') return null;
+  const f = (IS_BY[code].s || []).find(x => (x.t === 'line' || x.t === 'lineNC' || x.t === 'colVis') && cfg.s[isKey(x)] && cfg.s[isKey(x)].c && cfg.s[isKey(x)].c !== 'transparent');
+  return f ? cfg.s[isKey(f)].c : null;
+}
+function isFieldShown(f, vals) { if (!f.when) return true; return vals[f.when[0]] === f.when[1]; }
+const IS_STYLE_NAME = { solid: 'Solid', dashed: 'Dashed', dotted: 'Dotted' };
+const IS_DASH = { solid: '', dashed: '6 4', dotted: '1.5 3' };
+const IS_LINE_ICO = s => `<svg viewBox="0 0 26 10"><path d="M${s === 'dotted' ? 2 : 1} 5h${s === 'dotted' ? 23 : 24}" stroke="currentColor" stroke-width="${s === 'dotted' ? 2.4 : 2}" ${s === 'dashed' ? 'stroke-dasharray="6 3"' : s === 'dotted' ? 'stroke-dasharray="0 4.5" stroke-linecap="round"' : ''}/></svg>`;
+const IS_W_ICO = w => `<svg viewBox="0 0 26 10"><path d="M1 5h24" stroke="currentColor" stroke-width="${[1, 2, 3.4][w - 1]}"/></svg>`;
+const isDecOf = v => { const s = String(v); return s.includes('.') ? s.split('.')[1].length : 0; };
+/* per-layout saved defaults: state.indDefaults[code] */
+const isSaved = code => (state.indDefaults || {})[code] || isFactory(code);
+const isSame = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+let IS = null;   /* open drawer: { id, code, work, tab, inner } */
+let anchorPick = null;   /* AVWAP "Pick on chart": instance id waiting for a plot tap */
+function openIndSettings(id) {
+  const st = state.studies.find(s => s.id === id); if (!st || !IS_BY[st.code]) return;
+  const e = IS_BY[st.code];
+  IS = { id, code: st.code, work: isClone(instCfg(st)), tab: 'style', inner: null };
+  const tabs = e.tabs.length > 1 ? `<div class="seg is-tabs">${e.tabs.map(t => `<button class="seg-opt ${t.toLowerCase() === 'style' ? 'active' : ''}" data-is="tab" data-v="${t.toLowerCase()}">${t}</button>`).join('')}</div>` : '';
+  openSheet(`<button class="is-back" data-is="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Back</button><div class="is-name" id="isName"></div>${tabs}`,
+    `<div class="is-wrap"><div class="is-screens"><div class="is-screen is-main" id="isMain"></div><div class="is-screen is-sub" id="isSub"></div></div><div class="is-foot"><button class="lf-btn primary is-ok" data-is="ok">Ok</button></div></div>`,
+    null, 'indset', `<button class="tb-btn" data-is="menu" aria-label="More">${ICO.dotsH}</button>`);
+  sheetEl.classList.add('is-sheet');
+  if (!tabs) sheetEl.classList.add('is-notabs');
+  isRender();
+}
+function isTitleText() { return IS.inner ? IS.inner.title : isTitle(IS.code, IS.work); }
+function isRender() {
+  const e = IS_BY[IS.code];
+  document.getElementById('isName').textContent = isTitleText();
+  const sec = IS.tab === 'inputs' ? 'i' : 's';
+  const vals = Object.assign({}, IS.work.s, IS.work.i);
+  const chartType = IS.work.s['Chart type'];
+  const groups = [[]];
+  (e[sec] || []).forEach(f => { if (f.t === 'div') { if (groups[groups.length - 1].length) groups.push([]); return; } if (isFieldShown(f, vals)) groups[groups.length - 1].push(f); });
+  const main = document.getElementById('isMain'), top = main.scrollTop;
+  main.innerHTML = groups.filter(g => g.length).map(g => `<div class="is-grp">${g.map(f => isRowHTML(f, sec, chartType)).join('')}</div>`).join('') || `<div class="empty">No settings</div>`;
+  main.scrollTop = top;
+  sheetEl.classList.toggle('is-inner', !!IS.inner);
+}
+function isSwHTML(c) { return `<span class="is-sw ${!c || c === 'transparent' ? 'none' : ''}" style="${c && c !== 'transparent' ? `background:${c}` : ''}"></span>`; }
+function isRowHTML(f, sec, chartType) {
+  const k = isKey(f), v = IS.work[sec][k], at = `data-sec="${sec}" data-f="${escHTML(k)}"`;
+  const lbl = escHTML(f.l || '');
+  const chev = `<span class="is-chev">${ICO.chevSm}</span>`;
+  switch (f.t) {
+    case 'line': case 'lineNC': case 'colVis': case 'fill': {
+      let label = f.l, sub = '';
+      const pw = v.w || 1, po = v.o === undefined ? 100 : v.o;
+      if (f.t === 'lineNC') { label = chartType === 'Area' ? 'Area color' : chartType === 'Histogram Chart' ? 'Bar color' : 'Line color'; sub = chartType === 'Histogram Chart' ? po + '%' : `${IS_STYLE_NAME[v.s]}, ${pw} px, ${po}%`; }
+      else if (f.t === 'line') sub = `${IS_STYLE_NAME[v.s]}, ${pw} px, ${po}%`;
+      else if (f.t === 'fill') sub = (v.c === 'transparent' ? 'No colour, ' : '') + v.o + '%';
+      const sw = f.t === 'lineNC' ? '' : `<button class="sw ${v.v ? 'on' : ''}" data-is="vis" ${at} aria-label="${v.v ? 'Hide' : 'Show'} ${lbl}"></button>`;
+      return `<div class="row is-row is-plot" data-is="plot" ${at} data-kind="${f.t}">${isSwHTML(v.c)}<div class="row-main"><span class="is-lbl">${escHTML(label)}</span>${sub ? `<span class="row-sub">${sub}</span>` : ''}</div>${sw}${chev}</div>`;
+    }
+    case 'colour': return `<div class="row is-row" data-is="colour" ${at}><span class="is-lbl">${lbl}</span>${isSwHTML(v)}${chev}</div>`;
+    case 'width': return chartType === 'Histogram Chart' ? '' : `<div class="row is-row" ${at}><span class="is-lbl">${lbl}</span><div class="seg is-seg">${[1, 2, 3].map(w => `<button class="seg-opt ${v === w ? 'active' : ''}" data-is="set" ${at} data-v="${w}" data-num="1" aria-label="Width ${w}">${IS_W_ICO(w)}</button>`).join('')}</div></div>`;
+    case 'opa': return isOpaHTML(f, sec, k, v, lbl);
+    case 'bool': case 'toggle': { const on = f.t === 'toggle' ? v === 'On' : !!v; return `<div class="row is-row" ${at}><span class="is-lbl">${lbl}</span><button class="sw ${on ? 'on' : ''}" data-is="bool" ${at} data-kind="${f.t}" aria-label="${lbl}"></button></div>`; }
+    case 'num': return `<div class="row is-row" ${at}><span class="is-lbl">${lbl}</span>${isStepHTML(f, sec, k, v)}</div>`;
+    case 'seg': if (sec === 's' || (f.o.length <= 3 && f.o.every(o => o.length <= 10))) return `<div class="row is-row is-segrow" ${at}><span class="is-lbl">${lbl}</span><div class="seg is-seg wide">${f.o.map(o => `<button class="seg-opt ${v === o ? 'active' : ''}" data-is="set" ${at} data-v="${escHTML(o)}">${escHTML(o === 'Histogram Chart' ? 'Histogram' : o)}</button>`).join('')}</div></div>`;
+      /* falls through: Inputs segmented = dropdown pattern */
+    case 'list': return `<div class="row is-row" data-is="list" ${at}><span class="is-lbl">${lbl}</span><span class="is-val">${escHTML(v)}</span>${chev}</div>`;
+    case 'datetime': return `<div class="row is-row" data-is="dt" ${at}><span class="is-lbl">${lbl}</span><span class="is-val">${v ? escHTML(v) : 'Not set'}</span>${chev}</div>`;
+    case 'action': return `<div class="row is-row is-actrow"><button class="is-action" data-is="pick">Pick on chart</button></div>`;
+  }
+  return '';
+}
+function isOpaHTML(f, sec, k, v, lbl) {
+  const mx = f.mx === undefined ? 100 : f.mx, stp = f.st || 5;
+  return `<div class="row is-row is-opa" data-sec="${sec}" data-f="${escHTML(k)}"><span class="is-lbl">${lbl}</span><span class="is-val is-pct">${v}%</span></div><div class="is-slider"><input type="range" min="${f.mn || 0}" max="${mx}" step="${stp}" value="${v}" data-is="range" data-sec="${sec}" data-f="${escHTML(k)}" style="--p:${(v - (f.mn || 0)) / (mx - (f.mn || 0)) * 100}%" aria-label="${lbl}"></div>`;
+}
+function isStepHTML(f, sec, k, v) {
+  const dec = Math.max(isDecOf(f.st || 1), isDecOf(f.d || 0)), num = +v;
+  const at = `data-sec="${sec}" data-f="${escHTML(k)}"`;
+  return `<span class="is-step"><button data-is="dec" ${at} ${num <= f.mn ? 'disabled' : ''} aria-label="Decrease">&minus;</button><input class="is-num" ${at} type="text" inputmode="${dec ? 'decimal' : 'numeric'}" value="${isFinite(num) ? num.toFixed(dec) : ''}" data-dec="${dec}"><button data-is="inc" ${at} ${num >= f.mx ? 'disabled' : ''} aria-label="Increase">+</button></span>`;
+}
+const isField = (sec, k) => (IS_BY[IS.code][sec] || []).find(f => isKey(f) === k) || (IS.inner && IS.inner.f && isKey(IS.inner.f) === k ? IS.inner.f : null);
+/* inner screens: list (options + checkmark), plot sub-screen, date and time wheel */
+function isPush(inner) {
+  IS.inner = inner;
+  const sub = document.getElementById('isSub');
+  sub.innerHTML = isSubHTML(); sub.scrollTop = 0;
+  if (inner.kind === 'dt') isWheelsInit(sub);
+  isRender();
+}
+/* date/time wheels: centre the selected item, and a scroll that settles selects the item under the band */
+function isWheelsInit(sub) {
+  sub.querySelectorAll('.is-wheel').forEach(col => {
+    const items = [...col.children], si = items.findIndex(b => b.classList.contains('sel'));
+    col.scrollTop = Math.max(0, si) * 36;
+    let tm = 0;
+    col.addEventListener('scroll', () => { clearTimeout(tm); tm = setTimeout(() => {
+      if (!IS || !IS.inner || IS.inner.kind !== 'dt') return;
+      const it = items[clamp(Math.round(col.scrollTop / 36), 0, items.length - 1)];
+      if (it && !it.classList.contains('sel')) { items.forEach(b => b.classList.toggle('sel', b === it)); isWheelCommit(); }
+    }, 140); }, { passive: true });
+  });
+}
+function isWheelCommit() {
+  const pick = w => document.querySelector(`#isSub [data-wheel="${w}"] .is-wi.sel`).dataset.v;
+  const val = `${pick('d')}, 2026 ${pick('h')}:${pick('m')}`;
+  isSetVal(IS.inner.sec, IS.inner.k, val); document.getElementById('isDtVal').textContent = val;
+}
+function isPop() { IS.inner = null; isRender(); }
+function isSubHTML() {
+  const n = IS.inner, v = IS.work[n.sec][n.k], at = `data-sec="${n.sec}" data-f="${escHTML(n.k)}"`;
+  if (n.kind === 'list') return `<div class="is-grp">${n.f.o.map(o => `<div class="row is-row is-opt" data-is="opt" ${at} data-v="${escHTML(o)}"><span class="is-lbl">${escHTML(o)}</span>${o === v ? ICO.check : ''}</div>`).join('')}</div>`;
+  if (n.kind === 'plot') {
+    const t = n.f.t, ct = IS.work.s['Chart type'];
+    let h = '';
+    if (t !== 'lineNC') h += `<div class="row is-row"><span class="is-lbl">Show</span><button class="sw ${v.v ? 'on' : ''}" data-is="vis" ${at}></button></div>`;
+    h += `<div class="row is-row" data-is="colour" ${at} data-sub="c"><span class="is-lbl">Colour</span>${isSwHTML(v.c)}<span class="is-chev">${ICO.chevSm}</span></div>`;
+    if ((t === 'line' || t === 'lineNC') && ct !== 'Histogram Chart') {
+      h += `<div class="row is-row"><span class="is-lbl">Line style</span><div class="seg is-seg">${['solid', 'dashed', 'dotted'].map(s => `<button class="seg-opt ${v.s === s ? 'active' : ''}" data-is="lstyle" ${at} data-v="${s}" aria-label="${IS_STYLE_NAME[s]}">${IS_LINE_ICO(s)}</button>`).join('')}</div></div>`;
+      h += `<div class="row is-row"><span class="is-lbl">Width</span><div class="seg is-seg">${[1, 2, 3].map(w => `<button class="seg-opt ${(v.w || 1) === w ? 'active' : ''}" data-is="pwidth" ${at} data-v="${w}" aria-label="Width ${w}">${IS_W_ICO(w)}</button>`).join('')}</div></div>`;
+    }
+    let tail = '';
+    if (t === 'line' || t === 'lineNC') tail = isOpaHTML({ mn: 0, mx: 100, st: 5 }, n.sec, n.k + '::o', v.o === undefined ? 100 : v.o, 'Opacity');
+    if (t === 'fill') tail = isOpaHTML({ mn: n.f.mn || 0, mx: n.f.mx || 50, st: n.f.st || 1 }, n.sec, n.k + '::o', v.o, 'Opacity');
+    return `<div class="is-grp">${h}</div>${tail ? `<div class="is-grp">${tail}</div>` : ''}`;
+  }
+  if (n.kind === 'dt') {
+    const dates = [...new Set(BARS.slice(-120).map(b => b.date))].reverse(), hours = [...Array(24)].map((_, i) => String(i).padStart(2, '0')), mins = [...Array(12)].map((_, i) => String(i * 5).padStart(2, '0'));
+    const cur = v ? v.match(/^(.*), 2026 (\d\d):(\d\d)$/) : null, sel = { d: cur ? cur[1] : dates[0], h: cur ? cur[2] : '09', m: cur ? cur[3] : '30' };
+    const col = (key, arr) => `<div class="is-wheel" data-wheel="${key}">${arr.map(x => `<button class="is-wi ${x === sel[key] ? 'sel' : ''}" data-is="wheel" data-w="${key}" data-v="${x}">${x}</button>`).join('')}</div>`;
+    return `<div class="is-dt"><div class="is-dt-val" id="isDtVal">${v ? escHTML(v) : 'Not set'}</div><div class="is-wheels"><div class="is-wheel-band"></div>${col('d', dates)}${col('h', hours)}${col('m', mins)}</div></div>`;
+  }
+  return '';
+}
+function isSetVal(sec, k, v) {
+  if (k.endsWith('::o')) { IS.work[sec][k.slice(0, -3)].o = v; return; }
+  IS.work[sec][k] = v;
+}
+function isRefresh() { if (IS.inner) document.getElementById('isSub').innerHTML = isSubHTML(); isRender(); }
+function isMenuHTML(state2) {
+  const same = isSame(IS.work, isSaved(IS.code));
+  if (state2 === 'saved') return `<div class="set-row set-action" data-is="default"><span class="set-label is-saved">${ICO.check}Saved</span></div>`;
+  return `<div class="set-row set-action" data-is="default" data-mode="${same ? 'reset' : 'save'}"><span class="set-label">${same ? 'Reset to default' : 'Save as default'}</span></div>`;
+}
+function isAction(el, e) {
+  const a = el.dataset.is, sec = el.dataset.sec, k = el.dataset.f;
+  if (a === 'tab') { IS.tab = el.dataset.v; sheetEl.querySelectorAll('.is-tabs .seg-opt').forEach(b => b.classList.toggle('active', b === el)); document.getElementById('isMain').scrollTop = 0; isRender(); return; }
+  if (a === 'back') { isPop(); return; }
+  if (a === 'ok') { isCommit(); closeOverlays(); IS = null; return; }
+  if (a === 'menu') { let m = sheetEl.querySelector('.is-menu'); if (m) { m.remove(); return; } m = document.createElement('div'); m.className = 'pop open sheet-menu is-menu'; m.innerHTML = isMenuHTML(); sheetEl.appendChild(m); return; }
+  if (a === 'default') {
+    const m = sheetEl.querySelector('.is-menu'); if (!m || !el.dataset.mode) return;
+    if (el.dataset.mode === 'save') {
+      state.indDefaults[IS.code] = isClone(IS.work); markDirty();
+      m.innerHTML = isMenuHTML('saved');
+      setTimeout(() => m.remove(), 1100);
+    } else {
+      delete state.indDefaults[IS.code];
+      const st = state.studies.find(s => s.id === IS.id);
+      IS.work = isFactory(IS.code);
+      if (st) { st.cfg = isClone(IS.work); isSyncColor(st); renderLegend(); drawAll(); }
+      markDirty(); m.remove(); isRefresh();
+    }
+    return;
+  }
+  if (a === 'plot') { if (e.target.closest('.sw')) return; const f = isField(sec, k); isPush({ kind: 'plot', sec, k, f, title: f.t === 'lineNC' ? (IS.work.s['Chart type'] === 'Area' ? 'Area color' : IS.work.s['Chart type'] === 'Histogram Chart' ? 'Bar color' : 'Line color') : f.l }); return; }
+  if (a === 'list') { const f = isField(sec, k); isPush({ kind: 'list', sec, k, f, title: f.l }); return; }
+  if (a === 'dt') { const f = isField(sec, k); isPush({ kind: 'dt', sec, k, f, title: f.l }); return; }
+  if (a === 'opt') { isSetVal(sec, k, el.dataset.v); isPop(); return; }
+  if (a === 'vis') { e.stopPropagation(); const v = IS.work[sec][k]; v.v = !v.v; isRefresh(); return; }
+  if (a === 'bool') { const f = isField(sec, k); const cur = IS.work[sec][k]; isSetVal(sec, k, f.t === 'toggle' ? (cur === 'On' ? 'Off' : 'On') : !cur); isRefresh(); return; }
+  if (a === 'set') { const v = el.dataset.num ? +el.dataset.v : el.dataset.v; isSetVal(sec, k, v); if (k === '#width') isPlots(IS.code).forEach(f => { IS.work.s[isKey(f)].w = v; }); isRefresh(); return; }
+  if (a === 'pwidth') { IS.work[sec][k].w = +el.dataset.v; isRefresh(); return; }
+  if (a === 'lstyle') { IS.work[sec][k].s = el.dataset.v; isRefresh(); return; }
+  if (a === 'colour') {
+    const v = IS.work[sec][k], obj = typeof v === 'object' && v, f = isField(sec, k);
+    const opa = obj && v.o !== undefined ? { value: v.o, max: f && f.t === 'fill' ? (f.mx || 50) : 100, step: f && f.t === 'fill' ? 1 : 5, onChange: o => { v.o = o; isRefresh(); } } : null;
+    openColorSheet({ color: obj ? v.c : v, opacity: opa, onPick: c => { if (obj) v.c = c; else IS.work[sec][k] = c; isRefresh(); } });
+    return;
+  }
+  if (a === 'dec' || a === 'inc') {
+    const f = isField(sec, k), stp = f.st || 1, dec = Math.max(isDecOf(stp), isDecOf(f.d || 0));
+    let v = +IS.work[sec][k]; if (!isFinite(v)) v = f.d;
+    v = clamp(+(Math.round((v + (a === 'inc' ? stp : -stp)) / stp) * stp).toFixed(dec), f.mn, f.mx);
+    isSetVal(sec, k, v); isRefresh(); return;
+  }
+  if (a === 'wheel') {
+    const col = el.closest('.is-wheel'); col.querySelectorAll('.is-wi').forEach(b => b.classList.toggle('sel', b === el));
+    col.scrollTo ? col.scrollTo({ top: [...col.children].indexOf(el) * 36, behavior: 'smooth' }) : (col.scrollTop = [...col.children].indexOf(el) * 36);
+    isWheelCommit();
+    return;
+  }
+  if (a === 'pick') {
+    isCommit(); anchorPick = IS.id; closeOverlays(); IS = null;
+    toast('Tap the chart to set the anchor');
+  }
+}
+function isSyncColor(st) { const c = isMainColor(st.code, st.cfg); if (c) st.color = c; }
+function isCommit() {
+  const st = state.studies.find(s => s.id === IS.id); if (!st) return;
+  if (isSame(IS.work, st.cfg)) return;
+  st.cfg = isClone(IS.work); isSyncColor(st);
+  markDirty(); renderLegend(); drawAll();
+}
+sheetEl.addEventListener('click', e => {
+  if (!IS || !sheetEl.classList.contains('is-sheet')) return;
+  const el = e.target.closest('[data-is]'); if (!el || el.tagName === 'INPUT') return;
+  e.stopPropagation(); isAction(el, e);
+}, true);
+sheetEl.addEventListener('input', e => {
+  if (!IS) return;
+  const t = e.target, sec = t.dataset.sec, k = t.dataset.f; if (!sec) return;
+  if (t.dataset.is === 'range') {
+    const v = +t.value; isSetVal(sec, k, v);
+    if (k === '#opacity' && sec === 's') isPlots(IS.code).forEach(f => { IS.work.s[isKey(f)].o = v; });
+    t.style.setProperty('--p', (v - +t.min) / (+t.max - +t.min) * 100 + '%');
+    const pct = t.closest('.is-screen').querySelector(`.is-opa[data-f="${window.CSS && CSS.escape ? CSS.escape(k) : k}"] .is-pct`); if (pct) pct.textContent = v + '%';
+    return;
+  }
+  if (t.classList.contains('is-num')) { t.value = t.value.replace(/[^0-9.\-]/g, ''); const v = parseFloat(t.value); if (isFinite(v)) { IS.work[sec][k] = v; document.getElementById('isName').textContent = isTitleText(); } }
+});
+sheetEl.addEventListener('change', e => {
+  if (!IS || !e.target.classList.contains('is-num')) return;
+  const t = e.target, f = isField(t.dataset.sec, t.dataset.f); let v = parseFloat(t.value); if (!isFinite(v)) v = f.d;
+  isSetVal(t.dataset.sec, t.dataset.f, clamp(v, f.mn, f.mx)); isRefresh();
 });
 
 /* ---- Indicators: legend, badge, drawer ---- */
@@ -2381,7 +2820,7 @@ function renderLegend() {
     head.classList.toggle('has-legend', n > 0);
     lg.classList.toggle('collapsed', !state.legendOpen);
     lg.innerHTML = !n ? '' :
-      `<div class="lg-rows">${vis.map(s => `<div class="lg-row" data-id="${s.id}" data-code="${s.code}"><span class="lg-bar" style="background:${s.color}"></span><span class="lg-name">${indLabel(s.code)}</span><span class="lg-val" style="color:${s.color === 'var(--gray-1)' ? 'var(--text-primary)' : s.color}">${studyValue(s.code, BARS.length - 1)}</span></div>`).join('')}</div>` +
+      `<div class="lg-rows">${vis.map(s => `<div class="lg-row" data-id="${s.id}" data-code="${s.code}"><span class="lg-bar" style="background:${s.color}"></span><span class="lg-name">${escHTML(instLabel(s))}</span><span class="lg-val" style="color:${s.color === 'var(--gray-1)' ? 'var(--text-primary)' : s.color}">${studyValue(s, BARS.length - 1)}</span></div>`).join('')}</div>` +
       `<button class="lg-toggle" data-act="legend-toggle" aria-label="${state.legendOpen ? 'Collapse' : 'Expand'} indicators">${ICO.chev.replace('class="chev"', '')}</button>`;
   });
   renderBadges();
@@ -2391,7 +2830,12 @@ function addStudy(code) {
   if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); return; }
   if (code === 'Vol' && countStudy('Vol')) return;   /* Volume is single-instance */
   const used = new Set(state.studies.map(s => s.color)); const color = code === 'Vol' ? 'var(--gray-1)' : (IND_COLORS.find(c => !used.has(c)) || IND_COLORS[state.studies.length % IND_COLORS.length]);
-  state.studies.push({ id: uid('s'), code, color, hidden: false }); recentInd(code);
+  const dup = countStudy(code) > 0;
+  const st = { id: uid('s'), code, color, hidden: false };
+  st.cfg = isClone(state.indDefaults[code] || isFactory(code));   /* new instances start from this layout's saved default */
+  if (dup && code !== 'Vol') { const f = IS_BY[code].s.find(x => x.t === 'line' || x.t === 'lineNC' || x.t === 'colVis'); if (f) st.cfg.s[isKey(f)].c = resolveColor(color) || color; }   /* a second instance gets its own colour */
+  isSyncColor(st);
+  state.studies.push(st); recentInd(code);
   renderLegend(); drawAll(); markDirty();
 }
 function removeStudyCode(code) {   /* removes the most recent instance of that indicator */
@@ -2439,8 +2883,9 @@ function layersSegHTML() {
 function layersBodyHTML() {
   const eye = h => `<button class="ly-btn" data-lyeye aria-label="${h ? 'Show' : 'Hide'}">${h ? ICO.eyeOff : ICO.eye}</button>`;
   const trash = `<button class="ly-btn trash" data-lytrash aria-label="Remove">${ICO.trash}</button>`;
+  const cog = `<button class="ly-btn" data-lycog aria-label="Settings">${ICO.cog}</button>`;   /* indicator rows only */
   if (layersTab === 'drawings') return state.drawings.length ? state.drawings.map(x => `<div class="ly-row ${x.hidden ? 'hidden' : ''}" data-lyid="${x.id}" data-lykind="d"><span class="ly-glyph">${GL[TOOL_GLYPH[x.name]] || ''}</span><span class="ly-name">${splitTool(x.name).label}</span>${eye(x.hidden)}${trash}</div>`).join('') : `<div class="empty">No drawings</div>`;
-  return state.studies.length ? state.studies.map(s => `<div class="ly-row ${s.hidden ? 'hidden' : ''}" data-lyid="${s.id}" data-lykind="s"><span class="ly-dot" style="background:${s.color}"></span><span class="ly-name">${indLabel(s.code).replace('(', ' (')}</span>${eye(s.hidden)}${trash}</div>`).join('') : `<div class="empty">No indicators</div>`;
+  return state.studies.length ? state.studies.map(s => `<div class="ly-row ${s.hidden ? 'hidden' : ''}" data-lyid="${s.id}" data-lykind="s"><span class="ly-dot" style="background:${s.color}"></span><span class="ly-name">${escHTML(instLabel(s).replace('(', ' ('))}</span>${cog}${eye(s.hidden)}${trash}</div>`).join('') : `<div class="empty">No indicators</div>`;
 }
 function openLayersDrawer(tab) {
   layersTab = tab || 'drawings'; pickHandler = null;
@@ -2448,7 +2893,7 @@ function openLayersDrawer(tab) {
 }
 function rerenderLayers() { if (!sheetEl.classList.contains('h-layers')) return; document.getElementById('sheetTitle').innerHTML = layersSegHTML(); sheetBody.innerHTML = layersBodyHTML(); }
 
-/* ---- Create New Alert (mock of the native iOS drawer; copy is the app's) ---- *//* ---- Create New Alert (mock of the native iOS drawer; copy is the app's) ---- */
+/* ---- Create New Alert (mock of the native iOS drawer; copy is the app's) ---- */
 const ALERT_ICO = {
   price: `<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20V6M5 9l3-3 3 3M20 8v14M17 19l3 3 3-3"/><path d="M14 11.5c-1.6 0-2.4.7-2.4 1.6 0 2 4.8.9 4.8 3 0 1-.9 1.7-2.4 1.7M14 10v1.5M14 17.8v1.4"/></svg>`,
   pct: `<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 21 21 7"/><circle cx="9" cy="9" r="2.6"/><circle cx="19" cy="19" r="2.6"/></svg>`,
@@ -2520,7 +2965,7 @@ function captureChart() {
         /* legend rows */
         const lgY0 = c.land ? hy + 26 : hy + 60; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.textAlign = 'left';
         const cssVar = v => { const m = v.match(/--[\w-]+/); return m ? getComputedStyle(document.documentElement).getPropertyValue(m[0]).trim() || '#8C8C8C' : v; };
-        state.studies.forEach((st, k) => { const y = lgY0 + k * 16; const col = cssVar(st.color); ctx.fillStyle = col; ctx.fillRect(12, y - 7, 3, 14); ctx.fillStyle = '#000'; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.fillText(indLabel(st.code), 21, y); const wl = ctx.measureText(indLabel(st.code)).width; ctx.fillStyle = st.code === 'Vol' ? '#000' : col; ctx.font = '510 11px ' + CAPTURE_FONT; ctx.fillText(studyValue(st.code, BARS.length - 1), 21 + wl + 6, y); });
+        state.studies.forEach((st, k) => { const y = lgY0 + k * 16; const col = cssVar(st.color); ctx.fillStyle = col; ctx.fillRect(12, y - 7, 3, 14); ctx.fillStyle = '#000'; ctx.font = '600 11px ' + CAPTURE_FONT; ctx.fillText(instLabel(st), 21, y); const wl = ctx.measureText(instLabel(st)).width; ctx.fillStyle = st.code === 'Vol' ? '#000' : col; ctx.font = '510 11px ' + CAPTURE_FONT; ctx.fillText(studyValue(st.code, BARS.length - 1), 21 + wl + 6, y); });
         resolve(cv.toDataURL('image/png'));
       } catch (err) { reject(err); }
     };
@@ -2633,11 +3078,12 @@ function saveLayoutsStore() {
   try { localStorage.setItem(LAYOUTS_KEY, JSON.stringify({ list: layouts.list, activeId: layouts.activeId, autosave: layouts.autosave, order: layouts.order, favs: layouts.favs })); } catch (_) {}
 }
 function snapshotState() {
-  return { type: state.type, interval: state.interval, range: state.range, studies: state.studies.map(s => ({ ...s })), drawings: state.drawings.map(x => ({ ...x })), settings: { ...state.settings }, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
+  return { type: state.type, interval: state.interval, range: state.range, studies: state.studies.map(s => { instCfg(s); return isClone(s); }), indDefaults: isClone(state.indDefaults || {}), drawings: state.drawings.map(x => ({ ...x })), settings: { ...state.settings }, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
 }
 function restoreState(s) {
   state.type = s.type; state.interval = s.interval; state.range = s.range || null;
-  state.studies = (s.studies || [{ code: 'Vol', color: 'var(--gray-1)' }]).filter(x => IND_BY_CODE[x.code]).slice(0, IND_MAX).map(x => ({ id: x.id || uid('s'), code: x.code, color: x.color, hidden: !!x.hidden }));
+  state.studies = (s.studies || [{ code: 'Vol', color: 'var(--gray-1)' }]).filter(x => IND_BY_CODE[x.code]).slice(0, IND_MAX).map(x => ({ id: x.id || uid('s'), code: x.code, color: x.color, hidden: !!x.hidden, cfg: x.cfg ? isClone(x.cfg) : undefined }));
+  state.indDefaults = isClone(s.indDefaults || {});
   state.drawings = (s.drawings || []).slice(0, DRAW_MAX).map(x => ({ id: x.id || uid('d'), name: x.name, hidden: !!x.hidden }));
   state.settings = { ...state.settings, ...s.settings };
   renderLegend();
@@ -2882,7 +3328,8 @@ sheetBody.addEventListener('click', e => {
   const ly = e.target.closest('[data-lyid]');
   if (ly) {
     const id = ly.dataset.lyid, kind = ly.dataset.lykind;
-    if (e.target.closest('[data-lyeye]')) { if (kind === 's') toggleStudyHidden(id); else toggleDrawingHidden(id); rerenderLayers(); }
+    if (e.target.closest('[data-lycog]')) { if (kind === 's') openIndSettings(id); }
+    else if (e.target.closest('[data-lyeye]')) { if (kind === 's') toggleStudyHidden(id); else toggleDrawingHidden(id); rerenderLayers(); }
     else if (e.target.closest('[data-lytrash]')) { if (kind === 's') removeStudyId(id); else removeDrawing(id); rerenderLayers(); }
     return;
   }
@@ -2932,6 +3379,8 @@ sheetBody.addEventListener('click', e => {
    ACTIONS (event delegation)
    ============================================================ */
 document.addEventListener('click', e => {
+  const lgr = e.target.closest('.lg-row');   /* tap an indicator's legend row: its settings */
+  if (lgr && lgr.dataset.id) { openIndSettings(lgr.dataset.id); return; }
   const btn = e.target.closest('[data-act]');
   if (!btn) return;
   const act = btn.dataset.act;
@@ -2946,7 +3395,7 @@ document.addEventListener('click', e => {
     case 'layouts':    openLayoutsDrawer(); break;
     case 'camera':     shareChart(); break;
     case 'alert':      openAlertDrawer(); break;
-    case 'exitfs':     toast('Close full screen'); break;
+    case 'back':       toast('Back to the app'); break;
     case 'latest':     charts[state.orientation].scrollToLatest(); break;
     case 'zoom-default': charts[state.orientation].zoomToDefault(); break;
     case 'layers-panel': openLayersDrawer('drawings'); break;
