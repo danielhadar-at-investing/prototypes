@@ -232,6 +232,24 @@ svg { display: block; }
 .btn-secondary { height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--divider); font-size: 15px; font-weight: 510; color: var(--text-primary); }
 .btn-primary { height: 40px; padding: 0 16px; border-radius: 10px; background: var(--text-active); color: #FFF; font-size: 15px; font-weight: 600; transition: opacity .15s; }
 .btn-primary:disabled { opacity: .4; }
+.name-err { font-size: 12px; font-weight: 500; color: var(--red-down); margin-top: 6px; line-height: 16px; }
+.name-err:empty { display: none; }
+/* native "+" new layout drawers: Unsaved changes, Create layout */
+.sheet.lay-flow .sheet-title { padding-bottom: 12px; }
+.lf-body { padding: 0 var(--margin) 12px; display: flex; flex-direction: column; }
+.lf-text { font-size: 15px; line-height: 21px; color: var(--text-secondary-2); text-align: center; margin: 0 8px 18px; }
+.lf-text b { color: var(--text-primary); font-weight: 600; overflow-wrap: anywhere; }
+.lf-btns { display: flex; flex-direction: column; gap: 10px; }
+.lf-btn { height: 50px; border-radius: 12px; font-size: 17px; font-weight: 600; }
+.lf-btn.primary { background: var(--text-active); color: #FFF; transition: opacity .15s; }
+.lf-btn.primary:disabled { opacity: .4; }
+.lf-btn.outline { border: 1.5px solid var(--divider); color: var(--text-primary); }
+.lf-btn.plain { color: var(--text-active); height: 44px; font-weight: 510; }
+.lf-cap { font-size: 12px; font-weight: 600; letter-spacing: .4px; color: var(--text-secondary); margin: 0 2px 8px; }
+.lf-row { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 16px; }
+.lf-row .lf-btn { height: 44px; padding: 0 18px; font-size: 16px; }
+.lf-row .lf-btn.primary { flex: 1; }
+#phone.landscape .sheet.lay-flow { max-width: 460px; }
 /* toast with an action */
 #toast .toast-act { margin-left: 12px; color: #7FB2FF; font-weight: 600; }
 .tb-div { width: .5px; height: 20px; background: var(--divider); margin: 0 4px; flex-shrink: 0; }
@@ -375,6 +393,8 @@ svg { display: block; }
 .ind-btn.rm { color: var(--green-up); }
 .ind-btn.add { color: var(--text-active); }
 .ind-btn.fav { color: var(--text-secondary); }
+.ind-slot { width: 26px; display: flex; justify-content: center; flex-shrink: 0; }   /* fixed columns: [count] [-] [+] [star] line up on every row */
+.ind-btn:disabled { color: var(--gray-3); pointer-events: none; }
 .ind-btn.fav svg { width: 18px; height: 18px; }
 .ind-btn.fav.on { color: var(--orange); }
 .chip svg { display: inline-block; width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }   /* the global svg { display: block } would stack the icon above the label */
@@ -778,7 +798,8 @@ svg { display: block; }
         <div class="modal" role="dialog" aria-labelledby="nameTitle">
           <div class="modal-title" id="nameTitle">Layout Name</div>
           <div class="modal-sub">Give this layout a name so you can find it again.</div>
-          <input class="modal-input" id="nameInput" type="text" placeholder="Layout name" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="40">
+          <input class="modal-input" id="nameInput" type="text" placeholder="Layout name" autocomplete="off" autocorrect="off" spellcheck="false">
+          <div class="name-err" id="nameErr"></div>
           <div class="modal-btns"><button class="btn-secondary" id="nameCancel">Cancel</button><button class="btn-primary" id="nameSave" disabled>Save layout</button></div>
         </div>
       </div>
@@ -2365,8 +2386,10 @@ function renderLegend() {
   });
   renderBadges();
 }
+const canAddStudy = code => state.studies.length < IND_MAX && !(code === 'Vol' && countStudy('Vol'));   /* + disabled at the cap, and for Vol once it is on */
 function addStudy(code) {
   if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); return; }
+  if (code === 'Vol' && countStudy('Vol')) return;   /* Volume is single-instance */
   const used = new Set(state.studies.map(s => s.color)); const color = code === 'Vol' ? 'var(--gray-1)' : (IND_COLORS.find(c => !used.has(c)) || IND_COLORS[state.studies.length % IND_COLORS.length]);
   state.studies.push({ id: uid('s'), code, color, hidden: false }); recentInd(code);
   renderLegend(); drawAll(); markDirty();
@@ -2391,7 +2414,7 @@ function indRowsHTML() {
   else if (indCat === 'Recent') list = indRecent.map(c => IND_BY_CODE[c]).filter(Boolean);
   else list = INDICATORS.filter(d => indCat === 'All indicators' || d.cat === indCat);
   if (!list.length) return `<div class="empty">${q ? `No indicators match "${indQuery}"` : indCat === 'Favorites' ? 'No favorites yet' : 'Nothing here yet'}</div>`;
-  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-cnt">${n}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}">&minus;</button>` : ''}<button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}">+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
+  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span><span class="ind-slot">${n ? `<span class="ind-cnt">${n}</span>` : ''}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}"${n ? '' : ' disabled'}>&minus;</button><button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}"${canAddStudy(d.code) ? '' : ' disabled'}>+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
 }
 function renderIndicators() {
   const q = indQuery;
@@ -2669,13 +2692,68 @@ function applyLayout(id) {
   restoreState(l.state);
   layouts.dirty = false; saveLayoutsStore(); refreshLayoutBtn();
 }
-function newLayout() {
-  layouts.activeId = null;
+const escHTML = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+/* layout name rules, mirrored from the web "Create New Layout" field (checked 2026-09-28):
+   trimmed-empty (spaces, tabs) = button disabled, no message; duplicate of an existing name, trimmed and
+   case-insensitive = disabled + inline red message; no length limit; any characters (HTML, emoji) accepted */
+function layoutNameCheck(raw, exceptId) {
+  const v = String(raw || '').trim();
+  if (!v) return { ok: false, msg: '', name: v };
+  const dup = layouts.list.some(l => l.id !== exceptId && l.name.trim().toLowerCase() === v.toLowerCase());
+  return dup ? { ok: false, msg: `A layout named \u201C${v}\u201D already exists.`, name: v } : { ok: true, msg: '', name: v };
+}
+/* create a named layout with the default chart setup, apply it, clean state */
+function newLayout(name) {
   state.legendOpen = false;   /* new layout starts with the legend collapsed */
   restoreState(DEFAULT_STATE);
-  layouts.dirty = true; saveLayoutsStore(); refreshLayoutBtn();
-  toast('New layout');
+  createLayout(name || 'Untitled');
+  closeOverlays();
+  toast('Layout created');
 }
+/* "+" in the Layouts drawer: Unsaved changes drawer first when dirty, then the Create layout drawer */
+function startNewLayout() {
+  if (layouts.dirty && !layouts.autosave) openUnsavedDrawer(); else openCreateLayoutDrawer();
+}
+function openUnsavedDrawer() {
+  const a = activeLayout();
+  openSheet('Unsaved changes', `<div class="lf-body"><p class="lf-text">You have unsaved changes in <b>${escHTML(a ? a.name : 'Untitled')}</b>. What would you like to do before creating a new layout?</p>` +
+    `<div class="lf-btns"><button class="lf-btn primary" data-lf="save">Save current first</button><button class="lf-btn outline" data-lf="discard">Discard changes</button><button class="lf-btn plain" data-lf="cancel">Cancel</button></div></div>`);
+  sheetEl.classList.add('lay-flow', 'lf-unsaved');
+}
+function openCreateLayoutDrawer() {
+  openSheet('Create layout', `<div class="lf-body"><div class="lf-cap">LAYOUT NAME</div>` +
+    `<input class="modal-input" id="lfName" type="text" placeholder="" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Layout name">` +
+    `<div class="name-err" id="lfErr"></div>` +
+    `<div class="lf-row"><button class="lf-btn plain" data-lf="cancel">Cancel</button><button class="lf-btn primary" data-lf="create" disabled>Create New Layout</button></div></div>`);
+  sheetEl.classList.add('lay-flow', 'lf-create');
+  setTimeout(() => document.getElementById('lfName')?.focus(), 60);
+}
+function lfValidate() {
+  const inp = document.getElementById('lfName'); if (!inp) return null;
+  const r = layoutNameCheck(inp.value);
+  document.getElementById('lfErr').textContent = r.msg;
+  sheetBody.querySelector('[data-lf="create"]').disabled = !r.ok;
+  return r;
+}
+function lfAction(k) {
+  if (k === 'cancel') { closeOverlays(); return; }
+  if (k === 'save') {
+    const a = activeLayout();
+    if (a) { saveCurrentLayout(); openCreateLayoutDrawer(); }
+    else { closeOverlays(); openNameDialog('', name => { createLayout(name); toast('Layout saved'); openCreateLayoutDrawer(); }); }
+    return;
+  }
+  if (k === 'discard') {
+    const a = activeLayout();
+    if (a) restoreState(a.state);
+    layouts.dirty = false; saveLayoutsStore(); refreshLayoutBtn();
+    openCreateLayoutDrawer();
+    return;
+  }
+  if (k === 'create') { const r = lfValidate(); if (r && r.ok) newLayout(r.name); }
+}
+sheetBody.addEventListener('input', e => { if (e.target.id === 'lfName') lfValidate(); });
+sheetBody.addEventListener('keydown', e => { if (e.target.id === 'lfName' && e.key === 'Enter') lfAction('create'); });
 function setAutosave(on) {
   layouts.autosave = on; saveLayoutsStore(); refreshLayoutBtn();
   if (on && layouts.dirty && activeLayout()) saveCurrentLayout(true);
@@ -2683,15 +2761,17 @@ function setAutosave(on) {
 /* Layout Name dialog (new + rename) */
 let nameCb = null;
 const nameScrim = document.getElementById('nameScrim'), nameInput = document.getElementById('nameInput'), nameSave = document.getElementById('nameSave');
-function openNameDialog(value, cb) {
-  nameCb = cb; nameInput.value = value || ''; nameSave.disabled = !nameInput.value.trim();
+let nameExcept = null;
+function nameValidate() { const r = layoutNameCheck(nameInput.value, nameExcept); document.getElementById('nameErr').textContent = r.msg; nameSave.disabled = !r.ok; return r; }
+function openNameDialog(value, cb, exceptId) {
+  nameCb = cb; nameExcept = exceptId || null; nameInput.value = value || ''; nameValidate();
   nameScrim.classList.add('open');
   setTimeout(() => { nameInput.focus(); nameInput.select(); }, 60);
 }
 function closeNameDialog() { nameScrim.classList.remove('open'); nameCb = null; }
-nameInput.addEventListener('input', () => { nameSave.disabled = !nameInput.value.trim(); });
+nameInput.addEventListener('input', nameValidate);
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !nameSave.disabled) nameSave.click(); if (e.key === 'Escape') closeNameDialog(); });
-nameSave.addEventListener('click', () => { const v = nameInput.value.trim(); if (!v) return; const cb = nameCb; closeNameDialog(); if (cb) cb(v); });
+nameSave.addEventListener('click', () => { const r = nameValidate(); if (!r.ok) return; const cb = nameCb; closeNameDialog(); if (cb) cb(r.name); });
 document.getElementById('nameCancel').addEventListener('click', closeNameDialog);
 nameScrim.addEventListener('click', e => { if (e.target === nameScrim) closeNameDialog(); });
 
@@ -2704,7 +2784,7 @@ function sortedLayouts() {
 }
 function layoutRowHTML(l, manage) {
   const active = l.id === layouts.activeId;
-  return `<div class="lay-row ${active ? 'active' : ''}" data-layout="${l.id}"><span class="lay-glyph"></span><div class="lay-main"><span class="lay-name">${l.name}</span><span class="lay-sub">${l.state.interval} &middot; ${relTime(l.savedAt)}</span></div>` +
+  return `<div class="lay-row ${active ? 'active' : ''}" data-layout="${l.id}"><span class="lay-glyph"></span><div class="lay-main"><span class="lay-name">${escHTML(l.name)}</span><span class="lay-sub">${l.state.interval} &middot; ${relTime(l.savedAt)}</span></div>` +
     (manage ? `<div class="lay-actions"><button class="lay-act" data-layact="rename" aria-label="Rename">${ICO.pencil}</button><button class="lay-act" data-layact="duplicate" aria-label="Duplicate">${ICO.dup}</button><button class="lay-act danger" data-layact="delete" aria-label="Delete">${ICO.trash}</button>${active ? '<span class="lay-dot"></span>' : ''}</div>` : (active ? '<span class="lay-dot"></span>' : '')) + `</div>`;
 }
 function layoutsListHTML(manage) {
@@ -2757,10 +2837,12 @@ function deleteLayout(id) {
   toast('Layout deleted', { label: 'Undo', fn: () => { layouts.list.splice(idx, 0, removed); if (wasActive) layouts.activeId = id; saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts(); } });
 }
 sheetEl.addEventListener('click', e => {
+  const lf = e.target.closest('[data-lf]');
+  if (lf) { lfAction(lf.dataset.lf); return; }
   const act = e.target.closest('[data-lay]');
   if (act) {
     const k = act.dataset.lay;
-    if (k === 'new') { closeOverlays(); newLayout(); }
+    if (k === 'new') startNewLayout();
     else if (k === 'menu') toggleLayoutsMenu();
     else if (k === 'autosave') { setAutosave(!layouts.autosave); rerenderLayouts(); }
     else if (k === 'manage') openManageLayouts();
@@ -2773,7 +2855,7 @@ sheetEl.addEventListener('click', e => {
   if (la) {
     const id = la.closest('[data-layout]').dataset.layout, l = layouts.list.find(x => x.id === id); if (!l) return;
     const k = la.dataset.layact;
-    if (k === 'rename') openNameDialog(l.name, name => { l.name = name; saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts(); toast('Layout renamed'); });
+    if (k === 'rename') openNameDialog(l.name, name => { l.name = name; saveLayoutsStore(); refreshLayoutBtn(); rerenderLayouts(); toast('Layout renamed'); }, l.id);
     else if (k === 'duplicate') { const copy = { ...l, id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: l.name + ' copy', createdAt: Date.now(), savedAt: Date.now(), usedAt: Date.now(), state: JSON.parse(JSON.stringify(l.state)) }; layouts.list.splice(layouts.list.indexOf(l) + 1, 0, copy); saveLayoutsStore(); rerenderLayouts(); toast('Layout duplicated'); }
     else if (k === 'delete') deleteLayout(id);
     return;
