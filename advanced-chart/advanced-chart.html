@@ -185,7 +185,7 @@ svg { display: block; }
 .tb-l, .tb-c, .tb-r { display: flex; align-items: center; gap: 2px; }
 .tb-r { justify-self: end; }
 .chart-toolbar.spread { justify-content: space-between; padding: 0 12px; }
-.pencil-btn { position: relative; }
+.pencil-btn, .lyr-btn { position: relative; }
 .save-btn { position: relative; }
 .save-dot { position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--green-up); border: 1.5px solid var(--bg-primary); opacity: 0; transform: scale(.5); transition: opacity .15s, transform .15s var(--ease-spring); }
 .save-btn.dirty .save-dot { opacity: 1; transform: none; }
@@ -324,7 +324,7 @@ svg { display: block; }
 .lg-val { font-weight: 510; }
 .lg-toggle { width: 28px; height: 28px; border-radius: 14px; margin-left: -6px; background: transparent; border: .5px solid var(--divider); display: inline-flex; align-items: center; justify-content: center; }   /* chevron only */
 .lg-toggle svg { width: 12px; height: 12px; color: var(--text-secondary); transition: transform .2s var(--ease-ios); }
-.ch-legend.collapsed .lg-toggle svg { transform: rotate(180deg); }   /* down = collapse, up = expand */
+.ch-legend:not(.collapsed) .lg-toggle svg { transform: rotate(180deg); }   /* collapsed = down (expand), expanded = up (collapse) */
 /* no reserved band: at rest the legend sits right under the price row; while the crosshair rows show (and no chips fill the slot)
    the legend slides down by the rows' height with the same timings as the fade, then back */
 .ch-legend { transition: transform .2s ease; }
@@ -378,7 +378,6 @@ svg { display: block; }
 .chip svg { display: inline-block; width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }   /* the global svg { display: block } would stack the icon above the label */
 .chip svg.bolt { color: var(--orange); }
 .chip.active svg.bolt { color: #FFD60A; }
-.lg-row.hidden { opacity: .45; }
 /* layers drawer */
 .sheet.drawer.h-layers { height: min(560px, 94%); }
 .ly-row { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 8px 0 var(--margin); position: relative; }
@@ -906,7 +905,7 @@ const state = {
   tool: null,             /* active drawing tool */
   settings: { extended: true, events: true, log: false, invert: false, countdown: false },
   compare: [],            /* [{ sym, ci }] up to 5, ci = palette slot */
-  legendOpen: true,
+  legendOpen: false,   /* collapsed by default; session-only, not layout state */
   cmpMode: '%',           /* '%' rebased percent view, '$' shared price axis */
   studies: [{ id: 's0', code: 'Vol', color: 'var(--gray-1)', hidden: false }],   /* indicator instances in legend order; Volume is on by default */
   drawings: [],           /* drawing layers: { id, name, hidden } */
@@ -1154,9 +1153,9 @@ function chartModuleHTML(id, land) {
   const symBtn    = `<button class="tb-btn tb-text tb-sym" data-act="symbol">SNDK</button>`;
   const ivBtn     = `<button class="tb-btn tb-text" data-act="interval" aria-label="Interval and date range"><span class="interval-label">${state.interval}</span></button>`;
   const typeBtn   = `<button class="tb-btn" data-act="type" aria-label="Chart type"><span class="type-icon">${ICO.candle}</span></button>`;
-  const pencilBtn = `<button class="tb-btn pencil-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}<span class="ind-badge draw-badge"></span></button>`;
-  const indBtn    = `<button class="tb-btn layers-btn" data-act="layers" aria-label="Indicators">${ICO.bars}<span class="ind-badge"></span></button>`;   /* climbing bars = indicators */
-  const layersBtn = `<button class="tb-btn" data-act="layers-panel" aria-label="Layers">${ICO.layers}</button>`;
+  const pencilBtn = `<button class="tb-btn pencil-btn" data-act="draw" aria-label="Drawing tools">${ICO.pencil}</button>`;
+  const indBtn    = `<button class="tb-btn layers-btn" data-act="layers" aria-label="Indicators">${ICO.bars}</button>`;   /* climbing bars = indicators */
+  const layersBtn = `<button class="tb-btn lyr-btn" data-act="layers-panel" aria-label="Layers">${ICO.layers}<span class="ind-badge ly-badge"></span></button>`;
   const exitBtn   = `<button class="tb-btn" data-act="exitfs" aria-label="Close full screen">${ICO.compress}</button>`;
   const div       = `<span class="tb-div"></span>`;
 
@@ -2158,8 +2157,9 @@ function selectTool(name) {
 }
 function removeDrawing(id) { const k = state.drawings.findIndex(x => x.id === id); if (k < 0) return; state.drawings.splice(k, 1); markDirty(); renderBadges(); }
 function renderBadges() {
-  document.querySelectorAll('.layers-btn .ind-badge').forEach(b => b.textContent = state.studies.length ? String(state.studies.length) : '');
-  document.querySelectorAll('.pencil-btn .draw-badge').forEach(b => b.textContent = state.drawings.length ? String(state.drawings.length) : '');
+  /* one badge, on Layers only: drawings + indicator instances (hidden included) = Drawings (n) + Indicators (n) in the drawer */
+  const total = state.drawings.length + state.studies.length;
+  document.querySelectorAll(".lyr-btn .ly-badge").forEach(b => b.textContent = total ? String(total) : '');
 }
 const TOOL_GLYPH = {}; DRAW_CATS.forEach(c => c.tools.forEach(t => { TOOL_GLYPH[t.name] = t.g; }));
 
@@ -2225,13 +2225,13 @@ document.addEventListener('click', e => {
 
 /* ---- Indicators: legend, badge, drawer ---- */
 function renderLegend() {
-  const n = state.studies.length;
+  const vis = state.studies.filter(s => !s.hidden), n = vis.length;   /* hidden layers take no space on the chart; order kept */
   document.querySelectorAll('.chart-module').forEach(root => {
     const head = root.querySelector('.chart-head'), lg = root.querySelector('.ch-legend');
     head.classList.toggle('has-legend', n > 0);
     lg.classList.toggle('collapsed', !state.legendOpen);
     lg.innerHTML = !n ? '' :
-      `<div class="lg-rows">${state.studies.map(s => `<div class="lg-row ${s.hidden ? 'hidden' : ''}" data-id="${s.id}" data-code="${s.code}"><span class="lg-bar" style="background:${s.color}"></span><span class="lg-name">${indLabel(s.code)}</span><span class="lg-val" style="color:${s.color === 'var(--gray-1)' ? 'var(--text-primary)' : s.color}">${studyValue(s.code, BARS.length - 1)}</span></div>`).join('')}</div>` +
+      `<div class="lg-rows">${vis.map(s => `<div class="lg-row" data-id="${s.id}" data-code="${s.code}"><span class="lg-bar" style="background:${s.color}"></span><span class="lg-name">${indLabel(s.code)}</span><span class="lg-val" style="color:${s.color === 'var(--gray-1)' ? 'var(--text-primary)' : s.color}">${studyValue(s.code, BARS.length - 1)}</span></div>`).join('')}</div>` +
       `<button class="lg-toggle" data-act="legend-toggle" aria-label="${state.legendOpen ? 'Collapse' : 'Expand'} indicators">${ICO.chev.replace('class="chev"', '')}</button>`;
   });
   renderBadges();
@@ -2543,6 +2543,7 @@ function applyLayout(id) {
 }
 function newLayout() {
   layouts.activeId = null;
+  state.legendOpen = false;   /* new layout starts with the legend collapsed */
   restoreState(DEFAULT_STATE);
   layouts.dirty = true; saveLayoutsStore(); refreshLayoutBtn();
   toast('New layout');
