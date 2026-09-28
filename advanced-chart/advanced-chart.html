@@ -1292,7 +1292,13 @@ Chart.prototype.draw = function () {
   /* price <-> y, with optional logarithmic and inverted scale */
   const S = state.settings, useLog = S.log && lo > 0 && !cmpPct;
   const f = useLog ? Math.log : (v => v), fi = useLog ? Math.exp : (v => v);
-  const flo = f(lo), fhi = f(hi);
+  let flo = f(lo), fhi = f(hi);
+  /* manual price scale (axis drag / pinch): span = k x auto-fit span, centre = auto-fit centre + o x auto-fit span.
+     Both are relative to the auto-fit of the visible bars, so on pan the scale keeps its zoom factor and follows the candles. */
+  const aS = fhi - flo, aC = (flo + fhi) / 2;
+  this.autoY = { S: aS, C: aC };
+  if (this.pz) { const sp = aS * this.pz.k, cc = aC + this.pz.o * aS; flo = cc - sp / 2; fhi = cc + sp / 2; }
+  this.fY = { f, flo, fhi };
   const yLin = p => priceBottom - (f(p) - flo) / (fhi - flo) * (priceBottom - HEAD);
   const pLin = y => fi(flo + (priceBottom - y) / (priceBottom - HEAD) * (fhi - flo));
   const yAt = S.invert ? (p => HEAD + priceBottom - yLin(p)) : yLin;
@@ -1322,13 +1328,13 @@ Chart.prototype.draw = function () {
   const nearTag = y => (showLast && Math.abs(y - ly) <= 15) || tagItems.some(it => Math.abs(y - it.y) <= 10);   /* compare tags are drawn over the labels; only hide a label the tag would cover */
 
   /* grid + y labels (extend below the price domain, like the web chart) */
-  const step = niceStep((hi - lo) / 5);
+  const step = niceStep((hi - lo) / 5 * (this.pz ? this.pz.k : 1));
   let grid = '', ylab = '';
   const vLo = Math.min(pAt(yMin), pAt(yMax)), vHi = Math.max(pAt(yMin), pAt(yMax));
   const vStart = Math.floor(vLo / step) * step, vEnd = vHi;
   for (let v = vStart; v <= vEnd; v += step) {
     const y = r(yAt(v)) + .5;
-    if (y < yMin || y > yMax) continue;
+    if (y < yMin || y > yMax || (!cmpPct && v < 0)) continue;   /* a zoomed-out price axis shows no negative prices */
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
     if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the gear / reset buttons */
     if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
@@ -1517,7 +1523,7 @@ Chart.prototype.draw = function () {
   this.first = false;
   if (this.evOpen !== null && this.evOpen !== undefined) this.placeEvent();
   this.latestBtn.classList.toggle('show', !this.atLatest());
-  this.zoomBtn.classList.toggle('show', Math.round(this.view.count) !== this.defaultCount);
+  this.zoomBtn.classList.toggle('show', Math.round(this.view.count) !== this.defaultCount || !!this.pz);   /* also while a manual price scale is on */
   if (this.hover !== null) this.setHover(this.hover.i, this.hover.y); else this.updateHead(N - 1);
 };
 
@@ -1711,6 +1717,7 @@ Chart.prototype.scrollToLatest = function () {
 Chart.prototype.cancelScroll = function () { if (this._anim) { cancelAnimationFrame(this._anim); this._anim = 0; } if (this._zoomAnim) { cancelAnimationFrame(this._zoomAnim); this._zoomAnim = 0; } };
 /* animated zoom back to the orientation default, right edge anchored; clears the picked range, keeps compare; not layout state */
 Chart.prototype.zoomToDefault = function () {
+  this.pz = null;                            /* back to an auto-fit price axis too */
   this.cancelScroll();
   if (this.stopInertia) this.stopInertia();
   this.clear(); this.closeEvent();
@@ -1814,6 +1821,58 @@ Chart.prototype.bind = function () {
     state.range = null;                      /* zoomed by hand: no preset date range applies any more */
     scheduleDraw();
   }
+  /* Price-axis gestures (the y-label column, full plot height): scale the PRICE axis only, never the bar count.
+     self.pz = { k, o } or null (auto-fit): k = span / auto-fit span, clamped 0.2..5; o = centre offset in auto-fit spans. */
+  const PZ_MIN = 0.2, PZ_MAX = 5;
+  const ax = { pts: new Map(), drag: null, pinch: null, lastTap: 0 };
+  const pzK = () => self.pz ? self.pz.k : 1, pzO = () => self.pz ? self.pz.o : 0;
+  function setPz(k, o) {
+    k = clamp(k, PZ_MIN, PZ_MAX);
+    self.pz = Math.abs(k - 1) < 1e-4 && Math.abs(o) < 1e-4 ? null : { k, o };
+    scheduleDraw();
+  }
+  function axisFrac(y) {                     /* 0 at the bottom of the price domain, 1 at the top (in scale space) */
+    const g = self.geom; let t = (g.priceBottom - y) / (g.priceBottom - g.HEAD);
+    return state.settings.invert ? 1 - t : t;
+  }
+  function setPzAnchored(k, fm, t) {         /* keep the scale value fm at the same height t while the span changes */
+    k = clamp(k, PZ_MIN, PZ_MAX);
+    const A = self.autoY, sp = k * A.S, cc = fm - t * sp + sp / 2;
+    setPz(k, (cc - A.C) / A.S);
+  }
+  function axisDown(e, p) {
+    ax.pts.set(e.pointerId, p);
+    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+    stopInertia(); clearTimeout(holdTimer);
+    if (self.hover) self.clear();
+    if (ax.pts.size === 1) ax.drag = { id: e.pointerId, y0: p.y, k0: pzK(), o0: pzO(), moved: false };
+    else if (ax.pts.size === 2 && self.fY) {
+      ax.drag = null; ax.lastTap = 0;
+      const [a, b] = [...ax.pts.values()], t = axisFrac((a.y + b.y) / 2), F = self.fY;
+      ax.pinch = { d0: Math.max(20, Math.abs(a.y - b.y)), k0: pzK(), t, fm: F.flo + t * (F.fhi - F.flo) };
+    }
+  }
+  function axisMove(e, p) {
+    ax.pts.set(e.pointerId, p);
+    if (ax.pinch) {                          /* vertical spread zooms in (smaller span), pinch together zooms out */
+      const [a, b] = [...ax.pts.values()], d = Math.max(20, Math.abs(a.y - b.y));
+      setPzAnchored(ax.pinch.k0 * ax.pinch.d0 / d, ax.pinch.fm, ax.pinch.t);
+    } else if (ax.drag && ax.drag.id === e.pointerId) {   /* drag down compresses, drag up stretches; centre stays */
+      const dy = p.y - ax.drag.y0;
+      if (Math.abs(dy) > SLOP) ax.drag.moved = true;
+      if (ax.drag.moved) setPz(ax.drag.k0 * Math.exp(dy * 0.006), ax.drag.o0);
+    }
+  }
+  function axisUp(e) {
+    ax.pts.delete(e.pointerId);
+    try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (ax.pinch) { if (ax.pts.size < 2) { ax.pinch = null; ax.drag = null; } return; }
+    const dr = ax.drag; ax.drag = null;
+    if (!dr || dr.moved) { ax.lastTap = 0; return; }
+    const now = performance.now();
+    if (now - ax.lastTap < 320) { ax.lastTap = 0; self.pz = null; scheduleDraw(); }   /* double-tap: back to auto-fit */
+    else ax.lastTap = now;
+  }
   function prepZoom() {
     clearTimeout(holdTimer); stopInertia(); self.cancelScroll();
     if (self.hover) self.clear();
@@ -1848,9 +1907,10 @@ Chart.prototype.bind = function () {
     if (!e.ctrlKey) return;                  /* plain wheel does nothing on the chart */
     e.preventDefault();                      /* the page never zooms while the pointer is over the chart */
     if (!self.geom || pinch) return;
+    const dy = clamp(e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), -60, 60);
+    if (local(e).x > self.geom.plotW) { wz = null; setPz(pzK() * Math.exp(dy * 0.01), pzO()); return; }   /* over the price axis: price zoom */
     if (!wz) { prepZoom(); wz = { c: self.view.count, lim: Math.max(self.defaultCount, self.view.count) }; }
     clearTimeout(wzT); wzT = setTimeout(() => { wz = null; }, 350);   /* one gesture = one clamp ceiling */
-    const dy = clamp(e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), -60, 60);
     wz.c = clamp(wz.c * Math.exp(dy * 0.01), MIN_BARS, wz.lim);
     const count = Math.round(wz.c);
     if (count !== self.view.count) zoomAround(count, clamp(local(e).x, 0, self.geom.plotW));
@@ -1861,6 +1921,7 @@ Chart.prototype.bind = function () {
     e.preventDefault();
     if (!self.geom || pinch) return;
     prepZoom();
+    if (e.clientX != null && local(e).x > self.geom.plotW) { gz = { price: true, k0: pzK(), o0: pzO() }; return; }
     const x = e.clientX != null ? clamp(local(e).x, 0, self.geom.plotW) : self.geom.plotW / 2;
     gz = { count0: self.view.count, lim: Math.max(self.defaultCount, self.view.count), x,
            anchorBar: x / self.geom.slot - 0.6 + self.view.start };
@@ -1868,6 +1929,7 @@ Chart.prototype.bind = function () {
   area.addEventListener('gesturechange', e => {
     e.preventDefault();
     if (!gz || pinch || !self.geom || !(e.scale > 0)) return;
+    if (gz.price) { setPz(gz.k0 / e.scale, gz.o0); return; }
     const count = clamp(Math.round(gz.count0 / e.scale), MIN_BARS, gz.lim);
     if (count !== self.view.count) zoomAround(count, gz.x, gz.anchorBar);
   }, { passive: false });
@@ -1879,7 +1941,7 @@ Chart.prototype.bind = function () {
     self.closeEvent(); self.closeSettings(); self.cancelScroll();
     clearTimeout(self._pillT); self.hidePill();   /* a new touch cancels a lingering Create alert pill */
     const p = local(e);
-    if (p.x > self.geom.plotW) return;       /* price axis is not a gesture surface */
+    if (p.x > self.geom.plotW) { if (!pts.size) axisDown(e, p); return; }   /* price axis: price-scale gestures only (no crosshair) */
     pts.set(e.pointerId, p);
     try { svg.setPointerCapture(e.pointerId); } catch (_) {}
     if (pts.size + ovl.size >= 2 && !pinch) {   /* second finger (on the plot or already on an overlay) */
@@ -1897,6 +1959,8 @@ Chart.prototype.bind = function () {
   svg.addEventListener('pointermove', e => {
     if (!self.geom) return;
     const p = local(e);
+    if (ax.pts.has(e.pointerId)) { axisMove(e, p); return; }
+    if (e.pointerType === 'mouse' && !ptr) svg.style.cursor = p.x > self.geom.plotW ? 'ns-resize' : '';   /* web-style resize cursor over the axis */
     if (pinch) {
       if (!pts.has(e.pointerId)) return;
       pts.set(e.pointerId, p);
@@ -1928,6 +1992,7 @@ Chart.prototype.bind = function () {
     }
   });
   function endPointer(e, cancelled) {
+    if (ax.pts.has(e.pointerId)) { axisUp(e); return; }
     pts.delete(e.pointerId);
     try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
     if (pinch) {
@@ -2519,7 +2584,7 @@ document.addEventListener('click', e => {
   const row = e.target.closest('[data-set]');
   if (row) { toggleSetting(row.dataset.set); return; }
   const sa = e.target.closest('[data-setact]');
-  if (sa) { const c = charts[state.orientation]; c.closeSettings(); c.scrollToLatest(); return; }
+  if (sa) { const c = charts[state.orientation]; c.closeSettings(); Object.values(charts).forEach(x => { x.pz = null; }); c.scrollToLatest(); c.draw(); return; }
   const cta = e.target.closest('[data-evcta]');
   if (cta) { toast(cta.dataset.evcta); Object.values(charts).forEach(c => c.closeEvent()); }
 });
