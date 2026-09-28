@@ -388,10 +388,13 @@ svg { display: block; }
 .cs-scrim.open { opacity: 1; pointer-events: auto; }
 .sheet.csheet { z-index: 46; padding-bottom: calc(var(--home-h) + 4px); }
 #phone.landscape .sheet.csheet { max-width: 460px; padding-bottom: 12px; }
-.cs-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; padding: 4px var(--margin) 8px; }
+.sheet.csheet { max-height: 94%; }
+.sheet.csheet > .sheet-grabber, .sheet.csheet > .sheet-title, .cs-opa { flex-shrink: 0; }   /* header and opacity row stay pinned */
+.cs-grid { display: grid; grid-template-columns: repeat(10, var(--csz, 1fr)); justify-content: center; gap: var(--csg, 6px); padding: 4px var(--margin) 8px; flex: 0 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }   /* swatch size set on open to fit width and height; scrolls only as a last resort */
+.cs-grid::-webkit-scrollbar { display: none; }
 .cs-sw { aspect-ratio: 1; border-radius: 7px; border: .5px solid rgba(0,0,0,.12); position: relative; }
 .cs-sw.sel { box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--text-active); z-index: 1; }
-#phone.landscape .cs-grid { gap: 4px; padding-top: 0; }
+#phone.landscape .cs-grid { padding-top: 0; }
 #phone.landscape .cs-sw { border-radius: 5px; }
 .cs-opa { display: none; }
 .cs-opa.on { display: block; }
@@ -2568,8 +2571,22 @@ function openColorSheet(ctx) {   /* ctx: { color, onPick(hex), opacity?: { value
   const op = ctx.opacity, box = document.getElementById('csOpa'), inp = document.getElementById('csOpaIn');
   box.classList.toggle('on', !!op);
   if (op) { ctx.op0 = op.value; inp.max = op.max || 100; inp.step = op.step || 5; inp.value = op.value; csOpaPaint(); }
+  csFit();
   document.getElementById('csScrim').classList.add('open');
   document.getElementById('colorSheet').classList.add('open');
+}
+/* size the 10 x 10 swatches to the smaller of: the sheet width, and the height left under the 94% cap after the header and opacity row */
+function csFit() {
+  const sh = document.getElementById('colorSheet'), grid = document.getElementById('csGrid'), phone = document.getElementById('phone');
+  const land = phone.classList.contains('landscape'), gap = land ? 4 : 6;
+  grid.style.setProperty('--csg', gap + 'px'); grid.style.removeProperty('--csz');
+  const W = sh.clientWidth, maxH = phone.clientHeight * 0.94;
+  if (!W || !maxH) return;
+  const cs = getComputedStyle(sh), padV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const fixed = [...sh.children].filter(el => el !== grid && getComputedStyle(el).position !== 'absolute').reduce((a, el) => a + el.offsetHeight + (parseFloat(getComputedStyle(el).marginTop) || 0) + (parseFloat(getComputedStyle(el).marginBottom) || 0), 0);
+  const gcs = getComputedStyle(grid), gPadV = parseFloat(gcs.paddingTop) + parseFloat(gcs.paddingBottom), gPadH = parseFloat(gcs.paddingLeft) + parseFloat(gcs.paddingRight);
+  const byW = (W - gPadH - 9 * gap) / 10, byH = (maxH - padV - fixed - gPadV - 9 * gap) / 10;
+  grid.style.setProperty('--csz', Math.max(16, Math.floor(Math.min(byW, byH, 44))) + 'px');
 }
 function csOpaPaint() { const inp = document.getElementById('csOpaIn'); document.getElementById('csOpaPct').textContent = inp.value + '%'; inp.style.setProperty('--p', inp.value / +inp.max * 100 + '%'); }
 document.getElementById('csOpaIn').addEventListener('input', e => { if (!csCtx || !csCtx.opacity) return; csOpaPaint(); csCtx.opacity.onChange(+e.target.value); });
