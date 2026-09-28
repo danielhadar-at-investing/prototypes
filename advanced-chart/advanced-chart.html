@@ -342,7 +342,12 @@ svg { display: block; }
 .ch-legend { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 3px; pointer-events: auto; }
 .lg-rows { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
 .ch-legend.collapsed .lg-rows { display: none; }
-.lg-row { display: inline-flex; align-items: center; gap: 6px; height: 17px; padding: 0 6px; margin-left: -6px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lg-row { display: inline-flex; align-items: center; gap: 6px; height: 17px; padding: 0 6px; margin-left: -6px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; position: relative; }
+/* tap target: rows split the 2px gap between them; the first row extends up and the last row down to 44pt, no visual change */
+.lg-row::before { content: ""; position: absolute; left: 0; right: -12px; top: -1px; bottom: -1px; }
+.lg-row:first-child::before { top: -13.5px; }
+.lg-row:last-child::before { bottom: -13.5px; }
+.lg-row:only-child::before { top: -13.5px; bottom: -13.5px; }
 .lg-bar { width: 3px; height: 14px; border-radius: 1.5px; flex-shrink: 0; }
 .lg-name { font-weight: 600; color: var(--text-primary); }
 .lg-val { font-weight: 510; }
@@ -623,7 +628,7 @@ svg { display: block; }
 .row .toggle.on { background: var(--green-up); }
 .row .toggle.on::after { transform: translateX(18px); }
 .sheet-x { position: absolute; top: 12px; left: 12px; width: 30px; height: 30px; border-radius: 50%; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; color: var(--icon-primary); z-index: 1; }   /* every sheet: X top-left */
-.sheet-x::after { content: ""; position: absolute; inset: -7px; }   /* 44pt hit area */
+.sheet-x::after { content: ""; position: absolute; inset: -8px; }   /* 44pt hit area (28-30px button) */
 .sheet-x svg { width: 14px; height: 14px; }
 .sheet-actions { position: absolute; top: 9px; right: 10px; display: flex; align-items: center; gap: 2px; z-index: 1; }
 .sheet-actions .tb-btn { height: 36px; min-width: 36px; }
@@ -663,7 +668,8 @@ svg { display: block; }
 .is-sw { width: 26px; height: 26px; border-radius: 50%; border: .5px solid rgba(0,0,0,.14); flex-shrink: 0; }
 .is-sw.none { background: linear-gradient(135deg, transparent 45%, var(--red-down) 45%, var(--red-down) 55%, transparent 55%), #FFF; }
 .is-seg { width: 150px; flex-shrink: 0; }
-.is-seg.wide { width: auto; flex: 0 1 230px; }
+.is-seg.wide { width: auto; flex: 0 1 250px; }
+.is-seg.wide .seg-opt { flex: 1 1 auto; padding: 0 8px; white-space: nowrap; }   /* "Histogram Chart" on one line, as web */
 .is-seg .seg-opt { height: 30px; display: inline-flex; align-items: center; justify-content: center; }
 .is-seg svg { width: 26px; height: 10px; }
 .is-step { display: inline-flex; align-items: center; height: 32px; border-radius: 8px; background: var(--bg-secondary); flex-shrink: 0; }
@@ -697,6 +703,52 @@ svg { display: block; }
 .is-wi { display: block; width: 100%; height: 36px; scroll-snap-align: center; font-size: 17px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .is-wi.sel { color: var(--text-primary); font-weight: 600; }
 .chart-svg .study-fill { stroke: none; }
+/* drawings: placing banner, floating toolbar, inline text field, handles */
+.dt-banner { position: absolute; left: 8px; right: 72px; width: fit-content; max-width: calc(100% - 80px); margin: 0 auto; z-index: 8; display: none; align-items: center; gap: 8px; height: 36px; padding: 0 4px 0 12px; border-radius: 10px; background: rgba(28,28,30,.9); color: #FFF; font-size: 13px; font-weight: 510; box-shadow: 0 4px 14px rgba(0,0,0,.18); white-space: nowrap; }
+.dt-banner.on { display: flex; }
+.dt-bn-t { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dt-bn-step { font-size: 12px; color: rgba(255,255,255,.7); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.dt-bn-btn { height: 28px; padding: 0 10px; border-radius: 7px; color: #FFF; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.14); position: relative; flex-shrink: 0; }
+.dt-bn-btn::after { content: ""; position: absolute; inset: -8px -2px; }
+.dt-bn-btn.done { background: var(--text-active); }
+.dt-bn-btn:disabled { opacity: .4; }
+.dt-bar { position: absolute; left: 8px; right: 8px; width: fit-content; max-width: calc(100% - 16px); margin: 0 auto; z-index: 8; display: none; align-items: center; gap: 0; padding: 4px; border-radius: 12px; background: var(--bg-primary); box-shadow: 0 4px 16px rgba(0,0,0,.14), 0 0 0 .5px rgba(0,0,0,.1); overflow-x: auto; scrollbar-width: none; }
+.dt-bar::-webkit-scrollbar { display: none; }
+.dt-bar.on { display: flex; }
+.dt-b { flex-shrink: 0; min-width: 36px; height: 36px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; color: var(--icon-primary); border-radius: 8px; position: relative; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.dt-b::before { content: ""; position: absolute; inset: -4px 0; }   /* 44pt touch height: 36px + 4px above and below, inside the bar's 4px padding so the scroller does not clip it */
+.dt-b:active { background: var(--bg-secondary); }
+.dt-b svg { width: 22px; height: 22px; display: block; }
+.dt-b .dt-lico { width: 24px; height: 12px; }
+.dt-b.dt-txt { padding: 0 7px; }
+.dt-b.has { color: var(--text-active); }
+.dt-sw { width: 20px; height: 20px; border-radius: 50%; border: .5px solid rgba(0,0,0,.18); display: block; }
+.dt-fsw { border-radius: 5px; }
+.dt-sep { width: 1px; height: 22px; background: var(--divider); margin: 0 3px; flex-shrink: 0; }
+.dt-text { position: absolute; z-index: 9; display: none; align-items: center; gap: 6px; padding: 6px; border-radius: 12px; background: var(--bg-primary); box-shadow: 0 4px 16px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.1); }
+.dt-text.on { display: flex; }
+.dt-text input { width: 160px; height: 34px; border: 0; border-radius: 8px; background: var(--bg-secondary); padding: 0 10px; font: inherit; font-size: 15px; color: var(--text-primary); outline: none; }
+.dt-text-done { height: 34px; padding: 0 12px; border-radius: 8px; background: var(--text-active); color: #FFF; font-size: 14px; font-weight: 600; }
+.dt-sb { padding: 4px 0 8px; }
+.dt-seg { margin: 6px var(--margin) 4px; }
+.dt-seg .seg-opt { height: 52px; }
+.dt-seg-in { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; }
+.dt-seg-in svg { width: 28px; height: 12px; display: block; }
+.dt-field { padding: 6px var(--margin) 4px; }
+.dt-field input, .dt-field textarea { width: 100%; border: 0; border-radius: 10px; background: var(--bg-secondary); padding: 10px 12px; font: inherit; font-size: 15px; color: var(--text-primary); outline: none; resize: none; }
+.dt-field input { height: 44px; }
+.dt-bval { display: inline-flex; align-items: center; justify-content: center; width: 72px; }
+.dt-cgrp + .dt-cgrp { border-top: .5px solid var(--divider-secondary); }
+.dt-coords .iv-title { padding-top: 10px; }
+.sheet.drawer.h-dtcoords { height: min(520px, 90%); }
+.chart-svg .drw-h { fill: #FFF; stroke: #2563EB; stroke-width: 1.5; }
+.chart-svg .drw-anchor { fill: #FFF; stroke: #2563EB; stroke-width: 1.5; }
+.chart-svg .drw-tbox { fill: rgba(37,99,235,.08); stroke: #2563EB; stroke-width: 1; stroke-dasharray: 3 2; }
+.chart-svg .drw-vguide { stroke: #2563EB; stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-svg .drw-flash line { stroke: #2563EB; stroke-width: 9; stroke-linecap: round; stroke-opacity: .35; animation: drwFlash .9s ease-out forwards; }
+@keyframes drwFlash { from { stroke-opacity: .45; } to { stroke-opacity: 0; } }
+.chart-svg .drw-g text, .chart-svg .drw-prev text { font-family: inherit; }
+.chart-svg .drw-tag text { fill: #FFF; }
 /* native "Create New Alert" drawer mock */
 .sheet.drawer.h-alert { height: min(560px, 94%); }
 .sheet.h-alert .sheet-title { font-size: 20px; font-weight: 600; letter-spacing: -.4px; padding-bottom: 12px; }
@@ -1271,10 +1323,11 @@ const ICO = {
    CHART MODULE MARKUP (shared by portrait + landscape)
    ============================================================ */
 function chartModuleHTML(id, land) {
-  /* Portrait: top bar = [SNDK][+] | (empty centre) | [bell | separator | save][layouts][camera]; bottom bar = [interval][type][pencil][layers][close].
+  /* Portrait: top bar = [back][SNDK][+] | (empty centre) | [save][layouts] | separator | [bell][camera]; bottom bar = [interval][type][pencil][layers][close].
      Landscape merges both into one bar in that order. */
   const plusBtn   = `<button class="tb-btn" data-act="add" aria-label="Add symbol">${ICO.plus}</button>`;
-  const bellBtn   = `<button class="tb-btn" data-act="alert" aria-label="Create alert">${ICO.bell}</button><span class="tb-sep"></span>`;
+  const bellBtn   = `<button class="tb-btn" data-act="alert" aria-label="Create alert">${ICO.bell}</button>`;
+  const sep       = `<span class="tb-sep"></span>`;   /* between the layout group (save, folder) and the actions (alert, camera) */
   const saveBtn   = `<button class="tb-btn save-btn" data-act="save-layout" aria-label="Save layout">${ICO.floppy}<span class="save-dot"></span></button>`;
   const folderBtn = `<button class="tb-btn layout-btn" data-act="layouts" aria-label="Layouts">${ICO.folder}<span class="layout-name"></span>${ICO.chev}</button>`;
   const cameraBtn = `<button class="tb-btn" data-act="camera" aria-label="Share a screenshot">${ICO.camera}</button>`;
@@ -1288,8 +1341,8 @@ function chartModuleHTML(id, land) {
   const div       = `<span class="tb-div"></span>`;
 
   const topBar = land
-    ? `<div class="chart-toolbar top">${backBtn}${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div>`
-    : `<div class="chart-toolbar top three"><div class="tb-l">${backBtn}${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${bellBtn}${saveBtn}${folderBtn}${cameraBtn}</div></div>`;
+    ? `<div class="chart-toolbar top">${backBtn}${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}</div>`
+    : `<div class="chart-toolbar top three"><div class="tb-l">${backBtn}${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}</div></div>`;
   const bottomBar = land ? '' :
     `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${indBtn}${layersBtn}</div>`;
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
@@ -1662,8 +1715,8 @@ Chart.prototype.draw = function () {
   const cdown = (S.countdown && showLast) ? `<g class="countdown"><text x="${W - 4}" y="${ly + 22}" text-anchor="end">Closes in</text><text class="cd-time" x="${W - 4}" y="${ly + 33}" text-anchor="end">${countdownText()}</text></g>` : '';   /* two lines, right-aligned inside the axis column */
   const wm = `<text class="wm" x="12" y="${plotBottom - 8}">Investing.com</text>`;
   const clip = `<defs><clipPath id="${clipId}"><rect x="0" y="0" width="${plotW}" height="${plotBottom}"/></clipPath></defs>`;
-
-  svg.innerHTML = `${clip}<g class="gridg">${grid}</g>${wm}<g clip-path="url(#${clipId})"><g class="vol">${vol}</g>${series}${studies}${clines}</g>${lastp}<g class="axes">${ylab}${xlab}</g>${cmpTags}${cdown}<g class="events">${evs}</g><g class="xhg"></g>`;
+  const drw = dtRender(this);   /* drawings in chart coordinates; selection handles, placing preview and flash in their own group (dropped from the camera PNG) */
+  svg.innerHTML = `${clip}<g class="gridg">${grid}</g>${wm}<g clip-path="url(#${clipId})"><g class="vol">${vol}</g>${series}${studies}${clines}<g class="drw">${drw.body}</g></g>${lastp}<g class="axes">${ylab}${xlab}</g>${cmpTags}${drw.axis}${cdown}<g class="events">${evs}</g><g class="drw-ui" clip-path="url(#${clipId})">${drw.ui}</g><g class="xhg"></g>`;
   this.xh = svg.querySelector('.xhg');
   this.first = false;
   if (this.evOpen !== null && this.evOpen !== undefined) this.placeEvent();
@@ -1948,6 +2001,8 @@ Chart.prototype.bind = function () {
       const st = state.studies.find(x => x.id === anchorPick); anchorPick = null;
       const i = clamp(barAt(g.x0), 0, BARS.length - 1);
       if (st) { instCfg(st).i['Anchor by'] = 'Date'; st.cfg.i['Anchor time'] = BARS[i].date + ', 2026 09:30'; markDirty(); renderLegend(); toast('Anchor set to ' + BARS[i].date); }
+    } else if (g.mode === 'pending' && !cancelled) {
+      dtTap(self, { x: g.x0, y: g.y0 });   /* tap: select the topmost drawing, or deselect */
     } else if (g.mode === 'xh') {
       if (cancelled) self.clear(); else self.releaseCrosshair();   /* auto fade; only the pill lingers */
     }
@@ -2040,7 +2095,7 @@ Chart.prototype.bind = function () {
     suppressClick = 1;                       /* the overlay under a pinching finger must not fire its tap */
   }
   area.addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'touch' || svg.contains(e.target) || !self.geom) return;
+    if (e.pointerType !== 'touch' || svg.contains(e.target) || !self.geom || DRW.placing || DRW.ptrId !== null) return;   /* no pinch while placing or dragging a drawing */
     ovl.set(e.pointerId, local(e));
     if (pts.size + ovl.size >= 2 && !pinch) { absorbOverlay(); startPinch(); }
   }, true);
@@ -2055,7 +2110,7 @@ Chart.prototype.bind = function () {
   area.addEventListener('wheel', e => {
     if (!e.ctrlKey) return;                  /* plain wheel does nothing on the chart */
     e.preventDefault();                      /* the page never zooms while the pointer is over the chart */
-    if (!self.geom || pinch) return;
+    if (!self.geom || pinch || DRW.placing || DRW.drag) return;
     const dy = clamp(e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1), -60, 60);
     if (local(e).x > self.geom.plotW) { wz = null; setPz(pzK() * Math.exp(dy * 0.01), pzO()); return; }   /* over the price axis: price zoom */
     if (!wz) { prepZoom(); wz = { c: self.view.count, lim: Math.max(self.defaultCount, self.view.count) }; }
@@ -2068,7 +2123,7 @@ Chart.prototype.bind = function () {
   let gz = null;
   area.addEventListener('gesturestart', e => {
     e.preventDefault();
-    if (!self.geom || pinch) return;
+    if (!self.geom || pinch || DRW.placing || DRW.drag) return;
     prepZoom();
     if (e.clientX != null && local(e).x > self.geom.plotW) { gz = { price: true, k0: pzK(), o0: pzO() }; return; }
     const x = e.clientX != null ? clamp(local(e).x, 0, self.geom.plotW) : self.geom.plotW / 2;
@@ -2090,6 +2145,10 @@ Chart.prototype.bind = function () {
     self.closeEvent(); self.closeSettings(); self.cancelScroll();
     clearTimeout(self._pillT); self.hidePill();   /* a new touch cancels a lingering Create alert pill */
     const p = local(e);
+    /* drawings: placing mode takes every touch (no pan, pinch or long press); a selected drawing's handle or body starts a drag */
+    if (DRW.placing) { if (DRW.ptrId === null && !pts.size) { stopInertia(); if (self.hover) self.clear(); try { svg.setPointerCapture(e.pointerId); } catch (_) {} dtPlaceDown(self, e, { x: Math.min(p.x, self.geom.plotW), y: p.y }); } return; }
+    if (DRW.ptrId !== null) return;
+    if (!pts.size && p.x <= self.geom.plotW && dtDragStart(self, e, p)) { stopInertia(); if (self.hover) self.clear(); try { svg.setPointerCapture(e.pointerId); } catch (_) {} return; }
     if (p.x > self.geom.plotW) { if (!pts.size) axisDown(e, p); return; }   /* price axis: price-scale gestures only (no crosshair) */
     pts.set(e.pointerId, p);
     try { svg.setPointerCapture(e.pointerId); } catch (_) {}
@@ -2108,6 +2167,7 @@ Chart.prototype.bind = function () {
   svg.addEventListener('pointermove', e => {
     if (!self.geom) return;
     const p = local(e);
+    if (DRW.ptrId === e.pointerId) { if (DRW.placing) dtPlaceMove(self, { x: Math.min(p.x, self.geom.plotW), y: p.y }); else dtDragMove(self, p); return; }
     if (ax.pts.has(e.pointerId)) { axisMove(e, p); return; }
     if (e.pointerType === 'mouse' && !ptr) svg.style.cursor = p.x > self.geom.plotW ? 'ns-resize' : '';   /* web-style resize cursor over the axis */
     if (pinch) {
@@ -2141,6 +2201,12 @@ Chart.prototype.bind = function () {
     }
   });
   function endPointer(e, cancelled) {
+    if (DRW.ptrId === e.pointerId) {
+      try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
+      const p = local(e);
+      if (DRW.placing) dtPlaceUp(self, { x: Math.min(p.x, self.geom.plotW), y: p.y }, cancelled); else dtDragEnd(self, cancelled);
+      return;
+    }
     if (ax.pts.has(e.pointerId)) { axisUp(e); return; }
     pts.delete(e.pointerId);
     try { svg.releasePointerCapture(e.pointerId); } catch (_) {}
@@ -2184,6 +2250,7 @@ function applyScale() {
 }
 function setOrientation(o) {
   if (o === state.orientation || switching) return;
+  dtCancelPlacing();
   setTimeout(() => document.querySelectorAll('.chart-module').forEach(updateCmpStuck), 650);
   switching = true;
   closeOverlays();
@@ -2426,15 +2493,13 @@ function renderDrawTools() {
     ? list.map(t => { const p = splitTool(t.name); return `<div class="tcard tool-card" data-tool="${t.name.replace(/"/g, '&quot;')}">${p.clicks ? `<span class="tcard-badge" aria-label="${p.clicks} clicks">${TAP_ICO}${p.clicks}</span>` : ''}<div class="tcard-ico">${GL[t.g]}</div><div class="tcard-label sm">${p.label}</div></div>`; }).join('')
     : `<div class="empty">No tools match "${drawQuery}"</div>`;
 }
-/* picking a tool adds a drawing layer (mock) */
+/* picking a tool closes the drawer and enters placing mode on the chart */
 function selectTool(name) {
-  if (state.drawings.length >= DRAW_MAX) { toast('You can add up to ' + DRAW_MAX + ' drawings'); return; }
-  state.drawings.push({ id: uid('d'), name, hidden: false });
-  markDirty(); renderBadges();
+  if (name !== 'Anchored VWAP' && state.drawings.length >= DRAW_MAX) { toast('You can add up to ' + DRAW_MAX + ' drawings'); return; }
   closeOverlays();
-  toast(splitTool(name).label + ' added');
+  dtStartPlacing(name);
 }
-function removeDrawing(id) { const k = state.drawings.findIndex(x => x.id === id); if (k < 0) return; state.drawings.splice(k, 1); markDirty(); renderBadges(); }
+function removeDrawing(id) { dtDelete(id, false); }
 function renderBadges() {
   /* one badge, on Layers only: drawings + indicator instances (hidden included) = Drawings (n) + Indicators (n) in the drawer */
   const total = state.drawings.length + state.studies.length;
@@ -2649,7 +2714,7 @@ function isRowHTML(f, sec, chartType) {
     case 'opa': return isOpaHTML(f, sec, k, v, lbl);
     case 'bool': case 'toggle': { const on = f.t === 'toggle' ? v === 'On' : !!v; return `<div class="row is-row" ${at}><span class="is-lbl">${lbl}</span><button class="sw ${on ? 'on' : ''}" data-is="bool" ${at} data-kind="${f.t}" aria-label="${lbl}"></button></div>`; }
     case 'num': return `<div class="row is-row" ${at}><span class="is-lbl">${lbl}</span>${isStepHTML(f, sec, k, v)}</div>`;
-    case 'seg': if (sec === 's' || (f.o.length <= 3 && f.o.every(o => o.length <= 10))) return `<div class="row is-row is-segrow" ${at}><span class="is-lbl">${lbl}</span><div class="seg is-seg wide">${f.o.map(o => `<button class="seg-opt ${v === o ? 'active' : ''}" data-is="set" ${at} data-v="${escHTML(o)}">${escHTML(o === 'Histogram Chart' ? 'Histogram' : o)}</button>`).join('')}</div></div>`;
+    case 'seg': if (sec === 's' || (f.o.length <= 3 && f.o.every(o => o.length <= 10))) return `<div class="row is-row is-segrow" ${at}><span class="is-lbl">${lbl}</span><div class="seg is-seg wide">${f.o.map(o => `<button class="seg-opt ${v === o ? 'active' : ''}" data-is="set" ${at} data-v="${escHTML(o)}">${escHTML(o)}</button>`).join('')}</div></div>`;
       /* falls through: Inputs segmented = dropdown pattern */
     case 'list': return `<div class="row is-row" data-is="list" ${at}><span class="is-lbl">${lbl}</span><span class="is-val">${escHTML(v)}</span>${chev}</div>`;
     case 'datetime': return `<div class="row is-row" data-is="dt" ${at}><span class="is-lbl">${lbl}</span><span class="is-val">${v ? escHTML(v) : 'Not set'}</span>${chev}</div>`;
@@ -2724,8 +2789,11 @@ function isSetVal(sec, k, v) {
   IS.work[sec][k] = v;
 }
 function isRefresh() { if (IS.inner) document.getElementById('isSub').innerHTML = isSubHTML(); isRender(); }
+/* the saved default as this instance sees it: an auto-assigned instance colour replaces the default's colour */
+function isRef(code, st) { const ref = isClone(isSaved(code)); if (st && st.autoCol && ref.s[st.autoCol.k]) ref.s[st.autoCol.k].c = st.autoCol.c; return ref; }
+const isInst = () => state.studies.find(s => s.id === IS.id);
 function isMenuHTML(state2) {
-  const same = isSame(IS.work, isSaved(IS.code));
+  const same = isSame(IS.work, isRef(IS.code, isInst()));
   if (state2 === 'saved') return `<div class="set-row set-action" data-is="default"><span class="set-label is-saved">${ICO.check}Saved</span></div>`;
   return `<div class="set-row set-action" data-is="default" data-mode="${same ? 'reset' : 'save'}"><span class="set-label">${same ? 'Reset to default' : 'Save as default'}</span></div>`;
 }
@@ -2738,13 +2806,16 @@ function isAction(el, e) {
   if (a === 'default') {
     const m = sheetEl.querySelector('.is-menu'); if (!m || !el.dataset.mode) return;
     if (el.dataset.mode === 'save') {
-      state.indDefaults[IS.code] = isClone(IS.work); markDirty();
+      const sv = isClone(IS.work), st0 = isInst();
+      if (st0 && st0.autoCol && sv.s[st0.autoCol.k] && sv.s[st0.autoCol.k].c === st0.autoCol.c) sv.s[st0.autoCol.k].c = isSaved(IS.code).s[st0.autoCol.k].c;   /* the untouched auto colour is not saved into the default */
+      state.indDefaults[IS.code] = sv; markDirty();
       m.innerHTML = isMenuHTML('saved');
       setTimeout(() => m.remove(), 1100);
     } else {
       delete state.indDefaults[IS.code];
       const st = state.studies.find(s => s.id === IS.id);
       IS.work = isFactory(IS.code);
+      if (st && st.autoCol && IS.work.s[st.autoCol.k]) IS.work.s[st.autoCol.k].c = st.autoCol.c;   /* reset keeps the instance's own colour */
       if (st) { st.cfg = isClone(IS.work); isSyncColor(st); renderLegend(); drawAll(); }
       markDirty(); m.remove(); isRefresh();
     }
@@ -2833,7 +2904,7 @@ function addStudy(code) {
   const dup = countStudy(code) > 0;
   const st = { id: uid('s'), code, color, hidden: false };
   st.cfg = isClone(state.indDefaults[code] || isFactory(code));   /* new instances start from this layout's saved default */
-  if (dup && code !== 'Vol') { const f = IS_BY[code].s.find(x => x.t === 'line' || x.t === 'lineNC' || x.t === 'colVis'); if (f) st.cfg.s[isKey(f)].c = resolveColor(color) || color; }   /* a second instance gets its own colour */
+  if (dup && code !== 'Vol') { const f = IS_BY[code].s.find(x => x.t === 'line' || x.t === 'lineNC' || x.t === 'colVis'); if (f) { st.cfg.s[isKey(f)].c = resolveColor(color) || color; st.autoCol = { k: isKey(f), c: st.cfg.s[isKey(f)].c }; } }   /* a second instance gets its own colour, which counts as its baseline (not a user edit) */
   isSyncColor(st);
   state.studies.push(st); recentInd(code);
   renderLegend(); drawAll(); markDirty();
@@ -2844,7 +2915,7 @@ function removeStudyCode(code) {   /* removes the most recent instance of that i
 }
 function removeStudyId(id) { const k = state.studies.findIndex(s => s.id === id); if (k < 0) return; state.studies.splice(k, 1); renderLegend(); drawAll(); markDirty(); }
 function toggleStudyHidden(id) { const s = state.studies.find(x => x.id === id); if (!s) return; s.hidden = !s.hidden; renderLegend(); drawAll(); markDirty(); }
-function toggleDrawingHidden(id) { const x = state.drawings.find(y => y.id === id); if (!x) return; x.hidden = !x.hidden; markDirty(); }
+function toggleDrawingHidden(id) { const x = state.drawings.find(y => y.id === id); if (!x) return; x.hidden = !x.hidden; if (x.hidden && DRW.sel === id) DRW.sel = null; markDirty(); drawAll(); }   /* hidden = not rendered, not hit-testable */
 const indRecent = ['Vol', 'SMA', 'EMA'];
 function recentInd(code) { const k = indRecent.indexOf(code); if (k >= 0) indRecent.splice(k, 1); indRecent.unshift(code); if (indRecent.length > 6) indRecent.length = 6; }
 function toggleFav(code) { const k = layouts.favs.indexOf(code); if (k >= 0) layouts.favs.splice(k, 1); else layouts.favs.push(code); saveLayoutsStore(); }
@@ -2913,7 +2984,7 @@ function openAlertDrawer() {
 }
 
 /* ---- Screenshot + share sheet ---- */
-const SVG_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'visibility', 'font-family', 'font-size', 'font-weight', 'font-variant-numeric', 'shape-rendering'];
+const SVG_PROPS = ['fill', 'fill-opacity', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'visibility', 'font-family', 'font-size', 'font-weight', 'font-variant-numeric', 'shape-rendering', 'paint-order', 'stroke-dashoffset', 'stroke-miterlimit', 'letter-spacing'];   /* paint-order keeps drawing-label halos under the glyphs */
 function inlineSvgStyles(srcEl, dstEl) {
   const cs = getComputedStyle(srcEl);
   dstEl.setAttribute('style', SVG_PROPS.map(p => p + ':' + cs.getPropertyValue(p)).join(';'));
@@ -2940,7 +3011,7 @@ function captureChart() {
     /* chart SVG with computed styles inlined */
     const clone = c.svg.cloneNode(true);
     inlineSvgStyles(c.svg, clone);
-    clone.querySelectorAll('.xhg, .events rect').forEach(n => n.remove());
+    clone.querySelectorAll('.xhg, .events rect, .drw-ui').forEach(n => n.remove());
     clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); clone.setAttribute('width', W); clone.setAttribute('height', H);
     const img = new Image();
     img.onload = () => {
@@ -3078,13 +3149,14 @@ function saveLayoutsStore() {
   try { localStorage.setItem(LAYOUTS_KEY, JSON.stringify({ list: layouts.list, activeId: layouts.activeId, autosave: layouts.autosave, order: layouts.order, favs: layouts.favs })); } catch (_) {}
 }
 function snapshotState() {
-  return { type: state.type, interval: state.interval, range: state.range, studies: state.studies.map(s => { instCfg(s); return isClone(s); }), indDefaults: isClone(state.indDefaults || {}), drawings: state.drawings.map(x => ({ ...x })), settings: { ...state.settings }, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
+  return { type: state.type, interval: state.interval, range: state.range, studies: state.studies.map(s => { instCfg(s); return isClone(s); }), indDefaults: isClone(state.indDefaults || {}), drawings: state.drawings.map(x => isClone(x)), settings: { ...state.settings }, count: charts[state.orientation].view.count, compare: state.compare.map(c => ({ ...c })), cmpMode: state.cmpMode };
 }
 function restoreState(s) {
   state.type = s.type; state.interval = s.interval; state.range = s.range || null;
-  state.studies = (s.studies || [{ code: 'Vol', color: 'var(--gray-1)' }]).filter(x => IND_BY_CODE[x.code]).slice(0, IND_MAX).map(x => ({ id: x.id || uid('s'), code: x.code, color: x.color, hidden: !!x.hidden, cfg: x.cfg ? isClone(x.cfg) : undefined }));
+  state.studies = (s.studies || [{ code: 'Vol', color: 'var(--gray-1)' }]).filter(x => IND_BY_CODE[x.code]).slice(0, IND_MAX).map(x => ({ id: x.id || uid('s'), code: x.code, color: x.color, hidden: !!x.hidden, cfg: x.cfg ? isClone(x.cfg) : undefined, autoCol: x.autoCol ? { ...x.autoCol } : undefined }));
   state.indDefaults = isClone(s.indDefaults || {});
-  state.drawings = (s.drawings || []).slice(0, DRAW_MAX).map(x => ({ id: x.id || uid('d'), name: x.name, hidden: !!x.hidden }));
+  state.drawings = (s.drawings || []).slice(0, DRAW_MAX).map(x => Object.assign(isClone(x), { id: x.id || uid('d'), hidden: !!x.hidden }));   /* points, style, text and note */
+  DRW.sel = null; dtCancelPlacing();
   state.settings = { ...state.settings, ...s.settings };
   renderLegend();
   state.compare = (s.compare || []).slice(0, CMP_MAX).map(c => ({ ...c })); state.cmpMode = s.cmpMode || '%';
@@ -3373,6 +3445,764 @@ sheetBody.addEventListener('click', e => {
     if (v === '__custom') { toast('Custom date range'); return; }
     if (pickHandler) pickHandler(v);
   }
+});
+
+/* ============================================================
+   DRAWINGS ENGINE - real, placeable, editable drawings
+   Source: QA's web catalogue (Output/2026-09-28-advanced-chart-drawing-tools.json), compacted to
+   name: [points, toolbar set, colour (0 = multi-colour levels), width px, opacity %, coordinates ('p' price only, 'pb' price + bar, '' none), axis-label default (null = no switch)]
+   Every drawing lives in chart coordinates { b: bar index, p: price }, so it pans, zooms and price-scales with the chart.
+   Three handle types: point handles, box (corner + edge), freehand (start + end). Anchored VWAP adds an indicator instead.
+   ============================================================ */
+const DT_CAT = {"Trend Line":[2,"line","#2C54C4",1.5,100,"pb",0],"Ray":[2,"line","#2C54C4",1.5,100,"pb",0],"Arrow":[2,"line","#2C54C4",1.5,100,"pb",0],"Horizontal Line":[1,"line","#2C54C4",1.5,100,"p",1],"Horizontal Ray":[1,"line","#2C54C4",1.5,100,"pb",1],"Price Label":[1,"line","#2C54C4",1.5,100,"pb",0],"Vertical Line":[1,"line","#2C54C4",1.5,100,"pb",null],"Extended Line":[2,"line","#2C54C4",1.5,100,"pb",0],"Info Line":[2,"line","#2C54C4",1.5,100,"pb",0],"Trend Angle":[2,"line","#2C54C4",1.5,100,"pb",0],"Cross Line":[1,"line","#2C54C4",1.5,100,"pb",0],"Parallel Channel":[3,"fill","#2C54C4",1.5,100,"pb",0],"Regression Channel":[2,"line","#2C54C4",1.5,100,"pb",0],"Fib Channel (3-click)":[3,"line",0,1.5,100,"pb",0],"Flat Top/Bottom Channel (3-click)":[3,"fill","#2C54C4",1.5,100,"pb",0],"Disjoint Channel (4-click)":[4,"fill","#2C54C4",1.5,100,"pb",0],"Andrews' Pitchfork (3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Schiff Pitchfork (3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Inside Pitchfork (3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Modified Schiff Pitchfork (3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Rectangle":[2,"fill","#2C54C4",1.5,100,"pb",0],"Ellipse":[2,"fill","#2C54C4",1.5,100,"pb",0],"Triangle":[3,"fill","#2C54C4",1.5,100,"pb",0],"Arc":[3,"fill","#2C54C4",1.5,100,"pb",0],"Circle":[2,"line","#2C54C4",1.5,100,"pb",0],"Rotated Rectangle":[3,"fill","#2C54C4",1.5,100,"pb",0],"Sector (3-click pie wedge)":[3,"fill","#2C54C4",1.5,100,"pb",0],"Double Curve (Bezier - 4-click)":[4,"line","#2C54C4",1.5,100,"pb",0],"Polyline (click to add, double-click to finish)":[4,"line","#2C54C4",1.5,100,"pb",0],"Brush (freehand)":[0,"free","#2C54C4",2.0,100,"",null],"Highlighter (freehand, thick + translucent)":[0,"free","#2C54C4",10.0,35,"",null],"Sine Line (cycle drawing)":[2,"line","#2C54C4",1.5,100,"pb",0],"Time Cycles (semicircles)":[2,"line","#2C54C4",1.5,100,"pb",0],"Cyclic Lines":[2,"line","#2C54C4",1.5,100,"pb",0],"Fibonacci Retracement":[2,"line",0,1.5,100,"pb",0],"Fibonacci Projection (3-click)":[3,"line",0,1.5,100,"pb",0],"Fibonacci Arc":[2,"line",0,1.5,100,"pb",0],"Fibonacci Fan":[2,"line",0,1.5,100,"pb",0],"Fibonacci Time Zone":[2,"line","#2C54C4",1.5,100,"pb",0],"Fib Speed/Resistance Fan":[2,"line",0,1.5,100,"pb",0],"Trend-Based Fib Time (3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Fib Speed/Resistance Arcs":[2,"line",0,1.5,100,"pb",0],"Fibonacci Circles":[2,"line",0,1.5,100,"pb",0],"Fibonacci Spiral":[2,"line","#2C54C4",1.5,100,"pb",0],"Fibonacci Wedge":[2,"line",0,1.5,100,"pb",0],"Pitchfan (3-click)":[3,"line",0,1.5,100,"pb",0],"Gann Fan":[2,"line",0,1.5,100,"pb",0],"Gann Box":[2,"line",0,1.5,100,"pb",0],"Gann Square":[2,"line",0,1.5,100,"pb",0],"ABCD Pattern (4-click)":[4,"line","#2C54C4",1.5,100,"pb",0],"XABCD Pattern (5-click)":[5,"line","#2C54C4",1.5,100,"pb",0],"Cypher Pattern (5-click)":[5,"line","#2C54C4",1.5,100,"pb",0],"Head & Shoulders (5-click)":[7,"line","#2C54C4",1.5,100,"pb",0],"Three Drives (7-click)":[7,"line","#2C54C4",1.5,100,"pb",0],"Bar Pattern (clone source bars, 3-click)":[3,"line","#2C54C4",1.5,100,"pb",0],"Elliott Wave (5-click)":[5,"line","#2C54C4",1.5,100,"pb",0],"Elliott Correction (A-B-C)":[3,"line","#2C54C4",1.5,100,"pb",0],"Elliott Triangle (A-B-C-D-E)":[5,"line","#2C54C4",1.5,100,"pb",0],"Triangle Pattern (4-click converging)":[4,"line","#2C54C4",1.5,100,"pb",0],"Long Position (entry / stop / target)":[3,"line","#2C54C4",1.5,100,"pb",0],"Short Position (entry / stop / target)":[3,"line","#2C54C4",1.5,100,"pb",0],"Position Forecast":[3,"line","#2C54C4",1.5,100,"pb",0],"Price Range":[2,"fill","#2C54C4",1.5,100,"pb",0],"Date Range":[2,"fill","#2C54C4",1.5,100,"pb",0],"Date & Price Range":[2,"fill","#2C54C4",1.5,100,"pb",0],"Fixed Range Volume Profile (2-click)":[2,"line","#2C54C4",1.5,100,"pb",0],"Anchored Volume Profile (1-click anchor)":[1,"line","#2C54C4",1.5,100,"pb",0],"Anchored VWAP":[1,"none",null,null,null,"",null],"Measure":[2,"line","#2C54C4",1.5,100,"pb",0],"Text Annotation":[1,"text","#2C54C4",null,100,"pb",0],"Callout":[2,"line","#2C54C4",1.5,100,"pb",0],"Anchored Text":[1,"text","#2C54C4",null,100,"pb",0],"Arrow Marker":[1,"line","#2C54C4",1.5,100,"pb",0],"Mark Up":[1,"line","#2C54C4",1.5,100,"pb",0],"Mark Down":[1,"line","#2C54C4",1.5,100,"pb",0]};
+const DT_BOX = new Set(['Rectangle', 'Ellipse', 'Date & Price Range', 'Measure']);
+const DT_TEXT_AT = { 'Text Annotation': 1, 'Anchored Text': 1, 'Callout': 2 };   /* the text field opens after this many points */
+const DT_LVL = ['#787B86', '#F23645', '#FF9800', '#4CAF50', '#089981', '#00BCD4', '#2962FF', '#9C27B0', '#E91E63', '#795548'];   /* fixed level colours (web multi-colour tools) */
+const DT_UP = '#089981', DT_DN = '#F23645', DT_HANDLE = '#2563EB';
+const DT_FUTURE = 40;   /* points may sit up to 40 bars right of the last bar */
+const DT_HIT = 22;      /* hit tolerance either side of a stroke (touch) */
+function dtMeta(name) {
+  const c = DT_CAT[name] || [2, 'line', '#2C54C4', 1.5, 100, 'pb', 0];
+  const hk = name === 'Anchored VWAP' ? 'avwap' : DT_BOX.has(name) ? 'box' : /^(Brush|Highlighter)/.test(name) ? 'free' : /^Polyline/.test(name) ? 'poly' : 'pts';
+  return { n: c[0], set: c[1], col: c[2] || null, w: c[3], o: c[4], cf: c[5], chk: c[6], hk, text: DT_TEXT_AT[name] || 0 };
+}
+function dtDefaults(name) {
+  const m = dtMeta(name);
+  return { c: m.col, w: m.w || 1.5, s: 'solid', o: m.o || 100, fc: '#2C54C4', fo: 10, lbl: !!m.chk };
+}
+/* calendar date of a bar (future bars step over weekends from the last session) */
+function dtDateObj(b) {
+  b = Math.round(b);
+  const N = BARS.length, src = BARS[clamp(b, 0, N - 1)].date.split(' ');
+  const d = new Date(2026, MON.indexOf(src[0]), +src[1]);
+  for (let k = N - 1; k < b; k++) { do { d.setDate(d.getDate() + 1); } while (d.getDay() === 0 || d.getDay() === 6); }
+  return d;
+}
+const dtDate = b => { const d = dtDateObj(b); return MON[d.getMonth()] + ' ' + d.getDate(); };
+const dtDays = (b0, b1) => Math.round(Math.abs(dtDateObj(b1) - dtDateObj(b0)) / 864e5);
+const dtLabel = name => splitTool(name).label;
+
+/* ---- geometry helpers (pixel space) ---- */
+const dtUnit = (dx, dy) => { const L = Math.hypot(dx, dy) || 1; return [dx / L, dy / L]; };
+const dtFar = 4000;
+function dtExt(a, b, back, fwd) {   /* extend segment a->b to far points */
+  const [ux, uy] = dtUnit(b[0] - a[0], b[1] - a[1]);
+  const A = back ? [a[0] - ux * dtFar, a[1] - uy * dtFar] : a, B = fwd ? [b[0] + ux * dtFar, b[1] + uy * dtFar] : b;
+  return [A, B];
+}
+function dtArc(cx, cy, rx, ry, a0, a1, n) { const out = []; n = n || 48; for (let k = 0; k <= n; k++) { const a = a0 + (a1 - a0) * k / n; out.push([cx + rx * Math.cos(a), cy + ry * Math.sin(a)]); } return out; }
+const dtMid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+function dtSegDist(px, py, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L2 = dx * dx + dy * dy;
+  let t = L2 ? ((px - a[0]) * dx + (py - a[1]) * dy) / L2 : 0; t = clamp(t, 0, 1);
+  return Math.hypot(px - (a[0] + t * dx), py - (a[1] + t * dy));
+}
+function dtInPoly(px, py, P) {
+  let inside = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const [xi, yi] = P[i], [xj, yj] = P[j];
+    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / ((yj - yi) || 1e-9) + xi)) inside = !inside;
+  }
+  return inside;
+}
+const dtPct = (a, b) => (a ? (b - a) / a * 100 : 0);
+const dtSign = v => (v >= 0 ? '+' : '-');
+const dtLv = v => String(+(v * 100).toFixed(1)) + '%';
+
+/* ---- SVG builder: every primitive also records its hit geometry ---- */
+function dtBuilder(col, w, dash) {
+  const B = { s: '', segs: [], polys: [], boxes: [], hp: null };
+  const ptsStr = P => P.map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
+  B.path = (P, o) => {
+    o = o || {}; if (P.length < 2 || P.some(q => !isFinite(q[0]) || !isFinite(q[1]))) return;
+    const c = o.c || col, d = o.dash !== undefined ? o.dash : dash;
+    B.s += `<polyline points="${ptsStr(P)}" style="fill:${o.fill || 'none'};${o.fill ? `fill-opacity:${o.fo};` : ''}stroke:${o.noStroke ? 'none' : c};stroke-width:${o.w || w};${d ? `stroke-dasharray:${d};` : ''}stroke-linecap:round;stroke-linejoin:round"/>`;
+    if (!o.noHit) for (let k = 1; k < P.length; k++) B.segs.push([P[k - 1], P[k]]);
+    if (o.fill && !o.noHit) B.polys.push(P);
+  };
+  B.line = (a, b, o) => B.path([a, b], o);
+  B.fill = (P, fc, fo) => { if (P.length < 3 || P.some(q => !isFinite(q[0]) || !isFinite(q[1]))) return; B.s += `<polygon points="${ptsStr(P)}" style="fill:${fc};fill-opacity:${fo};stroke:none"/>`; B.polys.push(P); };
+  B.text = (x, y, str, o) => {
+    o = o || {}; if (!isFinite(x) || !isFinite(y)) return;
+    const fs = o.fs || 11, wd = String(str).length * fs * (fs >= 13 ? 0.62 : 0.58), a = o.a || 'start';
+    const x0 = a === 'middle' ? x - wd / 2 : a === 'end' ? x - wd : x;
+    if (o.bg) B.s += `<rect x="${(x0 - 5).toFixed(1)}" y="${(y - fs - 1).toFixed(1)}" width="${(wd + 10).toFixed(1)}" height="${fs + 7}" rx="4" style="fill:${o.bg};stroke:none"/>`;
+    B.s += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${a}" style="fill:${o.c || col};font-size:${fs}px;font-weight:${o.fw || 500};${o.bg ? 'stroke:none' : 'stroke:#FFFFFF;stroke-width:3px;stroke-linejoin:round;paint-order:stroke'}">${escHTML(String(str))}</text>`;
+    const box = [[x0 - 5, y - fs - 1], [x0 + wd + 5, y - fs - 1], [x0 + wd + 5, y + 6], [x0 - 5, y + 6]];
+    if (!o.noHit) B.polys.push(box);
+    if (o.main) B.boxes.push(box);
+  };
+  B.arrowHead = (a, b, size, c) => {
+    const [ux, uy] = dtUnit(b[0] - a[0], b[1] - a[1]), s = size || 9;
+    B.fill([b, [b[0] - ux * s - uy * s * .55, b[1] - uy * s + ux * s * .55], [b[0] - ux * s + uy * s * .55, b[1] - uy * s - ux * s * .55]], c || col, 1);
+  };
+  return B;
+}
+
+/* ---- renderers: (B, P pixel points, D drawing, g geom, h helpers) ---- */
+const DT_R = {};
+const dtFibRet = [0, .236, .382, .5, .618, .786, 1, 1.618, 2.618];   /* web default includes the two extension levels */
+function dtLevels(B, D, g, h, lvls, priceOf, x0, x1, fills) {
+  lvls.forEach((lv, k) => {
+    const pr = priceOf(lv), y = g.yAt(pr), c = h.lc(k);
+    B.line([x0, y], [x1, y], { c });
+    if (fills && k) { const y0 = g.yAt(priceOf(lvls[k - 1])); B.fill([[x0, y0], [x1, y0], [x1, y], [x0, y]], c, .08); }
+    B.text(Math.min(x0, x1) + 4, y - 3, `${dtLv(lv)} ${fmt(pr)}`, { c, fs: 10, noHit: true });
+  });
+}
+Object.assign(DT_R, {
+  'Trend Line': (B, P) => B.line(P[0], P[1]),
+  'Ray': (B, P) => { const [a, b] = dtExt(P[0], P[1], false, true); B.line(a, b); },
+  'Arrow': (B, P) => { B.line(P[0], P[1]); B.arrowHead(P[0], P[1], 8 + B.w * 1.5); },
+  'Horizontal Line': (B, P, D, g) => B.line([-10, P[0][1]], [g.plotW + 10, P[0][1]]),
+  'Horizontal Ray': (B, P, D, g) => B.line(P[0], [g.plotW + 10, P[0][1]]),
+  'Price Label': (B, P, D, g, h) => { const [x, y] = P[0]; B.line([x, y], [x + 10, y - 12]); B.text(x + 14, y - 12, fmt(D.pts[0].p), { bg: h.col, c: '#FFFFFF', fs: 11, fw: 600, main: true }); },
+  'Vertical Line': (B, P, D, g) => B.line([P[0][0], -10], [P[0][0], g.plotBottom + 10]),
+  'Extended Line': (B, P) => { const [a, b] = dtExt(P[0], P[1], true, true); B.line(a, b); },
+  'Info Line': (B, P, D) => {
+    B.line(P[0], P[1]);
+    const [a, b] = D.pts, dp = b.p - a.p, m = dtMid(P[0], P[1]);
+    B.text(m[0], m[1] - 8, `${dtSign(dp)}${fmt(Math.abs(dp))} (${dtSign(dp)}${Math.abs(dtPct(a.p, b.p)).toFixed(2)}%) · ${Math.abs(Math.round(b.b - a.b))} bars`, { a: 'middle', fs: 10, bg: '#FFFFFF' });
+  },
+  'Trend Angle': (B, P) => {
+    B.line(P[0], P[1]);
+    const ang = Math.atan2(-(P[1][1] - P[0][1]), P[1][0] - P[0][0]), R = 34;
+    B.line(P[0], [P[0][0] + R + 16, P[0][1]], { dash: '4 3', noHit: true });
+    B.path(dtArc(P[0][0], P[0][1], R, R, 0, -ang, 24), { noHit: true });
+    B.text(P[0][0] + R + 4, P[0][1] - 6 - (ang > 0 ? 8 : -14), `${(ang * 180 / Math.PI).toFixed(1)}°`, { fs: 10 });
+  },
+  'Cross Line': (B, P, D, g) => { B.line([-10, P[0][1]], [g.plotW + 10, P[0][1]]); B.line([P[0][0], -10], [P[0][0], g.plotBottom + 10]); },
+  'Parallel Channel': (B, P, D, g, h) => {
+    const [a, b, c] = P, t = (c[0] - a[0]) / ((b[0] - a[0]) || 1e-9), dy = c[1] - (a[1] + (b[1] - a[1]) * t);
+    const a2 = [a[0], a[1] + dy], b2 = [b[0], b[1] + dy];
+    B.fill([a, b, b2, a2], h.fc, h.fo);
+    B.line(a, b); B.line(a2, b2); B.line(dtMid(a, a2), dtMid(b, b2), { dash: '4 4', noHit: true });
+    B.hp = [a, b, dtMid(a2, b2)];
+  },
+  'Regression Channel': (B, P, D, g) => {
+    const i0 = clamp(Math.round(Math.min(D.pts[0].b, D.pts[1].b)), 0, BARS.length - 1), i1 = clamp(Math.round(Math.max(D.pts[0].b, D.pts[1].b)), 0, BARS.length - 1);
+    const n = i1 - i0 + 1; if (n < 2) { B.line(P[0], P[1]); return; }
+    let sx = 0, sy = 0, sxy = 0, sxx = 0; for (let i = i0; i <= i1; i++) { const x = i - i0, y = BARS[i].c; sx += x; sy += y; sxy += x * y; sxx += x * x; }
+    const k = (n * sxy - sx * sy) / (n * sxx - sx * sx || 1), c0 = (sy - k * sx) / n;
+    let dev = 0; for (let i = i0; i <= i1; i++) dev = Math.max(dev, Math.abs(BARS[i].c - (c0 + k * (i - i0))));
+    const at = (i, off) => [g.xAt(i), g.yAt(c0 + k * (i - i0) + off)];
+    B.line(at(i0, 0), at(i1, 0)); B.line(at(i0, dev), at(i1, dev), { dash: '5 4' }); B.line(at(i0, -dev), at(i1, -dev), { dash: '5 4' });
+    B.fill([at(i0, dev), at(i1, dev), at(i1, -dev), at(i0, -dev)], B.col, .06);
+    B.hp = [at(i0, 0), at(i1, 0)];
+  },
+  'Fib Channel (3-click)': (B, P, D, g, h) => {
+    const [a, b, c] = P, t = (c[0] - a[0]) / ((b[0] - a[0]) || 1e-9), dy = c[1] - (a[1] + (b[1] - a[1]) * t);
+    [0, .236, .382, .5, .618, .786, 1, 1.618].forEach((lv, k) => { const A = [a[0], a[1] + dy * lv], Bp = [b[0], b[1] + dy * lv]; B.line(A, Bp, { c: h.lc(k) }); B.text(Math.max(A[0], Bp[0]) + 4, (A[0] > Bp[0] ? A : Bp)[1] + 3, dtLv(lv), { c: h.lc(k), fs: 10, noHit: true }); });
+  },
+  'Flat Top/Bottom Channel (3-click)': (B, P, D, g, h) => {
+    const [a, b, c] = P; B.fill([a, b, [b[0], c[1]], [a[0], c[1]]], h.fc, h.fo); B.line(a, b); B.line([a[0], c[1]], [b[0], c[1]]);
+  },
+  'Disjoint Channel (4-click)': (B, P, D, g, h) => { B.fill([P[0], P[1], P[3], P[2]], h.fc, h.fo); B.line(P[0], P[1]); B.line(P[2], P[3]); },
+  'Rectangle': (B, P, D, g, h) => { const [a, b] = P, R = [a, [b[0], a[1]], b, [a[0], b[1]], a]; B.fill(R.slice(0, 4), h.fc, h.fo); B.path(R); },
+  'Ellipse': (B, P, D, g, h) => { const [a, b] = P, E = dtArc((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, Math.abs(b[0] - a[0]) / 2, Math.abs(b[1] - a[1]) / 2, 0, Math.PI * 2, 64); B.fill(E, h.fc, h.fo); B.path(E); },
+  'Triangle': (B, P, D, g, h) => { B.fill(P.slice(0, 3), h.fc, h.fo); B.path([P[0], P[1], P[2], P[0]]); },
+  'Arc': (B, P, D, g, h) => {
+    const [a, m, c] = P, ctl = [2 * m[0] - (a[0] + c[0]) / 2, 2 * m[1] - (a[1] + c[1]) / 2], Q = [];
+    for (let k = 0; k <= 40; k++) { const t = k / 40, u = 1 - t; Q.push([u * u * a[0] + 2 * u * t * ctl[0] + t * t * c[0], u * u * a[1] + 2 * u * t * ctl[1] + t * t * c[1]]); }
+    B.fill(Q, h.fc, h.fo); B.path(Q);
+  },
+  'Circle': (B, P) => { const R = Math.hypot(P[1][0] - P[0][0], P[1][1] - P[0][1]); B.path(dtArc(P[0][0], P[0][1], R, R, 0, Math.PI * 2, 72)); },
+  'Rotated Rectangle': (B, P, D, g, h) => {
+    const [a, b, c] = P, [ux, uy] = dtUnit(b[0] - a[0], b[1] - a[1]), nx = -uy, ny = ux, d = (c[0] - a[0]) * nx + (c[1] - a[1]) * ny;
+    const R = [a, b, [b[0] + nx * d, b[1] + ny * d], [a[0] + nx * d, a[1] + ny * d]]; B.fill(R, h.fc, h.fo); B.path(R.concat([a]));
+  },
+  'Sector (3-click pie wedge)': (B, P, D, g, h) => {
+    const [o, p1, p2] = P, R = Math.hypot(p1[0] - o[0], p1[1] - o[1]);
+    const a0 = Math.atan2(p1[1] - o[1], p1[0] - o[0]); let a1 = Math.atan2(p2[1] - o[1], p2[0] - o[0]);
+    while (a1 - a0 > Math.PI) a1 -= Math.PI * 2; while (a0 - a1 > Math.PI) a1 += Math.PI * 2;
+    const S = [o].concat(dtArc(o[0], o[1], R, R, a0, a1, 40)).concat([o]); B.fill(S, h.fc, h.fo); B.path(S);
+  },
+  'Double Curve (Bezier - 4-click)': (B, P) => {
+    const [a, b, c, d] = P, Q = []; for (let k = 0; k <= 48; k++) { const t = k / 48, u = 1 - t; Q.push([u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1]]); }
+    B.path(Q); B.line(a, b, { dash: '3 3', w: 1, noHit: true }); B.line(c, d, { dash: '3 3', w: 1, noHit: true });
+  },
+  'Polyline (click to add, double-click to finish)': (B, P) => B.path(P),
+  'Brush (freehand)': (B, P) => B.path(P),
+  'Highlighter (freehand, thick + translucent)': (B, P) => B.path(P),
+  'Sine Line (cycle drawing)': (B, P, D, g) => {
+    const [a, b] = P, hp = Math.abs(b[0] - a[0]) || 1, mid = (a[1] + b[1]) / 2, amp = a[1] - mid, Q = [];
+    for (let x = -10; x <= g.plotW + 10; x += 3) Q.push([x, mid + amp * Math.cos(Math.PI * (x - a[0]) / hp)]);
+    B.path(Q);
+  },
+  'Time Cycles (semicircles)': (B, P, D, g) => {
+    const per = Math.abs(P[1][0] - P[0][0]); if (per < 4) { B.line(P[0], P[1]); return; }
+    const x0 = Math.min(P[0][0], P[1][0]), y = P[0][1];
+    for (let k = -Math.ceil(x0 / per) - 1; x0 + k * per < g.plotW + per; k++) B.path(dtArc(x0 + (k + .5) * per, y, per / 2, per / 2, Math.PI, Math.PI * 2, 28));
+    B.line([-10, y], [g.plotW + 10, y], { dash: '3 4', w: 1, noHit: true });
+  },
+  'Cyclic Lines': (B, P, D, g) => {
+    const per = Math.abs(P[1][0] - P[0][0]); if (per < 4) { B.line([P[0][0], -10], [P[0][0], g.plotBottom]); return; }
+    for (let x = P[0][0] - Math.ceil(P[0][0] / per) * per; x < g.plotW + 10; x += per) B.line([x, -10], [x, g.plotBottom + 10]);
+  },
+  'Fibonacci Retracement': (B, P, D, g, h) => {
+    const [a, b] = D.pts; B.line(P[0], P[1], { dash: '4 4', c: '#787B86', w: 1 });
+    dtLevels(B, D, g, h, dtFibRet, lv => b.p + (a.p - b.p) * lv, Math.min(P[0][0], P[1][0]), Math.max(P[0][0], P[1][0]), true);
+  },
+  'Fibonacci Projection (3-click)': (B, P, D, g, h) => {
+    const [a, b, c] = D.pts; B.path(P.slice(0, 3), { dash: '4 4', c: '#787B86', w: 1 });
+    dtLevels(B, D, g, h, [0, .618, 1, 1.618, 2.618], lv => c.p + (b.p - a.p) * lv, P[2][0], P[2][0] + Math.max(40, Math.abs(P[1][0] - P[0][0])), true);
+  },
+  'Fibonacci Arc': (B, P, D, g, h) => {
+    const [a, b] = P, R = Math.hypot(a[0] - b[0], a[1] - b[1]), up = a[1] < b[1];
+    B.line(a, b, { dash: '4 4', c: '#787B86', w: 1 });
+    [.382, .5, .618, 1].forEach((lv, k) => { B.path(dtArc(b[0], b[1], R * lv, R * lv, up ? Math.PI : 0, up ? Math.PI * 2 : Math.PI, 40), { c: h.lc(k + 1) }); B.text(b[0], b[1] + (up ? -R * lv - 3 : R * lv + 11), dtLv(lv), { a: 'middle', c: h.lc(k + 1), fs: 10, noHit: true }); });
+  },
+  'Fibonacci Fan': (B, P, D, g, h) => {
+    const [a, b] = P, dy = b[1] - a[1];
+    [0, .236, .382, .5, .618, .786, 1].forEach((lv, k) => { const t = [b[0], b[1] - dy * lv], [, e] = dtExt(a, t, false, true); B.line(a, e, { c: h.lc(k) }); B.text(t[0] + 4, t[1] - 3, dtLv(lv), { c: h.lc(k), fs: 10, noHit: true }); });
+  },
+  'Fibonacci Time Zone': (B, P, D, g) => {
+    const b0 = D.pts[0].b, db = D.pts[1].b - b0;
+    [0, 1, 2, 3, 5, 8, 13, 21, 34, 55].forEach(f => { const x = g.xAt(b0 + db * f); B.line([x, -10], [x, g.plotBottom + 10]); B.text(x + 3, g.HEAD + 12, String(f), { fs: 10, noHit: true }); });
+  },
+  'Fib Speed/Resistance Fan': (B, P, D, g, h) => {
+    const [a, b] = P, dx = b[0] - a[0], dy = b[1] - a[1];
+    B.path([a, [b[0], a[1]], b, [a[0], b[1]], a], { dash: '3 4', w: 1, c: '#787B86', noHit: true });
+    [.25, .382, .5, .618, .75, 1].forEach((lv, k) => {
+      const [, e1] = dtExt(a, [b[0], a[1] + dy * lv], false, true), [, e2] = dtExt(a, [a[0] + dx * lv, b[1]], false, true);
+      B.line(a, e1, { c: h.lc(k) }); if (lv < 1) B.line(a, e2, { c: h.lc(k) });
+    });
+  },
+  'Trend-Based Fib Time (3-click)': (B, P, D, g) => {
+    const [a, b, c] = D.pts; B.path(P.slice(0, 3), { dash: '4 4', c: '#787B86', w: 1 });
+    [0, .382, .5, .618, 1, 1.382, 1.618, 2].forEach(lv => { const x = g.xAt(c.b + (b.b - a.b) * lv); B.line([x, -10], [x, g.plotBottom + 10]); B.text(x + 3, g.HEAD + 12, String(lv), { fs: 10, noHit: true }); });
+  },
+  'Fib Speed/Resistance Arcs': (B, P, D, g, h) => {
+    const [a, b] = P, R = Math.hypot(b[0] - a[0], b[1] - a[1]), up = b[1] < a[1];
+    B.line(a, b, { dash: '4 4', c: '#787B86', w: 1 });
+    [.25, .382, .5, .618, .75, 1].forEach((lv, k) => B.path(dtArc(a[0], a[1], R * lv, R * lv, up ? Math.PI : 0, up ? Math.PI * 2 : Math.PI, 40), { c: h.lc(k) }));
+  },
+  'Fibonacci Circles': (B, P, D, g, h) => {
+    const [a, b] = P, m = dtMid(a, b), R = Math.hypot(b[0] - a[0], b[1] - a[1]) / 2;
+    B.line(a, b, { dash: '4 4', c: '#787B86', w: 1 });
+    [.382, .618, 1, 1.618, 2.618].forEach((lv, k) => B.path(dtArc(m[0], m[1], R * lv, R * lv, 0, Math.PI * 2, 64), { c: h.lc(k + 1) }));
+  },
+  'Fibonacci Spiral': (B, P) => {
+    const [a, b] = P, r0 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, t0 = Math.atan2(b[1] - a[1], b[0] - a[0]), Q = [];
+    for (let k = -120; k <= 60; k++) { const th = k * Math.PI / 40, r = r0 * Math.pow(1.618, th / (Math.PI / 2)); if (r > 3000) continue; Q.push([a[0] + r * Math.cos(t0 + th), a[1] + r * Math.sin(t0 + th)]); }
+    B.path(Q); B.line(a, b, { dash: '4 4', w: 1, noHit: true });
+  },
+  'Fibonacci Wedge': (B, P, D, g, h) => {
+    const [a, b] = P, R = Math.hypot(b[0] - a[0], b[1] - a[1]), a1 = Math.atan2(b[1] - a[1], b[0] - a[0]), a0 = b[0] >= a[0] ? 0 : Math.PI;
+    B.line(a, b, { c: h.lc(0) }); B.line(a, [a[0] + R * Math.cos(a0), a[1]], { c: h.lc(0) });
+    [.382, .5, .618, 1].forEach((lv, k) => B.path(dtArc(a[0], a[1], R * lv, R * lv, a0, a1 - (a1 - a0 > Math.PI ? Math.PI * 2 : a0 - a1 > Math.PI ? -Math.PI * 2 : 0), 30), { c: h.lc(k + 1) }));
+  },
+  'Pitchfan (3-click)': (B, P, D, g, h) => {
+    const [o, p1, p2] = P; B.line(p1, p2, { dash: '4 4', w: 1, c: '#787B86' });
+    [0, .382, .5, .618, 1].forEach((lv, k) => { const t = [p1[0] + (p2[0] - p1[0]) * lv, p1[1] + (p2[1] - p1[1]) * lv], [, e] = dtExt(o, t, false, true); B.line(o, e, { c: h.lc(k) }); });
+  },
+  'Gann Fan': (B, P, D, g, h) => {
+    const [a, b] = P, dx = b[0] - a[0], dy = b[1] - a[1];
+    [[8, '1x8'], [4, '1x4'], [3, '1x3'], [2, '1x2'], [1, '1x1'], [1 / 2, '2x1'], [1 / 3, '3x1'], [1 / 4, '4x1'], [1 / 8, '8x1']].forEach(([r, lb], k) => {
+      const t = r >= 1 ? [a[0] + dx / r, b[1]] : [b[0], a[1] + dy * r], [, e] = dtExt(a, t, false, true);
+      B.line(a, e, { c: h.lc(k) }); B.text(t[0] + 3, t[1] - 3, lb, { c: h.lc(k), fs: 10, noHit: true });
+    });
+  },
+  'Gann Box': (B, P, D, g, h) => {
+    const [a, b] = P, lv = [0, .25, .382, .5, .618, .75, 1];
+    lv.forEach((v, k) => { const x = a[0] + (b[0] - a[0]) * v, y = a[1] + (b[1] - a[1]) * v; B.line([x, a[1]], [x, b[1]], { c: h.lc(k), w: v % 1 ? 1 : B.w }); B.line([a[0], y], [b[0], y], { c: h.lc(k), w: v % 1 ? 1 : B.w }); });
+    B.line(a, b, { c: h.lc(6), dash: '4 4', noHit: true }); B.line([a[0], b[1]], [b[0], a[1]], { c: h.lc(6), dash: '4 4', noHit: true });
+  },
+  'Gann Square': (B, P, D, g, h) => {
+    const [a, b] = P;
+    [0, 1 / 3, 2 / 3, 1].forEach((v, k) => { const x = a[0] + (b[0] - a[0]) * v, y = a[1] + (b[1] - a[1]) * v; B.line([x, a[1]], [x, b[1]], { c: h.lc(k) }); B.line([a[0], y], [b[0], y], { c: h.lc(k) }); });
+    B.line(a, b, { c: h.lc(5), noHit: true }); B.line([a[0], b[1]], [b[0], a[1]], { c: h.lc(5), noHit: true });
+    const rx = b[0] - a[0], ry = b[1] - a[1];
+    [1 / 3, 2 / 3, 1].forEach(v => { const Q = []; for (let k = 0; k <= 24; k++) { const t = k / 24 * Math.PI / 2; Q.push([a[0] + rx * v * Math.cos(t), a[1] + ry * v * Math.sin(t)]); } B.path(Q, { c: h.lc(7), w: 1, noHit: true }); });
+  },
+  'ABCD Pattern (4-click)': (B, P, D) => {
+    B.path(P); B.line(P[0], P[2], { dash: '4 4', w: 1, noHit: true }); B.line(P[1], P[3], { dash: '4 4', w: 1, noHit: true });
+    dtPtLabels(B, P, ['A', 'B', 'C', 'D']);
+    const r1 = Math.abs((D.pts[2].p - D.pts[1].p) / ((D.pts[1].p - D.pts[0].p) || 1)), r2 = Math.abs((D.pts[3].p - D.pts[2].p) / ((D.pts[2].p - D.pts[1].p) || 1));
+    const m1 = dtMid(P[0], P[2]), m2 = dtMid(P[1], P[3]); B.text(m1[0], m1[1], r1.toFixed(3), { a: 'middle', fs: 10, bg: '#FFFFFF', noHit: true }); B.text(m2[0], m2[1], r2.toFixed(3), { a: 'middle', fs: 10, bg: '#FFFFFF', noHit: true });
+  },
+  'Head & Shoulders (5-click)': (B, P, D, g, h) => {
+    /* web tap order: left low, left shoulder, head, right shoulder, right low, then neckline N1, N2 */
+    const [LL, LS, H, RS, RL, N1, N2] = P, path = [LL, LS, N1, H, N2, RS, RL];
+    B.fill([LS, N1, H, N2, RS], h.col, .08); B.path(path);
+    B.line(dtExt(N2, N1, false, true)[1], dtExt(N1, N2, false, true)[1], { dash: '6 4' });
+    B.text(LS[0], LS[1] - 8, 'Left Shoulder', { a: 'middle', fs: 10, noHit: true }); B.text(H[0], H[1] - 8, 'Head', { a: 'middle', fs: 10, noHit: true }); B.text(RS[0], RS[1] - 8, 'Right Shoulder', { a: 'middle', fs: 10, noHit: true });
+  },
+  'Three Drives (7-click)': (B, P) => { B.path(P); dtPtLabels(B, P, ['', '1', '', '2', '', '3', '']); B.line(P[1], P[5], { dash: '4 4', w: 1, noHit: true }); },
+  'Bar Pattern (clone source bars, 3-click)': (B, P, D, g, h) => {
+    const s0 = clamp(Math.round(Math.min(D.pts[0].b, D.pts[1].b)), 0, BARS.length - 1), s1 = clamp(Math.round(Math.max(D.pts[0].b, D.pts[1].b)), 0, BARS.length - 1);
+    const base = BARS[s0].o, off = D.pts[2].b - s0, dp = D.pts[2].p - base;
+    for (let i = s0; i <= s1; i++) { const bb = BARS[i], x = g.xAt(i + off); B.line([x, g.yAt(bb.h + dp)], [x, g.yAt(bb.l + dp)], { w: 1 }); B.line([x, g.yAt(bb.o + dp)], [x, g.yAt(bb.c + dp)], { w: Math.max(2, g.slot * .5), c: bb.c >= bb.o ? DT_UP : DT_DN }); }
+    B.line(P[0], P[1], { dash: '3 3', w: 1, noHit: true });
+  },
+  'Elliott Wave (5-click)': (B, P) => { B.path(P); dtPtLabels(B, P, ['(1)', '(2)', '(3)', '(4)', '(5)']); },
+  'Elliott Correction (A-B-C)': (B, P) => { B.path(P); dtPtLabels(B, P, ['(A)', '(B)', '(C)']); },
+  'Elliott Triangle (A-B-C-D-E)': (B, P) => {
+    B.path(P); dtPtLabels(B, P, ['(A)', '(B)', '(C)', '(D)', '(E)']);
+    B.line(...dtExt(P[0], P[2], false, false), { dash: '4 4', w: 1, noHit: true }); B.line(P[1], P[3], { dash: '4 4', w: 1, noHit: true });
+  },
+  'Triangle Pattern (4-click converging)': (B, P, D, g, h) => {
+    B.path(P); const [, e1] = dtExt(P[0], P[2], false, true), [, e2] = dtExt(P[1], P[3], false, true);
+    B.line(P[2], [P[2][0] + (e1[0] - P[2][0]) * .02, P[2][1] + (e1[1] - P[2][1]) * .02], { dash: '4 4', noHit: true }); B.line(P[3], [P[3][0] + (e2[0] - P[3][0]) * .02, P[3][1] + (e2[1] - P[3][1]) * .02], { dash: '4 4', noHit: true });
+    B.fill([P[0], P[2], P[3], P[1]], h.col, .08);
+    dtPtLabels(B, P, ['A', 'B', 'C', 'D']);
+  },
+  'Long Position (entry / stop / target)': (B, P, D, g) => dtPosition(B, P, D, g),
+  'Short Position (entry / stop / target)': (B, P, D, g) => dtPosition(B, P, D, g),
+  'Position Forecast': (B, P, D) => {
+    B.line(P[0], P[1], { dash: '6 4' }); B.arrowHead(P[0], P[1], 9); B.line(P[1], P[2], { dash: '6 4' }); B.arrowHead(P[1], P[2], 9);
+    [[0, 1], [1, 2]].forEach(([i, j]) => { const a = D.pts[i], b = D.pts[j], dp = b.p - a.p, m = dtMid(P[i], P[j]); B.text(m[0], m[1] - 8, `${dtSign(dp)}${Math.abs(dtPct(a.p, b.p)).toFixed(2)}% in ${Math.abs(Math.round(b.b - a.b))} bars`, { a: 'middle', fs: 10, bg: '#FFFFFF', c: dp >= 0 ? DT_UP : DT_DN }); });
+  },
+  'Price Range': (B, P, D, g, h) => {
+    const [a, b] = P, x = (a[0] + b[0]) / 2; B.fill([a, [b[0], a[1]], b, [a[0], b[1]]], h.fc, h.fo);
+    B.line([a[0], a[1]], [b[0], a[1]]); B.line([a[0], b[1]], [b[0], b[1]]); B.line([x, a[1]], [x, b[1]], { noHit: true }); B.arrowHead([x, a[1]], [x, b[1]], 8);
+    const dp = D.pts[1].p - D.pts[0].p; B.text(x, b[1] + (b[1] < a[1] ? -8 : 16), `${dtSign(dp)}${fmt(Math.abs(dp))} (${dtSign(dp)}${Math.abs(dtPct(D.pts[0].p, D.pts[1].p)).toFixed(2)}%)`, { a: 'middle', fs: 11, bg: h.col, c: '#FFFFFF', fw: 600 });
+  },
+  'Date Range': (B, P, D, g, h) => {
+    const [a, b] = P, y = (a[1] + b[1]) / 2; B.fill([a, [b[0], a[1]], b, [a[0], b[1]]], h.fc, h.fo);
+    B.line([a[0], a[1]], [a[0], b[1]]); B.line([b[0], a[1]], [b[0], b[1]]); B.line([a[0], y], [b[0], y], { noHit: true }); B.arrowHead([a[0], y], [b[0], y], 8);
+    const n = Math.round(D.pts[1].b - D.pts[0].b); B.text((a[0] + b[0]) / 2, Math.max(a[1], b[1]) + 16, `${n} bars, ${dtDays(D.pts[0].b, D.pts[1].b)}d`, { a: 'middle', fs: 11, bg: h.col, c: '#FFFFFF', fw: 600 });
+  },
+  'Date & Price Range': (B, P, D, g, h) => dtRangeBox(B, P, D, g, h, false),
+  'Measure': (B, P, D, g, h) => dtRangeBox(B, P, D, g, h, true),
+  'Fixed Range Volume Profile (2-click)': (B, P, D, g, h) => dtVolProfile(B, D, g, h, D.pts[0].b, D.pts[1].b),
+  'Anchored Volume Profile (1-click anchor)': (B, P, D, g, h) => dtVolProfile(B, D, g, h, D.pts[0].b, BARS.length - 1),
+  'Text Annotation': (B, P, D, g, h) => B.text(P[0][0], P[0][1], D.text || 'Text', { c: h.col, fs: 14, fw: 510, main: true }),
+  'Anchored Text': (B, P, D, g, h) => { B.s += `<circle cx="${P[0][0].toFixed(1)}" cy="${P[0][1].toFixed(1)}" r="3" style="fill:${h.col};stroke:none"/>`; B.line(P[0], [P[0][0], P[0][1] - 10], { w: 1 }); B.text(P[0][0], P[0][1] - 14, D.text || 'Text', { a: 'middle', c: h.col, fs: 14, fw: 510, main: true }); },
+  'Callout': (B, P, D, g, h) => { B.line(P[0], P[1]); B.text(P[1][0], P[1][1] + 5, D.text || 'Text', { a: 'middle', bg: h.col, c: '#FFFFFF', fs: 13, fw: 510, main: true }); },
+  'Arrow Marker': (B, P, D, g, h) => { const [x, y] = P[0]; B.fill([[x, y], [x + 9, y + 12], [x + 3.5, y + 12], [x + 3.5, y + 30], [x - 3.5, y + 30], [x - 3.5, y + 12], [x - 9, y + 12]], h.col, 1); },
+  'Mark Up': (B, P, D, g, h) => { const [x, y] = P[0]; B.fill([[x, y + 4], [x + 8, y + 18], [x - 8, y + 18]], h.col, 1); },
+  'Mark Down': (B, P, D, g, h) => { const [x, y] = P[0]; B.fill([[x, y - 4], [x + 8, y - 18], [x - 8, y - 18]], h.col, 1); }
+});
+DT_R['Cypher Pattern (5-click)'] = DT_R['XABCD Pattern (5-click)'] = (B, P, D, g, h) => {
+  B.fill([P[0], P[1], P[2]], h.col, .1); B.fill([P[2], P[3], P[4]], h.col, .1); B.path(P);
+  const pr = D.pts.map(q => q.p), leg = (i, j) => Math.abs(pr[j] - pr[i]) || 1e-9;
+  const ratios = [[0, 2, leg(1, 2) / leg(0, 1)], [1, 3, leg(2, 3) / leg(1, 2)], [2, 4, leg(3, 4) / leg(2, 3)], [0, 4, leg(1, 4) / leg(0, 1)]];   /* AB/XA, BC/AB, CD/BC, XD (AD/XA) as web */
+  ratios.forEach(([i, j, r]) => { B.line(P[i], P[j], { dash: '4 4', w: 1, noHit: true }); const m = dtMid(P[i], P[j]); B.text(m[0], m[1] + 4, r.toFixed(3), { a: 'middle', fs: 10, bg: '#FFFFFF', noHit: true }); });
+  dtPtLabels(B, P, ['X', 'A', 'B', 'C', 'D']);
+};
+/* pitchforks: median from the origin through the midpoint of points 2-3, tines parallel through 2 and 3 */
+function dtFork(kind) {
+  return (B, P) => {
+    const [p0, p1, p2] = P, m = dtMid(p1, p2);
+    const o = kind === 'schiff' ? [p0[0], (p0[1] + p1[1]) / 2] : kind === 'mod' || kind === 'inside' ? dtMid(p0, p1) : p0;
+    const [ux, uy] = dtUnit(m[0] - o[0], m[1] - o[1]), far = p => [p[0] + ux * dtFar, p[1] + uy * dtFar];
+    B.fill([p1, far(p1), far(m), m], B.col, .1); B.fill([m, far(m), far(p2), p2], B.col, .05);   /* shading between the tines, as web */
+    B.line(o, far(m)); B.line(p1, far(p1)); B.line(p2, far(p2)); B.line(p1, p2);
+    if (o !== p0) B.line(p0, o, { dash: '4 4', w: 1, noHit: true });
+    if (kind === 'inside') { const q1 = dtMid(p1, m), q2 = dtMid(p2, m); B.line(q1, far(q1), { dash: '4 4', w: 1 }); B.line(q2, far(q2), { dash: '4 4', w: 1 }); }
+  };
+}
+DT_R["Andrews' Pitchfork (3-click)"] = dtFork('andrews');
+DT_R['Schiff Pitchfork (3-click)'] = dtFork('schiff');
+DT_R['Modified Schiff Pitchfork (3-click)'] = dtFork('mod');
+DT_R['Inside Pitchfork (3-click)'] = dtFork('inside');
+function dtPtLabels(B, P, L) { L.forEach((lb, k) => { if (!lb || !P[k]) return; const up = k === 0 ? (P[1] ? P[0][1] < P[1][1] : true) : P[k][1] <= P[k - 1][1]; B.text(P[k][0], P[k][1] + (up ? -9 : 17), lb, { a: 'middle', fs: 11, fw: 600, noHit: true }); }); }
+function dtPosition(B, P, D, g) {
+  const [e, s, t] = P, xr = Math.max(s[0], t[0], e[0] + 60), x0 = e[0];
+  const ent = D.pts[0].p, stop = D.pts[1].p, tgt = D.pts[2].p;
+  B.fill([[x0, e[1]], [xr, e[1]], [xr, t[1]], [x0, t[1]]], DT_UP, .18); B.fill([[x0, e[1]], [xr, e[1]], [xr, s[1]], [x0, s[1]]], DT_DN, .18);
+  B.line([x0, e[1]], [xr, e[1]]); B.line([x0, t[1]], [xr, t[1]], { c: DT_UP, w: 1 }); B.line([x0, s[1]], [xr, s[1]], { c: DT_DN, w: 1 });
+  const rr = Math.abs(tgt - ent) / (Math.abs(ent - stop) || 1), cx = (x0 + xr) / 2;
+  B.text(cx, t[1] + (t[1] < e[1] ? -6 : 16), `Target: ${fmt(tgt)} (${dtSign(tgt - ent)}${Math.abs(dtPct(ent, tgt)).toFixed(2)}%)`, { a: 'middle', fs: 10, bg: DT_UP, c: '#FFFFFF', fw: 600, noHit: true });
+  B.text(cx, s[1] + (s[1] < e[1] ? -6 : 16), `Stop: ${fmt(stop)} (${dtSign(stop - ent)}${Math.abs(dtPct(ent, stop)).toFixed(2)}%)`, { a: 'middle', fs: 10, bg: DT_DN, c: '#FFFFFF', fw: 600, noHit: true });
+  B.text(cx, e[1] + 4, `R/R ${rr.toFixed(2)}`, { a: 'middle', fs: 10, bg: '#FFFFFF', fw: 600, noHit: true });
+  B.hp = [e, [s[0], s[1]], [t[0], t[1]]];
+}
+function dtRangeBox(B, P, D, g, h, measure) {
+  const [a, b] = P, [pa, pb] = D.pts, dp = pb.p - pa.p, up = dp >= 0, n = Math.round(pb.b - pa.b);
+  const fc = measure ? (up ? DT_UP : DT_DN) : h.fc, fo = measure ? .16 : h.fo;   /* Measure: green up, red down (web) */
+  const x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]), mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+  B.fill([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], fc, fo);
+  if (measure) { B.line([x0, y0], [x0, y1], { c: fc, dash: '4 3', w: 1 }); B.line([x1, y0], [x1, y1], { c: fc, dash: '4 3', w: 1 }); }   /* dashed vertical guides */
+  else B.path([[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]], { c: h.col });
+  B.line([mx, a[1]], [mx, b[1]], { c: measure ? fc : h.col, noHit: true }); B.arrowHead([mx, a[1]], [mx, b[1]], 8, measure ? fc : h.col);
+  B.line([a[0], my], [b[0], my], { c: measure ? fc : h.col, noHit: true }); B.arrowHead([a[0], my], [b[0], my], 8, measure ? fc : h.col);
+  let vol = 0; for (let i = clamp(Math.round(Math.min(pa.b, pb.b)), 0, BARS.length - 1); i <= clamp(Math.round(Math.max(pa.b, pb.b)), 0, BARS.length - 1); i++) vol += BARS[i].v;
+  const txt = `${dtSign(dp)}${fmt(Math.abs(dp))} (${dtSign(dp)}${Math.abs(dtPct(pa.p, pb.p)).toFixed(2)}%) · ${Math.abs(n)} bars, ${dtDays(pa.b, pb.b)}d · Vol ${fmtVol(vol)}`;
+  const wd = txt.length * 11 * 0.58, lx = clamp(mx, wd / 2 + 6, Math.max(wd / 2 + 6, g.plotW - wd / 2 - 6));   /* keep the pill inside the plot */
+  B.text(lx, measure ? y0 - 10 : y1 + 18, txt, { a: 'middle', fs: 11, bg: measure ? fc : h.col, c: '#FFFFFF', fw: 600 });   /* Measure label above the box, as web */
+}
+function dtVolProfile(B, D, g, h, bA, bB) {
+  const i0 = clamp(Math.round(Math.min(bA, bB)), 0, BARS.length - 1), i1 = clamp(Math.round(Math.max(bA, bB)), 0, BARS.length - 1);
+  let lo = Infinity, hi = -Infinity; for (let i = i0; i <= i1; i++) { lo = Math.min(lo, BARS[i].l); hi = Math.max(hi, BARS[i].h); }
+  const NB = 14, bins = Array(NB).fill(0), st = (hi - lo) / NB || 1;
+  for (let i = i0; i <= i1; i++) { const tp = (BARS[i].h + BARS[i].l + BARS[i].c) / 3; bins[clamp(Math.floor((tp - lo) / st), 0, NB - 1)] += BARS[i].v; }
+  const mx = Math.max(...bins) || 1, x0 = g.xAt(i0), x1 = g.xAt(i1), wMax = Math.max(30, (x1 - x0) * .45), poc = bins.indexOf(mx);
+  B.path([[x0, g.yAt(hi)], [x1, g.yAt(hi)], [x1, g.yAt(lo)], [x0, g.yAt(lo)], [x0, g.yAt(hi)]], { dash: '3 3', w: 1 });
+  bins.forEach((v, k) => { const yA = g.yAt(lo + st * (k + 1)) + .5, yB = g.yAt(lo + st * k) - .5, wv = v / mx * wMax; B.fill([[x0, yA], [x0 + wv, yA], [x0 + wv, yB], [x0, yB]], k === poc ? DT_DN : h.col, k === poc ? .5 : .3); });
+  const py = g.yAt(lo + st * (poc + .5)); B.line([x0, py], [x1, py], { c: DT_DN, w: 1, noHit: true });
+  B.hp = [[x0, g.yAt(D.pts[0].p)]].concat(D.pts[1] ? [[g.xAt(D.pts[1].b), g.yAt(D.pts[1].p)]] : []);
+}
+
+/* ---- state ---- */
+const DRW = { placing: null, sel: null, drag: null, ptrId: null, flash: null, sheet: null };
+const dtFind = id => state.drawings.find(x => x.id === id);
+const dtActive = () => charts[state.orientation];
+function dtBarF(chart, x) { const g = chart.geom; return x / g.slot - 0.6 + chart.view.start; }
+function dtSnap(chart, p) { return { b: clamp(Math.round(dtBarF(chart, p.x)), 0, BARS.length - 1 + DT_FUTURE), p: chart.geom.pAt(p.y) }; }
+
+/* ---- render (called from Chart.draw) ---- */
+function dtRenderOne(D, g, extraPts) {
+  const m = dtMeta(D.name), st = D.st || dtDefaults(D.name);
+  let pts = (D.pts || []).concat(extraPts || []);
+  if (!pts.length) return null;
+  const need = m.hk === 'free' || m.hk === 'poly' ? 1 : m.n;
+  while (pts.length < need) pts = pts.concat([pts[pts.length - 1]]);
+  const P = pts.map(q => [g.xAt(q.b), g.yAt(q.p)]);
+  const col = st.c || DT_LVL[6];
+  const dash = st.s === 'dashed' ? `${Math.max(4, st.w * 3)} ${Math.max(3, st.w * 2)}` : st.s === 'dotted' ? `${Math.max(1, st.w * .6)} ${Math.max(3, st.w * 2)}` : '';
+  const B = dtBuilder(col, st.w, dash); B.w = st.w; B.col = col;
+  const h = { col, fc: st.fc || '#2C54C4', fo: (st.fo === undefined ? 10 : st.fo) / 100, lc: k => st.c || DT_LVL[k % DT_LVL.length] };
+  const Dv = Object.assign({}, D, { pts });
+  const fn = DT_R[D.name] || ((B2, P2) => B2.path(P2));
+  try { fn(B, P, Dv, g, h); } catch (err) { B.path(P); }
+  return { B, P, m, st };
+}
+function dtRender(chart) {
+  const g = chart.geom; chart._hit = []; chart._hnd = [];
+  if (!g || g.pct) { dtSyncBar(); return { body: '', ui: '', axis: '' }; }
+  let body = '', ui = '', axis = '';
+  const axTag = (p, c) => { const y = g.yAt(p); if (y < 8 || y > g.plotBottom - 4) return ''; return `<g class="tag drw-tag"><rect x="${g.plotW + 3}" y="${(y - 9.5).toFixed(1)}" width="${g.AX - 6}" height="19" rx="4" style="fill:${c}"/><text x="${g.plotW + g.AX / 2}" y="${(y + 3.5).toFixed(1)}" text-anchor="middle">${fmt(p)}</text></g>`; };
+  state.drawings.forEach(D => {
+    if (D.hidden || !D.pts || !D.pts.length) return;
+    const R = dtRenderOne(D, g); if (!R) return;
+    const { B, P, m, st } = R;
+    body += `<g class="drw-g" data-drw="${D.id}" style="opacity:${st.o / 100}">${B.s}</g>`;
+    chart._hit.push({ id: D.id, segs: B.segs, polys: B.polys });
+    if (st.lbl && m.cf) [...new Set(D.pts.map(q => q.p))].forEach(p => { axis += axTag(p, st.c || DT_LVL[6]); });
+    if (DRW.flash === D.id) ui += `<g class="drw-flash">${B.segs.map(s => `<line x1="${s[0][0].toFixed(1)}" y1="${s[0][1].toFixed(1)}" x2="${s[1][0].toFixed(1)}" y2="${s[1][1].toFixed(1)}"/>`).join('')}</g>`;
+    if (DRW.sel === D.id && !DRW.placing) {
+      if (B.boxes.length) B.boxes.forEach(bx => { ui += `<rect class="drw-tbox" x="${bx[0][0].toFixed(1)}" y="${bx[0][1].toFixed(1)}" width="${(bx[1][0] - bx[0][0]).toFixed(1)}" height="${(bx[2][1] - bx[0][1]).toFixed(1)}" rx="4"/>`; });
+      dtHandles(D, m, P, B).forEach(hd => {
+        chart._hnd.push(hd);
+        ui += hd.sq ? `<rect class="drw-h" x="${(hd.x - 4.5).toFixed(1)}" y="${(hd.y - 4.5).toFixed(1)}" width="9" height="9" rx="1.5"/>` : `<circle class="drw-h" cx="${hd.x.toFixed(1)}" cy="${hd.y.toFixed(1)}" r="6"/>`;
+      });
+    }
+  });
+  /* placing preview: the shape so far + loose anchor circles */
+  const pl = DRW.placing;
+  if (pl && pl.name !== 'Anchored VWAP' && chart === dtActive()) {
+    const extra = pl.prev ? [pl.prev] : [];
+    const D = { id: '_preview', name: pl.name, pts: pl.pts, st: dtDefaults(pl.name), text: pl.text || '' };
+    const R = (pl.pts.length || extra.length) ? dtRenderOne(D, g, extra) : null;
+    if (R) ui += `<g class="drw-prev" style="opacity:${R.st.o / 100}">${R.B.s}</g>`;
+    pl.pts.concat(extra).forEach((q, k) => { if (pl.m.hk === 'free' && k) return; ui += `<circle class="drw-anchor" cx="${g.xAt(q.b).toFixed(1)}" cy="${g.yAt(q.p).toFixed(1)}" r="5"/>`; });
+  } else if (pl && pl.prev && chart === dtActive()) ui += `<line class="drw-vguide" x1="${g.xAt(pl.prev.b).toFixed(1)}" x2="${g.xAt(pl.prev.b).toFixed(1)}" y1="0" y2="${g.plotBottom}"/>`;
+  dtSyncBar();
+  return { body, ui, axis };
+}
+/* handles by type: point (one per point, or the renderer's positions), box (4 corners + 4 edges), freehand (start + end) */
+function dtHandles(D, m, P, B) {
+  if (m.hk === 'box') {
+    const [a, b] = P, out = [];
+    [[0, 0], [1, 0], [0, 1], [1, 1]].forEach(([bi, pi]) => out.push({ x: P[bi][0], y: P[pi][1], h: { t: 'corner', bi, pi } }));
+    out.push({ x: (a[0] + b[0]) / 2, y: a[1], sq: 1, h: { t: 'edge', ax: 'p', i: 0 } }, { x: (a[0] + b[0]) / 2, y: b[1], sq: 1, h: { t: 'edge', ax: 'p', i: 1 } },
+             { x: a[0], y: (a[1] + b[1]) / 2, sq: 1, h: { t: 'edge', ax: 'b', i: 0 } }, { x: b[0], y: (a[1] + b[1]) / 2, sq: 1, h: { t: 'edge', ax: 'b', i: 1 } });
+    return out;
+  }
+  if (m.hk === 'free') return [0, P.length - 1].map(k => ({ x: P[k][0], y: P[k][1], h: { t: 'pt', k } }));
+  const hp = B.hp || P;
+  return D.pts.map((q, k) => ({ x: (hp[k] || P[k])[0], y: (hp[k] || P[k])[1], h: { t: 'pt', k } }));
+}
+const dtHitH = (H, p) => H.segs.some(s => dtSegDist(p.x, p.y, s[0], s[1]) <= DT_HIT) || H.polys.some(P => dtInPoly(p.x, p.y, P));
+function dtHitTest(chart, p) {
+  const hits = chart._hit || [];
+  for (let k = hits.length - 1; k >= 0; k--) if (dtHitH(hits[k], p)) return hits[k].id;   /* topmost = most recently added */
+  return null;
+}
+const dtHitsId = (chart, id, p) => { const H = (chart._hit || []).find(x => x.id === id); return !!H && dtHitH(H, p); };   /* the selected drawing stays draggable where it overlaps another */
+function dtHandleAt(chart, p) {
+  let best = null, bd = 23;
+  (chart._hnd || []).forEach(hd => { const d = Math.hypot(hd.x - p.x, hd.y - p.y); if (d < bd) { bd = d; best = hd; } });   /* 44pt touch target */
+  return best;
+}
+
+/* ---- placing ---- */
+function dtStartPlacing(name) {
+  Object.values(charts).forEach(c => { if (c.hover) c.clear(); });
+  DRW.sel = null;
+  DRW.placing = { name, m: dtMeta(name), pts: [], prev: null, text: '' };
+  dtBanner(); dtActive().draw();
+}
+function dtCancelPlacing() { if (!DRW.placing) return; DRW.placing = null; DRW.ptrId = null; dtTextClose(); dtBanner(); dtActive().draw(); }
+function dtBanner() {
+  document.querySelectorAll('.chart-module').forEach(root => {
+    const area = root.querySelector('.chart-area'); let el = area.querySelector('.dt-banner');
+    const pl = DRW.placing, on = pl && root === dtActive().root;
+    if (!el) { el = document.createElement('div'); el.className = 'dt-banner'; area.appendChild(el); el.addEventListener('click', e => { const b = e.target.closest('[data-dtb]'); if (!b) return; e.stopPropagation(); if (b.dataset.dtb === 'cancel') dtCancelPlacing(); else if (b.dataset.dtb === 'done') dtPolyDone(); }); }
+    el.classList.toggle('on', !!on);
+    if (!on) return;
+    const lb = dtLabel(pl.name), m = pl.m, k = pl.pts.length;
+    let txt, step = '';
+    if (m.hk === 'free') txt = `${lb}: drag to draw`;
+    else if (m.hk === 'poly') { txt = `${lb}: tap to add points`; step = `${k} ${k === 1 ? 'point' : 'points'}`; }
+    else if (m.hk === 'avwap') txt = 'Anchored VWAP: tap a bar';
+    else { txt = `${lb}: tap ${m.n} ${m.n === 1 ? 'point' : 'points'}`; if (m.n > 1) step = `${Math.min(k + 1, m.n)} of ${m.n}`; }
+    if (pl.awaitText) { txt = `${lb}: type your text`; step = ''; }
+    el.innerHTML = `<span class="dt-bn-t">${escHTML(txt)}</span>${step ? `<span class="dt-bn-step">${step}</span>` : ''}${m.hk === 'poly' ? `<button class="dt-bn-btn done" data-dtb="done" ${k < 2 ? 'disabled' : ''}>Done</button>` : ''}<button class="dt-bn-btn" data-dtb="cancel">Cancel</button>`;
+    el.style.top = dtTopY(root) + 'px';
+  });
+}
+function dtTopY(root) { const head = root.querySelector('.chart-head'); return Math.round(head.offsetTop + head.offsetHeight + 6); }
+function dtPlaceDown(chart, e, p) {
+  const pl = DRW.placing; DRW.ptrId = e.pointerId;
+  if (pl.awaitText) return;
+  if (pl.m.hk === 'free') { const q = { b: dtBarF(chart, p.x), p: chart.geom.pAt(p.y) }; pl.pts = [q]; pl.last = p; }
+  else pl.prev = dtSnap(chart, p);
+  chart.draw();
+}
+function dtPlaceMove(chart, p) {
+  const pl = DRW.placing; if (!pl || pl.awaitText) return;
+  if (pl.m.hk === 'free') { if (!pl.last || Math.hypot(p.x - pl.last.x, p.y - pl.last.y) < 2.5) return; pl.pts.push({ b: dtBarF(chart, p.x), p: chart.geom.pAt(p.y) }); pl.last = p; }
+  else pl.prev = dtSnap(chart, p);
+  dtSchedule(chart);
+}
+function dtPlaceUp(chart, p, cancelled) {
+  const pl = DRW.placing; DRW.ptrId = null; if (!pl || pl.awaitText) return;
+  if (cancelled) { pl.prev = null; if (pl.m.hk === 'free') pl.pts = []; chart.draw(); return; }
+  if (pl.m.hk === 'free') { if (pl.pts.length >= 2) dtCommit(pl.pts); else { pl.pts = []; chart.draw(); } return; }
+  const q = pl.prev || dtSnap(chart, p); pl.prev = null; pl.pts.push(q);
+  if (pl.m.hk === 'poly') { if (pl.pts.length >= 30) { dtPolyDone(); return; } dtBanner(); chart.draw(); return; }
+  if (pl.m.text && pl.pts.length === pl.m.text) { pl.awaitText = true; dtBanner(); chart.draw(); dtTextOpen(chart, q); return; }
+  if (pl.pts.length >= pl.m.n) { dtCommit(pl.pts); return; }
+  dtBanner(); chart.draw();
+}
+function dtPolyDone() { const pl = DRW.placing; if (pl && pl.m.hk === 'poly' && pl.pts.length >= 2) dtCommit(pl.pts); }
+function dtCommit(pts, text) {
+  const pl = DRW.placing; if (!pl) return;
+  const name = pl.name; DRW.placing = null; DRW.ptrId = null; dtTextClose(); dtBanner();
+  if (name === 'Anchored VWAP') {
+    if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); dtActive().draw(); return; }
+    addStudy('AVWAP');
+    const st = state.studies[state.studies.length - 1], b = clamp(pts[0].b, 0, BARS.length - 1);
+    instCfg(st).i['Anchor by'] = 'Date'; st.cfg.i['Anchor time'] = BARS[b].date + ', 2026 09:30';
+    renderLegend(); markDirty();
+    toast('AVWAP anchored at ' + BARS[b].date);
+    return;
+  }
+  const D = { id: uid('d'), name, hidden: false, pts: pts.map(q => ({ b: q.b, p: q.p })), st: dtDefaults(name), text: text || '', note: '' };
+  state.drawings.push(D);
+  DRW.flash = D.id; clearTimeout(DRW._flashT); DRW._flashT = setTimeout(() => { DRW.flash = null; dtActive().draw(); }, 900);   /* brief highlight, not selected (as web) */
+  markDirty(); renderBadges(); rerenderLayers(); dtActive().draw();
+}
+/* inline text field for text tools (Enter or Done commits, empty cancels) */
+function dtTextOpen(chart, q) {
+  const area = chart.root.querySelector('.chart-area'); let el = area.querySelector('.dt-text');
+  if (!el) {
+    el = document.createElement('div'); el.className = 'dt-text';
+    el.innerHTML = `<input type="text" placeholder="Add text" enterkeyhint="done" autocomplete="off" aria-label="Text"><button class="dt-text-done">Done</button>`;
+    area.appendChild(el);
+    const done = () => { const pl = DRW.placing; if (!pl) return; const v = el.querySelector('input').value.trim(); if (!v) { dtCancelPlacing(); return; } dtCommit(pl.pts, v); };
+    el.querySelector('button').addEventListener('click', e => { e.stopPropagation(); done(); });
+    el.querySelector('input').addEventListener('keydown', e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') dtCancelPlacing(); });
+  }
+  const g = chart.geom, x = clamp(g.xAt(q.b) - 8, 6, Math.max(6, g.plotW - 230)), y = clamp(g.yAt(q.p) + 12, 50, Math.max(50, g.plotBottom - 56));
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  el.querySelector('input').value = ''; el.classList.add('on');
+  setTimeout(() => { try { el.querySelector('input').focus(); } catch (_) {} }, 30);
+}
+function dtTextClose() { document.querySelectorAll('.dt-text.on').forEach(el => { el.classList.remove('on'); const i = el.querySelector('input'); if (i) i.blur(); }); }
+function dtSchedule(chart) { if (!chart._dtRaf) chart._dtRaf = requestAnimationFrame(() => { chart._dtRaf = 0; chart.draw(); }); }
+
+/* ---- selection + dragging ---- */
+function dtSelect(id) { DRW.sel = id; dtCloseSheetIfOther(); dtActive().draw(); }
+function dtTap(chart, p) {
+  if (DRW.placing) return;
+  const id = dtHitTest(chart, p);
+  if (id) dtSelect(id);
+  else if (DRW.sel) dtSelect(null);
+}
+function dtDragStart(chart, e, p) {
+  if (!DRW.sel) return false;
+  const D = dtFind(DRW.sel); if (!D || D.hidden) return false;
+  const hd = dtHandleAt(chart, p);
+  const body = !hd && dtHitsId(chart, D.id, p);
+  if (!hd && !body) return false;
+  DRW.drag = { chart, id: D.id, h: hd ? hd.h : { t: 'body' }, orig: D.pts.map(q => ({ ...q })), x0: p.x, y0: p.y, bf0: dtBarF(chart, p.x), p0: chart.geom.pAt(p.y), moved: false };
+  DRW.ptrId = e.pointerId;
+  return true;
+}
+function dtDragMove(chart, p) {
+  const dr = DRW.drag; if (!dr) return;
+  const D = dtFind(dr.id); if (!D) return;
+  if (!dr.moved) { if (Math.hypot(p.x - dr.x0, p.y - dr.y0) <= 6) return; dr.moved = true; dtSyncBar(); }
+  const g = chart.geom, sb = x => clamp(Math.round(dtBarF(chart, x)), 0, BARS.length - 1 + DT_FUTURE), pr = g.pAt(p.y);
+  const pts = dr.orig.map(q => ({ ...q })), h = dr.h;
+  if (h.t === 'body') { const db = Math.round(dtBarF(chart, p.x) - dr.bf0), dp = pr - dr.p0; pts.forEach(q => { q.b += db; q.p += dp; }); }
+  else if (h.t === 'pt') { const s = dtSnap(chart, p); pts[h.k] = dtMeta(D.name).hk === 'free' ? { b: dtBarF(chart, p.x), p: s.p } : s; }
+  else if (h.t === 'corner') { pts[h.bi].b = sb(p.x); pts[h.pi].p = pr; }
+  else if (h.t === 'edge') { if (h.ax === 'b') pts[h.i].b = sb(p.x); else pts[h.i].p = pr; }
+  D.pts = pts;
+  dtSchedule(chart);
+}
+function dtDragEnd(chart, cancelled) {
+  const dr = DRW.drag; DRW.drag = null; DRW.ptrId = null; if (!dr) return;
+  const D = dtFind(dr.id);
+  if (cancelled && D) D.pts = dr.orig;
+  else if (dr.moved) markDirty();
+  chart.draw(); dtRefreshSheet();
+}
+
+/* ---- floating toolbar (in-chart menu) for the selected drawing ---- */
+const DT_ICO = {
+  note: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v11l-5 5H5z"/><path d="M14 20v-5h5M8 9h8M8 12.5h5"/></svg>`,
+  coords: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20 20 4"/><circle cx="6" cy="18" r="2.2" fill="#FFF"/><circle cx="18" cy="6" r="2.2" fill="#FFF"/><path d="M4 4v4M4 4h4M20 20v-4M20 20h-4"/></svg>`,
+  text: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6V4.5h14V6M12 4.5v15M9 19.5h6"/></svg>`,
+  fill: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m4 12 7-7 7 7-7 7z"/><path d="M19 15.5c0 1.4.9 2.5 2 2.5" /></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15M9.5 6.5V4.5h5v2M6.5 6.5l1 13h9l1-13M10 10v6.5M14 10v6.5"/></svg>`,
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg>`
+};
+const dtLineIco = (s, w) => `<svg viewBox="0 0 26 12" class="dt-lico"><path d="M${s === 'dotted' ? 2 : 1} 6h${s === 'dotted' ? 23 : 24}" stroke="currentColor" stroke-width="${w || 2}" ${s === 'dashed' ? 'stroke-dasharray="6 3"' : s === 'dotted' ? 'stroke-dasharray="0 4.5" stroke-linecap="round"' : ''}/></svg>`;
+const dtMulti = 'conic-gradient(#F23645, #FF9800, #4CAF50, #00BCD4, #2962FF, #9C27B0, #F23645)';
+function dtBarItems(D) {
+  const m = dtMeta(D.name), items = ['color'];
+  if (m.set !== 'text') items.push('width', 'style');
+  items.push('opacity');
+  if (m.set === 'fill') items.push('fill');
+  if (m.text) items.push('text');
+  items.push('note');
+  if (m.cf) items.push('coords');
+  items.push('|', 'trash', 'close');
+  return items;
+}
+function dtBarHTML(D) {
+  const st = D.st;
+  return dtBarItems(D).map(it => {
+    switch (it) {
+      case 'color': return `<button class="dt-b" data-dt="color" aria-label="Colour"><span class="dt-sw" style="background:${st.c || dtMulti}"></span></button>`;
+      case 'width': return `<button class="dt-b dt-txt" data-dt="width" aria-label="Line width">${+st.w}px</button>`;
+      case 'style': return `<button class="dt-b" data-dt="style" aria-label="Line style">${dtLineIco(st.s)}</button>`;
+      case 'opacity': return `<button class="dt-b dt-txt" data-dt="opacity" aria-label="Opacity">${st.o}%</button>`;
+      case 'fill': return `<button class="dt-b" data-dt="fill" aria-label="Fill"><span class="dt-sw dt-fsw" style="background:${st.fc};opacity:${Math.max(.25, st.fo / 100 * 3)}"></span></button>`;
+      case 'text': return `<button class="dt-b" data-dt="text" aria-label="Text">${DT_ICO.text}</button>`;
+      case 'note': return `<button class="dt-b ${D.note ? 'has' : ''}" data-dt="note" aria-label="Note">${DT_ICO.note}</button>`;
+      case 'coords': return `<button class="dt-b" data-dt="coords" aria-label="Coordinates">${DT_ICO.coords}</button>`;
+      case '|': return `<span class="dt-sep"></span>`;
+      case 'trash': return `<button class="dt-b" data-dt="trash" aria-label="Delete drawing">${DT_ICO.trash}</button>`;
+      case 'close': return `<button class="dt-b" data-dt="close" aria-label="Close">${DT_ICO.close}</button>`;
+    }
+    return '';
+  }).join('');
+}
+function dtSyncBar() {
+  if (typeof charts === 'undefined') return;
+  const D = DRW.sel && dtFind(DRW.sel);
+  document.querySelectorAll('.chart-module').forEach(root => {
+    const area = root.querySelector('.chart-area'); let el = area.querySelector('.dt-bar');
+    const bn = area.querySelector('.dt-banner.on'); if (bn) bn.style.top = dtTopY(root) + 'px';   /* position only: rebuilding the banner mid-tap would drop the Cancel click */
+    if (!el) { el = document.createElement('div'); el.className = 'dt-bar'; el.setAttribute('role', 'toolbar'); area.appendChild(el); el.addEventListener('click', e => { const b = e.target.closest('[data-dt]'); if (b) { e.stopPropagation(); dtBarAction(b.dataset.dt); } }); }
+    const chart = Object.values(charts).find(c => c.root === root);
+    const show = !!(D && !D.hidden && !DRW.placing && chart === dtActive() && !(DRW.drag && DRW.drag.moved) && chart.geom && !chart.geom.pct);
+    el.classList.toggle('on', show);
+    if (!show) return;
+    const sig = D.id + JSON.stringify(D.st) + (D.note ? 1 : 0);
+    if (el._sig !== sig) { el.innerHTML = dtBarHTML(D); el._sig = sig; }
+    /* dock at the top of the plot; if that would cover the selected drawing, dock above the volume pane instead */
+    const g = chart.geom, top = dtTopY(root), bh = el.offsetHeight || 44, bx = el.offsetWidth ? el.offsetLeft : 0, bw = el.offsetWidth || g.plotW;
+    const H = (chart._hit || []).find(x => x.id === D.id), bot = Math.round(g.priceBottom - bh - 6);
+    const ov = y => H ? dtGeomInRect(H, { x0: bx - 4, x1: bx + bw + 4, y0: y - 4, y1: y + bh + 4 }, g) : 0;
+    const oT = ov(top), oB = oT ? ov(bot) : 1, useBot = oT > 0 && oB < oT;   /* top unless it overlaps; bottom only if it overlaps less (re-run on every draw: selection, drag release) */
+    el.dataset.dock = useBot ? 'bottom' : 'top';
+    el.style.top = (useBot ? bot : top) + 'px';
+  });
+}
+/* does a drawing's geometry (clipped to the plot) reach into a rectangle? */
+function dtGeomInRect(H, r, g) {
+  const inR = (x, y) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1 && x >= 0 && x <= g.plotW && y >= 0 && y <= g.plotBottom;
+  const segIn = (a, b) => {   /* returns the clipped length inside the rectangle (0 = no overlap) */
+    let t0 = 0, t1 = 1; const dx = b[0] - a[0], dy = b[1] - a[1];
+    [[-dx, a[0] - Math.max(0, r.x0)], [dx, Math.min(g.plotW, r.x1) - a[0]], [-dy, a[1] - Math.max(0, r.y0)], [dy, Math.min(g.plotBottom, r.y1) - a[1]]].forEach(([pp, qq]) => {
+      if (Math.abs(pp) < 1e-9) { if (qq < 0) t0 = 2; return; }
+      const t = qq / pp; if (pp < 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t);
+    });
+    return t0 <= t1 ? Math.max(1e-3, (t1 - t0) * Math.hypot(dx, dy)) : 0;   /* Liang-Barsky clip against the rectangle */
+  };
+  let amt = 0;
+  H.segs.forEach(sg => { amt += segIn(sg[0], sg[1]); });
+  H.polys.forEach(P => { for (let k = 0; k < P.length; k++) amt += segIn(P[k], P[(k + 1) % P.length]); if (dtInPoly((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, P) && inR((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2)) amt += (r.x1 - r.x0); });
+  return amt;   /* overlap amount in px of geometry inside the rectangle */
+}
+function dtApply() { markDirty(); dtActive().draw(); }
+function dtBarAction(a) {
+  const D = dtFind(DRW.sel); if (!D) return;
+  const m = dtMeta(D.name);
+  if (a === 'close') { dtSelect(null); return; }
+  if (a === 'trash') { dtDelete(D.id, true); return; }
+  if (a === 'color') { openColorSheet({ color: D.st.c || '', onPick: c => { D.st.c = c; dtApply(); } }); return; }
+  dtOpenSheet(a, D, m);
+}
+function dtDelete(id, undo) {
+  const k = state.drawings.findIndex(x => x.id === id); if (k < 0) return;
+  const [D] = state.drawings.splice(k, 1);
+  if (DRW.sel === id) DRW.sel = null;
+  if (DRW.sheet && DRW.sheet.id === id) closeOverlays();
+  markDirty(); renderBadges(); rerenderLayers(); dtActive().draw();
+  if (undo) toast('Drawing deleted', { label: 'Undo', fn: () => { state.drawings.splice(Math.min(k, state.drawings.length), 0, D); markDirty(); renderBadges(); rerenderLayers(); dtActive().draw(); } });
+}
+/* ---- toolbar sheets: reuse the settings-drawer controls ---- */
+function dtSheetBody(a, D, m) {
+  const st = D.st, row = (l, inner, extra) => `<div class="row is-row" ${extra || ''}><span class="is-lbl">${l}</span>${inner}</div>`;
+  const slider = (key, v, mn, mx, stp, lbl) => `<div class="row is-row is-opa"><span class="is-lbl">${lbl}</span><span class="is-val is-pct" data-dtpct="${key}">${v}%</span></div><div class="is-slider"><input type="range" min="${mn}" max="${mx}" step="${stp}" value="${v}" data-dtr="${key}" style="--p:${(v - mn) / (mx - mn) * 100}%" aria-label="${lbl}"></div>`;
+  if (a === 'width') {
+    const opts = [...new Set([1, 2, 3, m.w || 1.5])].sort((x, y) => x - y);
+    return `<div class="dt-sb"><div class="seg dt-seg">${opts.map(w => `<button class="seg-opt ${+st.w === w ? 'active' : ''}" data-dtset="w" data-v="${w}"><span class="dt-seg-in">${dtLineIco('solid', Math.min(w, 6))}<span>${w}px</span></span></button>`).join('')}</div></div>`;
+  }
+  if (a === 'style') return `<div class="dt-sb"><div class="seg dt-seg">${[['solid', 'Line'], ['dashed', 'Dashed'], ['dotted', 'Dotted']].map(([s, l]) => `<button class="seg-opt ${st.s === s ? 'active' : ''}" data-dtset="s" data-v="${s}"><span class="dt-seg-in">${dtLineIco(s)}<span>${l}</span></span></button>`).join('')}</div></div>`;
+  if (a === 'opacity') return `<div class="dt-sb">${slider('o', st.o, 10, 100, 5, 'Opacity')}</div>`;
+  if (a === 'fill') return `<div class="dt-sb">${row('Fill colour', `<span class="is-sw" style="background:${st.fc}"></span><span class="is-chev">${ICO.chevSm}</span>`, 'data-dtfc="1"')}${slider('fo', st.fo, 0, 100, 5, 'Opacity')}</div>`;
+  if (a === 'text') return `<div class="dt-sb"><div class="dt-field"><input type="text" data-dtt="text" value="${escHTML(D.text || '')}" placeholder="Text" enterkeyhint="done" autocomplete="off"></div></div>`;
+  if (a === 'note') return `<div class="dt-sb"><div class="dt-field"><textarea data-dtt="note" rows="4" placeholder="Add a note">${escHTML(D.note || '')}</textarea></div></div>`;
+  if (a === 'coords') {
+    const priceOnly = m.cf === 'p';
+    const rows = D.pts.map((q, k) => `<div class="dt-cgrp"><div class="iv-title">#${k + 1}</div>` +
+      row('Price', `<span class="is-step"><button data-dtc="pdec" data-k="${k}" aria-label="Decrease">&minus;</button><input class="is-num dt-pin" data-k="${k}" type="text" inputmode="decimal" value="${q.p.toFixed(2)}"><button data-dtc="pinc" data-k="${k}" aria-label="Increase">+</button></span>`) +
+      (priceOnly ? '' : row('Bar', `<span class="is-step"><button data-dtc="bdec" data-k="${k}" aria-label="Earlier bar">&minus;</button><span class="is-num dt-bval">${dtDate(q.b)}</span><button data-dtc="binc" data-k="${k}" aria-label="Later bar">+</button></span>`)) + `</div>`).join('');
+    const chk = m.chk === null ? '' : `<div class="is-grp">${row('Show price labels on axis', `<button class="sw ${st.lbl ? 'on' : ''}" data-dtc="lbl" aria-label="Show price labels on axis"></button>`)}</div>`;
+    return `<div class="dt-sb dt-coords">${rows}${chk}</div>`;
+  }
+  return '';
+}
+const DT_SHEET_TITLE = { width: 'Line width', style: 'Line style', opacity: 'Opacity', fill: 'Fill', text: 'Text', note: 'Note', coords: 'Coordinates' };
+function dtOpenSheet(a, D, m) {
+  openSheet(DT_SHEET_TITLE[a], dtSheetBody(a, D, m), null, a === 'coords' ? 'dtcoords' : null);
+  sheetEl.classList.add('dt-sheet', 'dt-' + a);
+  DRW.sheet = { a, id: D.id };
+  const f = sheetBody.querySelector('[data-dtt]'); if (f) setTimeout(() => { try { f.focus(); } catch (_) {} }, 60);
+}
+function dtRefreshSheet() {
+  if (!DRW.sheet || !sheetEl.classList.contains('dt-sheet') || !sheetEl.classList.contains('open')) return;
+  const D = dtFind(DRW.sheet.id); if (!D) return;
+  if (DRW.sheet.a === 'coords') { const top = sheetBody.scrollTop; sheetBody.innerHTML = dtSheetBody('coords', D, dtMeta(D.name)); sheetBody.scrollTop = top; }
+}
+function dtCloseSheetIfOther() { if (DRW.sheet && DRW.sheet.id !== DRW.sel && sheetEl.classList.contains('dt-sheet')) { closeOverlays(); DRW.sheet = null; } }
+sheetEl.addEventListener('click', e => {
+  if (!sheetEl.classList.contains('dt-sheet') || !DRW.sheet) return;
+  const D = dtFind(DRW.sheet.id); if (!D) return;
+  const set = e.target.closest('[data-dtset]');
+  if (set) { const k = set.dataset.dtset; D.st[k] = k === 'w' ? +set.dataset.v : set.dataset.v; sheetBody.querySelectorAll('[data-dtset]').forEach(b => b.classList.toggle('active', b === set)); dtApply(); return; }
+  if (e.target.closest('[data-dtfc]')) { openColorSheet({ color: D.st.fc, onPick: c => { D.st.fc = c; sheetBody.innerHTML = dtSheetBody('fill', D, dtMeta(D.name)); dtApply(); } }); return; }
+  const c = e.target.closest('[data-dtc]');
+  if (c) {
+    const k = +c.dataset.k, a = c.dataset.dtc;
+    if (a === 'lbl') D.st.lbl = !D.st.lbl;
+    else if (a === 'pdec' || a === 'pinc') D.pts[k].p = Math.max(0.01, +(D.pts[k].p + (a === 'pinc' ? 1 : -1)).toFixed(2));
+    else if (a === 'bdec' || a === 'binc') D.pts[k].b = clamp(Math.round(D.pts[k].b) + (a === 'binc' ? 1 : -1), 0, BARS.length - 1 + DT_FUTURE);
+    dtRefreshSheet(); dtApply();
+  }
+});
+sheetEl.addEventListener('input', e => {
+  if (!sheetEl.classList.contains('dt-sheet') || !DRW.sheet) return;
+  const D = dtFind(DRW.sheet.id); if (!D) return;
+  const t = e.target;
+  if (t.dataset.dtr) { const k = t.dataset.dtr, v = +t.value; D.st[k] = v; t.style.setProperty('--p', (v - +t.min) / (+t.max - +t.min) * 100 + '%'); const pc = sheetBody.querySelector(`[data-dtpct="${k}"]`); if (pc) pc.textContent = v + '%'; dtApply(); return; }
+  if (t.dataset.dtt) { D[t.dataset.dtt] = t.value; dtApply(); return; }
+  if (t.classList.contains('dt-pin')) { t.value = t.value.replace(/[^0-9.]/g, ''); const v = parseFloat(t.value); if (isFinite(v) && v > 0) { D.pts[+t.dataset.k].p = v; dtApply(); } }
+});
+sheetEl.addEventListener('keydown', e => { if (sheetEl.classList.contains('dt-sheet') && e.key === 'Enter' && e.target.matches('input[data-dtt]')) closeOverlays(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || e.target.matches('input, textarea')) return;
+  if (DRW.placing) dtCancelPlacing(); else if (DRW.sel && !sheetEl.classList.contains('open')) dtSelect(null);
 });
 
 /* ============================================================
