@@ -1250,7 +1250,7 @@ Chart.prototype.draw = function () {
   const plotBottom = H - XA;
   const cmp = state.compare, cmpPct = cmp.length > 0 && state.cmpMode === '%';
   const cmpData = cmp.map(c => ({ ci: c.ci, sym: c.sym, data: cmpSeries(c.sym) }));
-  const volOn = hasStudy('Vol');
+  const volOn = hasStudy('Vol');   /* one shared pane while any Vol instance is visible */
   const volH = volOn ? Math.round((plotBottom - HEAD) * 0.17) : 0;   /* the volume pane stays in both compare views; off when the Vol study is removed */
   const priceBottom = plotBottom - volH - (volOn ? 10 : 4);
   const N = BARS.length;
@@ -2366,7 +2366,6 @@ function renderLegend() {
   renderBadges();
 }
 function addStudy(code) {
-  if (code === 'Vol' && countStudy('Vol')) return;   /* one volume pane only */
   if (state.studies.length >= IND_MAX) { toast('You can add up to ' + IND_MAX + ' indicators'); return; }
   const used = new Set(state.studies.map(s => s.color)); const color = code === 'Vol' ? 'var(--gray-1)' : (IND_COLORS.find(c => !used.has(c)) || IND_COLORS[state.studies.length % IND_COLORS.length]);
   state.studies.push({ id: uid('s'), code, color, hidden: false }); recentInd(code);
@@ -2392,7 +2391,7 @@ function indRowsHTML() {
   else if (indCat === 'Recent') list = indRecent.map(c => IND_BY_CODE[c]).filter(Boolean);
   else list = INDICATORS.filter(d => indCat === 'All indicators' || d.cat === indCat);
   if (!list.length) return `<div class="empty">${q ? `No indicators match "${indQuery}"` : indCat === 'Favorites' ? 'No favorites yet' : 'Nothing here yet'}</div>`;
-  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-cnt">${n}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}">&minus;</button>` : ''}${d.code === 'Vol' && n ? '' : `<button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}">+</button>`}<button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
+  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-cnt">${n}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}">&minus;</button>` : ''}<button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}">+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
 }
 function renderIndicators() {
   const q = indQuery;
