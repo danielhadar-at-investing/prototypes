@@ -3886,7 +3886,7 @@ function dtPosition(B, P, D, g) {
 function dtRangeBox(B, P, D, g, h, measure) {
   const [a, b] = P, [pa, pb] = D.pts, dp = pb.p - pa.p, up = dp >= 0, n = Math.round(pb.b - pa.b);
   /* Measure and Date & Price Range: green up, red down (web); a color the user picked for the range still wins */
-  const dir = up ? DT_UP : DT_DN, dflt = dtDefaults(D.name), userC = !measure && D.st && D.st.c && D.st.c !== dflt.c, userF = !measure && D.st && D.st.fc && D.st.fc !== dflt.fc;
+  const dir = up ? DT_UP : DT_DN, dflt = dtDefaults(D.name), userC = !measure && D.st && D.st.c && D.st.c !== dflt.c, userF = false;   /* fill always follows the direction (no Fill control on this tool) */
   const fc = measure ? dir : (userF ? h.fc : dir), fo = measure ? .16 : (userF ? h.fo : .16), lc = measure ? dir : (userC ? h.col : dir);
   const x0 = Math.min(a[0], b[0]), x1 = Math.max(a[0], b[0]), y0 = Math.min(a[1], b[1]), y1 = Math.max(a[1], b[1]), mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
   B.fill([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], fc, fo);
@@ -4139,7 +4139,7 @@ function dtBarItems(D) {
   const m = dtMeta(D.name), items = ['color'];
   if (m.set !== 'text') items.push('width', 'style');
   items.push('opacity');
-  if (m.set === 'fill') items.push('fill');
+  if (m.set === 'fill' && D.name !== 'Date & Price Range') items.push('fill');   /* Daniel: DPR fill always follows the direction color */
   if (m.text) items.push('text');
   items.push('note');
   if (m.cf) items.push('coords');
