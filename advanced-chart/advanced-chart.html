@@ -420,14 +420,15 @@ svg { display: block; }
 .ind-row { display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 var(--margin); position: relative; }
 .ind-row + .ind-row::before { content: ""; position: absolute; top: 0; left: var(--margin); right: 0; height: .5px; background: var(--divider); }
 .ind-code { width: 74px; flex-shrink: 0; font-size: 13px; font-weight: 700; letter-spacing: -.2px; }
-.ind-name { flex: 1; min-width: 0; font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ind-name { flex: 1; min-width: 0; font-size: 14px; line-height: 17px; color: var(--text-secondary); white-space: normal; overflow-wrap: anywhere; padding: 4px 0; }   /* no badge: the full name, wrapping to a second line when it is longer than the column */
+.ind-row.has-cnt .ind-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }   /* badge showing: one line, ends before the badge */
 .ind-cnt { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--text-secondary); color: #FFF; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; flex-shrink: 0; }
 .ind-btn { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 400; flex-shrink: 0; position: relative; }
 .ind-btn::after { content: ""; position: absolute; inset: -6px; }   /* 44pt hit */
 .ind-btn.rm { color: var(--green-up); }
 .ind-btn.add { color: var(--text-active); }
 .ind-btn.fav { color: var(--text-secondary); }
-.ind-slot { width: 26px; display: flex; justify-content: center; flex-shrink: 0; }   /* fixed columns: [count] [-] [+] [star] line up on every row */
+.ind-slot { width: 26px; display: flex; justify-content: center; flex-shrink: 0; }   /* rendered only with a count: without it the name runs into the slot; [-] [+] [star] stay right-aligned and line up on every row */
 .ind-btn:disabled { color: var(--gray-3); pointer-events: none; }
 .ind-btn.fav svg { width: 18px; height: 18px; }
 .ind-btn.fav.on { color: var(--orange); }
@@ -2935,7 +2936,7 @@ function toggleStudyHidden(id) { const s = state.studies.find(x => x.id === id);
 function toggleDrawingHidden(id) { const x = state.drawings.find(y => y.id === id); if (!x) return; x.hidden = !x.hidden; if (x.hidden && DRW.sel === id) DRW.sel = null; markDirty(); drawAll(); }   /* hidden = not rendered, not hit-testable */
 const indRecent = ['Vol', 'SMA', 'EMA'];
 function recentInd(code) { const k = indRecent.indexOf(code); if (k >= 0) indRecent.splice(k, 1); indRecent.unshift(code); if (indRecent.length > 6) indRecent.length = 6; }
-function toggleFav(code) { const k = layouts.favs.indexOf(code); if (k >= 0) layouts.favs.splice(k, 1); else layouts.favs.push(code); saveLayoutsStore(); }
+function toggleFav(code) { const k = layouts.favs.indexOf(code); if (k >= 0) layouts.favs.splice(k, 1); else layouts.favs.push(code); saveLayoutsStore(); toast(code + (k >= 0 ? ' removed from Favorites' : ' added to Favorites')); }
 const IND_CAT_ICONS = { Favorites: () => ICO.star, Recent: () => ICO.history, 'All indicators': () => ICO.lines3, Trend: () => ICO.trendUp, Volatility: () => ICO.wavyV, Momentum: () => ICO.bolt, Oscillator: () => ICO.sine };
 let indCat = 'All indicators', indQuery = '';
 function indRowsHTML() {
@@ -2946,7 +2947,7 @@ function indRowsHTML() {
   else if (indCat === 'Recent') list = indRecent.map(c => IND_BY_CODE[c]).filter(Boolean);
   else list = INDICATORS.filter(d => indCat === 'All indicators' || d.cat === indCat);
   if (!list.length) return `<div class="empty">${q ? `No indicators match "${indQuery}"` : indCat === 'Favorites' ? 'No favorites yet' : 'Nothing here yet'}</div>`;
-  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span><span class="ind-slot">${n ? `<span class="ind-cnt">${n}</span>` : ''}</span><button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}"${n ? '' : ' disabled'}>&minus;</button><button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}"${canAddStudy(d.code) ? '' : ' disabled'}>+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
+  return list.map(d => { const n = countStudy(d.code), fav = layouts.favs.includes(d.code); return `<div class="ind-row ${n ? 'has-cnt' : ''}" data-ind="${d.code}"><span class="ind-code">${d.code}</span><span class="ind-name">${d.name}</span>${n ? `<span class="ind-slot"><span class="ind-cnt">${n}</span></span>` : ''}<button class="ind-btn rm" data-indrm="${d.code}" aria-label="Remove one ${d.code}"${n ? '' : ' disabled'}>&minus;</button><button class="ind-btn add" data-indadd="${d.code}" aria-label="Add ${d.code}"${canAddStudy(d.code) ? '' : ' disabled'}>+</button><button class="ind-btn fav ${fav ? 'on' : ''}" data-indfav="${d.code}" aria-label="Favorite ${d.code}">${fav ? ICO.starFill : ICO.star}</button></div>`; }).join('');
 }
 function renderIndicators() {
   const q = indQuery;
