@@ -2728,8 +2728,9 @@ let anchorPick = null;   /* AVWAP "Pick on chart": instance id waiting for a plo
 function openIndSettings(id) {
   const st = state.studies.find(s => s.id === id); if (!st || !IS_BY[st.code]) return;
   const e = IS_BY[st.code];
-  IS = { id, code: st.code, work: isClone(instCfg(st)), tab: 'style', inner: null };
-  const tabs = e.tabs.length > 1 ? `<div class="seg is-tabs">${e.tabs.map(t => `<button class="seg-opt ${t.toLowerCase() === 'style' ? 'active' : ''}" data-is="tab" data-v="${t.toLowerCase()}">${t}</button>`).join('')}</div>` : '';
+  const two = e.tabs.length > 1, order = two ? ['Inputs', 'Style'] : e.tabs;   /* Daniel: [Inputs | Style], Inputs opens by default */
+  IS = { id, code: st.code, work: isClone(instCfg(st)), tab: two ? 'inputs' : 'style', inner: null };
+  const tabs = two ? `<div class="seg is-tabs">${order.map(t => `<button class="seg-opt ${t.toLowerCase() === IS.tab ? 'active' : ''}" data-is="tab" data-v="${t.toLowerCase()}">${t}</button>`).join('')}</div>` : '';
   openSheet(`<button class="is-back" data-is="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Back</button><div class="is-name" id="isName"></div>${tabs}`,
     `<div class="is-wrap"><div class="is-screens"><div class="is-screen is-main" id="isMain"></div><div class="is-screen is-sub" id="isSub"></div></div><div class="is-foot"><button class="lf-btn primary is-ok" data-is="ok">Ok</button></div></div>`,
     null, 'indset', `<button class="tb-btn" data-is="menu" aria-label="More">${ICO.dotsH}</button>`);
