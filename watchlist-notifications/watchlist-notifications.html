@@ -292,67 +292,42 @@ svg { display: block; }
 .first-gap { height: 12px; }
 
 /* ---------- 10. WATCHLIST SCREEN ---------- */
-.wl-chips {
-  display: flex; gap: 8px;
-  padding: 6px var(--margin) 10px;
-  overflow-x: auto; scrollbar-width: none;
-  background: var(--bg-primary-3);
+.wl-scroll { padding-bottom: 12px; }
+.wl-group { background: var(--bg-primary-3); margin-bottom: 10px; }
+.wl-group-head {
+  position: sticky; top: 0; z-index: 4;
+  background: var(--bg-secondary);
+  border-bottom: .5px solid var(--divider);
+  padding: 10px var(--margin) 9px;
 }
-.wl-chips::-webkit-scrollbar { display: none; }
-.chip {
-  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
-  height: 32px; padding: 0 14px;
-  border-radius: 16px;
-  background: var(--bg-tertiary);
-  border: .5px solid var(--divider);
-  font-size: 13px; font-weight: 510;
-  color: var(--text-primary);
-  transition: background .15s, color .15s;
-  white-space: nowrap;
-}
-.chip.active { background: var(--text-primary); color: var(--bg-primary); border-color: transparent; }
-.chip:active { opacity: .8; }
-
-.wl-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px var(--margin) 8px;
-  background: var(--bg-primary-3);
-}
-.wl-head-left { min-width: 0; }
-.wl-name { font-size: 20px; font-weight: 700; letter-spacing: -.3px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wl-count { font-size: 13px; font-weight: 510; color: var(--text-secondary); margin-top: 2px; }
-.wl-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.wl-group-name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.wl-group-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; line-height: 1.2; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.wl-group-count { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 3px; }
+.wl-group-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
 .wl-action {
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--icon-primary);
+  color: var(--text-secondary);
   transition: background .15s;
 }
 .wl-action:active { background: rgba(128,128,128,.18); }
-.wl-action svg { width: 22px; height: 22px; }
-
-.wl-list { background: var(--bg-primary-3); padding-bottom: 20px; }
-.row {
-  display: flex; align-items: center; justify-content: space-between;
-  min-height: 56px;
-  padding: 0 var(--margin);
-  position: relative;
+.wl-action svg { width: 20px; height: 20px; }
+.wl-rows { }
+.wl-row {
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  padding: 12px var(--margin);
+  border-bottom: .5px solid var(--divider);
   transition: background .15s;
 }
-.row:active { background: rgba(128,128,128,.1); }
-.row + .row::before {
-  content: ""; position: absolute; top: 0; left: var(--margin); right: 0;
-  height: .5px; background: var(--divider);
-}
-.row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.row-ticker { font-size: 15px; font-weight: 510; color: var(--text-primary); }
-.row-name { font-size: 13px; font-weight: 400; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-.row-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 110px; }
-.price { font-size: 14px; font-weight: 510; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.change { font-size: 14px; font-weight: 510; font-variant-numeric: tabular-nums; }
-.up   { color: var(--price-up); }
-.down { color: var(--price-down); }
-.sparkline { width: 60px; height: 24px; margin: 0 18px; flex-shrink: 0; }
+.wl-row:last-child { border-bottom: none; }
+.wl-row:active { background: rgba(128,128,128,.08); }
+.wl-row-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wl-row-name { font-size: 16px; font-weight: 600; color: var(--text-primary); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.wl-row-meta { font-size: 12px; color: var(--text-secondary); line-height: 1.2; }
+.wl-row-price { font-size: 16px; font-weight: 600; color: var(--text-primary); line-height: 1.2; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.wl-row-change { font-size: 12px; font-weight: 510; line-height: 1.2; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.wl-row-change.up { color: var(--price-up); }
+.wl-row-change.down { color: var(--price-down); }
 
 .wl-empty {
   display: flex; flex-direction: column; align-items: center; text-align: center;
@@ -444,6 +419,7 @@ svg { display: block; }
 .sheet-grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--gray-3); margin: 0 auto 8px; flex-shrink: 0; }
 .sheet-head { position: relative; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0 52px; flex-shrink: 0; }
 .sheet-title { font-size: 17px; font-weight: 510; letter-spacing: -.4px; color: var(--text-primary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sheet-sub { flex-shrink: 0; font-size: 13px; color: var(--text-secondary); text-align: center; margin: -8px 52px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet-x {
   position: absolute; left: 8px; top: 0;
   width: 44px; height: 44px; border-radius: 50%;
@@ -776,8 +752,9 @@ svg { display: block; }
       <button class="sheet-x" onclick="requestClose()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
-      <div class="sheet-title" id="drTitle">My Watchlist</div>
+      <div class="sheet-title">Push Notifications</div>
     </div>
+    <div class="sheet-sub" id="drSub">My Watchlist</div>
     <div class="sheet-body" id="drBody"></div>
     <div class="sheet-foot">
       <button class="btn-primary" onclick="saveDrawer()">Save</button>
@@ -980,18 +957,13 @@ function renderSettings() {
 /* ============================================================
    WATCHLIST TAB
    ============================================================ */
-function seeded(seed) { let s = seed; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; }
-function sparkPoints(seed, up) {
-  const rnd = seeded(seed); const vals = []; let v = 0;
-  for (let i = 0; i <= 6; i++) { v += rnd() - 0.5 + (up ? 0.24 : -0.24); vals.push(v); }
-  const min = Math.min(...vals), max = Math.max(...vals), span = (max - min) || 1;
-  return vals.map((val, i) => (i * 10) + ',' + (21 - ((val - min) / span) * 18).toFixed(1)).join(' ');
-}
 function fmt(n) {
   const d = n < 10 ? 2 : 2;
   return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
-function selectList(id) { S.selected = id; renderWatchlist(); }
+const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="m13.5 8.5 3 3"/></svg>';
+const ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>';
 
 function renderWatchlist() {
   const body = document.getElementById('wlBody');
@@ -1008,44 +980,30 @@ function renderWatchlist() {
     return;
   }
 
-  const cur = listById(S.selected) || ls[0];
-  let html = '';
-  if (ls.length > 1) {
-    html += '<div class="wl-chips">' + ls.map(l =>
-      '<button class="chip' + (l.id === cur.id ? ' active' : '') + '" onclick="selectList(\'' + l.id + '\')">' + l.name + '</button>'
-    ).join('') + '</div>';
-  }
-  html +=
-    '<div class="wl-head">' +
-      '<div class="wl-head-left">' +
-        '<div class="wl-name">' + cur.name + '</div>' +
-        '<div class="wl-count">' + cur.items.length + ' Symbols' + (S.guest ? ' &middot; Guest' : '') + '</div>' +
+  /* Every watchlist is a section: title band (name, count, bell / edit / info) + its rows, stacked in one scroll */
+  body.innerHTML = '<div class="wl-scroll">' + ls.map(l =>
+    '<div class="wl-group" data-list="' + l.id + '">' +
+      '<div class="wl-group-head">' +
+        '<div class="wl-group-name-row">' +
+          '<span class="wl-group-name">' + l.name + '</span>' +
+          '<div class="wl-group-actions">' +
+            '<button class="wl-action" aria-label="Watchlist notifications" onclick="openDrawer(\'' + l.id + '\')">' + ICON_BELL + '</button>' +
+            '<button class="wl-action" aria-label="Edit watchlist" onclick="toast(\'Edit ' + l.name + '\')">' + ICON_EDIT + '</button>' +
+            '<button class="wl-action" aria-label="Watchlist info" onclick="toast(\'Info: ' + l.name + '\')">' + ICON_INFO + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="wl-group-count">' + l.items.length + ' Symbols' + (S.guest ? ' &middot; Guest' : '') + '</div>' +
       '</div>' +
-      '<div class="wl-actions">' +
-        '<button class="wl-action" aria-label="Watchlist notifications" onclick="openDrawer(\'' + cur.id + '\')">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>' +
-        '</button>' +
-        '<button class="wl-action" aria-label="Edit watchlist" onclick="toast(\'Edit watchlist\')">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="m13.5 8.5 3 3"/></svg>' +
-        '</button>' +
-        '<button class="wl-action" aria-label="Watchlist info" onclick="toast(\'Watchlist info\')">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>' +
-        '</button>' +
-      '</div>' +
-    '</div>';
-
-  html += '<div class="wl-list">' + cur.items.map((q, i) => {
-    const up = q.chg >= 0, cls = up ? 'up' : 'down';
-    const abs = q.price * q.chg / 100;
-    return '<div class="row" onclick="toast(\'' + q.sym + '\')">' +
-      '<div class="row-main"><div class="row-ticker">' + q.sym + '</div><div class="row-name">' + q.name + '</div></div>' +
-      '<svg class="sparkline ' + cls + '" viewBox="0 0 60 24" preserveAspectRatio="none"><polyline points="' + sparkPoints(i * 977 + cur.id.charCodeAt(2) * 31, up) + '" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>' +
-      '<div class="row-side"><div class="price">' + fmt(q.price) + '</div>' +
-      '<div class="change ' + cls + '">' + (up ? '+' : '') + abs.toFixed(2) + ' (' + (up ? '+' : '') + q.chg.toFixed(2) + '%)</div></div>' +
-    '</div>';
-  }).join('') + '</div>';
-
-  body.innerHTML = html;
+      '<div class="wl-rows">' + l.items.map(q => {
+        const up = q.chg >= 0, cls = up ? 'up' : 'down';
+        const abs = q.price * q.chg / 100;
+        return '<div class="wl-row" onclick="toast(\'' + q.sym + '\')">' +
+          '<div class="wl-row-line"><div class="wl-row-name">' + q.name + '</div><div class="wl-row-price">' + fmt(q.price) + '</div></div>' +
+          '<div class="wl-row-line"><div class="wl-row-meta">' + q.sym + '</div><div class="wl-row-change ' + cls + '">' + (up ? '+' : '') + abs.toFixed(2) + ' (' + (up ? '+' : '') + q.chg.toFixed(2) + '%)</div></div>' +
+        '</div>';
+      }).join('') + '</div>' +
+    '</div>'
+  ).join('') + '</div>';
 }
 
 /* ============================================================
@@ -1079,7 +1037,7 @@ function alertDiscard() { const fn = pendingDiscard; document.getElementById('al
 function openDrawer(id) {
   const l = listById(id);
   draft = { id, flags: Object.assign({}, S.flags[id]) };
-  document.getElementById('drTitle').textContent = l.name;
+  document.getElementById('drSub').textContent = l.name;
   document.getElementById('drBody').innerHTML = TYPES.map(t =>
     '<div class="dr-row">' +
       '<div><div class="dr-title">' + t.title + '</div><div class="dr-sub">' + t.sub + '</div></div>' +
@@ -1131,8 +1089,8 @@ function openMatrix() {
     '</div>'
   ).join('');
   foot.innerHTML =
-    '<button class="btn-primary" onclick="saveMatrix()">Save</button>' +
-    (S.guest ? '<button class="btn-glass" onclick="openSignup()">Sign up to create more watchlists</button>' : '');
+    (S.guest ? '<button class="btn-glass" onclick="openSignup()">Sign up to create more watchlists</button>' : '') +
+    '<button class="btn-primary" onclick="saveMatrix()">Save</button>';
   showSheet('shMatrix');
 }
 function mwToggle(el, id, k) {
