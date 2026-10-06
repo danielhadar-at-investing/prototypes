@@ -471,8 +471,8 @@ svg { display: block; }
 .wn-name { flex: 1; min-width: 0; font-size: 17px; font-weight: 400; letter-spacing: -.4px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wn-sum { flex-shrink: 0; font-size: 15px; font-weight: 400; color: var(--text-secondary); white-space: nowrap; }
 .wn-chev { width: 18px; height: 18px; flex-shrink: 0; color: var(--gray-3); margin-left: -4px; }
-.wn-cta { padding: 20px var(--margin) 24px; }
-.wd-foot { padding: 12px var(--margin) 16px; flex-shrink: 0; }
+.wn-guest { flex-shrink: 0; padding: 12px var(--margin) 12px; background: var(--bg-primary-3); }
+.wn-guest-text { font-size: 15px; color: var(--text-secondary); text-align: center; margin-bottom: 12px; }
 
 /* Sign-up stub */
 .su-logo { font-size: 22px; font-weight: 700; letter-spacing: -.5px; text-align: center; color: var(--text-primary); margin: 4px 0 6px; }
@@ -487,38 +487,6 @@ svg { display: block; }
 .su-btn.apple { background: var(--text-primary); color: var(--bg-primary); }
 .su-btn:active { opacity: .8; }
 .su-btn svg { width: 20px; height: 20px; }
-
-/* ---------- 13. iOS ALERT ---------- */
-.alert-wrap {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.3);
-  opacity: 0; pointer-events: none;
-  transition: opacity .2s;
-  z-index: 60;
-}
-.alert-wrap.open { opacity: 1; pointer-events: auto; }
-.alert {
-  width: 270px; border-radius: 14px; overflow: hidden;
-  background: rgba(242,242,247,.95);
-  backdrop-filter: blur(20px) saturate(1.8);
-  transform: scale(1.1);
-  transition: transform .2s var(--ease-ios);
-  text-align: center;
-}
-.alert-wrap.open .alert { transform: scale(1); }
-[data-theme="dark"] .alert { background: rgba(44,44,46,.95); }
-.alert-title { font-size: 17px; font-weight: 600; color: var(--text-primary); padding: 19px 16px 4px; }
-.alert-body { font-size: 13px; color: var(--text-primary); line-height: 17px; padding: 0 16px 18px; }
-.alert-btns { display: flex; border-top: .5px solid #C6C6C8; }
-[data-theme="dark"] .alert-btns { border-top-color: #48484A; }
-.alert-btns button { flex: 1; height: 44px; font-size: 17px; color: #007AFF; }
-[data-theme="dark"] .alert-btns button { color: #0A84FF; }
-.alert-btns button + button { border-left: .5px solid #C6C6C8; }
-[data-theme="dark"] .alert-btns button + button { border-left-color: #48484A; }
-.alert-btns button.bold { font-weight: 600; }
-.alert-btns button.destructive { color: #FF3B30; }
-.alert-btns button:active { background: rgba(0,0,0,.08); }
 
 /* ---------- 14. TOAST ---------- */
 #toast {
@@ -660,7 +628,7 @@ svg { display: block; }
               </div>
               <div class="sw on" id="swMaster" onclick="toggleMaster()"></div>
             </div>
-            <button class="cell-cta" id="ctaCustomize" onclick="openList()">Customize Watchlist Notifications <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+            <button class="cell-cta" id="ctaCustomize" onclick="openList()">Customize Watchlists Notifications <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
           </div>
 
           <div class="sect-title">Editor's Picks</div>
@@ -716,10 +684,11 @@ svg { display: block; }
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
             </button>
           </div>
-          <div class="nav-title">Watchlist Notifications</div>
+          <div class="nav-title">Watchlists Notifications</div>
           <div class="nav-right"></div>
         </div>
         <div class="screen-body plain" id="wnBody"></div>
+        <div class="wn-guest" id="wnGuest" style="display:none"></div>
         <div class="home-only" style="background:var(--bg-primary-3)"><div class="home-indicator"></div></div>
       </div>
 
@@ -727,7 +696,7 @@ svg { display: block; }
       <div class="pushed-screen" id="pgDetail">
         <div class="nav-bar">
           <div class="nav-left">
-            <button class="icon-btn" onclick="requestPopDetail()" aria-label="Back">
+            <button class="icon-btn" onclick="popDetail()" aria-label="Back">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>
             </button>
           </div>
@@ -735,8 +704,7 @@ svg { display: block; }
           <div class="nav-right"></div>
         </div>
         <div class="screen-body plain" id="wdBody"></div>
-        <div class="wd-foot"><button class="btn-primary" onclick="saveDetail()">Save</button></div>
-        <div class="home-only" style="background:var(--bg-primary-3)"><div class="home-indicator"></div></div>
+                <div class="home-only" style="background:var(--bg-primary-3)"><div class="home-indicator"></div></div>
       </div>
     </div>
 
@@ -787,13 +755,13 @@ svg { display: block; }
   </div>
 
   <!-- ================= OVERLAYS ================= -->
-  <div class="backdrop" id="backdrop" onclick="requestClose()"></div>
+  <div class="backdrop" id="backdrop" onclick="closeOverlay()"></div>
 
   <!-- Watchlist Notifications drawer -->
   <div class="sheet" id="shDrawer">
     <div class="sheet-grabber"></div>
     <div class="sheet-head">
-      <button class="sheet-x" onclick="requestClose()" aria-label="Close">
+      <button class="sheet-x" onclick="closeOverlay()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
       <div class="sheet-title">Push Notifications</div>
@@ -801,7 +769,7 @@ svg { display: block; }
     <div class="sheet-sub" id="drSub">My Watchlist</div>
     <div class="sheet-body" id="drBody"></div>
     <div class="sheet-foot">
-      <button class="btn-primary" onclick="saveDrawer()">Save</button>
+      <button class="btn-primary" onclick="closeOverlay()">Close</button>
     </div>
   </div>
 
@@ -809,7 +777,7 @@ svg { display: block; }
   <div class="sheet" id="shSignup">
     <div class="sheet-grabber"></div>
     <div class="sheet-head">
-      <button class="sheet-x" onclick="requestClose()" aria-label="Close">
+      <button class="sheet-x" onclick="closeOverlay()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
     </div>
@@ -828,18 +796,6 @@ svg { display: block; }
       Continue with Email
     </button>
     <button class="btn-ghost" onclick="closeOverlay()">Not now</button>
-  </div>
-
-  <!-- Discard confirmation (iOS alert) -->
-  <div class="alert-wrap" id="alertWrap">
-    <div class="alert">
-      <div class="alert-title">Discard changes?</div>
-      <div class="alert-body">Your changes to watchlist notifications will not be saved.</div>
-      <div class="alert-btns">
-        <button class="bold" onclick="alertKeep()">Keep editing</button>
-        <button class="destructive" onclick="alertDiscard()">Discard</button>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -905,10 +861,9 @@ const S = {
   flags: {},          // { listId: { news, price, earnings } }
   selected: null      // watchlist shown on the Watchlist tab
 };
-let draft = null;     // drawer working copy
-let detailDraft = null; // settings-screen working copy
+let drawerId = null;  // watchlist open in the bell drawer
+let detailId = null;  // watchlist open on the settings screen
 let activeSheet = null;
-let pendingDiscard = null;
 
 function lists() { return MODES[S.mode]; }
 function listById(id) { return ALL_LISTS.find(l => l.id === id); }
@@ -1047,47 +1002,27 @@ function showSheet(id) {
   document.getElementById(id).classList.add('open');
 }
 function closeOverlay(silent) {
-  document.querySelectorAll('.sheet.open, .backdrop.open, .alert-wrap.open').forEach(el => el.classList.remove('open'));
-  activeSheet = null; draft = null; pendingDiscard = null;
+  document.querySelectorAll('.sheet.open, .backdrop.open').forEach(el => el.classList.remove('open'));
+  activeSheet = null; drawerId = null;
 }
-function isDirty() {
-  if (!draft) return false;
-  if (activeSheet === 'shDrawer') return JSON.stringify(draft.flags) !== JSON.stringify(S.flags[draft.id]);
-  return false;
-}
-/* X, grabber-area scrim tap: confirm if there are unsaved changes */
-function requestClose() {
-  if (document.getElementById('alertWrap').classList.contains('open')) return;
-  if (isDirty()) { pendingDiscard = closeOverlay; document.getElementById('alertWrap').classList.add('open'); return; }
-  closeOverlay();
-}
-function alertKeep() { document.getElementById('alertWrap').classList.remove('open'); pendingDiscard = null; }
-function alertDiscard() { const fn = pendingDiscard; document.getElementById('alertWrap').classList.remove('open'); if (fn) fn(); }
-
 /* ---- Watchlist Notifications drawer ---- */
 function openDrawer(id) {
   const l = listById(id);
-  draft = { id, flags: Object.assign({}, S.flags[id]) };
+  drawerId = id;
   document.getElementById('drSub').textContent = l.name;
   document.getElementById('drBody').innerHTML = TYPES.map(t =>
     '<div class="dr-row">' +
       '<div><div class="dr-title">' + t.title + '</div><div class="dr-sub">' + t.sub + '</div></div>' +
-      '<div class="sw' + (draft.flags[t.k] ? ' on' : '') + '" data-k="' + t.k + '" onclick="drToggle(this)"></div>' +
+      '<div class="sw' + (S.flags[id][t.k] ? ' on' : '') + '" data-k="' + t.k + '" onclick="drToggle(this)"></div>' +
     '</div>'
   ).join('');
   showSheet('shDrawer');
 }
 function drToggle(el) {
   const k = el.dataset.k;
-  draft.flags[k] = !draft.flags[k];
-  el.classList.toggle('on', draft.flags[k]);
+  S.flags[drawerId][k] = !S.flags[drawerId][k];   /* applies immediately */
+  el.classList.toggle('on', S.flags[drawerId][k]);
 }
-function saveDrawer() {
-  S.flags[draft.id] = Object.assign({}, draft.flags);
-  closeOverlay();
-  toast('Saved');
-}
-
 /* ---- Watchlist Notifications screen (pushed from the Customize CTA) ---- */
 function summary(f) {
   const on = TYPES.filter(t => f[t.k]).map(t => t.short);
@@ -1102,6 +1037,7 @@ function openList() {
 function renderList() {
   const body = document.getElementById('wnBody');
   const ls = lists();
+  const g0 = document.getElementById('wnGuest'); g0.style.display = 'none'; g0.innerHTML = '';
   if (!ls.length) {
     body.innerHTML =
       '<div class="wl-empty">' +
@@ -1118,8 +1054,12 @@ function renderList() {
         '<div class="wn-sum">' + summary(S.flags[l.id]) + '</div>' +
         '<svg class="wn-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>' +
       '</div>'
-    ).join('') + '</div>' +
-    (S.guest ? '<div class="wn-cta"><button class="btn-glass" onclick="openSignup()">Sign up to create more watchlists</button></div>' : '');
+    ).join('') + '</div>';
+  const g = document.getElementById('wnGuest');
+  g.style.display = S.guest ? '' : 'none';
+  g.innerHTML = S.guest
+    ? '<div class="wn-guest-text">Want to create more watchlists?</div><button class="btn-primary" onclick="openSignup()">Sign up for free</button>'
+    : '';
 }
 function popList() {
   document.getElementById('pgList').classList.remove('open');
@@ -1129,13 +1069,13 @@ function popList() {
 /* ---- Watchlist settings screen (pushed from a row) ---- */
 function openDetail(id) {
   const l = listById(id);
-  detailDraft = { id, flags: Object.assign({}, S.flags[id]) };
+  detailId = id;
   document.getElementById('wdTitle').textContent = l.name;
   document.getElementById('wdSub').textContent = l.items.length + ' symbols';
   document.getElementById('wdBody').innerHTML = TYPES.map(t =>
     '<div class="dr-row">' +
       '<div><div class="dr-title">' + t.title + '</div><div class="dr-sub">' + t.sub + '</div></div>' +
-      '<div class="sw' + (detailDraft.flags[t.k] ? ' on' : '') + '" data-k="' + t.k + '" onclick="wdToggle(this)"></div>' +
+      '<div class="sw' + (S.flags[id][t.k] ? ' on' : '') + '" data-k="' + t.k + '" onclick="wdToggle(this)"></div>' +
     '</div>'
   ).join('');
   document.getElementById('pgList').classList.add('behind');
@@ -1143,31 +1083,16 @@ function openDetail(id) {
 }
 function wdToggle(el) {
   const k = el.dataset.k;
-  detailDraft.flags[k] = !detailDraft.flags[k];
-  el.classList.toggle('on', detailDraft.flags[k]);
-}
-function detailDirty() {
-  return !!detailDraft && JSON.stringify(detailDraft.flags) !== JSON.stringify(S.flags[detailDraft.id]);
+  S.flags[detailId][k] = !S.flags[detailId][k];   /* applies immediately */
+  el.classList.toggle('on', S.flags[detailId][k]);
 }
 function popDetail() {
-  detailDraft = null;
+  if (detailId !== null && lists().length) renderList();   /* row summary reflects the change on the way back */
+  detailId = null;
   document.getElementById('pgDetail').classList.remove('open');
   document.getElementById('pgList').classList.remove('behind');
 }
-function requestPopDetail() {
-  if (document.getElementById('alertWrap').classList.contains('open')) return;
-  if (detailDirty()) { pendingDiscard = popDetail; document.getElementById('alertWrap').classList.add('open'); return; }
-  popDetail();
-}
-function saveDetail() {
-  S.flags[detailDraft.id] = Object.assign({}, detailDraft.flags);
-  popDetail();
-  renderList();
-  toast('Saved');
-}
 function popAll() {
-  pendingDiscard = null;
-  document.getElementById('alertWrap').classList.remove('open');
   popDetail();
   popList();
 }
