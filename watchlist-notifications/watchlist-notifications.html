@@ -419,6 +419,7 @@ svg { display: block; }
 .sheet-grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--gray-3); margin: 0 auto 8px; flex-shrink: 0; }
 .sheet-head { position: relative; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0 52px; flex-shrink: 0; }
 .sheet-title { font-size: 17px; font-weight: 510; letter-spacing: -.4px; color: var(--text-primary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sheet-sub { flex-shrink: 0; font-size: 13px; color: var(--text-secondary); text-align: center; margin: -8px 52px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet-x {
   position: absolute; left: 8px; top: 0;
   width: 44px; height: 44px; border-radius: 50%;
@@ -797,6 +798,7 @@ svg { display: block; }
       </button>
       <div class="sheet-title">Push Notifications</div>
     </div>
+    <div class="sheet-sub" id="drSub">My Watchlist</div>
     <div class="sheet-body" id="drBody"></div>
     <div class="sheet-foot">
       <button class="btn-primary" onclick="saveDrawer()">Save</button>
@@ -1064,7 +1066,9 @@ function alertDiscard() { const fn = pendingDiscard; document.getElementById('al
 
 /* ---- Watchlist Notifications drawer ---- */
 function openDrawer(id) {
+  const l = listById(id);
   draft = { id, flags: Object.assign({}, S.flags[id]) };
+  document.getElementById('drSub').textContent = l.name;
   document.getElementById('drBody').innerHTML = TYPES.map(t =>
     '<div class="dr-row">' +
       '<div><div class="dr-title">' + t.title + '</div><div class="dr-sub">' + t.sub + '</div></div>' +
