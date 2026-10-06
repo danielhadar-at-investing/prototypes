@@ -428,6 +428,35 @@ svg { display: block; }
 }
 .sheet-x:active { background: rgba(128,128,128,.18); }
 .sheet-x svg { width: 20px; height: 20px; }
+.sheet-warn {
+  position: absolute; right: 14px; top: 6px;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  color: var(--orange);
+}
+.sheet-warn.show { display: flex; }
+.sheet-warn:active { background: rgba(128,128,128,.18); }
+.sheet-warn svg { width: 24px; height: 24px; }
+
+/* Popover menu anchored under the warn icon */
+.warn-scrim { position: absolute; inset: 0; z-index: 55; display: none; }
+.warn-scrim.open { display: block; }
+.warn-menu {
+  position: absolute; right: 14px; top: 0;
+  width: 262px; border-radius: 13px;
+  background: rgba(249,249,249,.94);
+  backdrop-filter: blur(20px) saturate(1.8);
+  box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.06);
+  z-index: 56;
+  opacity: 0; transform: scale(.9); transform-origin: top right;
+  pointer-events: none;
+  transition: opacity .18s, transform .22s var(--ease-ios);
+}
+.warn-menu.open { opacity: 1; transform: scale(1); pointer-events: auto; }
+[data-theme="dark"] .warn-menu { background: rgba(44,44,46,.94); }
+.warn-text { font-size: 13px; color: var(--text-secondary); padding: 12px 16px 8px; line-height: 17px; }
+.warn-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 16px 12px; }
+.warn-label { font-size: 15px; font-weight: 510; color: var(--text-primary); }
 .sheet-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .sheet-body::-webkit-scrollbar { display: none; }
 .sheet-foot { padding: 12px var(--margin) 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -566,7 +595,7 @@ svg { display: block; }
               <div class="cell-title">Allow Notifications</div>
               <div class="cell-text">Turn on/off all Notifications</div>
             </div>
-            <div class="sw on" id="swAllow" onclick="toggleAllow(this)"></div>
+            <div class="sw on" id="swAllow" onclick="toggleAllow()"></div>
           </div>
         </div>
 
@@ -765,6 +794,9 @@ svg { display: block; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
       <div class="sheet-title">Push Notifications Settings</div>
+      <button class="sheet-warn" id="drWarn" onclick="openWarnMenu()" aria-label="Notifications are disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.5v5.5M12 16.4h.01" stroke-width="2.2"/></svg>
+      </button>
     </div>
     <div class="sheet-sub" id="drSub">My Watchlist</div>
     <div class="sheet-body" id="drBody"></div>
@@ -797,6 +829,10 @@ svg { display: block; }
     </button>
     <button class="btn-ghost" onclick="closeOverlay()">Not now</button>
   </div>
+
+  <!-- Disabled-state popover (anchored under the drawer's warn icon) -->
+  <div class="warn-scrim" id="warnScrim" onclick="closeWarnMenu()"></div>
+  <div class="warn-menu" id="warnMenu"></div>
 
 </div>
 
@@ -925,20 +961,62 @@ function setTab(el, name) {
 /* ============================================================
    SETTINGS SCREEN
    ============================================================ */
-function toggleAllow(el) {
-  S.allow = !S.allow;
-  el.classList.toggle('on', S.allow);
-  document.getElementById('settingsSections').classList.toggle('off', !S.allow);
-}
+function setAllow(v) { S.allow = v; renderSettings(); }
+function toggleAllow() { setAllow(!S.allow); }
 function toggleLocal(el) { el.classList.toggle('on'); }
+function setMaster(v) { S.master = v; renderSettings(); }
 function toggleMaster() {
-  S.master = !S.master;
-  renderSettings();
+  setMaster(!S.master);
   toast(S.master ? 'Watchlist notifications on' : 'Watchlist notifications off');
 }
 function renderSettings() {
+  document.getElementById('swAllow').classList.toggle('on', S.allow);
+  document.getElementById('settingsSections').classList.toggle('off', !S.allow);
   document.getElementById('swMaster').classList.toggle('on', S.master);
   document.getElementById('ctaCustomize').classList.toggle('disabled', !S.master);
+  renderWarn();
+}
+
+/* ---- Drawer disabled-state indicator + popover ---- */
+function pushesBlocked() { return !S.allow || !S.master; }
+function renderWarn() {
+  document.getElementById('drWarn').classList.toggle('show', pushesBlocked());
+  if (document.getElementById('warnMenu').classList.contains('open')) renderWarnMenu();
+}
+function renderWarnMenu() {
+  const m = document.getElementById('warnMenu');
+  if (!S.allow) {
+    m.dataset.line = 'allow';
+    m.innerHTML = '<div class="warn-text">Push notifications are disabled</div>' +
+      '<div class="warn-row"><div class="warn-label">Allow Notifications</div><div class="sw" id="warnSw" onclick="warnToggle(\'allow\')"></div></div>';
+  } else if (!S.master) {
+    m.dataset.line = 'master';
+    m.innerHTML = '<div class="warn-text">Watchlist notifications are disabled</div>' +
+      '<div class="warn-row"><div class="warn-label">Watchlist Notifications</div><div class="sw" id="warnSw" onclick="warnToggle(\'master\')"></div></div>';
+  } else {
+    closeWarnMenu();
+  }
+}
+function openWarnMenu() {
+  if (!pushesBlocked()) return;
+  const btn = document.getElementById('drWarn').getBoundingClientRect();
+  const ph = document.getElementById('phone').getBoundingClientRect();
+  const m = document.getElementById('warnMenu');
+  m.style.top = Math.max(0, btn.bottom - ph.top + 6) + 'px';
+  renderWarnMenu();
+  document.getElementById('warnScrim').classList.add('open');
+  m.classList.add('open');
+}
+function closeWarnMenu() {
+  document.getElementById('warnScrim').classList.remove('open');
+  const m = document.getElementById('warnMenu');
+  m.classList.remove('open'); delete m.dataset.line;
+}
+function warnToggle(which) {
+  const sw = document.getElementById('warnSw');
+  if (sw) sw.classList.add('on');                     /* let the switch animate on before the line swaps */
+  if (which === 'allow') setAllow(true); else setMaster(true);
+  setTimeout(() => { if (document.getElementById('warnMenu').classList.contains('open')) renderWarnMenu(); }, 260);
 }
 
 /* ============================================================
@@ -979,7 +1057,7 @@ function renderWatchlist() {
             '<button class="wl-action" aria-label="Watchlist info" onclick="toast(\'Info: ' + l.name + '\')">' + ICON_INFO + '</button>' +
           '</div>' +
         '</div>' +
-        '<div class="wl-group-count">' + l.items.length + ' symbols' + (S.guest ? ' &middot; Guest' : '') + '</div>' +
+        '<div class="wl-group-count">' + l.items.length + ' symbols</div>' +
       '</div>' +
       '<div class="wl-rows">' + l.items.map(q => {
         const up = q.chg >= 0, cls = up ? 'up' : 'down';
@@ -1003,6 +1081,7 @@ function showSheet(id) {
 }
 function closeOverlay(silent) {
   document.querySelectorAll('.sheet.open, .backdrop.open').forEach(el => el.classList.remove('open'));
+  closeWarnMenu();
   activeSheet = null; drawerId = null;
 }
 /* ---- Watchlist Notifications drawer ---- */
@@ -1016,6 +1095,7 @@ function openDrawer(id) {
       '<div class="sw' + (S.flags[id][t.k] ? ' on' : '') + '" data-k="' + t.k + '" onclick="drToggle(this)"></div>' +
     '</div>'
   ).join('');
+  renderWarn();
   showSheet('shDrawer');
 }
 function drToggle(el) {
