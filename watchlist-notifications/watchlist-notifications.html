@@ -1191,6 +1191,7 @@ function drToggle(el) {
 /* ---- Watchlist Notifications screen (pushed from the Customize CTA) ---- */
 function summary(f) {
   const on = TYPES.filter(t => f[t.k]).map(t => t.short);
+  if (on.length === TYPES.length) return 'All';
   return on.length ? on.join(', ') : 'None';
 }
 function openList() {
