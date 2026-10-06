@@ -303,15 +303,53 @@ svg { display: block; }
 .wl-group-name-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .wl-group-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; line-height: 1.2; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .wl-group-count { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 3px; }
-.wl-group-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-.wl-action {
-  width: 32px; height: 32px; border-radius: 50%;
+.wl-group-name-left { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.wl-group-chevron { width: 18px; height: 18px; color: var(--text-secondary); flex-shrink: 0; }
+.wl-group-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; position: relative; }
+.wl-hbtn {
+  width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: var(--text-secondary);
   transition: background .15s;
 }
-.wl-action:active { background: rgba(128,128,128,.18); }
-.wl-action svg { width: 20px; height: 20px; }
+.wl-hbtn:active { background: rgba(0,0,0,.06); }
+.wl-hbtn svg { width: 20px; height: 20px; }
+.wl-view-chips { display: flex; gap: 8px; padding: 10px 0 2px; overflow-x: auto; scrollbar-width: none; }
+.wl-view-chips::-webkit-scrollbar { display: none; }
+.wl-view-chip {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  height: 28px; padding: 0 12px; border-radius: 14px;
+  border: 1px solid var(--gray-3); background: var(--bg-primary-3);
+  font-size: 13px; font-weight: 510; color: var(--text-primary);
+}
+.wl-view-chip svg { width: 14px; height: 14px; }
+.wl-view-chip.active { background: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+.wl-view-chip:active { opacity: .8; }
+
+/* "..." context menu, anchored under the dots of its band */
+.wl-menu {
+  display: none;
+  position: absolute; top: calc(100% + 6px); right: 0;
+  width: 250px;
+  background: var(--bg-primary);
+  border-radius: 13px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.06);
+  overflow: hidden;
+  z-index: 50;
+}
+.wl-menu.open { display: block; }
+.wl-menu-item {
+  display: flex; align-items: center; gap: 13px;
+  width: 100%; height: 40px; padding: 0 16px;
+  font-size: 16px; font-weight: 400; color: var(--text-primary);
+  text-align: left; white-space: nowrap;
+}
+.wl-menu-item:active { background: rgba(128,128,128,.12); }
+.wl-menu-item svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--text-primary); }
+.wl-menu-item.danger, .wl-menu-item.danger svg { color: var(--red-down); }
+.wl-menu-sep { height: 1px; background: var(--divider); margin: 4px 16px; }
+.wl-menu-pad { height: 4px; }
+
 .wl-rows { }
 .wl-row {
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
@@ -922,6 +960,7 @@ function setScreen(s) {
   document.getElementById('scrWatchlist').classList.toggle('active', s === 'watchlist');
   closeOverlay(true);
   popAll();
+  closeWlMenu();
 }
 function setMode(m) {
   S.mode = m;
@@ -1026,9 +1065,46 @@ function fmt(n) {
   const d = n < 10 ? 2 : 2;
   return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 }
-const ICON_BELL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
-const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="m13.5 8.5 3 3"/></svg>';
-const ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>';
+const ICON_NEWS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M7 9h5M7 12.5h10M7 16h10"/><path d="M14 9h3"/></svg>';
+const ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-7 7M10 20H4v-6M4 20l7-7"/></svg>';
+const ICON_DOTS = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>';
+const ICON_CHEV = '<svg class="wl-group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+const MI = {
+  add:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+  edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"/><path d="m13.5 8.5 3 3"/></svg>',
+  bell:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  gear:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>'
+};
+/* Menu order and copy per spec: Add Symbol, Edit List | Notifications Settings, Watchlist Settings | Delete */
+function menuHTML(l) {
+  const n = l.name.replace(/'/g, "\\'");
+  return '<div class="wl-menu" id="wlMenu-' + l.id + '">' +
+    '<div class="wl-menu-pad"></div>' +
+    '<button class="wl-menu-item" data-act="add" onclick="toast(\'Add Symbol: ' + n + '\')">' + MI.add + 'Add Symbol</button>' +
+    '<button class="wl-menu-item" data-act="edit" onclick="toast(\'Edit List: ' + n + '\')">' + MI.edit + 'Edit List</button>' +
+    '<div class="wl-menu-sep"></div>' +
+    '<button class="wl-menu-item" data-act="notif" onclick="openDrawer(\'' + l.id + '\')">' + MI.bell + 'Notifications Settings</button>' +
+    '<button class="wl-menu-item" data-act="settings" onclick="toast(\'Watchlist Settings: ' + n + '\')">' + MI.gear + 'Watchlist Settings</button>' +
+    '<div class="wl-menu-sep"></div>' +
+    '<button class="wl-menu-item danger" data-act="delete" onclick="toast(\'Delete: ' + n + '\')">' + MI.trash + 'Delete</button>' +
+    '<div class="wl-menu-pad"></div>' +
+  '</div>';
+}
+let openMenuId = null;
+function toggleWlMenu(e, id) {
+  e.stopPropagation();
+  const wasOpen = openMenuId === id;
+  closeWlMenu();
+  if (wasOpen) return;
+  openMenuId = id;
+  document.getElementById('wlMenu-' + id).classList.add('open');
+  document.addEventListener('click', closeWlMenu, { once: true });
+}
+function closeWlMenu() {
+  document.querySelectorAll('.wl-menu.open').forEach(m => m.classList.remove('open'));
+  openMenuId = null;
+}
 
 function renderWatchlist() {
   const body = document.getElementById('wlBody');
@@ -1045,19 +1121,28 @@ function renderWatchlist() {
     return;
   }
 
-  /* Every watchlist is a section: title band (name, count, bell / edit / info) + its rows, stacked in one scroll */
+  /* Every watchlist is a section (Watchlist Redesign): band = name + chevron, count, view chips,
+     header actions news / expand / "..."; the "..." menu holds the Notifications Settings entry point */
+  closeWlMenu();
   body.innerHTML = '<div class="wl-scroll">' + ls.map(l =>
     '<div class="wl-group" data-list="' + l.id + '">' +
       '<div class="wl-group-head">' +
         '<div class="wl-group-name-row">' +
-          '<span class="wl-group-name">' + l.name + '</span>' +
+          '<div class="wl-group-name-left" onclick="toast(\'Collapse ' + l.name.replace(/'/g, "\\'") + '\')"><span class="wl-group-name">' + l.name + '</span>' + ICON_CHEV + '</div>' +
           '<div class="wl-group-actions">' +
-            '<button class="wl-action" aria-label="Watchlist notifications" onclick="openDrawer(\'' + l.id + '\')">' + ICON_BELL + '</button>' +
-            '<button class="wl-action" aria-label="Edit watchlist" onclick="toast(\'Edit ' + l.name + '\')">' + ICON_EDIT + '</button>' +
-            '<button class="wl-action" aria-label="Watchlist info" onclick="toast(\'Info: ' + l.name + '\')">' + ICON_INFO + '</button>' +
+            '<button class="wl-hbtn" aria-label="Watchlist news" onclick="toast(\'Watchlist News\')">' + ICON_NEWS + '</button>' +
+            '<button class="wl-hbtn" aria-label="Expand" onclick="toast(\'Expand\')">' + ICON_EXPAND + '</button>' +
+            '<button class="wl-hbtn wl-dots" aria-label="More" onclick="toggleWlMenu(event, \'' + l.id + '\')">' + ICON_DOTS + '</button>' +
+            menuHTML(l) +
           '</div>' +
         '</div>' +
         '<div class="wl-group-count">' + l.items.length + ' symbols</div>' +
+        '<div class="wl-view-chips">' +
+          '<button class="wl-view-chip active" onclick="toast(\'Main\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Main</button>' +
+          '<button class="wl-view-chip" onclick="toast(\'Details\')">Details</button>' +
+          '<button class="wl-view-chip" onclick="toast(\'Technical\')">Technical</button>' +
+          '<button class="wl-view-chip" onclick="toast(\'Ratings\')">Ratings</button>' +
+        '</div>' +
       '</div>' +
       '<div class="wl-rows">' + l.items.map(q => {
         const up = q.chg >= 0, cls = up ? 'up' : 'down';
