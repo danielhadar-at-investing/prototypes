@@ -218,7 +218,7 @@
   }
   .sticky-header .sticky-green { color: var(--green); }
   .sticky-header .sticky-red { color: var(--red); }
-  .hero-pill span.down { background: rgba(226,54,54,0.1); color: var(--red); }
+  .hero-pill span.down { background: var(--red); }
   .sticky-header .sticky-val { color: var(--text-secondary); font-weight: 400; }
 
   /* Hero cards */
@@ -294,11 +294,12 @@
   }
   .hero-pill span {
     display: inline-block;
-    background: rgba(14,203,129,0.1);
-    color: var(--green);
+    background: var(--green);
+    color: #000;
+    white-space: nowrap;
     font-size: 13px;
     font-weight: 700;
-    padding: 3px 10px;
+    padding: 3px 8px;
     border-radius: 20px;
     transition: opacity 0.15s;
   }
@@ -308,7 +309,7 @@
     color: var(--text-tertiary);
   }
 
-  /* Ring gauge wrapper - grows to fill space between label and "out of 5" */
+  /* Ring gauge wrapper - grows to fill space between label and the verbal tag */
   .ring-gauge-wrap {
     flex: 1;
     display: flex;
@@ -1316,7 +1317,7 @@
               <div class="hero-certainty">Low Uncertainty</div>
             </div>
             <div class="hero-card" id="heroHealth" onclick="switchTab('health')">
-              <div class="hero-label">Health Score</div>
+              <div class="hero-label">Financial Health</div>
               <!-- Change 5: Ring gauge replaces speedometer -->
               <div class="ring-gauge-wrap">
                 <div class="ring-gauge-container">
@@ -1333,7 +1334,7 @@
                   </div>
                 </div>
               </div>
-              <div class="ring-gauge-label">out of 5</div>
+              <div class="ring-gauge-label" id="healthTag">Good</div>
             </div>
           </div>
 
@@ -2575,6 +2576,7 @@ function updateOverallHealthScore() {
   const dashLen = (score / 5) * circumference;
 
   document.querySelector('.ring-gauge-score').textContent = score.toFixed(1);
+  document.getElementById('healthTag').textContent = ['Weak', 'Fair', 'Good', 'Great', 'Excellent'][Math.min(5, Math.max(1, Math.round(score))) - 1];
   const progressCircle = document.querySelectorAll('.ring-gauge-svg circle')[1];
   progressCircle.setAttribute('stroke', colorHex);
   progressCircle.setAttribute('stroke-dasharray', `${dashLen.toFixed(1)} ${circumference.toFixed(2)}`);
