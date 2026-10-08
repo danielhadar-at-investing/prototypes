@@ -217,6 +217,8 @@
     background: var(--text-tertiary);
   }
   .sticky-header .sticky-green { color: var(--green); }
+  .sticky-header .sticky-red { color: var(--red); }
+  .hero-pill span.down { background: rgba(226,54,54,0.1); color: var(--red); }
   .sticky-header .sticky-val { color: var(--text-secondary); font-weight: 400; }
 
   /* Hero cards */
@@ -1295,7 +1297,7 @@
         <div class="scroll-content" id="scrollContent">
           <!-- Sticky header -->
           <div class="sticky-header" id="stickyHeader">
-            <span>FV: <span id="stickyFV">$234.00</span> <span class="sticky-green" id="stickyUpside">+17.9%</span></span>
+            <span>FV: <span id="stickyFV">$228.07</span> <span class="sticky-green" id="stickyUpside">+14.9%</span></span>
             <span class="sticky-sep"></span>
             <span>Health: <span id="stickyHealth">3.3/5</span></span>
           </div>
@@ -1308,8 +1310,8 @@
             <div class="hero-card active" id="heroFV" onclick="switchTab('fv')">
               <div class="hero-label">Fair Value</div>
               <div class="hero-fv-content">
-                <div class="hero-fv-value" id="heroFVValue">$234.00</div>
-                <div class="hero-pill"><span id="heroUpside">+17.9% Upside</span></div>
+                <div class="hero-fv-value" id="heroFVValue">$228.07</div>
+                <div class="hero-pill"><span id="heroUpside">+14.9% Upside</span></div>
               </div>
               <div class="hero-certainty">Low Uncertainty</div>
             </div>
@@ -1476,7 +1478,7 @@
           <div class="detail-back" onclick="closeModelDetail()">
             <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="detail-title" id="modelDetailTitle">DCF Growth Exit</div>
+          <div class="detail-title" id="modelDetailTitle">5Y DCF Growth Exit</div>
           <div class="detail-help-btn" id="modelHelpBtn" onclick="showModelHelp()">?</div>
         </div>
         <div id="modelDetailContent"></div>
@@ -1526,23 +1528,23 @@
 const CURRENT_PRICE = 198.50;
 
 const models = [
-  { name: 'DCF Growth Exit', value: 245, low: 230, high: 260, on: true, updated: '7h ago' },
-  { name: 'DCF EBITDA Exit', value: 238, low: 225, high: 250, on: true, updated: '7h ago' },
-  { name: 'DCF Revenue Exit', value: 220, low: 205, high: 235, on: true, updated: '7h ago' },
+  { name: '5Y DCF Growth Exit', value: 245, low: 230, high: 260, on: true, updated: '7h ago' },
+  { name: '5Y DCF EBITDA Exit', value: 238, low: 225, high: 250, on: true, updated: '7h ago' },
+  { name: '5Y DCF Revenue Exit', value: 220, low: 205, high: 235, on: true, updated: '7h ago' },
   { name: 'Dividend Discount', value: 175, low: 160, high: 190, on: true, updated: '1d ago' },
   { name: 'P/E Multiple', value: 242, low: 228, high: 256, on: true, updated: '7h ago' },
   { name: 'EV/EBITDA', value: 230, low: 218, high: 242, on: true, updated: '7h ago' },
   { name: 'Price/Sales', value: 248, low: 232, high: 264, on: true, updated: '1d ago' },
   { name: 'Price/Book', value: 210, low: 195, high: 225, on: true, updated: '3d ago' },
-  { name: 'PEG Ratio', value: 235, low: 220, high: 250, on: true, updated: '7h ago' },
-  { name: 'FCF Yield', value: 240, low: 225, high: 255, on: true, updated: '1d ago' },
+  { name: 'EV / Revenue Multiples', value: 235, low: 220, high: 250, on: true, updated: '7h ago' },
+  { name: 'EV / EBIT Multiples', value: 240, low: 225, high: 255, on: true, updated: '1d ago' },
   { name: 'Earnings Power', value: 225, low: 210, high: 240, on: true, updated: '7h ago' },
-  { name: 'Graham Number', value: 205, low: 190, high: 220, on: true, updated: '4d ago' },
-  { name: 'Sum of Parts', value: 252, low: 238, high: 266, on: true, updated: '2d ago' },
-  { name: 'Residual Income', value: 228, low: 215, high: 240, on: true, updated: '1d ago' }
+  { name: 'DDM Multi Stage', value: 205, low: 190, high: 220, on: true, updated: '4d ago' },
+  { name: '10Y DCF Growth Exit', value: 252, low: 238, high: 266, on: true, updated: '2d ago' },
+  { name: '10Y DCF EBITDA Exit', value: 228, low: 215, high: 240, on: true, updated: '1d ago' }
 ];
 
-const fairModels = ['Graham Number', 'Price/Book'];
+const fairModels = ['DDM Multi Stage', 'Price/Book'];
 
 const rangeData = {
   market: { low: 164.08, high: 260.10, value: CURRENT_PRICE },
@@ -1570,11 +1572,11 @@ const analystRatings = [
 const ANALYST_PREVIEW_COUNT = 5;
 
 const healthModels = [
-  { name: 'Cash Flow Health', score: 3.5, label: '3.5' },
-  { name: 'Growth Health', score: 3.4, label: '3.4' },
-  { name: 'Price Momentum', score: 4.3, label: '4.3' },
-  { name: 'Profitability Health', score: 4.1, label: '4.1' },
-  { name: 'Relative Value', score: 1.0, label: '1.0' }
+  { name: 'Cash Flow Health', score: 3.1, label: '3.1' },
+  { name: 'Growth Health', score: 3.6, label: '3.6' },
+  { name: 'Price Momentum', score: 4.4, label: '4.4' },
+  { name: 'Profitability Health', score: 4.2, label: '4.2' },
+  { name: 'Relative Value', score: 1.1, label: '1.1' }
 ];
 
 const healthColors = ['#2962ff', '#26a69a', '#ab47bc', '#ffab00', '#ef5350'];
@@ -1583,11 +1585,11 @@ const healthColors = ['#2962ff', '#26a69a', '#ab47bc', '#ffab00', '#ef5350'];
 const healthTimeline = {
   years: [2021, 2022, 2023, 2024, 2025],
   data: {
-    'Cash Flow Health': [3.2, 3.4, 3.6, 3.4, 3.5],
-    'Growth Health': [2.8, 2.5, 2.9, 3.1, 3.4],
-    'Price Momentum': [3.8, 3.2, 3.5, 4.0, 4.3],
-    'Profitability Health': [4.0, 4.1, 4.0, 4.2, 4.1],
-    'Relative Value': [1.5, 1.3, 1.1, 1.0, 1.0]
+    'Cash Flow Health': [3.2, 3.4, 3.6, 3.4, 3.1],
+    'Growth Health': [2.8, 2.5, 2.9, 3.1, 3.6],
+    'Price Momentum': [3.8, 3.2, 3.5, 4.0, 4.4],
+    'Profitability Health': [4.0, 4.1, 4.0, 4.1, 4.2],
+    'Relative Value': [1.5, 1.3, 1.1, 1.0, 1.1]
   }
 };
 
@@ -1595,7 +1597,7 @@ const chartLineVisible = [true, true, true, true, true];
 
 // Model detail data
 const modelDetails = {
-  'DCF Growth Exit': {
+  '5Y DCF Growth Exit': {
     assumptions: [
       ['Cost of Capital (WACC)', '8.5% - 10.2%', '9.3%'],
       ['Terminal Growth Rate', '2.0% - 3.5%', '2.8%'],
@@ -1610,7 +1612,7 @@ const modelDetails = {
       ['Texas Instruments', 'TXN', 'NASDAQ:TXN']
     ]
   },
-  'DCF EBITDA Exit': {
+  '5Y DCF EBITDA Exit': {
     assumptions: [
       ['EV/EBITDA Multiple', '18x - 24x', '21.3x'],
       ['Cost of Capital (WACC)', '8.2% - 10.0%', '9.1%'],
@@ -1625,7 +1627,7 @@ const modelDetails = {
       ['Nvidia', 'NVDA', 'NASDAQ:NVDA']
     ]
   },
-  'DCF Revenue Exit': {
+  '5Y DCF Revenue Exit': {
     assumptions: [
       ['EV/Revenue Multiple', '6.5x - 8.5x', '7.2x'],
       ['Cost of Capital (WACC)', '8.5% - 10.5%', '9.4%'],
@@ -1715,26 +1717,26 @@ const modelDetails = {
       ['Intel', 'INTC', 'NASDAQ:INTC']
     ]
   },
-  'PEG Ratio': {
+  'EV / Revenue Multiples': {
     assumptions: [
-      ['PEG Ratio', '1.8x - 2.6x', '2.15x'],
-      ['Earnings Growth', '8% - 14%', '10.8%'],
-      ['Forward P/E', '25x - 30x', '27.5x'],
+      ['EV/Revenue Multiple', '7.2x - 9.0x', '8.1x'],
+      ['Revenue Estimate', '$405B - $425B', '$415B'],
+      ['Net Debt', '$50B - $58B', '$54B'],
       ['Fair Value', '$220 - $250', '$235']
     ],
     benchmarks: [
       ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
       ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
-      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
-      ['Adobe', 'ADBE', 'NASDAQ:ADBE'],
-      ['Salesforce', 'CRM', 'NYSE:CRM']
+      ['Samsung Electronics', 'SMSN', 'KRX:005930'],
+      ['Sony Group', 'SONY', 'NYSE:SONY'],
+      ['Dell Technologies', 'DELL', 'NYSE:DELL']
     ]
   },
-  'FCF Yield': {
+  'EV / EBIT Multiples': {
     assumptions: [
-      ['FCF Yield', '3.2% - 4.5%', '3.8%'],
-      ['FCF/Share', '$6.80 - $7.90', '$7.35'],
-      ['FCF Growth', '7% - 12%', '9.2%'],
+      ['EV/EBIT Multiple', '22x - 27x', '24.6x'],
+      ['EBIT Estimate', '$128B - $138B', '$133B'],
+      ['Net Debt', '$50B - $58B', '$54B'],
       ['Fair Value', '$225 - $255', '$240']
     ],
     benchmarks: [
@@ -1760,49 +1762,49 @@ const modelDetails = {
       ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI']
     ]
   },
-  'Graham Number': {
+  'DDM Multi Stage': {
     assumptions: [
-      ['EPS (TTM)', '$6.40 - $7.20', '$6.73'],
-      ['Book Value/Share', '$4.40 - $5.10', '$4.83'],
-      ['Graham Multiplier', '22.5', '22.5'],
+      ['High Growth Rate (5Y)', '5.0% - 7.0%', '6.1%'],
+      ['Stable Growth Rate', '2.5% - 3.5%', '3.0%'],
+      ['Cost of Equity', '9.5% - 11.5%', '10.4%'],
       ['Fair Value', '$190 - $220', '$205']
     ],
     benchmarks: [
-      ['Western Digital', 'WDC', 'NASDAQ:WDC'],
-      ['Lenovo', 'LNVGY', 'HKSE:0992'],
-      ['NXP Semiconductors', 'NXPI', 'NASDAQ:NXPI'],
-      ['Intel', 'INTC', 'NASDAQ:INTC'],
-      ['Corning', 'GLW', 'NYSE:GLW']
+      ['Microsoft', 'MSFT', 'NASDAQ:MSFT'],
+      ['Johnson & Johnson', 'JNJ', 'NYSE:JNJ'],
+      ['Procter & Gamble', 'PG', 'NYSE:PG'],
+      ['Coca-Cola', 'KO', 'NYSE:KO'],
+      ['PepsiCo', 'PEP', 'NASDAQ:PEP']
     ]
   },
-  'Sum of Parts': {
+  '10Y DCF Growth Exit': {
     assumptions: [
-      ['iPhone Segment Value', '$1.8T - $2.1T', '$1.95T'],
-      ['Services Segment Value', '$1.2T - $1.5T', '$1.35T'],
-      ['Wearables + Other', '$180B - $250B', '$215B'],
+      ['Cost of Capital (WACC)', '8.5% - 10.2%', '9.3%'],
+      ['Terminal Growth Rate', '2.0% - 3.5%', '2.8%'],
+      ['Revenue CAGR (10Y)', '5.5% - 8.0%', '6.6%'],
       ['Fair Value', '$238 - $266', '$252']
     ],
     benchmarks: [
-      ['Alphabet', 'GOOGL', 'NASDAQ:GOOGL'],
-      ['Amazon', 'AMZN', 'NASDAQ:AMZN'],
-      ['Samsung Electronics', 'SMSN', 'KRX:005930'],
-      ['Sony Group', 'SONY', 'NYSE:SONY'],
-      ['Berkshire Hathaway', 'BRK.B', 'NYSE:BRK.B']
+      ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
+      ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
+      ['Broadcom', 'AVGO', 'NASDAQ:AVGO'],
+      ['Qualcomm', 'QCOM', 'NASDAQ:QCOM'],
+      ['Texas Instruments', 'TXN', 'NASDAQ:TXN']
     ]
   },
-  'Residual Income': {
+  '10Y DCF EBITDA Exit': {
     assumptions: [
-      ['Cost of Equity', '9.0% - 11.5%', '10.2%'],
-      ['ROE Spread', '140% - 165%', '152%'],
-      ['Growth Rate', '4.0% - 6.0%', '5.1%'],
+      ['EV/EBITDA Exit Multiple', '16x - 22x', '19.0x'],
+      ['Cost of Capital (WACC)', '8.5% - 10.2%', '9.3%'],
+      ['EBITDA CAGR (10Y)', '5.0% - 7.5%', '6.2%'],
       ['Fair Value', '$215 - $240', '$228']
     ],
     benchmarks: [
       ['Applied Materials', 'AMAT', 'NASDAQ:AMAT'],
       ['Advanced Micro Devices', 'AMD', 'NASDAQ:AMD'],
       ['Broadcom', 'AVGO', 'NASDAQ:AVGO'],
-      ['Texas Instruments', 'TXN', 'NASDAQ:TXN'],
-      ['Analog Devices', 'ADI', 'NASDAQ:ADI']
+      ['Qualcomm', 'QCOM', 'NASDAQ:QCOM'],
+      ['Texas Instruments', 'TXN', 'NASDAQ:TXN']
     ]
   }
 };
@@ -1881,6 +1883,7 @@ let activeTab = 'fv';
 
 // ===================== INIT =====================
 function init() {
+  healthModels.forEach(h => { h.score = recalcHealthScore(h.name); });
   renderChips();
   renderRangeBars();
   renderHealthRows();
@@ -1890,6 +1893,8 @@ function init() {
   document.getElementById('modelsToggleText').textContent = 'Show ' + models.length + ' models';
   document.getElementById('analystToggleText').textContent = 'Show ' + analystRatings.length + ' analysts';
   renderAnalystTable();
+  updateCalculations(false);
+  updateOverallHealthScore();
 }
 
 function getGlobalRange() {
@@ -2179,7 +2184,7 @@ function classify(name, val) {
   return 'fair';
 }
 
-function updateCalculations() {
+function updateCalculations(flash = true) {
   const active = models.filter(m => m.on);
   const count = active.length;
   if (count === 0) return;
@@ -2198,17 +2203,23 @@ function updateCalculations() {
   // Animate hero FV
   const heroFV = document.getElementById('heroFVValue');
   heroFV.textContent = '$' + avg.toFixed(2);
-  heroFV.classList.remove('flash');
-  void heroFV.offsetWidth;
-  heroFV.classList.add('flash');
+  if (flash) {
+    heroFV.classList.remove('flash');
+    void heroFV.offsetWidth;
+    heroFV.classList.add('flash');
+  }
 
   // Update hero upside pill
   const heroUpside = document.getElementById('heroUpside');
-  heroUpside.textContent = `+${upside.toFixed(1)}% Upside`;
+  const isUp = upside >= 0;
+  heroUpside.textContent = `${isUp ? '+' : ''}${upside.toFixed(1)}% ${isUp ? 'Upside' : 'Downside'}`;
+  heroUpside.classList.toggle('down', !isUp);
 
   // Update sticky
   document.getElementById('stickyFV').textContent = '$' + avg.toFixed(2);
-  document.getElementById('stickyUpside').textContent = '+' + upside.toFixed(1) + '%';
+  const stickyUpside = document.getElementById('stickyUpside');
+  stickyUpside.textContent = (isUp ? '+' : '') + upside.toFixed(1) + '%';
+  stickyUpside.className = isUp ? 'sticky-green' : 'sticky-red';
 
   // Update consensus bar
   const segGreen = document.getElementById('segGreen');
@@ -2469,20 +2480,20 @@ function closeModelDetail() {
 }
 
 const modelDescriptions = {
-  'DCF Growth Exit': 'Uses the Perpetuity Growth formula (also known as Gordon Growth) to calculate Terminal Value after five years.',
-  'DCF EBITDA Exit': 'Uses a EBITDA Exit multiple to calculate Terminal Value after five years.',
-  'DCF Revenue Exit': 'Uses a Revenue Exit multiple to calculate Terminal Value after five years.',
+  '5Y DCF Growth Exit': 'Uses the Perpetuity Growth formula (also known as Gordon Growth) to calculate Terminal Value after five years.',
+  '5Y DCF EBITDA Exit': 'Uses a EBITDA Exit multiple to calculate Terminal Value after five years.',
+  '5Y DCF Revenue Exit': 'Uses a Revenue Exit multiple to calculate Terminal Value after five years.',
   'Dividend Discount': 'Single stage dividend discount model also known as the Gordon Growth Model.',
   'P/E Multiple': 'Benchmarks Price to Earnings ratios to estimate equity value.',
   'EV/EBITDA': 'Benchmarks Enterprise Value to EBITDA multiples to estimate equity value.',
   'Price/Sales': 'Benchmarks Price to Sales ratios to estimate equity value.',
   'Price/Book': 'Benchmarks Price to Book ratios to estimate equity value.',
   'Earnings Power': 'Uses an adjusted free cash flow to estimate company value.',
-  'PEG Ratio': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  'FCF Yield': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  'Graham Number': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  'Sum of Parts': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  'Residual Income': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'
+  'EV / Revenue Multiples': 'Benchmarks Enterprise Value to Revenue multiples to estimate equity value.',
+  'EV / EBIT Multiples': 'Benchmarks Enterprise Value to EBIT multiples to estimate equity value.',
+  'DDM Multi Stage': 'Uses a higher growth for the first five years before assuming a stable growth rate into perpetuity.',
+  '10Y DCF Growth Exit': 'Uses the Perpetuity Growth formula (also known as Gordon Growth) to calculate Terminal Value after ten years.',
+  '10Y DCF EBITDA Exit': 'Uses a EBITDA Exit multiple to calculate Terminal Value after ten years.'
 };
 
 function showModelHelp() {
