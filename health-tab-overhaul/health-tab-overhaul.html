@@ -374,13 +374,16 @@
     gap: 6px;
     padding: 14px 8px 2px;
   }
+  /* Category toggles styled as buttons: filled, rounded rect, stretch to fill each row */
   .chart-legend-item {
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
-    height: 26px;
-    padding: 0 9px;
-    border-radius: 13px;
-    border: 1.5px solid var(--chip-color);
+    justify-content: center;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 8px;
+    border: 1px solid var(--chip-border);
     background: var(--chip-bg);
     font-size: 11px;
     font-weight: 600;
@@ -388,13 +391,15 @@
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
   }
   .chart-legend-item:active { transform: scale(0.97); }
   .chart-legend-item.off {
-    background: #FFFFFF;
-    border-color: var(--border-dark);
+    background: #F2F2F5;
+    border-color: transparent;
     color: var(--text-tertiary);
+    box-shadow: none;
   }
 
   /* Detail screens */
@@ -1151,7 +1156,8 @@ function renderChartLegend() {
     const item = document.createElement('div');
     item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
     item.style.setProperty('--chip-color', color);
-    item.style.setProperty('--chip-bg', color + '0F');
+    item.style.setProperty('--chip-bg', color + '1F');
+    item.style.setProperty('--chip-border', color + '66');
     item.textContent = name;
     item.onclick = () => {
       // Keep at least one line visible
