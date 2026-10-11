@@ -486,7 +486,7 @@
     -webkit-overflow-scrolling: touch;
   }
   .health-detail-chips::-webkit-scrollbar { display: none; }
-  /* All chips the same size; selected = brand blue outline + tint (Text Active / Primary #3372F6) */
+  /* All chips the same size; selected = dark outline on white, neutral (no accent color) */
   .health-detail-chip {
     flex-shrink: 0;
     width: 116px;
@@ -502,8 +502,9 @@
     transition: border-color 0.2s, background 0.2s;
   }
   .health-detail-chip.active {
-    border-color: #3372F6;
-    background: rgba(51, 114, 246, 0.06);
+    border-color: var(--text-primary);
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
   .hdchip-top {
     display: flex;
@@ -529,7 +530,7 @@
     color: var(--text-secondary);
     font-weight: 500;
   }
-  .health-detail-chip.active .hdchip-name { color: #3372F6; }
+  .health-detail-chip.active .hdchip-name { color: var(--text-primary); }
 
   /* Health metric rows */
   .hmetric-row { border-bottom: 1px solid var(--border); }
@@ -554,7 +555,7 @@
     content: ''; position: absolute;
     top: -10px; left: -10px; right: -10px; bottom: -10px;
   }
-  .hmetric-check.on { background: #3372F6; border-color: #3372F6; }
+  .hmetric-check.on { background: var(--text-primary); border-color: var(--text-primary); }
   /* Metrics with no score: disabled, unchecked, not toggleable */
   .hmetric-row.disabled .hmetric-main { opacity: 0.45; cursor: default; }
   .hmetric-row.disabled .hmetric-check { background: #F2F2F2; border-color: #E6E6E6; cursor: default; }
