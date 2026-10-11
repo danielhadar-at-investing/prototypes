@@ -528,9 +528,9 @@
   }
   .hmetric-row.off .hmetric-main { opacity: 0.4; }
   .hmetric-check {
-    width: 18px; height: 18px;
+    width: 17px; height: 17px;
     border-radius: 4px;
-    border: 2px solid var(--border-dark);
+    border: 1.5px solid #C7CACD;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; align-self: center;
     position: relative; cursor: pointer;
@@ -539,7 +539,8 @@
     content: ''; position: absolute;
     top: -10px; left: -10px; right: -10px; bottom: -10px;
   }
-  .hmetric-check.on { background: var(--text-primary); border-color: var(--text-primary); }
+  /* Subtle gray checkbox: DS Icons / Secondary #8C8C8C checked, Tertiary #C7CACD unchecked border */
+  .hmetric-check.on { background: #8C8C8C; border-color: #8C8C8C; }
   /* Metrics with no score: disabled, unchecked, not toggleable */
   .hmetric-row.disabled .hmetric-main { opacity: 0.45; cursor: default; }
   .hmetric-row.disabled .hmetric-check { background: #F2F2F2; border-color: #E6E6E6; cursor: default; }
