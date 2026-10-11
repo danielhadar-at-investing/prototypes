@@ -1628,11 +1628,11 @@ function setupMetricScrub(ri) {
 
     const d = metricMonth(idx);
     const det = metricPointDetails(hm.name, ri, history[idx]);
-    const row = (label, val, dotColor) => `<div class="chart-scrub-row">${dotColor ? `<span class="chart-scrub-dot" style="background:${dotColor}"></span>` : ''}<span>${label}</span><b>${val}</b></div>`;
+    const row = (label, val) => `<div class="chart-scrub-row"><span style="flex:1;color:var(--text-secondary)">${label}</span><b>${val}</b></div>`;
     scrub.innerHTML = `<div class="chart-scrub-date">${MONTHS_SHORT[d.month]} ${d.year}</div>`
-      + row('Score', history[idx].toFixed(1), continuousScoreColor(history[idx]))
-      + row('Value', det.value, 'transparent')
-      + row('Percentile', det.pct.toFixed(1) + '%', 'transparent');
+      + row('Score', history[idx].toFixed(1))
+      + row('Value', det.value)
+      + row('Percentile', det.pct.toFixed(1) + '%');
     scrub.classList.add('visible');
 
     const x = canvas.offsetLeft + padL + (idx / (n - 1)) * chartW;
