@@ -334,7 +334,6 @@
     width: 100%;
     height: 200px;
     display: block;
-    cursor: crosshair;
   }
   .chart-scrub {
     position: absolute;
@@ -1128,11 +1127,20 @@ function setupChartScrub() {
     renderHealthChart();
   };
 
-  canvas.addEventListener('pointerdown', e => update(e.clientX));
-  canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) update(e.clientX); });
-  canvas.addEventListener('pointerleave', clear);
-  canvas.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse') clear(); });
-  canvas.addEventListener('pointercancel', clear);
+  // Mobile behavior: no hover. Tap shows the readout and it stays; drag while pressed scrubs;
+  // tapping anywhere outside the chart dismisses it.
+  let dragging = false;
+  canvas.addEventListener('pointerdown', e => {
+    dragging = true;
+    canvas.setPointerCapture(e.pointerId);
+    update(e.clientX);
+  });
+  canvas.addEventListener('pointermove', e => { if (dragging) update(e.clientX); });
+  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; });
+  document.addEventListener('pointerdown', e => {
+    if (chartHoverIdx !== null && !wrap.contains(e.target)) clear();
+  });
 }
 
 function renderChartLegend() {
