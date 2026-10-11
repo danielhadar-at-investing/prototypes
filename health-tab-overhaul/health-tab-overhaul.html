@@ -375,34 +375,38 @@
     border-radius: 50%;
     flex-shrink: 0;
   }
+  /* Legend (TradingView style): small rounded swatch + regular gray label, tap to toggle */
   .chart-legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 14px 8px 2px;
+    justify-content: center;
+    gap: 6px 16px;
+    padding: 14px 16px 2px;
   }
   .chart-legend-item {
     display: flex;
     align-items: center;
-    height: 26px;
-    padding: 0 9px;
-    border-radius: 13px;
-    border: 1.5px solid var(--chip-color);
-    background: var(--chip-bg);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-primary);
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #6B7280;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    padding: 2px 0;
+    transition: color 0.2s, opacity 0.2s;
   }
-  .chart-legend-item:active { transform: scale(0.97); }
-  .chart-legend-item.off {
-    background: #FFFFFF;
-    border-color: var(--border-dark);
-    color: var(--text-tertiary);
+  .chart-legend-item::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--chip-color);
+    flex-shrink: 0;
+    transition: background 0.2s;
   }
+  .chart-legend-item.off { color: #C7CACD; }
+  .chart-legend-item.off::before { background: #ECECEF; }
 
   /* Detail screens */
   .detail-screen {
@@ -1281,7 +1285,6 @@ function renderChartLegend() {
     const item = document.createElement('div');
     item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
     item.style.setProperty('--chip-color', color);
-    item.style.setProperty('--chip-bg', color + '0F');
     item.textContent = name;
     item.onclick = () => {
       // Keep at least one line visible
