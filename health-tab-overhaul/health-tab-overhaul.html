@@ -192,24 +192,27 @@
   .health-block {
     margin: 0 -16px 20px;
   }
-  /* Overall score summary: 5-level speedometer */
+  /* Overall score summary: continuous speedometer (TradingView-style thin arc) */
   .health-summary {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 16px 18px;
+    padding: 4px 16px 20px;
   }
   .gauge-svg {
     width: 100%;
-    max-width: 330px;
+    max-width: 300px;
     display: block;
     overflow: visible;
   }
   .gauge-label {
     font-family: var(--font);
     font-size: 12px;
-    fill: var(--text-secondary);
+    font-weight: 500;
+    fill: #8A8F98;
+    transition: fill 0.3s;
   }
+  .gauge-label.active { font-weight: 600; }
   .gauge-needle {
     transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1);
   }
@@ -217,7 +220,7 @@
     display: flex;
     align-items: baseline;
     gap: 5px;
-    margin-top: 8px;
+    margin-top: 14px;
     padding: 4px 12px;
     border-radius: 14px;
     border: 1.5px solid var(--pill-color, #D4B03A);
@@ -225,9 +228,10 @@
     color: var(--text-primary);
     font-size: 13px;
     font-weight: 500;
+    line-height: 1.3;
     transition: background 0.3s, border-color 0.3s;
   }
-  .gauge-pill b { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .gauge-pill b { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
   /* Tab content */
   .tab-content {
@@ -239,10 +243,11 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
+    align-items: stretch;
     padding: 0 16px;
   }
   .health-cell {
-    padding: 10px 12px;
+    padding: 12px;
     border-radius: var(--radius);
     background: var(--bg-card);
     border: 1.5px solid var(--border);
@@ -255,20 +260,22 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   .health-cell-score {
-    font-size: 20px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 700;
     line-height: 1;
+    letter-spacing: -0.3px;
+    font-variant-numeric: tabular-nums;
   }
   .health-cell-chevron {
     color: var(--text-tertiary);
     display: flex;
   }
   .health-cell-name {
-    font-size: 11px;
-    color: var(--text-secondary);
+    font-size: 12px;
+    color: #4B5563;
     font-weight: 500;
     line-height: 1.3;
   }
@@ -301,9 +308,9 @@
     background: transparent;
     border-radius: 14px;
     font-family: var(--font);
-    font-size: 15px;
-    font-weight: 400;
-    color: #4B5563;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B7280;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
   }
@@ -603,15 +610,16 @@
   }
   /* Tab section title (lives outside the section card) */
   .tab-section-title {
-    font-size: 17px;
+    font-size: 20px;
     font-weight: 700;
+    line-height: 1.2;
     color: var(--text-primary);
     padding-top: 4px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    letter-spacing: 0;
+    letter-spacing: -0.3px;
   }
 
   /* Bottom padding for scroll */
@@ -714,7 +722,7 @@
             <div class="health-block">
               <!-- Overall score summary -->
               <div class="health-summary">
-                <svg class="gauge-svg" id="healthGauge" viewBox="0 0 340 160"></svg>
+                <svg class="gauge-svg" id="healthGauge" viewBox="0 0 300 140"></svg>
                 <div class="gauge-pill" id="gaugePill"><b id="healthScore">3.3</b><span id="healthTag">Good</span></div>
               </div>
               <div class="health-cells" id="healthRows"></div>
@@ -1220,8 +1228,9 @@ function healthLevelColor(score) {
   return HEALTH_LEVEL_COLORS[Math.min(5, Math.max(1, Math.round(score))) - 1];
 }
 
-// Speedometer geometry: semicircle, center (170, 150); f = 0 (left) .. 1 (right)
-const GAUGE = { cx: 170, cy: 150, rBand: 100, bandW: 26, rEdge: 114, edgeW: 4, rLabel: 132, needle: 78, gap: 0.012 };
+// Speedometer geometry: semicircle, center (150, 132); f = 0 (left) .. 1 (right)
+// Continuous arc: thin solid outer stroke + soft inner band, filled up to the needle
+const GAUGE = { cx: 150, cy: 132, rOuter: 92, outerW: 4, rInner: 85.5, innerW: 9, rLabel: 110, needle: 64 };
 
 function gaugePoint(f, r) {
   const a = Math.PI * (1 - f);
@@ -1235,22 +1244,28 @@ function gaugeArc(f1, f2, r) {
 
 function buildHealthGauge() {
   const svg = document.getElementById('healthGauge');
-  let html = '';
+  const x0 = GAUGE.cx - GAUGE.rOuter, x1 = GAUGE.cx + GAUGE.rOuter;
+  // Horizontal gradient = color along the arc (x is monotonic on a semicircle)
+  const stops = HEALTH_LEVEL_COLORS.map((c, k) => `<stop offset="${(k + 0.5) / 5}" stop-color="${c}"/>`).join('');
+  let html = `<defs><linearGradient id="gaugeGrad" gradientUnits="userSpaceOnUse" x1="${x0}" y1="0" x2="${x1}" y2="0">${stops}</linearGradient></defs>`;
+  // Track
+  const rTrack = (GAUGE.rOuter + GAUGE.outerW / 2 + GAUGE.rInner - GAUGE.innerW / 2) / 2;
+  const wTrack = (GAUGE.rOuter + GAUGE.outerW / 2) - (GAUGE.rInner - GAUGE.innerW / 2);
+  html += `<path d="${gaugeArc(0, 1, rTrack)}" stroke="#EEEEF1" stroke-width="${wTrack}" fill="none"/>`;
+  // Progress (inner soft band + outer solid stroke), d set in updateOverallHealthScore()
+  html += `<path id="gaugeInner" stroke="url(#gaugeGrad)" stroke-opacity="0.2" stroke-width="${GAUGE.innerW}" fill="none"/>`;
+  html += `<path id="gaugeOuter" stroke="url(#gaugeGrad)" stroke-width="${GAUGE.outerW}" fill="none"/>`;
+  // Labels at each level's center
   HEALTH_LEVELS.forEach((label, k) => {
-    const f1 = k / 5 + (k ? GAUGE.gap : 0), f2 = (k + 1) / 5 - (k < 4 ? GAUGE.gap : 0);
-    const c = HEALTH_LEVEL_COLORS[k];
-    html += `<path d="${gaugeArc(f1, f2, GAUGE.rBand)}" stroke="${c}" stroke-opacity="0.18" stroke-width="${GAUGE.bandW}" fill="none"/>`;
-    html += `<path d="${gaugeArc(f1, f2, GAUGE.rEdge)}" stroke="${c}" stroke-width="${GAUGE.edgeW}" fill="none"/>`;
-    const fm = (k + 0.5) / 5;
-    const [lx, ly] = gaugePoint(fm, GAUGE.rLabel);
+    const [lx, ly] = gaugePoint((k + 0.5) / 5, GAUGE.rLabel);
     const anchor = Math.abs(lx - GAUGE.cx) < 12 ? 'middle' : lx < GAUGE.cx ? 'end' : 'start';
-    html += `<text class="gauge-label" x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="${anchor}">${label}</text>`;
+    html += `<text class="gauge-label" id="gaugeLabel${k}" x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="${anchor}">${label}</text>`;
   });
-  // Needle points right (f = 1) at rest; rotated from the score in updateOverallHealthScore()
+  // Needle points right (f = 1) at rest; rotated from the level in updateOverallHealthScore()
   html += `<g class="gauge-needle" id="gaugeNeedle" style="transform-origin:${GAUGE.cx}px ${GAUGE.cy}px">
-    <line x1="${GAUGE.cx}" y1="${GAUGE.cy}" x2="${GAUGE.cx + GAUGE.needle}" y2="${GAUGE.cy}" stroke="#6B7080" stroke-width="2" stroke-linecap="round"/>
+    <line x1="${GAUGE.cx}" y1="${GAUGE.cy}" x2="${GAUGE.cx + GAUGE.needle}" y2="${GAUGE.cy}" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round"/>
   </g>
-  <circle cx="${GAUGE.cx}" cy="${GAUGE.cy}" r="6" fill="#4B5060"/>`;
+  <circle cx="${GAUGE.cx}" cy="${GAUGE.cy}" r="4.5" fill="#1A1A2E"/>`;
   svg.innerHTML = html;
 }
 
@@ -1258,6 +1273,7 @@ function updateOverallHealthScore() {
   const avg = healthModels.reduce((s, h) => s + h.score, 0) / healthModels.length;
   const score = Math.round(avg * 10) / 10;
   const level = Math.min(5, Math.max(1, Math.round(score)));
+  const color = HEALTH_LEVEL_COLORS[level - 1];
 
   if (!document.getElementById('gaugeNeedle')) buildHealthGauge();
 
@@ -1265,12 +1281,19 @@ function updateOverallHealthScore() {
   // the exact score is shown in the pill
   const f = (level - 0.5) / 5;
   document.getElementById('gaugeNeedle').style.transform = `rotate(${(-180 * (1 - f)).toFixed(1)}deg)`;
+  document.getElementById('gaugeOuter').setAttribute('d', gaugeArc(0, f, GAUGE.rOuter));
+  document.getElementById('gaugeInner').setAttribute('d', gaugeArc(0, f, GAUGE.rInner));
+  HEALTH_LEVELS.forEach((_, k) => {
+    const el = document.getElementById('gaugeLabel' + k);
+    el.classList.toggle('active', k === level - 1);
+    el.style.fill = k === level - 1 ? color : '';
+  });
 
   document.getElementById('healthScore').textContent = score.toFixed(1);
   document.getElementById('healthTag').textContent = HEALTH_LEVELS[level - 1];
   const pill = document.getElementById('gaugePill');
-  pill.style.setProperty('--pill-color', HEALTH_LEVEL_COLORS[level - 1]);
-  pill.style.setProperty('--pill-bg', HEALTH_LEVEL_COLORS[level - 1] + '1F');
+  pill.style.setProperty('--pill-color', color);
+  pill.style.setProperty('--pill-bg', color + '1F');
 }
 
 const expandedMetrics = new Set();
