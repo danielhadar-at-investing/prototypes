@@ -1393,8 +1393,8 @@ function updateOverallHealthScore() {
   // the exact score is shown in the pill
   const f = (level - 0.5) / 5;
   document.getElementById('gaugeNeedle').style.transform = `rotate(${(-180 * (1 - f)).toFixed(1)}deg)`;
-  // Fill covers the whole current level's segment (Weak = first fifth, Excellent = full arc)
-  const fill = level / 5;
+  // Fill runs to the needle (TradingView style); Excellent fills the whole arc
+  const fill = level === 5 ? 1 : f;
   document.getElementById('gaugeOuter').setAttribute('d', gaugeArc(0, fill, GAUGE.rOuter));
   document.getElementById('gaugeInner').setAttribute('d', gaugeArc(0, fill, GAUGE.rInner));
   HEALTH_LEVELS.forEach((_, k) => {
