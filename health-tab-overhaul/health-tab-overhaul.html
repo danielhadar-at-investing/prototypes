@@ -367,23 +367,19 @@
   }
   .chart-legend {
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 14px 16px 2px;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 14px 8px 2px;
   }
-  .chart-legend::-webkit-scrollbar { display: none; }
   .chart-legend-item {
-    flex: none;
     display: flex;
     align-items: center;
-    gap: 6px;
-    height: 30px;
-    padding: 0 12px 0 10px;
-    border-radius: 15px;
-    border: 1px solid var(--chip-border);
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 13px;
+    border: 1.5px solid var(--chip-color);
     background: var(--chip-bg);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
@@ -392,22 +388,10 @@
     transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .chart-legend-item:active { transform: scale(0.97); }
-  .chart-legend-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--chip-color);
-    box-shadow: 0 0 0 1.5px var(--chip-color);
-    flex-shrink: 0;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
   .chart-legend-item.off {
     background: #FFFFFF;
     border-color: var(--border-dark);
     color: var(--text-tertiary);
-  }
-  .chart-legend-item.off .chart-legend-dot {
-    background: transparent;
-    box-shadow: inset 0 0 0 1.5px #C4C7CE;
   }
 
   /* Detail screens */
@@ -725,7 +709,7 @@
         <div class="cat-tabs">
           <div class="cat-tab">Overview</div>
           <div class="cat-tab">News</div>
-          <div class="cat-tab active">Valuation<svg width="14" height="16" viewBox="0 0 14 16" fill="none" style="margin-left:4px;vertical-align:-2px"><path d="M7 0L13.5 2.5V7C13.5 11.5 10.5 14.5 7 16C3.5 14.5 0.5 11.5 0.5 7V2.5L7 0Z" fill="#1A1A2E"/><text x="7" y="11.5" text-anchor="middle" font-size="9" font-weight="800" fill="#ef8c43" font-family="-apple-system,sans-serif">P</text></svg></div>
+          <div class="cat-tab active">Health<svg width="14" height="16" viewBox="0 0 14 16" fill="none" style="margin-left:4px;vertical-align:-2px"><path d="M7 0L13.5 2.5V7C13.5 11.5 10.5 14.5 7 16C3.5 14.5 0.5 11.5 0.5 7V2.5L7 0Z" fill="#1A1A2E"/><text x="7" y="11.5" text-anchor="middle" font-size="9" font-weight="800" fill="#ef8c43" font-family="-apple-system,sans-serif">P</text></svg></div>
           <div class="cat-tab">Technical</div>
         </div>
 
@@ -1162,9 +1146,8 @@ function renderChartLegend() {
     const item = document.createElement('div');
     item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
     item.style.setProperty('--chip-color', color);
-    item.style.setProperty('--chip-bg', color + '14');
-    item.style.setProperty('--chip-border', color + '4D');
-    item.innerHTML = `<div class="chart-legend-dot"></div>${name}`;
+    item.style.setProperty('--chip-bg', color + '0F');
+    item.textContent = name;
     item.onclick = () => {
       // Keep at least one line visible
       if (chartLineVisible[i] && chartLineVisible.filter(Boolean).length === 1) return;
