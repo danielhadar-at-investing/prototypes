@@ -454,6 +454,78 @@
     color: var(--text-primary);
   }
 
+
+  /* ===== Metric row preview (option D) ===== */
+  .mfacts { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .mfact { background: #fff; border-radius: 10px; padding: 8px 10px; }
+  .mfact .k { font-size: 11px; color: var(--text-tertiary); }
+  .mfact .v { font-size: 14px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .mcta { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 8px; padding: 11px 12px; background: #fff; border: 0; border-radius: 10px; font: 600 13px var(--font); color: var(--text-primary); cursor: pointer; }
+  .mcta:active { background: #F3F3F5; }
+
+  /* ===== Full metric page ===== */
+  .detail-screen.pushed { transform: translateX(-30%); }
+  #metricPage { z-index: 40; }
+  .mp-header .detail-back { width: auto; gap: 6px; padding-right: 8px; font-size: 16px; font-weight: 500; }
+  .mp-header .detail-title { opacity: 0; transition: opacity .2s; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mp-header.scrolled .detail-title { opacity: 1; }
+  .mp-header { border-bottom-color: transparent; transition: border-color .2s; }
+  .mp-header.scrolled { border-bottom-color: var(--border); }
+  .mp-hero { padding: 4px 16px 0; }
+  .mp-eyebrow { font-size: 12px; font-weight: 500; color: #8A8F98; }
+  .mp-hero h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.2; margin-top: 2px; color: var(--text-primary); }
+  .mp-desc { font-size: 14px; line-height: 1.45; color: #4B5563; margin-top: 6px; }
+  .mp-kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 16px; background: #F5F5F7; border-radius: 14px; }
+  .mp-kpi { padding: 12px 10px; text-align: center; }
+  .mp-kpi + .mp-kpi { border-left: 1px solid rgba(0,0,0,0.07); }
+  .mp-kpi .k { font-size: 12px; color: #8A8F98; }
+  .mp-kpi .v { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .mp-kpi .v small { font-size: 13px; font-weight: 600; margin-left: 4px; }
+  .mp-note { margin-top: 10px; font-size: 13px; color: #8A8F98; line-height: 1.4; }
+  .mp-sec { padding: 30px 16px 0; }
+  .mp-sec h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; color: var(--text-primary); }
+  .mp-sub { font-size: 13px; color: #8A8F98; margin-top: 3px; line-height: 1.4; }
+  .mp-seg { display: flex; padding: 2px; background: #F0F0F2; border-radius: 9px; margin: 14px 0 10px; }
+  .mp-seg button { flex: 1; height: 28px; border: 0; background: none; border-radius: 7px; font: 600 13px var(--font); color: #8A8F98; cursor: pointer; }
+  .mp-seg button.on { background: #fff; color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .mp-chart { position: relative; }
+  .mp-chart svg { display: block; width: 100%; height: 170px; touch-action: pan-y; }
+  .mp-tip { position: absolute; top: 0; padding: 6px 9px; background: #fff; border: 1px solid #E5E7EB; border-radius: 9px; box-shadow: 0 4px 14px rgba(0,0,0,.08); font-size: 12px; color: #4B5563; pointer-events: none; white-space: nowrap; display: none; }
+  .mp-tip b { display: block; font-size: 13px; color: var(--text-primary); }
+  .mp-list { background: #F5F5F7; border-radius: 12px; margin-top: 12px; overflow: hidden; }
+  .mp-li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; font-size: 14px; position: relative; }
+  .mp-li + .mp-li::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; height: 1px; background: rgba(0,0,0,0.07); }
+  .mp-li .l { color: #4B5563; }
+  .mp-li .l small { display: block; font-size: 12px; color: #8A8F98; margin-top: 1px; }
+  .mp-li .r { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .mp-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .mp-chip { font-size: 12px; padding: 4px 8px; border-radius: 8px; background: #F5F5F7; color: #4B5563; font-variant-numeric: tabular-nums; }
+  .mp-chip b { font-weight: 600; color: var(--text-primary); }
+  .mp-up { color: #3E8E3A; } .mp-down { color: #D0473C; }
+  .mp-rank { display: inline-flex; align-items: baseline; gap: 6px; margin-top: 10px; font-size: 13px; color: #4B5563; }
+  .mp-rank b { font-size: 20px; color: var(--text-primary); }
+  .mp-peer { display: grid; grid-template-columns: 1fr 84px 66px; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px; position: relative; }
+  .mp-peer + .mp-peer::before { content: ''; position: absolute; top: 0; left: 14px; right: 0; height: 1px; background: rgba(0,0,0,0.07); }
+  .mp-peer .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #4B5563; }
+  .mp-peer .n small { color: #8A8F98; margin-left: 4px; font-size: 11px; }
+  .mp-peer.me .n { color: var(--text-primary); font-weight: 700; }
+  .mp-peer.avg .n { color: #8A8F98; font-style: italic; }
+  .mp-peer .track { position: relative; height: 8px; }
+  .mp-peer .track i { position: absolute; top: 0; height: 8px; border-radius: 3px; background: #9DB4EA; }
+  .mp-peer.me .track i { background: #3D63D1; }
+  .mp-peer.avg .track i { background: #C7CACD; }
+  .mp-peer .track .zero { position: absolute; top: -3px; bottom: -3px; width: 1px; background: #C7CACD; }
+  .mp-peer .val { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .mp-big { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-top: 6px; color: var(--text-primary); }
+  .mp-big small { font-size: 14px; font-weight: 500; color: #4B5563; margin-left: 6px; letter-spacing: 0; }
+  .mp-ptrack { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #E0574C, #EC9A4C, #D4B03A, #7CC860, #4FA83D); margin: 14px 0 6px; opacity: .85; }
+  .mp-ptrack .mk { position: absolute; top: -5px; width: 4px; height: 18px; border-radius: 2px; background: var(--text-primary); transform: translateX(-50%); box-shadow: 0 0 0 2px #fff; }
+  .mp-pscale { display: flex; justify-content: space-between; font-size: 11px; color: #8A8F98; }
+  .mp-formula { margin-top: 12px; padding: 12px 14px; background: #F5F5F7; border-radius: 12px; font: 500 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text-primary); }
+  .mp-formula .cap { font: 600 11px var(--font); color: #8A8F98; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .mp-p { font-size: 14px; line-height: 1.5; color: #4B5563; margin-top: 10px; }
+  .mp-foot { padding: 30px 16px 40px; font-size: 11px; color: #8A8F98; line-height: 1.5; }
+
   /* Detail tables */
   .detail-section {
     padding: 0 16px 16px;
@@ -571,7 +643,7 @@
     padding: 0 14px;
   }
   .hmetric-chart-wrap.open {
-    max-height: 150px;
+    max-height: 330px;
     padding: 2px 14px 12px;
   }
   .hmetric-chart-wrap canvas { width: 100%; height: 120px; display: block; touch-action: pan-y; }
@@ -815,6 +887,18 @@
           <div style="width:32px;flex-shrink:0"></div>
         </div>
         <div id="healthDetailContent"></div>
+      </div>
+
+      <!-- Full metric page (pushed from a metric row's "Full analysis") -->
+      <div class="detail-screen" id="metricPage">
+        <div class="detail-header mp-header" id="mpHeader">
+          <div class="detail-back" onclick="closeMetricPage()">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AAPL</span>
+          </div>
+          <div class="detail-title" id="mpTitle"></div>
+          <div style="width:58px;flex-shrink:0"></div>
+        </div>
+        <div id="metricPageContent"></div>
       </div>
     </div>
   </div>
@@ -1708,7 +1792,7 @@ function renderHealthDetailContent() {
           <div class="hmetric-score" style="color:${scoreColor}">${scoreVal}</div>
           ${hasScore ? `<div class="hmetric-expand">${chevronDownSVG}</div>` : '<div style="width:24px;flex-shrink:0"></div>'}
         </div>
-        ${hasScore ? `<div class="hmetric-chart-wrap" id="metricChart${ri}"><canvas id="metricCanvas${ri}"></canvas></div>` : ''}
+        ${hasScore ? `<div class="hmetric-chart-wrap" id="metricChart${ri}"><canvas id="metricCanvas${ri}"></canvas>${metricPreview(hm.name, ri)}</div>` : ''}
       </div>`;
   });
 
@@ -1730,6 +1814,193 @@ function renderHealthDetailContent() {
     newChipsWrap.scrollLeft = savedScroll;
   }
 }
+
+
+// ===================== METRIC PAGES =====================
+// Web definitions per metric (InvestingPro explorer pages). Numbers on each page are generated
+// Apple demo data, consistent with the row's value, percentile and score.
+const METRIC_DICT = {"Asset Efficiency": {"desc": "A ratio that measures the amount of cash flow that a company generates from its assets.", "prose": [], "formula": ["\"Asset Efficiency = Cash From Operations / Average Assets\","], "snapshot": false, "price": false}, "Asset Turnover": {"desc": "A ratio that measures the dollars in revenue a company generates per dollar of assets.", "prose": ["The Asset Turnover ratio indicates how well a company uses all its assets to generate revenues. Generally, a higher asset turnover ratio signifies that the company is effective at using all of its assets to generate revenues."], "formula": ["Asset Turnover = Total Revenue / Average Total Assets"], "snapshot": false, "price": false}, "Capital Expenditures Coverage": {"desc": "The amount a company outlays for capital assets for each dollar of cash dollar it generates from those investments.", "prose": [], "formula": [], "snapshot": false, "price": false}, "Operating Cash Flow Margin": {"desc": "A ratio that measures the amount of revenue a firm can convert into operating cash flow.", "prose": [], "formula": ["Operating Cash Flow Margin  = Cash from Operations / Total Revenue"], "snapshot": false, "price": false}, "Cash Ratio": {"desc": "A strict ratio used to assess a company's short-term liquidity.", "prose": ["Cash ratio measures if the company has enough liquidity to service short term liabilities."], "formula": ["Cash Ratio = Cash / Current Liabilities"], "snapshot": false, "price": false}, "Cash / Total Capital": {"desc": "A ratio that measures the level of the cash relative to the market value of total capital.", "prose": ["Cash / Total Capital ratio is a measurement of a company\u2019s liquidity. We calculate it as follows:"], "formula": ["Cash / Total Capital = Cash & Equivalents / (Debt + Market Cap)"], "snapshot": false, "price": false}, "Current Ratio": {"desc": "A ratio that compares a company's current total assets to its current total liabilities.", "prose": ["Current Ratio measures whether a firm is capitalized with enough assets to pay its debts over the next twelve months by comparing a firm\u2019s current assets to its current liabilities.", "While ratios vary by industry and circumstances, healthy companies generally have ratios between 1.5 and 3."], "formula": ["Current Ratio = Current Assets / Current Liabilities"], "snapshot": false, "price": false}, "Total Debt / Total Capital": {"desc": "A ratio that measures the level of the debt relative to the market value of total capital.", "prose": ["The higher the percentage, the more debt the company has in its capital structure and the lower the equity cushion. In times of distress, a high Debt / Total Capital increases the chances of default or bankruptcy."], "formula": ["Total Capital = Market Cap + Total Debt", "Total Debt / Total Capital = Total Debt / Total Capital"], "snapshot": false, "price": false}, "Debt / Equity": {"desc": "A ratio that measures the level of the debt relative to the book value of common equity.", "prose": ["Total Debt", "The higher the ratio, the more debt the company has in its capital structure."], "formula": ["(/) Total Common Equity", "(=) Debt / Equity", "Read More on HBR: Debt / Equity Ratio"], "snapshot": false, "price": false}, "Levered Free Cash Flow Margin": {"desc": "Levered free cash flow expressed as a percent of revenue.", "prose": [], "formula": ["Levered Free Cash Flow Margin  = Levered Free Cash Flow / Total Revenue"], "snapshot": false, "price": false}, "FCF / OCF": {"desc": "A ratio that measures the amount of free cash flows (FCF) for each dollar of operating cash flows (OCF).", "prose": [], "formula": [], "snapshot": false, "price": false}, "EPS Diluted Cumulative Growth (1Y)": {"desc": "Period over prior period growth in diluted EPS (cont. ops).", "prose": ["Diluted EPS (Cont. Ops) Growth = (Current Year - Prior Year) / ABS(Prior Year Diluted EPS (Cont. Ops))*", "*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": [], "snapshot": false, "price": false}, "EPS Diluted Cumulative Growth (3Y)": {"desc": "Cumulative diluted EPS growth over the last three years", "prose": [], "formula": [], "snapshot": true, "price": false}, "Diluted EPS (Cont. Ops) Growth": {"desc": "Period over prior period growth in diluted EPS (cont. ops).", "prose": ["Diluted EPS (Cont. Ops) Growth = (Current Year - Prior Year) / ABS(Prior Year Diluted EPS (Cont. Ops))*", "*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": [], "snapshot": false, "price": false}, "EPS Trend Score": {"desc": "Trend score is calculated as the percentage of quarters within the past two years that had positive year-over-year EPS growth. When a quarterly growth...\nView More", "prose": ["Trend score is calculated as the percentage of quarters within the past two years that had positive year-over-year EPS growth. When a quarterly growth value is not available, the denominator is adjusted accordingly. If a minimum of four quarters of data is not available, the value is returned as NA."], "formula": [], "snapshot": true, "price": false}, "FCF Levered Cumulative Growth (1Y)": {"desc": "Period over prior period growth in levered free cash flow.", "prose": ["Levered Free Cash Flow Growth = (Current Year - Prior Year) / ABS(Prior Year Levered Free Cash Flow)*", "*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": [], "snapshot": false, "price": false}, "FCF Levered Cumulative Growth (3Y)": {"desc": "Cumulative levered free cash flow growth over the last three years", "prose": [], "formula": [], "snapshot": true, "price": false}, "Levered Free Cash Flow Growth": {"desc": "Period over prior period growth in levered free cash flow.", "prose": ["Levered Free Cash Flow Growth = (Current Year - Prior Year) / ABS(Prior Year Levered Free Cash Flow)*", "*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": [], "snapshot": false, "price": false}, "FCF Levered Trend Score": {"desc": "Trend score is calculated as the percentage of quarters within the past two years that had positive year-over-year levered free cash flow growth. When...\nView More", "prose": ["Trend score is calculated as the percentage of quarters within the past two years that had positive year-over-year levered free cash flow growth. When a quarterly growth value is not available, the denominator is adjusted accordingly. If a minimum of four quarters of data is not available, the value is returned as NA."], "formula": [], "snapshot": true, "price": false}, "Gross Profit Cumulative Growth (1Y)": {"desc": "Period over prior period growth in gross profit.", "prose": ["*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": ["Gross Profit Growth = (Current Year - Prior Year) / ABS(Prior Year Gross Profit)*"], "snapshot": false, "price": false}, "Gross Profit Cumulative Growth (3Y)": {"desc": "Cumulative gross profit growth over the last three years", "prose": [], "formula": [], "snapshot": true, "price": false}, "Gross Profit Growth": {"desc": "Period over prior period growth in gross profit.", "prose": ["*ABS = An absolute value adjustment is used to ensure the direction of growth of negative numbers is reflected"], "formula": ["Gross Profit Growth = (Current Year - Prior Year) / ABS(Prior Year Gross Profit)*"], "snapshot": false, "price": false}, "Price % of 52 Week High": {"desc": "The current stock price expressed as a percentage of the 52 week high.", "prose": [], "formula": [], "snapshot": true, "price": true}, "1 Month Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 1 month.", "prose": ["The 1 month price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 1 month. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 1.00."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "1 Week Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 1 week.", "prose": ["The 1 week price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 1 week. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 1.00."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "1 Year Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 1 year.", "prose": ["The 1 year price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 1 year. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 1.00."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "2 Week Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 2 weeks.", "prose": [], "formula": [], "snapshot": false, "price": true}, "2 Year Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 2 years.", "prose": ["The 2 year price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 2 years. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 0.99."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "3 Month Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 3 months.", "prose": ["The 3 month price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 3 months. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 1.00."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "3 Week Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 3 weeks.", "prose": [], "formula": [], "snapshot": false, "price": true}, "3 Year Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 3 years.", "prose": ["The 3 year price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 3 years. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 0.99."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "4 Year Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 4 years.", "prose": ["The 4 year price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 4 years. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 0.98."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "5 Year Price Total Return": {"desc": "The total change in price (adjusted of dividends and splits when applicable) over the last 5 years.", "prose": ["The 5 year price total return measures the total change in price (adjusted of dividends and splits when applicable) over the last 5 years. If the company pays dividends, the starting stock price is adjusted down to include the return in the form of dividends.", "Prior price dividend adjustment factor is 0.98."], "formula": ["Last Close Price / Adj Prior Close Price", "(-) 1", "(=) Total Return", "(-) 1"], "snapshot": false, "price": true}, "Cash Return on Invested Capital": {"desc": "A ratio that measures the amount of free cash flow a firm generates on each dollar of capital invested (debt + equity).", "prose": [], "formula": [], "snapshot": false, "price": false}, "EBITDA Margin": {"desc": "Earnings before interest, taxes, depreciation and amortization (EBITDA) expressed as a percent of revenue.", "prose": [], "formula": ["EBITDA Margin  = EBITDA / Total Revenue"], "snapshot": false, "price": false}, "Pre-tax Income Margin": {"desc": "Earnings before taxes expressed as a percent of revenue.", "prose": [], "formula": ["Pre-tax Income Margin  = EBT, Incl. Unusual Items / Total Revenue"], "snapshot": false, "price": false}, "Fixed Asset Turnover": {"desc": "An efficiency ratio that is calculated by dividing revenue by average fixed assets.", "prose": ["The Fixed Asset Turnover ratio indicates how well a company uses its fixed assets to generate revenues. Generally, a higher fixed-asset turnover ratio signifies that the company is effective at using capital expenditures to generate revenues."], "formula": ["Fixed Asset Turnover = Revenue / Average Fixed Assets"], "snapshot": false, "price": false}, "Gross Profit Margin": {"desc": "Gross profit expressed as a percent of revenue.", "prose": [], "formula": ["Gross Profit Margin  = Gross Profit / Total Revenue"], "snapshot": false, "price": false}, "Inventory Turnover": {"desc": "A ratio that measures the number for times a company's inventory is sold and replaced over the year.", "prose": ["The Inventory Turnover ratio measures the number for times a company\u2019s inventory is sold and replaced over a year. It is a measure of working capital efficiency and a company\u2019s inventory turnover is often benchmarked against competitors or the industry average. A low turnover ratio can serve as a leading indicator of poor sales (excess inventory) while a high ratio may imply strong sales."], "formula": [], "snapshot": false, "price": false}, "Net Income to Common Margin": {"desc": "A ratio that measures the amount of profit from continuing operations that common shareholders earn on each dollar of revenue earned by the firm.", "prose": [], "formula": [], "snapshot": false, "price": false}, "Net Income to Company": {"desc": "This item represents the net income available to all stakeholders of the company and is presented as total income or loss before discontinued operatio...\nView More", "prose": [], "formula": [], "snapshot": false, "price": false}, "Operating Income Margin": {"desc": "Operating income expressed as a percent of revenue.", "prose": [], "formula": ["Operating Income Margin  = Operating Income, Adjusted / Total Revenue"], "snapshot": false, "price": false}, "Return on Capital": {"desc": "Measures the profitability and efficiency of a company's capital investments", "prose": [], "formula": [], "snapshot": false, "price": false}, "Return on Assets": {"desc": "A ratio that measures the amount of net profit a business generates per unit of assets it owns", "prose": ["Return on assets represents the dollars in earnings or Net Income a company generates per dollar of assets. ROA is typically used to gauge the efficiency of the company and its management at deploying capital to generate income for shareholders.", "The net income used in the numerator is often adjusted for one-time and non-recurring items to present a clearer view of future earnings. Since income is earned over the course of a year, we average Total Assets at the start and end of the year for the denominator."], "formula": ["Return on Assets = Net Income / Average Total Assets"], "snapshot": false, "price": false}, "Earnings Yield": {"desc": "The inverse of the price-to-earnings ratio for the latest twelve months.", "prose": ["The earnings yield or inverse price-to-earnings ratio determines the yield an investor can expect to earn in the form of net income at the current price.", "or"], "formula": ["Earnings Per Share (EPS) / Stock Price", "1 / PE Multiple"], "snapshot": false, "price": false}, "EV / EBIT": {"desc": "Measures the dollars in Enterprise Value for each dollar of EBIT over the last twelve months.", "prose": ["Enterprise Value / LTM EBIT measures the dollars in Enterprise Value for each dollar of EBIT earned over the last 12 months. EBIT stands for Earnings before Interest and Taxes."], "formula": ["EV / LTM EBIT = Enterprise Value / LTM EBIT"], "snapshot": false, "price": false}, "EV / EBIT Growth Ratio": {"desc": "A heuristic used to measure the level of EBIT growth relative to the EV / EBIT multiple.", "prose": [], "formula": [], "snapshot": true, "price": false}, "EV / EBITDA": {"desc": "Measures the dollars in Enterprise Value for each dollar of EBITDA over the last twelve months.", "prose": ["EBITDA Multiple, Enterprise Value / EBITDA, or EV / EBITDA measures the dollars in Enterprise Value for each dollar of EBITDA.", "EBITDA is used in the denominator since it is capital structure neutral and can be used to compare companies with different levels of debt (See EBITDA for benefits). We use Enterprise Value as the numerator to consider the claims on EBITDA of both debt and equity holders."], "formula": ["EBITDA Multiple = Enterprise Value / LTM EBITDA"], "snapshot": false, "price": false}, "EV / EBITDA Growth Ratio": {"desc": "A heuristic used to measure the level of EBITDA growth relative to the EV / EBITDA multiple.", "prose": [], "formula": [], "snapshot": true, "price": false}, "EV / Invested Capital": {"desc": "Measures the dollars in Enterprise Value for each dollar of Invested Capital (Equity + Debt) over the last twelve months.", "prose": ["Enterprise Value / Invested Capital measures the dollars in Enterprise Value for each dollar of the book value of total capital invested in the business."], "formula": ["EV / Invested Capital = Enterprise Value / Invested Capital"], "snapshot": false, "price": false}, "EV / IC Growth Ratio": {"desc": "A heuristic used to measure the level of revenue growth relative to the EV / Invested Capital multiple.", "prose": [], "formula": [], "snapshot": true, "price": false}, "EV / Revenue": {"desc": "Measures the dollars in Enterprise Value for each dollar of revenue over the last twelve months.", "prose": ["A revenue multiple measures the dollars in Enterprise Value for each dollar of revenue.", "Using Enterprise Value considers the claims on revenue (and the profit that it yields) of both debt and equity holders."], "formula": ["EV / LTM Revenue Ratio = Enterprise Value / Revenue"], "snapshot": false, "price": false}, "EV / Revenue Growth Ratio": {"desc": "A heuristic used to measure the level of revenue growth relative to the EV / Revenue multiple.", "prose": [], "formula": [], "snapshot": true, "price": false}, "Free Cash Flow Yield": {"desc": "Measures amount of free cash flow for each dollar of equity (market capitalization).", "prose": ["Free Cash Flow Yield (FCFY) measures amount of free cash flow for each dollar of market capitalization.", "Read More: Levered Free Cash Flow"], "formula": ["Free Cash Flow Yield = Levered Free Cash Flow / Market Capitalization"], "snapshot": false, "price": false}, "Market Cap": {"desc": "Measures a public company's total equity value as implied by the stock's last observed trading price. In the case of cryptocurrencies, it measure the ...\nView More", "prose": [], "formula": [], "snapshot": false, "price": false}};
+const PEERS = [['Microsoft', 'MSFT'], ['Alphabet', 'GOOGL'], ['Amazon', 'AMZN'], ['Meta Platforms', 'META'], ['NVIDIA', 'NVDA'],
+  ['Samsung', 'SSNL.F'], ['Sony', 'SONY'], ['Dell', 'DELL'], ['HP', 'HPQ'], ['Lenovo', 'LNVGY']];
+const MP_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+let mpCat = null, mpIdx = null, mpPeriod = 'annual', mpScope = 'Sector';
+
+function seeded(str) {
+  let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 100000) / 100000; };
+}
+// Parse a display value ("31.5%", "1.8x", "132.2 B", "0.8") into number + format
+function parseVal(str) {
+  const m = String(str).match(/^(-?[\d,]*\.?\d+)\s*(.*)$/);
+  if (!m) return null;
+  return { n: parseFloat(m[1].replace(/,/g, '')), suf: m[2] ? (m[2] === 'B' ? ' B' : m[2]) : '', dec: (m[1].split('.')[1] || '').length || 1 };
+}
+const fmtV = (n, pv) => n.toLocaleString('en-US', { minimumFractionDigits: pv.dec, maximumFractionDigits: pv.dec }) + pv.suf;
+
+// Build (deterministically) the full page model for one metric
+function metricModel(cat, ri) {
+  const row = healthMetrics[cat][ri];
+  const name = row[0], pv = parseVal(row[1]), pct = row[2], score = row[3];
+  const dict = METRIC_DICT[name] || { desc: '', prose: [], formula: [], snapshot: false };
+  const rnd = seeded(cat + name);
+  const rel = baseMetrics[cat] && baseMetrics[cat][ri] ? baseMetrics[cat][ri].rel : 'direct';
+  const inverse = rel === 'inverse';
+  const v = pv.n, step = Math.max(Math.abs(v) * 0.12, Math.pow(10, -pv.dec) * 5);
+  const model = { name, cat, row, pv, pct, score, dict, inverse };
+
+  // History: 10 fiscal years (Sep year end) and 40 quarters, ending at today's value
+  if (!dict.snapshot) {
+    const start = v - step * (rnd() * 6 - 2);
+    model.annual = Array.from({ length: 10 }, (_, i) => {
+      const t = i / 9, base = start + (v - start) * t;
+      return { label: 'FY ' + (2017 + i), short: String(2017 + i), v: i === 9 ? v : base + (rnd() - 0.5) * step * 2.2 };
+    });
+    model.quarterly = Array.from({ length: 40 }, (_, i) => {
+      const t = i / 39, base = start + (v - start) * t, d = new Date(Date.UTC(2016, 11 + i * 3, 1));
+      return { label: MP_MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(), short: MP_MONTHS[d.getUTCMonth()] + " '" + String(d.getUTCFullYear()).slice(2), v: i === 39 ? v * (1 + (rnd() - 0.5) * 0.08) : base + (rnd() - 0.5) * step * 3 };
+    });
+    model.ttm = model.quarterly.map((q, i, a) => ({ ...q, v: i < 3 ? q.v : (a[i].v + a[i - 1].v + a[i - 2].v + a[i - 3].v) / 4 }));
+    model.ttm[model.ttm.length - 1].v = v;
+    const last = model.annual.slice(-5).map(p => p.v);
+    model.avg = { n: last.length, v: last.reduce((a, b) => a + b, 0) / last.length };
+    const srt = [...last].sort((a, b) => a - b); model.median = srt[Math.floor(srt.length / 2)];
+    const five = model.annual.slice(-5);
+    model.peak = five.reduce((a, b) => (b.v > a.v ? b : a)); model.low = five.reduce((a, b) => (b.v < a.v ? b : a));
+    model.yoy = five.slice(1).map((p, i) => ({ y: p.short, v: p.v, c: five[i].v ? (p.v - five[i].v) / Math.abs(five[i].v) * 100 : 0 }));
+  }
+
+  // Peers: Apple's rank follows its percentile (lower-is-better metrics rank the other way)
+  const good = inverse ? pct : 100 - pct;
+  const rank = Math.min(11, Math.max(1, 1 + Math.round(good / 100 * 10)));
+  const vals = [];
+  // Positive values spread proportionally (no sign flips); zero/negative values spread additively
+  for (let k = 0; k < 11; k++) vals.push(v > 0 ? v * Math.exp((rank - 1 - k) * (0.12 + rnd() * 0.08)) : v + (rank - 1 - k) * step * (0.6 + rnd() * 0.5));
+  vals[rank - 1] = v;
+  const order = inverse ? [...vals].reverse() : vals;
+  let pi = 0;
+  model.peers = order.map(x => (Math.abs(x - v) < 1e-9 ? { name: 'Apple', tk: 'AAPL', v: x, me: true } : { name: PEERS[pi][0], tk: PEERS[pi++][1], v: x }));
+  // Best first: highest value, or lowest for lower-is-better metrics (valuation, debt)
+  model.peers.sort((a, b) => inverse ? a.v - b.v : b.v - a.v);
+  model.rank = model.peers.findIndex(p => p.me) + 1;
+  const pvs = model.peers.map(p => p.v).sort((a, b) => a - b);
+  model.peerMedian = pvs[5];
+
+  // Sector benchmark per scope
+  const scope = (label, cnt, wiggle) => {
+    const p = Math.min(99, Math.max(1, pct + (rnd() - 0.5) * wiggle));
+    const g = ((inverse ? 100 - p : p) - 50) / 50;
+    const med = v > 0 ? v * Math.exp(-g * 0.9) : v - step * g * 4;
+    const sp = Math.abs(med) || step;
+    return { label, count: cnt, p, median: med, mean: med * 0.92, min: v > 0 ? med * 0.05 : med - sp * 6, max: v > 0 ? Math.max(med, v) * 3.2 : med + sp * 6, sd: sp * 1.6 };
+  };
+  model.sector = { Sector: scope('Information Technology', 2100 + Math.floor(rnd() * 300), 14), Industry: scope('Technology Hardware, Storage & Peripherals', 120 + Math.floor(rnd() * 60), 22) };
+  model.sectorAvg = model.sector.Sector.median;
+  return model;
+}
+
+// Option D preview in the expanded row: average > sector median > peer rank
+function metricPreview(cat, ri) {
+  const row = healthMetrics[cat][ri];
+  if (row[3] === null) return '';
+  const m = metricModel(cat, ri), f = n => fmtV(n, m.pv);
+  const first = m.avg ? [`${m.avg.n}y average`, f(m.avg.v)] : ['Peer median', f(m.peerMedian)];
+  return `<div class="mfacts">
+    <div class="mfact"><div class="k">${first[0]}</div><div class="v">${first[1]}</div></div>
+    <div class="mfact"><div class="k">Sector median</div><div class="v">${f(m.sector.Sector.median)}</div></div>
+    <div class="mfact"><div class="k">Peer rank</div><div class="v">#${m.rank} of 11</div></div></div>
+    <button class="mcta" onclick="event.stopPropagation(); openMetricPage('${cat}', ${ri})">Full analysis <svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+}
+
+function mpChart(points, pv) {
+  const W = 358, H = 170, pl = 2, pr = 44, pt = 10, pb = 22, cw = W - pl - pr, ch = H - pt - pb;
+  const vals = points.map(p => p.v); let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+  const pad = (hi - lo) * 0.08 || 1; hi += pad; if (lo < 0) lo -= pad;
+  const y = v => pt + ch - (v - lo) / (hi - lo) * ch, n = points.length, slot = cw / n, bw = Math.max(2, Math.min(18, slot * 0.62));
+  let g = '';
+  for (let k = 0; k <= 3; k++) { const v = lo + (hi - lo) * k / 3; g += `<line x1="${pl}" x2="${pl + cw}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(0,0,0,.06)" stroke-dasharray="3 3"/><text x="${pl + cw + 6}" y="${y(v) + 3.5}" font-size="10" fill="#8A8F98">${fmtV(v, { ...pv, dec: Math.abs(hi - lo) > 20 ? 0 : 1 })}</text>`; }
+  let bars = '';
+  points.forEach((p, i) => { const x = pl + slot * (i + 0.5) - bw / 2, y0 = y(0), y1 = y(p.v); bars += `<rect x="${x.toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, Math.abs(y1 - y0)).toFixed(1)}" rx="2" fill="${i === n - 1 ? '#3D63D1' : '#9DB4EA'}"/>`; });
+  const stepL = Math.ceil(n / 5);
+  let xl = ''; points.forEach((p, i) => { if ((n - 1 - i) % stepL === 0) xl += `<text x="${(pl + slot * (i + 0.5)).toFixed(1)}" y="${H - 5}" font-size="10" fill="#8A8F98" text-anchor="middle">${p.short}</text>`; });
+  return `<div class="mp-chart" id="mpChart"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${g}<line x1="${pl}" x2="${pl + cw}" y1="${y(0)}" y2="${y(0)}" stroke="rgba(0,0,0,.18)"/>${bars}${xl}<line id="mpCross" x1="0" x2="0" y1="${pt}" y2="${pt + ch}" stroke="rgba(26,26,46,.35)" visibility="hidden"/></svg><div class="mp-tip" id="mpTip"></div></div>`;
+}
+function mpWireChart(points, pv) {
+  const el = document.getElementById('mpChart'); if (!el) return;
+  const svg = el.querySelector('svg'), tip = el.querySelector('#mpTip'), cross = el.querySelector('#mpCross'), W = 358, pl = 2, cw = W - pl - 44;
+  const show = cx => {
+    const r = svg.getBoundingClientRect(), x = (cx - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(points.length - 1, Math.floor((x - pl) / (cw / points.length)))), px = pl + cw / points.length * (i + 0.5);
+    cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.setAttribute('visibility', 'visible');
+    tip.innerHTML = `<b>${fmtV(points[i].v, pv)}</b>${points[i].label}`; tip.style.display = 'block';
+    tip.style.left = Math.min(Math.max(px / W * r.width - tip.offsetWidth / 2, 0), r.width - tip.offsetWidth) + 'px';
+  };
+  svg.addEventListener('pointerdown', e => { show(e.clientX); svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener('pointermove', e => { if (e.buttons) show(e.clientX); });
+}
+
+function renderMetricPage(resetScroll = true) {
+  const m = metricModel(mpCat, mpIdx), pv = m.pv, f = n => fmtV(n, pv);
+  const lv = healthLevelColor(m.score), level = HEALTH_LEVELS[Math.min(5, Math.max(1, Math.round(m.score))) - 1];
+  const screen = document.getElementById('metricPage'), keep = screen.scrollTop;
+  document.getElementById('mpTitle').textContent = m.name;
+  let h = `<div class="mp-hero"><div class="mp-eyebrow">${m.cat} · Apple</div><h1>${m.name}</h1><p class="mp-desc">${m.dict.desc}</p>
+    <div class="mp-kpis"><div class="mp-kpi"><div class="k">Value</div><div class="v">${m.row[1]}</div></div>
+      <div class="mp-kpi"><div class="k">Percentile</div><div class="v">${m.pct.toFixed(1)}%</div></div>
+      <div class="mp-kpi"><div class="k">Score</div><div class="v" style="color:${lv}">${m.score.toFixed(1)}<small>${level}</small></div></div></div>
+    ${m.dict.snapshot ? '<p class="mp-note">A point-in-time figure with no history; see how it compares with peers below.</p>' : ''}</div>`;
+
+  if (!m.dict.snapshot) {
+    const pts = mpPeriod === 'annual' ? m.annual : mpPeriod === 'quarterly' ? m.quarterly : m.ttm;
+    h += `<div class="mp-sec"><h2>History</h2><div class="mp-seg">${[['annual', 'Annual'], ['quarterly', 'Quarterly'], ['ttm', 'TTM']].map(o => `<button class="${o[0] === mpPeriod ? 'on' : ''}" onclick="mpPeriod='${o[0]}';renderMetricPage(false)">${o[1]}</button>`).join('')}</div>
+      ${mpChart(pts, pv)}
+      <div class="mp-list">
+        <div class="mp-li"><span class="l">${m.avg.n}-year average<small>FY 2022-2026</small></span><span class="r">${f(m.avg.v)}</span></div>
+        <div class="mp-li"><span class="l">${m.avg.n}-year median</span><span class="r">${f(m.median)}</span></div>
+        <div class="mp-li"><span class="l">Peak<small>${m.peak.label}</small></span><span class="r">${f(m.peak.v)}</span></div>
+        <div class="mp-li"><span class="l">Low<small>${m.low.label}</small></span><span class="r">${f(m.low.v)}</span></div></div>
+      <div class="mp-chips">${m.yoy.map(c => `<span class="mp-chip">${c.y} <b>${f(c.v)}</b> <span class="${c.c < 0 ? 'mp-down' : 'mp-up'}">${c.c >= 0 ? '+' : ''}${c.c.toFixed(1)}%</span></span>`).join('')}</div></div>`;
+  }
+
+  const lo = Math.min(0, ...m.peers.map(p => p.v)), hi = Math.max(0, ...m.peers.map(p => p.v)), span = hi - lo || 1, zx = (0 - lo) / span * 100;
+  const peerRows = [...m.peers, { name: 'IT sector (median)', avg: true, v: m.sectorAvg }].sort((a, b) => m.inverse ? a.v - b.v : b.v - a.v);
+  h += `<div class="mp-sec"><h2>Compared with peers</h2><div class="mp-sub">Similar companies by industry, size and growth.</div>
+    <div class="mp-rank"><b>#${m.rank}</b> of 11 companies</div>
+    <div class="mp-list">${peerRows.map(p => { const a = (Math.min(0, p.v) - lo) / span * 100, w = Math.abs(p.v) / span * 100;
+      return `<div class="mp-peer ${p.me ? 'me' : ''} ${p.avg ? 'avg' : ''}"><div class="n">${p.name}${p.tk ? `<small>${p.tk}</small>` : ''}</div><div class="track">${lo < 0 ? `<span class="zero" style="left:${zx}%"></span>` : ''}<i style="left:${a}%;width:${Math.max(w, 1)}%"></i></div><div class="val">${f(p.v)}</div></div>`; }).join('')}</div></div>`;
+
+  const sc = m.sector[mpScope], ord = n => { const r = Math.round(n), t = ['th', 'st', 'nd', 'rd'], k = r % 100; return r + (t[(k - 20) % 10] || t[k] || t[0]); };
+  h += `<div class="mp-sec"><h2>Sector benchmark</h2><div class="mp-sub">${sc.label} · Developed markets</div>
+    <div class="mp-seg">${['Sector', 'Industry'].map(o => `<button class="${o === mpScope ? 'on' : ''}" onclick="mpScope='${o}';renderMetricPage(false)">${o}</button>`).join('')}</div>
+    <div class="mp-big">${ord(sc.p)}<small>percentile</small></div>
+    <div class="mp-ptrack"><span class="mk" style="left:${sc.p}%"></span></div><div class="mp-pscale"><span>Lowest</span><span>Highest</span></div>
+    <div class="mp-list">${[['Companies included', sc.count.toLocaleString('en-US')], ['Median', f(sc.median)], ['Mean', f(sc.mean)], ['Lowest', f(sc.min)], ['Highest', f(sc.max)], ['Standard deviation', f(Math.abs(sc.sd))]]
+      .map(r => `<div class="mp-li"><span class="l">${r[0]}</span><span class="r">${r[1]}</span></div>`).join('')}</div></div>`;
+
+  if (m.dict.formula.length || m.dict.prose.length) {
+    h += `<div class="mp-sec"><h2>How it's calculated</h2>${m.dict.prose.map(l => `<p class="mp-p">${l}</p>`).join('')}
+      ${m.dict.formula.length ? `<div class="mp-formula"><div class="cap">Formula</div>${m.dict.formula.join('<br>')}</div>` : ''}</div>`;
+  }
+  h += `<div class="mp-foot">Source: InvestingPro. Prototype demo data for Apple; definitions from the InvestingPro metric pages.</div>`;
+  document.getElementById('metricPageContent').innerHTML = h;
+  if (!m.dict.snapshot) mpWireChart(mpPeriod === 'annual' ? m.annual : mpPeriod === 'quarterly' ? m.quarterly : m.ttm, pv);
+  screen.scrollTop = resetScroll ? 0 : keep;
+}
+
+function openMetricPage(cat, ri) {
+  mpCat = cat; mpIdx = ri; mpPeriod = 'annual'; mpScope = 'Sector';
+  renderMetricPage();
+  document.getElementById('mpHeader').classList.remove('scrolled');
+  document.getElementById('healthDetail').classList.add('pushed');
+  document.getElementById('metricPage').classList.add('visible');
+}
+function closeMetricPage() {
+  document.getElementById('healthDetail').classList.remove('pushed');
+  document.getElementById('metricPage').classList.remove('visible');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const sc = document.getElementById('metricPage');
+  sc.addEventListener('scroll', () => document.getElementById('mpHeader').classList.toggle('scrolled', sc.scrollTop > 60));
+});
 
 // ===================== START =====================
 document.addEventListener('DOMContentLoaded', init);
