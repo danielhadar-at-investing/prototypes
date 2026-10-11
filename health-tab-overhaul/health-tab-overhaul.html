@@ -1197,14 +1197,6 @@ function renderHealthChart() {
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    // End dot (current score)
-    if (chartHoverIdx === null) {
-      const x = xAt(n - 1), y = yAt(data[n - 1]);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = color;
-      ctx.beginPath(); ctx.arc(x, y, 2.75, 0, Math.PI * 2); ctx.fill();
-    }
   });
 
   // Scrub crosshair
