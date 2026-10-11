@@ -187,74 +187,15 @@
   }
   .scroll-content::-webkit-scrollbar { display: none; }
 
-  /* Sticky header */
-  .sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border);
-    opacity: 0;
-    transform: translateY(-100%);
-    transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none;
-  }
-  .sticky-header.visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
 
-  /* Hero card */
-  .hero-section {
-    padding: 0 16px 12px;
-    display: flex;
-    gap: 10px;
-  }
-  .hero-card {
-    flex: 1;
-    background: var(--bg-card);
-    border-radius: var(--radius);
-    padding: 14px;
-    border: 1.5px solid var(--border);
-    transition: border-color 0.25s, background 0.25s;
-    position: relative;
-    overflow: hidden;
+  /* Overall score summary (top of the Financial Health section card) */
+  .health-summary {
     display: flex;
     flex-direction: column;
-  }
-  .hero-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: transparent;
-    transition: background 0.25s;
-  }
-  /* Change 1: active card border and top accent to black */
-  .hero-card.active {
-    border-color: rgba(0,0,0,0.2);
-  }
-  .hero-card.active::before {
-    background: #1A1A2E;
-  }
-  .hero-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 0 14px;
+    border-bottom: 1px solid var(--border);
   }
 
   /* Ring gauge wrapper - grows to fill space between label and the verbal tag */
@@ -582,7 +523,7 @@
     line-height: 1.45;
     padding: 10px 12px;
     border-radius: 10px;
-    width: 220px;
+    width: 268px;
     z-index: 10;
     opacity: 0;
     pointer-events: none;
@@ -592,6 +533,7 @@
   }
   .range-tooltip strong {
     display: block;
+    white-space: nowrap;
     margin-bottom: 2px;
   }
   .range-tooltip.visible {
@@ -713,37 +655,6 @@
         </div>
 
         <div class="scroll-content" id="scrollContent">
-          <!-- Sticky header -->
-          <div class="sticky-header" id="stickyHeader">
-            <span>Health: <span id="stickyHealth">3.3/5</span></span>
-          </div>
-
-          <!-- Hero sentinel for intersection detection -->
-          <div id="heroSentinel" style="height:1px;"></div>
-
-          <!-- Hero card (full width) -->
-          <div class="hero-section" id="heroSection">
-            <div class="hero-card active" id="heroHealth">
-              <div class="hero-label">Financial Health</div>
-              <div class="ring-gauge-wrap">
-                <div class="ring-gauge-container">
-                  <svg class="ring-gauge-svg" viewBox="0 0 80 80" width="80" height="80">
-                    <!-- Track -->
-                    <circle cx="40" cy="40" r="32" fill="none" stroke="#F0F0F0" stroke-width="6" stroke-linecap="round"/>
-                    <!-- Progress: circumference = 2*pi*32 = 201.06; dash length is set from the score in updateOverallHealthScore() -->
-                    <circle cx="40" cy="40" r="32" fill="none" stroke="#ffab00" stroke-width="6" stroke-linecap="round"
-                      stroke-dasharray="132.7 201.06"
-                      transform="rotate(-90, 40, 40)"/>
-                  </svg>
-                  <div class="ring-gauge-inner">
-                    <div class="ring-gauge-score">3.3</div>
-                  </div>
-                </div>
-              </div>
-              <div class="ring-gauge-label" id="healthTag">Good</div>
-            </div>
-          </div>
-
           <!-- Health content -->
           <div class="tab-content" id="contentHealth">
             <div class="tab-section-title">Financial Health
@@ -752,6 +663,25 @@
               </button>
             </div>
             <div class="section-card">
+              <!-- Overall score summary -->
+              <div class="health-summary">
+                <div class="ring-gauge-wrap">
+                  <div class="ring-gauge-container">
+                    <svg class="ring-gauge-svg" viewBox="0 0 80 80" width="80" height="80">
+                      <!-- Track -->
+                      <circle cx="40" cy="40" r="32" fill="none" stroke="#F0F0F0" stroke-width="6" stroke-linecap="round"/>
+                      <!-- Progress: circumference = 2*pi*32 = 201.06; dash length is set from the score in updateOverallHealthScore() -->
+                      <circle cx="40" cy="40" r="32" fill="none" stroke="#ffab00" stroke-width="6" stroke-linecap="round"
+                        stroke-dasharray="132.7 201.06"
+                        transform="rotate(-90, 40, 40)"/>
+                    </svg>
+                    <div class="ring-gauge-inner">
+                      <div class="ring-gauge-score">3.3</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="ring-gauge-label" id="healthTag">Good</div>
+              </div>
               <div id="healthRows"></div>
             </div>
 
@@ -909,7 +839,6 @@ function init() {
   renderHealthRows();
   renderHealthChart();
   renderChartLegend();
-  setupStickyObserver();
   updateOverallHealthScore();
 }
 
@@ -1048,25 +977,6 @@ function renderChartLegend() {
   });
 }
 
-// ===================== STICKY HEADER =====================
-function setupStickyObserver() {
-  const scrollEl = document.getElementById('scrollContent');
-  const sentinel = document.getElementById('heroSentinel');
-  const stickyEl = document.getElementById('stickyHeader');
-
-  if (!scrollEl || !sentinel) return;
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      stickyEl.classList.toggle('visible', !entry.isIntersecting);
-    });
-  }, {
-    root: scrollEl,
-    threshold: 0
-  });
-  observer.observe(sentinel);
-}
-
 // ===================== HEALTH DETAIL =====================
 let activeHealthModel = 0;
 
@@ -1140,7 +1050,6 @@ function updateOverallHealthScore() {
   const progressCircle = document.querySelectorAll('.ring-gauge-svg circle')[1];
   progressCircle.setAttribute('stroke', colorHex);
   progressCircle.setAttribute('stroke-dasharray', `${dashLen.toFixed(1)} ${circumference.toFixed(2)}`);
-  document.getElementById('stickyHealth').textContent = score.toFixed(1) + '/5';
 }
 
 const expandedMetrics = new Set();
