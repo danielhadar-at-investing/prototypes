@@ -188,49 +188,62 @@
   .scroll-content::-webkit-scrollbar { display: none; }
 
 
-  /* Overall score summary (top of the Financial Health section card) */
+  /* Financial Health block (coast-to-coast, no card) */
+  .health-block {
+    margin: 0 -16px 20px;
+  }
+  /* Overall score summary: 5-level scale line, Overview style */
   .health-summary {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 0 14px;
+    padding: 0 16px 16px;
     border-bottom: 1px solid var(--border);
   }
-
-  /* Ring gauge wrapper - grows to fill space between label and the verbal tag */
-  .ring-gauge-wrap {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  /* Change 5: Ring gauge (replaces speedometer) */
-  .ring-gauge-container {
+  .hscale-tag-row {
     position: relative;
-    width: 80px;
-    height: 80px;
+    height: 40px;
   }
-  .ring-gauge-svg {
+  .hscale-tag {
     position: absolute;
-    top: 0; left: 0;
-  }
-  .ring-gauge-inner {
-    position: absolute;
-    inset: 0;
+    bottom: 10px;
+    left: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: baseline;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: var(--tag-bg, #F0F0F2);
+    font-size: 14px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    transition: left 0.3s ease, background 0.3s;
   }
-  .ring-gauge-score {
-    font-size: 20px;
-    font-weight: 800;
-    color: #1A1A2E;
+  .hscale-tag b { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .hscale-arrow {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--text-primary);
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
   }
-  .ring-gauge-label {
-    font-size: 11px;
-    color: #6B7280;
-    text-align: center;
+  .hscale-bar {
+    display: flex;
+    gap: 3px;
+  }
+  .hscale-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+  }
+  .hscale-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 500;
   }
 
   /* Tab content */
@@ -238,20 +251,11 @@
     padding: 16px;
   }
 
-  /* Change 3: Section card wrapper */
-  .section-card {
-    background: #FAFAFA;
-    border: 1px solid #F0F0F0;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-  }
-
   /* Health tab */
   .health-row {
     display: flex;
     align-items: center;
-    padding: 14px 0;
+    padding: 14px 16px;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
     transition: background 0.15s;
@@ -721,25 +725,18 @@
                 <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the <b>Information Technology</b> sector and operating in <b>Developed</b> economic markets.</div>
               </button>
             </div>
-            <div class="section-card">
+            <div class="health-block">
               <!-- Overall score summary -->
               <div class="health-summary">
-                <div class="ring-gauge-wrap">
-                  <div class="ring-gauge-container">
-                    <svg class="ring-gauge-svg" viewBox="0 0 80 80" width="80" height="80">
-                      <!-- Track -->
-                      <circle cx="40" cy="40" r="32" fill="none" stroke="#F0F0F0" stroke-width="6" stroke-linecap="round"/>
-                      <!-- Progress: circumference = 2*pi*32 = 201.06; dash length is set from the score in updateOverallHealthScore() -->
-                      <circle cx="40" cy="40" r="32" fill="none" stroke="#ffab00" stroke-width="6" stroke-linecap="round"
-                        stroke-dasharray="132.7 201.06"
-                        transform="rotate(-90, 40, 40)"/>
-                    </svg>
-                    <div class="ring-gauge-inner">
-                      <div class="ring-gauge-score">3.3</div>
-                    </div>
-                  </div>
+                <div class="hscale-tag-row" id="hscaleTagRow">
+                  <div class="hscale-tag" id="hscaleTag"><b id="healthScore">3.3</b><span id="healthTag">Good</span></div>
+                  <div class="hscale-arrow" id="hscaleArrow"></div>
                 </div>
-                <div class="ring-gauge-label" id="healthTag">Good</div>
+                <div class="hscale-bar" id="hscaleBar"></div>
+                <div class="hscale-ends">
+                  <span id="hscaleWeak">Weak</span>
+                  <span id="hscaleExcellent">Excellent</span>
+                </div>
               </div>
               <div id="healthRows"></div>
             </div>
@@ -1220,19 +1217,35 @@ function toggleHealthMetric(categoryName, metricIdx) {
   renderHealthChart();
 }
 
+const HEALTH_LEVELS = ['Weak', 'Fair', 'Good', 'Great', 'Excellent'];
+const HEALTH_LEVEL_COLORS = ['#E0574C', '#EC9A4C', '#D4B03A', '#7CC860', '#4FA83D'];
+
 function updateOverallHealthScore() {
   const avg = healthModels.reduce((s, h) => s + h.score, 0) / healthModels.length;
   const score = Math.round(avg * 10) / 10;
-  const color = score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)';
-  const colorHex = score >= 4 ? '#0ECB81' : score >= 3 ? '#ffab00' : '#E23636';
-  const circumference = 2 * Math.PI * 32;
-  const dashLen = (score / 5) * circumference;
+  const level = Math.min(5, Math.max(1, Math.round(score)));
 
-  document.querySelector('.ring-gauge-score').textContent = score.toFixed(1);
-  document.getElementById('healthTag').textContent = ['Weak', 'Fair', 'Good', 'Great', 'Excellent'][Math.min(5, Math.max(1, Math.round(score))) - 1];
-  const progressCircle = document.querySelectorAll('.ring-gauge-svg circle')[1];
-  progressCircle.setAttribute('stroke', colorHex);
-  progressCircle.setAttribute('stroke-dasharray', `${dashLen.toFixed(1)} ${circumference.toFixed(2)}`);
+  // Scale segments + end labels (built once)
+  const bar = document.getElementById('hscaleBar');
+  if (!bar.children.length) {
+    bar.innerHTML = HEALTH_LEVEL_COLORS.map(c => `<div class="hscale-seg" style="background:${c}"></div>`).join('');
+    document.getElementById('hscaleWeak').style.color = HEALTH_LEVEL_COLORS[0];
+    document.getElementById('hscaleExcellent').style.color = HEALTH_LEVEL_COLORS[4];
+  }
+
+  const tag = document.getElementById('hscaleTag');
+  document.getElementById('healthScore').textContent = score.toFixed(1);
+  document.getElementById('healthTag').textContent = HEALTH_LEVELS[level - 1];
+  tag.style.setProperty('--tag-bg', HEALTH_LEVEL_COLORS[level - 1] + '33');
+
+  // Pointer position: each segment covers one level, so score s sits at (s - 0.5) / 5
+  const row = document.getElementById('hscaleTagRow');
+  const W = row.clientWidth;
+  if (!W) return;
+  const x = Math.min(Math.max((score - 0.5) / 5, 0), 1) * W;
+  const tagW = tag.offsetWidth;
+  document.getElementById('hscaleArrow').style.left = Math.min(Math.max(x, 6), W - 6) + 'px';
+  tag.style.left = Math.min(Math.max(x - tagW / 2, 0), W - tagW) + 'px';
 }
 
 const expandedMetrics = new Set();
