@@ -1476,6 +1476,22 @@ function generateMetricHistory(name, currentScore) {
   return points;
 }
 
+// Continuous score color: score 0-5 maps onto these stops (0 and 1 = Weak, 5 = Excellent),
+// blended linearly in RGB. The sparkline gradient and its dots both use it, so a dot always
+// matches the line at that point.
+const SCORE_GRADIENT_STOPS = [[0, HEALTH_LEVEL_COLORS[0]], ...HEALTH_LEVEL_COLORS.map((c, k) => [(k + 1) / 5, c])];
+
+function continuousScoreColor(score) {
+  const t = Math.min(1, Math.max(0, score / 5));
+  let k = 0;
+  while (k < SCORE_GRADIENT_STOPS.length - 2 && t > SCORE_GRADIENT_STOPS[k + 1][0]) k++;
+  const [t0, c0] = SCORE_GRADIENT_STOPS[k], [t1, c1] = SCORE_GRADIENT_STOPS[k + 1];
+  const f = t1 === t0 ? 0 : (t - t0) / (t1 - t0);
+  const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+  const a = hex(c0), b = hex(c1);
+  return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * f)).join(',')})`;
+}
+
 // Sparkline: last 12 months, monthly points; tap a point for month / score / value / percentile
 const metricHoverIdx = {};
 
@@ -1552,8 +1568,7 @@ function drawMetricChart(ri) {
 
   // Line: one smooth curve, color blends continuously with the score (vertical gradient on the 0-5 axis)
   const grad = ctx.createLinearGradient(0, yAt(0), 0, yAt(5));
-  grad.addColorStop(0, HEALTH_LEVEL_COLORS[0]);
-  HEALTH_LEVEL_COLORS.forEach((c, k) => grad.addColorStop((k + 1) / 5, c));
+  SCORE_GRADIENT_STOPS.forEach(([t, c]) => grad.addColorStop(t, c));
   ctx.strokeStyle = grad;
   ctx.lineWidth = 2.25;
   ctx.lineCap = 'round';
@@ -1568,6 +1583,12 @@ function drawMetricChart(ri) {
   ctx.lineTo(xAt(n - 1), yAt(history[n - 1]));
   ctx.stroke();
 
+  // Monthly dots, each the color of the line at that point
+  history.forEach((v, i) => {
+    ctx.fillStyle = continuousScoreColor(v);
+    ctx.beginPath(); ctx.arc(xAt(i), yAt(v), 2.75, 0, Math.PI * 2); ctx.fill();
+  });
+
   // Tapped point
   const hi = metricHoverIdx[ri];
   if (hi !== undefined && hi !== null) {
@@ -1577,8 +1598,8 @@ function drawMetricChart(ri) {
     ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + chartH); ctx.stroke();
     ctx.fillStyle = '#FFFFFF';
     ctx.beginPath(); ctx.arc(x, yAt(history[hi]), 4.5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = scoreToColor(history[hi]);
-    ctx.beginPath(); ctx.arc(x, yAt(history[hi]), 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = continuousScoreColor(history[hi]);
+    ctx.beginPath(); ctx.arc(x, yAt(history[hi]), 3.5, 0, Math.PI * 2); ctx.fill();
   }
 }
 
@@ -1606,7 +1627,7 @@ function setupMetricScrub(ri) {
     const det = metricPointDetails(hm.name, ri, history[idx]);
     const row = (label, val, dotColor) => `<div class="chart-scrub-row">${dotColor ? `<span class="chart-scrub-dot" style="background:${dotColor}"></span>` : ''}<span>${label}</span><b>${val}</b></div>`;
     scrub.innerHTML = `<div class="chart-scrub-date">${MONTHS_SHORT[d.month]} ${d.year}</div>`
-      + row('Score', history[idx].toFixed(1), scoreToColor(history[idx]))
+      + row('Score', history[idx].toFixed(1), continuousScoreColor(history[idx]))
       + row('Value', det.value, 'transparent')
       + row('Percentile', det.pct.toFixed(1) + '%', 'transparent');
     scrub.classList.add('visible');
