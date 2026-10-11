@@ -192,108 +192,84 @@
   .health-block {
     margin: 0 -16px 20px;
   }
-  /* Overall score summary: 5-level scale line, Overview style */
+  /* Overall score summary: 5-level speedometer */
   .health-summary {
-    padding: 0 16px 16px;
-    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 16px 18px;
   }
-  .hscale-tag-row {
-    position: relative;
-    height: 40px;
+  .gauge-svg {
+    width: 100%;
+    max-width: 330px;
+    display: block;
+    overflow: visible;
   }
-  .hscale-tag {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
+  .gauge-label {
+    font-family: var(--font);
+    font-size: 12px;
+    fill: var(--text-secondary);
+  }
+  .gauge-needle {
+    transition: transform 0.45s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  .gauge-pill {
     display: flex;
     align-items: baseline;
     gap: 6px;
-    padding: 5px 10px;
-    border-radius: 4px;
-    background: var(--tag-bg, #F0F0F2);
-    font-size: 14px;
-    color: var(--text-primary);
-    white-space: nowrap;
-    transition: left 0.3s ease, background 0.3s;
+    margin-top: 10px;
+    padding: 7px 18px;
+    border-radius: 18px;
+    background: var(--pill-bg, #D4B03A);
+    color: #000;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s;
   }
-  .hscale-tag b { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .hscale-arrow {
-    position: absolute;
-    bottom: 2px;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 7px solid var(--text-primary);
-    transform: translateX(-50%);
-    transition: left 0.3s ease;
-  }
-  .hscale-bar {
-    display: flex;
-    gap: 3px;
-  }
-  .hscale-seg {
-    flex: 1;
-    height: 4px;
-    border-radius: 2px;
-  }
-  .hscale-ends {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-    font-size: 13px;
-    font-weight: 500;
-  }
+  .gauge-pill b { font-weight: 800; font-variant-numeric: tabular-nums; }
 
   /* Tab content */
   .tab-content {
     padding: 16px;
   }
 
-  /* Health tab */
-  .health-row {
+  /* Health category cells - same design as the Financial Health Metrics chips */
+  .health-cells {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 16px;
+  }
+  .health-cell {
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s, transform 0.1s;
+  }
+  .health-cell:active { transform: scale(0.98); border-color: var(--border-dark); }
+  .health-cell-top {
     display: flex;
     align-items: center;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
+    justify-content: space-between;
+    margin-bottom: 4px;
   }
-  .health-row:active { background: rgba(0,0,0,0.02); }
-  .health-row:last-of-type { border-bottom: none; }
-  .health-name {
-    width: 100px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-    flex-shrink: 0;
+  .health-cell-score {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
   }
-  .health-bar-container {
-    flex: 1;
-    height: 6px;
-    background: rgba(0,0,0,0.06);
-    border-radius: 3px;
-    margin: 0 12px;
-    overflow: hidden;
-  }
-  .health-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .health-score-val {
-    font-size: 14px;
-    font-weight: 700;
-    width: 28px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .health-chevron {
-    margin-left: 8px;
+  .health-cell-chevron {
     color: var(--text-tertiary);
-    font-size: 14px;
-    flex-shrink: 0;
+    display: flex;
+  }
+  .health-cell-name {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    line-height: 1.3;
   }
 
   /* Health history (coast-to-coast, no card) */
@@ -374,16 +350,13 @@
     gap: 6px;
     padding: 14px 8px 2px;
   }
-  /* Category toggles styled as buttons: filled, rounded rect, stretch to fill each row */
   .chart-legend-item {
-    flex: 1 1 auto;
     display: flex;
     align-items: center;
-    justify-content: center;
-    height: 32px;
-    padding: 0 8px;
-    border-radius: 8px;
-    border: 1px solid var(--chip-border);
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 13px;
+    border: 1.5px solid var(--chip-color);
     background: var(--chip-bg);
     font-size: 11px;
     font-weight: 600;
@@ -391,15 +364,13 @@
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
   .chart-legend-item:active { transform: scale(0.97); }
   .chart-legend-item.off {
-    background: #F2F2F5;
-    border-color: transparent;
+    background: #FFFFFF;
+    border-color: var(--border-dark);
     color: var(--text-tertiary);
-    box-shadow: none;
   }
 
   /* Detail screens */
@@ -732,17 +703,10 @@
             <div class="health-block">
               <!-- Overall score summary -->
               <div class="health-summary">
-                <div class="hscale-tag-row" id="hscaleTagRow">
-                  <div class="hscale-tag" id="hscaleTag"><b id="healthScore">3.3</b><span id="healthTag">Good</span></div>
-                  <div class="hscale-arrow" id="hscaleArrow"></div>
-                </div>
-                <div class="hscale-bar" id="hscaleBar"></div>
-                <div class="hscale-ends">
-                  <span id="hscaleWeak">Weak</span>
-                  <span id="hscaleExcellent">Excellent</span>
-                </div>
+                <svg class="gauge-svg" id="healthGauge" viewBox="0 0 340 160"></svg>
+                <div class="gauge-pill" id="gaugePill"><b id="healthScore">3.3</b><span id="healthTag">Good</span></div>
               </div>
-              <div id="healthRows"></div>
+              <div class="health-cells" id="healthRows"></div>
             </div>
 
             <div class="tab-section-title">Financial Health History</div>
@@ -924,25 +888,14 @@ document.addEventListener('click', e => {
 // ===================== HEALTH ROWS =====================
 function renderHealthRows() {
   const container = document.getElementById('healthRows');
-  container.innerHTML = '';
-  healthModels.forEach((hm, i) => {
-    const pct = (hm.score / 5) * 100;
-    const color = healthLevelColor(hm.score);
-    const row = document.createElement('div');
-    row.className = 'health-row';
-    row.onclick = () => openHealthDetail(i);
-    row.innerHTML = `
-      <div class="health-name">${hm.name}</div>
-      <div class="health-bar-container">
-        <div class="health-bar-fill" style="width:${pct}%; background:${color}"></div>
+  container.innerHTML = healthModels.map((hm, i) => `
+    <div class="health-cell" onclick="openHealthDetail(${i})">
+      <div class="health-cell-top">
+        <div class="health-cell-score" style="color:${healthLevelColor(hm.score)}">${hm.score.toFixed(1)}</div>
+        <div class="health-cell-chevron"><svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>
-      <div class="health-score-val" style="color:${color}">${hm.score.toFixed(1)}</div>
-      <div class="health-chevron">
-        <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-    `;
-    container.appendChild(row);
-  });
+      <div class="health-cell-name">${hm.name}</div>
+    </div>`).join('');
 }
 
 // ===================== HEALTH CHART =====================
@@ -1156,8 +1109,7 @@ function renderChartLegend() {
     const item = document.createElement('div');
     item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
     item.style.setProperty('--chip-color', color);
-    item.style.setProperty('--chip-bg', color + '1F');
-    item.style.setProperty('--chip-border', color + '66');
+    item.style.setProperty('--chip-bg', color + '0F');
     item.textContent = name;
     item.onclick = () => {
       // Keep at least one line visible
@@ -1239,32 +1191,54 @@ function healthLevelColor(score) {
   return HEALTH_LEVEL_COLORS[Math.min(5, Math.max(1, Math.round(score))) - 1];
 }
 
+// Speedometer geometry: semicircle, center (170, 150); f = 0 (left) .. 1 (right)
+const GAUGE = { cx: 170, cy: 150, rBand: 100, bandW: 26, rEdge: 114, edgeW: 4, rLabel: 132, needle: 78, gap: 0.012 };
+
+function gaugePoint(f, r) {
+  const a = Math.PI * (1 - f);
+  return [GAUGE.cx + r * Math.cos(a), GAUGE.cy - r * Math.sin(a)];
+}
+
+function gaugeArc(f1, f2, r) {
+  const [x1, y1] = gaugePoint(f1, r), [x2, y2] = gaugePoint(f2, r);
+  return `M${x1.toFixed(2)} ${y1.toFixed(2)} A${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`;
+}
+
+function buildHealthGauge() {
+  const svg = document.getElementById('healthGauge');
+  let html = '';
+  HEALTH_LEVELS.forEach((label, k) => {
+    const f1 = k / 5 + (k ? GAUGE.gap : 0), f2 = (k + 1) / 5 - (k < 4 ? GAUGE.gap : 0);
+    const c = HEALTH_LEVEL_COLORS[k];
+    html += `<path d="${gaugeArc(f1, f2, GAUGE.rBand)}" stroke="${c}" stroke-opacity="0.18" stroke-width="${GAUGE.bandW}" fill="none"/>`;
+    html += `<path d="${gaugeArc(f1, f2, GAUGE.rEdge)}" stroke="${c}" stroke-width="${GAUGE.edgeW}" fill="none"/>`;
+    const fm = (k + 0.5) / 5;
+    const [lx, ly] = gaugePoint(fm, GAUGE.rLabel);
+    const anchor = Math.abs(lx - GAUGE.cx) < 12 ? 'middle' : lx < GAUGE.cx ? 'end' : 'start';
+    html += `<text class="gauge-label" x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}" text-anchor="${anchor}">${label}</text>`;
+  });
+  // Needle points right (f = 1) at rest; rotated from the score in updateOverallHealthScore()
+  html += `<g class="gauge-needle" id="gaugeNeedle" style="transform-origin:${GAUGE.cx}px ${GAUGE.cy}px">
+    <line x1="${GAUGE.cx}" y1="${GAUGE.cy}" x2="${GAUGE.cx + GAUGE.needle}" y2="${GAUGE.cy}" stroke="#6B7080" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <circle cx="${GAUGE.cx}" cy="${GAUGE.cy}" r="6" fill="#4B5060"/>`;
+  svg.innerHTML = html;
+}
+
 function updateOverallHealthScore() {
   const avg = healthModels.reduce((s, h) => s + h.score, 0) / healthModels.length;
   const score = Math.round(avg * 10) / 10;
   const level = Math.min(5, Math.max(1, Math.round(score)));
 
-  // Scale segments + end labels (built once)
-  const bar = document.getElementById('hscaleBar');
-  if (!bar.children.length) {
-    bar.innerHTML = HEALTH_LEVEL_COLORS.map(c => `<div class="hscale-seg" style="background:${c}"></div>`).join('');
-    document.getElementById('hscaleWeak').style.color = HEALTH_LEVEL_COLORS[0];
-    document.getElementById('hscaleExcellent').style.color = HEALTH_LEVEL_COLORS[4];
-  }
+  if (!document.getElementById('gaugeNeedle')) buildHealthGauge();
 
-  const tag = document.getElementById('hscaleTag');
+  // Each segment covers one level, so score s sits at (s - 0.5) / 5 of the arc
+  const f = Math.min(Math.max((score - 0.5) / 5, 0.01), 0.99);
+  document.getElementById('gaugeNeedle').style.transform = `rotate(${(-180 * (1 - f)).toFixed(1)}deg)`;
+
   document.getElementById('healthScore').textContent = score.toFixed(1);
   document.getElementById('healthTag').textContent = HEALTH_LEVELS[level - 1];
-  tag.style.setProperty('--tag-bg', HEALTH_LEVEL_COLORS[level - 1] + '33');
-
-  // Pointer position: each segment covers one level, so score s sits at (s - 0.5) / 5
-  const row = document.getElementById('hscaleTagRow');
-  const W = row.clientWidth;
-  if (!W) return;
-  const x = Math.min(Math.max((score - 0.5) / 5, 0), 1) * W;
-  const tagW = tag.offsetWidth;
-  document.getElementById('hscaleArrow').style.left = Math.min(Math.max(x, 6), W - 6) + 'px';
-  tag.style.left = Math.min(Math.max(x - tagW / 2, 0), W - tagW) + 'px';
+  document.getElementById('gaugePill').style.setProperty('--pill-bg', HEALTH_LEVEL_COLORS[level - 1]);
 }
 
 const expandedMetrics = new Set();
