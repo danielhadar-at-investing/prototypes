@@ -238,21 +238,31 @@
     padding: 16px;
   }
 
-  /* Health category rows (iOS list style, coast-to-coast) */
+  /* Health category rows (iOS inset grouped list, like Settings) */
   .health-rows {
-    border-top: 1px solid var(--border);
+    margin: 0 16px;
+    background: #F5F5F7;
+    border-radius: 14px;
+    overflow: hidden;
   }
   .health-row {
+    position: relative;
     display: flex;
     align-items: center;
     min-height: 52px;
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 10px 14px 10px 16px;
     cursor: pointer;
     transition: background 0.15s;
   }
-  .health-row:active { background: rgba(0,0,0,0.03); }
-  .health-row:last-child { border-bottom: none; }
+  .health-row:active { background: rgba(0,0,0,0.04); }
+  /* Inset separator: starts at the text, runs to the card edge */
+  .health-row + .health-row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 16px; right: 0;
+    height: 1px;
+    background: rgba(0,0,0,0.07);
+  }
   .health-name {
     width: 116px;
     font-size: 14px;
@@ -264,7 +274,7 @@
   .health-bar-container {
     flex: 1;
     height: 6px;
-    background: #EEEEF1;
+    background: #E4E4E9;
     border-radius: 3px;
     margin: 0 12px;
     overflow: hidden;
