@@ -1261,8 +1261,9 @@ function updateOverallHealthScore() {
 
   if (!document.getElementById('gaugeNeedle')) buildHealthGauge();
 
-  // Each segment covers one level, so score s sits at (s - 0.5) / 5 of the arc
-  const f = Math.min(Math.max((score - 0.5) / 5, 0.01), 0.99);
+  // Same as prod: the needle snaps to the center of the level's segment (10/30/50/70/90%);
+  // the exact score is shown in the pill
+  const f = (level - 0.5) / 5;
   document.getElementById('gaugeNeedle').style.transform = `rotate(${(-180 * (1 - f)).toFixed(1)}deg)`;
 
   document.getElementById('healthScore').textContent = score.toFixed(1);
