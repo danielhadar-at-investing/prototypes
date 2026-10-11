@@ -1547,13 +1547,23 @@ function drawMetricChart(ri) {
     if (d.month % 3 === 0) ctx.fillText(MONTHS_SHORT[d.month], Math.min(Math.max(xAt(i), padL + 12), padL + chartW - 12), H - 4);
   }
 
-  // Line, colored by level per segment
+  // Line: one smooth curve, color blends continuously with the score (vertical gradient on the 0-5 axis)
+  const grad = ctx.createLinearGradient(0, yAt(0), 0, yAt(5));
+  grad.addColorStop(0, HEALTH_LEVEL_COLORS[0]);
+  HEALTH_LEVEL_COLORS.forEach((c, k) => grad.addColorStop((k + 1) / 5, c));
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.25;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(xAt(0), yAt(history[0]));
   for (let i = 0; i < n - 1; i++) {
-    ctx.strokeStyle = scoreToColor((history[i] + history[i + 1]) / 2);
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(xAt(i), yAt(history[i])); ctx.lineTo(xAt(i + 1), yAt(history[i + 1])); ctx.stroke();
+    // Midpoint quadratic smoothing
+    const xm = (xAt(i) + xAt(i + 1)) / 2, ym = (yAt(history[i]) + yAt(history[i + 1])) / 2;
+    ctx.quadraticCurveTo(xAt(i), yAt(history[i]), xm, ym);
   }
+  ctx.lineTo(xAt(n - 1), yAt(history[n - 1]));
+  ctx.stroke();
 
   // Tapped point
   const hi = metricHoverIdx[ri];
