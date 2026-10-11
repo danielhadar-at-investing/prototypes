@@ -276,7 +276,7 @@
   .health-row-text { flex: 1; min-width: 0; }
   .health-name {
     font-size: 14px;
-    font-weight: 590;
+    font-weight: 530;
     line-height: 1.3;
     color: var(--text-primary);
   }
@@ -558,15 +558,17 @@
   .hmetric-expand:active { background: rgba(0,0,0,0.04); }
   .hmetric-expand.open { transform: rotate(180deg); }
   .hmetric-chart-wrap {
+    position: relative;
     max-height: 0; overflow: hidden;
     transition: max-height 0.3s ease, padding 0.3s ease;
-    padding: 0 14px 0 40px;
+    padding: 0 14px;
   }
   .hmetric-chart-wrap.open {
-    max-height: 130px;
-    padding: 0 14px 10px 40px;
+    max-height: 150px;
+    padding: 2px 14px 12px;
   }
-  .hmetric-chart-wrap canvas { width: 100%; height: 100px; display: block; }
+  .hmetric-chart-wrap canvas { width: 100%; height: 120px; display: block; touch-action: pan-y; }
+  .hmetric-chart-wrap .chart-scrub { top: 2px; min-width: 120px; }
 
   /* Section (i) tooltip */
   .range-tooltip-btn {
@@ -1444,9 +1446,7 @@ function toggleMetricChart(ri) {
     expandedMetrics.add(ri);
     wrap.classList.add('open');
     chevron.classList.add('open');
-    const hm = healthModels[activeHealthModel];
-    const metric = healthMetrics[hm.name][ri];
-    setTimeout(() => drawMetricChart('metricCanvas' + ri, metric[0], metric[3]), 100);
+    setTimeout(() => { drawMetricChart(ri); setupMetricScrub(ri); }, 100);
   }
 }
 
@@ -1473,9 +1473,39 @@ function generateMetricHistory(name, currentScore) {
   return points;
 }
 
-function drawMetricChart(canvasId, name, currentScore) {
-  const canvas = document.getElementById(canvasId);
+// Sparkline: last 12 months, monthly points; tap a point for month / score / value / percentile
+const metricHoverIdx = {};
+
+function metricMonth(i) { return historyDate(HISTORY_MONTHS - 11 + i); }
+
+// Per-month value and percentile, moved in line with the score (same relation the preset logic uses)
+function metricPointDetails(name, ri, score) {
+  const metric = healthMetrics[name][ri];
+  const rel = baseMetrics[name] && baseMetrics[name][ri] ? baseMetrics[name][ri].rel : 'direct';
+  const ds = score - metric[3];
+  const dir = rel === 'inverse' ? -1 : 1;
+  const pct = Math.min(100, Math.max(0, metric[2] + dir * ds * 20));
+  const m = String(metric[1]).match(/^(-?[\d,]*\.?\d+)(.*)$/);
+  let value = metric[1];
+  if (m) {
+    const num = parseFloat(m[1].replace(/,/g, ''));
+    const dec = (m[1].split('.')[1] || '').length;
+    const scaled = num * (1 + dir * ds * 0.08);
+    value = scaled.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[2];
+  }
+  return { value, pct };
+}
+
+function metricChartGeometry(W, H) {
+  const padL = 2, padR = 20, padT = 8, padB = 18;
+  return { padL, padR, padT, padB, chartW: W - padL - padR, chartH: H - padT - padB };
+}
+
+function drawMetricChart(ri) {
+  const canvas = document.getElementById('metricCanvas' + ri);
   if (!canvas) return;
+  const hm = healthModels[activeHealthModel];
+  const metric = healthMetrics[hm.name][ri];
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 2;
   const rect = canvas.getBoundingClientRect();
@@ -1486,48 +1516,107 @@ function drawMetricChart(canvasId, name, currentScore) {
   ctx.scale(dpr, dpr);
 
   const W = rect.width, H = rect.height;
-  const padL = 22, padR = 6, padT = 6, padB = 18;
-  const chartW = W - padL - padR, chartH = H - padT - padB;
+  const { padL, padT, chartW, chartH } = metricChartGeometry(W, H);
+  const history = generateMetricHistory(metric[0], metric[3]);
+  const n = history.length;
+  const xAt = i => padL + (i / (n - 1)) * chartW;
+  const yAt = v => padT + chartH - (v / 5) * chartH;
   ctx.clearRect(0, 0, W, H);
 
-  const history = generateMetricHistory(name, currentScore);
-
+  // Grid + right-side Y labels (same style as Financial Health History)
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
   for (let v = 0; v <= 5; v++) {
-    const y = padT + chartH - (v / 5) * chartH;
-    ctx.strokeStyle = 'rgba(0,0,0,0.05)';
-    ctx.lineWidth = 0.5;
+    const y = yAt(v);
+    ctx.strokeStyle = v === 0 ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash(v === 0 ? [] : [3, 3]);
     ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.font = '8px -apple-system, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(v.toString(), padL - 4, y + 3);
+    if (v > 0 && v % 1 === 0) {
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      ctx.fillText(v.toString(), padL + chartW + 7, y + 3.5);
+    }
+  }
+  ctx.setLineDash([]);
+
+  // X labels: every 3 months
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0,0,0,0.38)';
+  for (let i = 0; i < n; i++) {
+    const d = metricMonth(i);
+    if (d.month % 3 === 0) ctx.fillText(MONTHS_SHORT[d.month], Math.min(Math.max(xAt(i), padL + 12), padL + chartW - 12), H - 4);
   }
 
-  const labels = ['2021', '2022', '2023', '2024', '2025', '2026'];
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.font = '8px -apple-system, sans-serif';
-  labels.forEach((lbl, li) => {
-    const x = padL + (li / (labels.length - 1)) * chartW;
-    ctx.fillText(lbl, x, H - 4);
-  });
-
-  for (let i = 0; i < history.length - 1; i++) {
-    const x1 = padL + (i / (history.length - 1)) * chartW;
-    const y1 = padT + chartH - (history[i] / 5) * chartH;
-    const x2 = padL + ((i + 1) / (history.length - 1)) * chartW;
-    const y2 = padT + chartH - (history[i + 1] / 5) * chartH;
+  // Line, colored by level per segment
+  for (let i = 0; i < n - 1; i++) {
     ctx.strokeStyle = scoreToColor((history[i] + history[i + 1]) / 2);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(xAt(i), yAt(history[i])); ctx.lineTo(xAt(i + 1), yAt(history[i + 1])); ctx.stroke();
   }
 
-  history.forEach((val, i) => {
-    const x = padL + (i / (history.length - 1)) * chartW;
-    const y = padT + chartH - (val / 5) * chartH;
-    ctx.fillStyle = scoreToColor(val);
-    ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+  // Tapped point
+  const hi = metricHoverIdx[ri];
+  if (hi !== undefined && hi !== null) {
+    const x = xAt(hi);
+    ctx.strokeStyle = 'rgba(26,26,46,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + chartH); ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath(); ctx.arc(x, yAt(history[hi]), 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = scoreToColor(history[hi]);
+    ctx.beginPath(); ctx.arc(x, yAt(history[hi]), 3, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function setupMetricScrub(ri) {
+  const canvas = document.getElementById('metricCanvas' + ri);
+  const wrap = document.getElementById('metricChart' + ri);
+  if (!canvas || canvas.dataset.scrub) return;
+  canvas.dataset.scrub = '1';
+  const scrub = document.createElement('div');
+  scrub.className = 'chart-scrub';
+  wrap.appendChild(scrub);
+
+  const update = clientX => {
+    const hm = healthModels[activeHealthModel];
+    const metric = healthMetrics[hm.name][ri];
+    const rect = canvas.getBoundingClientRect();
+    const { padL, chartW } = metricChartGeometry(rect.width, rect.height);
+    const history = generateMetricHistory(metric[0], metric[3]);
+    const n = history.length;
+    const idx = Math.round(Math.min(Math.max((clientX - rect.left - padL) / chartW, 0), 1) * (n - 1));
+    metricHoverIdx[ri] = idx;
+    drawMetricChart(ri);
+
+    const d = metricMonth(idx);
+    const det = metricPointDetails(hm.name, ri, history[idx]);
+    const row = (label, val, dotColor) => `<div class="chart-scrub-row">${dotColor ? `<span class="chart-scrub-dot" style="background:${dotColor}"></span>` : ''}<span>${label}</span><b>${val}</b></div>`;
+    scrub.innerHTML = `<div class="chart-scrub-date">${MONTHS_SHORT[d.month]} ${d.year}</div>`
+      + row('Score', history[idx].toFixed(1), scoreToColor(history[idx]))
+      + row('Value', det.value, 'transparent')
+      + row('Percentile', det.pct.toFixed(1) + '%', 'transparent');
+    scrub.classList.add('visible');
+
+    const x = canvas.offsetLeft + padL + (idx / (n - 1)) * chartW;
+    const w = scrub.offsetWidth;
+    const left = x > wrap.clientWidth / 2 ? x - w - 12 : x + 12;
+    scrub.style.left = Math.max(4, Math.min(left, wrap.clientWidth - w - 4)) + 'px';
+  };
+  const clear = () => {
+    metricHoverIdx[ri] = null;
+    scrub.classList.remove('visible');
+    drawMetricChart(ri);
+  };
+
+  // Same as the history chart: tap shows the readout and it stays; drag scrubs; tap outside dismisses
+  let dragging = false;
+  canvas.addEventListener('pointerdown', e => { dragging = true; canvas.setPointerCapture(e.pointerId); update(e.clientX); });
+  canvas.addEventListener('pointermove', e => { if (dragging) update(e.clientX); });
+  canvas.addEventListener('pointerup', () => { dragging = false; });
+  canvas.addEventListener('pointercancel', () => { dragging = false; });
+  document.addEventListener('pointerdown', e => {
+    if (metricHoverIdx[ri] !== null && metricHoverIdx[ri] !== undefined && !wrap.contains(e.target)) clear();
   });
 }
 
