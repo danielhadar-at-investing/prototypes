@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en" data-plan="paid">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Tab Overhaul</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --bg-page: #E8E8ED;
+    --bg-card: #FAFAFA;
+    --card: #FAFAFA;
+    --card-alt: #E5E7EB;
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-tertiary: #9CA3AF;
+    --green: #0ECB81;
+    --green-bg: rgba(14, 203, 129, 0.08);
+    --red: #E23636;
+    --red-bg: rgba(226, 54, 54, 0.08);
+    --blue: #2563EB;
+    --blue-bg: rgba(37, 99, 235, 0.08);
+    --yellow: #ffab00;
+    --yellow-bg: rgba(255,171,0,0.12);
+    --border: #F0F0F0;
+    --border-dark: #E5E7EB;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #E8E8ED;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    min-height: 100vh;
+    padding: 24px 0;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: #E0E0E0;
+    border-radius: 44px;
+    padding: 12px;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,0,0,0.12);
+    border: 1px solid #D0D0D0;
+  }
+
+  .device-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 54px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 10;
+    background: var(--bg);
+  }
+  .status-bar .time { font-size: 15px; font-weight: 700; }
+  .status-bar .icons { display: flex; gap: 5px; align-items: center; font-size: 12px; }
+
+  /* Notch / Dynamic Island */
+  .dynamic-island {
+    width: 120px;
+    height: 34px;
+    background: #000;
+    border-radius: 20px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+
+  /* Screen container for transitions */
+  .screen-container {
+    position: absolute;
+    top: 54px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+  }
+
+  /* Main screen */
+  .main-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .main-screen.pushed {
+    transform: translateX(-30%);
+    pointer-events: none;
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    height: 48px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .nav-back {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+  /* Category tabs */
+  .cat-tabs {
+    height: 44px;
+    background: var(--bg);
+    display: flex;
+    align-items: stretch;
+    padding: 0 8px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cat-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab {
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+  }
+  .cat-tab.active {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  .cat-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 2.5px;
+    background: #1A1A2E;
+    border-radius: 2px 2px 0 0;
+  }
+
+  /* Scrollable content */
+  .scroll-content {
+    height: calc(100% - 92px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* Sticky header */
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .sticky-header.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Hero card */
+  .hero-section {
+    padding: 0 16px 12px;
+    display: flex;
+    gap: 10px;
+  }
+  .hero-card {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1.5px solid var(--border);
+    transition: border-color 0.25s, background 0.25s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.25s;
+  }
+  /* Change 1: active card border and top accent to black */
+  .hero-card.active {
+    border-color: rgba(0,0,0,0.2);
+  }
+  .hero-card.active::before {
+    background: #1A1A2E;
+  }
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  /* Ring gauge wrapper - grows to fill space between label and the verbal tag */
+  .ring-gauge-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Change 5: Ring gauge (replaces speedometer) */
+  .ring-gauge-container {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .ring-gauge-svg {
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .ring-gauge-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ring-gauge-score {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1A1A2E;
+  }
+  .ring-gauge-label {
+    font-size: 11px;
+    color: #6B7280;
+    text-align: center;
+  }
+
+  /* Tab content */
+  .tab-content {
+    padding: 16px;
+  }
+
+  /* Change 3: Section card wrapper */
+  .section-card {
+    background: #FAFAFA;
+    border: 1px solid #F0F0F0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  /* Health tab */
+  .health-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .health-row:active { background: rgba(0,0,0,0.02); }
+  .health-row:last-of-type { border-bottom: none; }
+  .health-name {
+    width: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex-shrink: 0;
+  }
+  .health-bar-container {
+    flex: 1;
+    height: 6px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 3px;
+    margin: 0 12px;
+    overflow: hidden;
+  }
+  .health-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .health-score-val {
+    font-size: 14px;
+    font-weight: 700;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .health-chevron {
+    margin-left: 8px;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Health over time chart */
+  .chart-canvas-wrap {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px 12px 12px;
+    margin-bottom: 10px;
+  }
+  .chart-canvas-wrap canvas {
+    width: 100%;
+    height: 180px;
+    display: block;
+  }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 0 4px;
+  }
+  .chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: opacity 0.2s, background 0.2s;
+    user-select: none;
+  }
+  .chart-legend-item.off {
+    opacity: 0.35;
+  }
+  .chart-legend-item:hover {
+    background: rgba(0,0,0,0.04);
+  }
+  .chart-legend-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Detail screens */
+  .detail-screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--bg);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 30;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .detail-screen::-webkit-scrollbar { display: none; }
+  .detail-screen.visible {
+    transform: translateX(0);
+  }
+  .detail-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 5;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-back {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 20px;
+    border-radius: 8px;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .detail-back:active { background: rgba(0,0,0,0.04); }
+  .detail-title {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  /* Detail tables */
+  .detail-section {
+    padding: 0 16px 16px;
+  }
+  .detail-table {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* Health detail - model selector chips */
+  .health-detail-chips {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .health-detail-chips::-webkit-scrollbar { display: none; }
+  .health-detail-chip {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    text-align: left;
+    min-width: 80px;
+    transition: all 0.2s;
+  }
+  .health-detail-chip.active {
+    border-color: var(--text-primary);
+    background: #fff;
+  }
+  .hdchip-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .health-detail-chip .hdchip-score {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .health-detail-chip .hdchip-check {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hdchip-check svg { width: 10px; height: 10px; }
+  .health-detail-chip .hdchip-name {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  /* Health metric rows */
+  .hmetric-row { border-bottom: 1px solid var(--border); }
+  .hmetric-row:last-child { border-bottom: none; }
+  .hmetric-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .hmetric-row.off .hmetric-main { opacity: 0.4; }
+  .hmetric-check {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--border-dark);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+    position: relative; cursor: pointer;
+  }
+  .hmetric-check::after {
+    content: ''; position: absolute;
+    top: -10px; left: -10px; right: -10px; bottom: -10px;
+  }
+  .hmetric-check.on { background: var(--green); border-color: var(--green); }
+  .hmetric-check svg { width: 10px; height: 8px; opacity: 0; }
+  .hmetric-check.on svg { opacity: 1; }
+  .hmetric-info { flex: 1; min-width: 0; }
+  .hmetric-name { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.3; }
+  .hmetric-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .hmetric-score { font-size: 15px; font-weight: 700; flex-shrink: 0; min-width: 28px; text-align: right; }
+  .hmetric-expand {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--text-tertiary);
+    transition: transform 0.2s;
+    border-radius: 50%;
+  }
+  .hmetric-expand:active { background: rgba(0,0,0,0.04); }
+  .hmetric-expand.open { transform: rotate(180deg); }
+  .hmetric-chart-wrap {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 14px 0 40px;
+  }
+  .hmetric-chart-wrap.open {
+    max-height: 130px;
+    padding: 0 14px 10px 40px;
+  }
+  .hmetric-chart-wrap canvas { width: 100%; height: 100px; display: block; }
+
+  /* Section (i) tooltip */
+  .range-tooltip-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    background: none;
+    position: relative;
+    font-family: var(--font);
+    font-style: italic;
+  }
+  .range-tooltip {
+    position: absolute;
+    top: 28px;
+    right: 0;
+    background: var(--text-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    font-style: normal;
+    text-align: left;
+    line-height: 1.45;
+    padding: 10px 12px;
+    border-radius: 10px;
+    width: 220px;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .range-tooltip strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .range-tooltip.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .range-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 7px;
+    width: 10px;
+    height: 10px;
+    background: var(--text-primary);
+    transform: rotate(45deg);
+    border-radius: 2px;
+  }
+  /* Tab section title (lives outside the section card) */
+  .tab-section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-top: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    letter-spacing: 0;
+  }
+
+  /* Bottom padding for scroll */
+  .bottom-pad {
+    height: 40px;
+  }
+
+  /* Prototype control (outside the phone frame, not app UI) */
+  .proto-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font);
+  }
+  .proto-control-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .plan-toggle {
+    position: relative;
+    display: flex;
+    padding: 2px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 9px;
+  }
+  .plan-toggle-thumb {
+    position: absolute;
+    top: 2px; bottom: 2px; left: 2px;
+    width: calc(50% - 2px);
+    background: #fff;
+    border-radius: 7px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .plan-toggle[data-plan="paid"] .plan-toggle-thumb {
+    transform: translateX(100%);
+  }
+  .plan-toggle-btn {
+    position: relative;
+    z-index: 1;
+    width: 64px;
+    padding: 5px 0;
+    background: none;
+    border: none;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .plan-toggle-btn.active { color: var(--text-primary); }
+</style>
+</head>
+<body>
+
+<div class="device-frame">
+  <div class="device-screen">
+    <div class="dynamic-island"></div>
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="#1A1A2E"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0.5" width="3" height="11.5" rx="1" opacity="0.8"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="#1A1A2E"><path d="M7.5 3.5C9.5 3.5 11.2 4.3 12.5 5.5L14 4C12.3 2.3 10 1.2 7.5 1.2S2.7 2.3 1 4L2.5 5.5C3.8 4.3 5.5 3.5 7.5 3.5zM7.5 6.8C8.8 6.8 10 7.3 10.8 8.2L7.5 12L4.2 8.2C5 7.3 6.2 6.8 7.5 6.8z"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="21" height="10" rx="2" stroke="#1A1A2E" stroke-width="1"/><rect x="22" y="4" width="2" height="4" rx="1" fill="#1A1A2E" opacity="0.4"/><rect x="1.5" y="2.5" width="15" height="7" rx="1" fill="#1A1A2E"/></svg>
+      </span>
+    </div>
+
+    <div class="screen-container">
+      <!-- Main screen -->
+      <div class="main-screen" id="mainScreen">
+        <!-- Nav bar -->
+        <div class="nav-bar">
+          <div class="nav-back">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="nav-title">AAPL <span style="font-weight:600;margin-left:6px">198.50</span> <span style="color:var(--red);font-size:14px;font-weight:500">(-0.87%)</span></div>
+          <div style="width:36px;flex-shrink:0"></div>
+        </div>
+
+        <!-- Category tabs -->
+        <div class="cat-tabs">
+          <div class="cat-tab">Overview</div>
+          <div class="cat-tab">News</div>
+          <div class="cat-tab active">Valuation<svg width="14" height="16" viewBox="0 0 14 16" fill="none" style="margin-left:4px;vertical-align:-2px"><path d="M7 0L13.5 2.5V7C13.5 11.5 10.5 14.5 7 16C3.5 14.5 0.5 11.5 0.5 7V2.5L7 0Z" fill="#1A1A2E"/><text x="7" y="11.5" text-anchor="middle" font-size="9" font-weight="800" fill="#ef8c43" font-family="-apple-system,sans-serif">P</text></svg></div>
+          <div class="cat-tab">Technical</div>
+        </div>
+
+        <div class="scroll-content" id="scrollContent">
+          <!-- Sticky header -->
+          <div class="sticky-header" id="stickyHeader">
+            <span>Health: <span id="stickyHealth">3.3/5</span></span>
+          </div>
+
+          <!-- Hero sentinel for intersection detection -->
+          <div id="heroSentinel" style="height:1px;"></div>
+
+          <!-- Hero card (full width) -->
+          <div class="hero-section" id="heroSection">
+            <div class="hero-card active" id="heroHealth">
+              <div class="hero-label">Financial Health</div>
+              <div class="ring-gauge-wrap">
+                <div class="ring-gauge-container">
+                  <svg class="ring-gauge-svg" viewBox="0 0 80 80" width="80" height="80">
+                    <!-- Track -->
+                    <circle cx="40" cy="40" r="32" fill="none" stroke="#F0F0F0" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Progress: circumference = 2*pi*32 = 201.06; dash length is set from the score in updateOverallHealthScore() -->
+                    <circle cx="40" cy="40" r="32" fill="none" stroke="#ffab00" stroke-width="6" stroke-linecap="round"
+                      stroke-dasharray="132.7 201.06"
+                      transform="rotate(-90, 40, 40)"/>
+                  </svg>
+                  <div class="ring-gauge-inner">
+                    <div class="ring-gauge-score">3.3</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ring-gauge-label" id="healthTag">Good</div>
+            </div>
+          </div>
+
+          <!-- Health content -->
+          <div class="tab-content" id="contentHealth">
+            <div class="tab-section-title">Financial Health
+              <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
+                <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the Information Technology sector and operating in Developed economic markets.</div>
+              </button>
+            </div>
+            <div class="section-card">
+              <div id="healthRows"></div>
+            </div>
+
+            <div class="tab-section-title">Financial Health History</div>
+            <div class="section-card">
+              <div class="chart-canvas-wrap">
+                <canvas id="healthChart" width="680" height="360"></canvas>
+              </div>
+              <div class="chart-legend" id="chartLegend"></div>
+            </div>
+
+            <div class="bottom-pad"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Detail Screen -->
+      <div class="detail-screen" id="healthDetail">
+        <div class="detail-header">
+          <div class="detail-back" onclick="closeHealthDetail()">
+            <svg width="10" height="18" viewBox="0 0 10 18" fill="none"><path d="M9 1L1 9L9 17" stroke="#1A1A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="detail-title">Financial Health Metrics</div>
+          <div style="width:32px;flex-shrink:0"></div>
+        </div>
+        <div id="healthDetailContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Prototype control: plan state (not part of the app UI) -->
+<div class="proto-control">
+  <span class="proto-control-label">Plan</span>
+  <div class="plan-toggle" id="planToggle" data-plan="paid" role="group" aria-label="Plan">
+    <div class="plan-toggle-thumb"></div>
+    <button class="plan-toggle-btn" data-plan-option="free" onclick="setPlan('free')">Free</button>
+    <button class="plan-toggle-btn active" data-plan-option="paid" onclick="setPlan('paid')">Paid</button>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const healthModels = [
+  { name: 'Cash Flow Health', score: 3.1, label: '3.1' },
+  { name: 'Growth Health', score: 3.6, label: '3.6' },
+  { name: 'Price Momentum', score: 4.4, label: '4.4' },
+  { name: 'Profitability Health', score: 4.2, label: '4.2' },
+  { name: 'Relative Value', score: 1.1, label: '1.1' }
+];
+
+const healthColors = ['#2962ff', '#26a69a', '#ab47bc', '#ffab00', '#ef5350'];
+
+// Health over time data (fake plausible)
+const healthTimeline = {
+  years: [2021, 2022, 2023, 2024, 2025],
+  data: {
+    'Cash Flow Health': [3.2, 3.4, 3.6, 3.4, 3.1],
+    'Growth Health': [2.8, 2.5, 2.9, 3.1, 3.6],
+    'Price Momentum': [3.8, 3.2, 3.5, 4.0, 4.4],
+    'Profitability Health': [4.0, 4.1, 4.0, 4.1, 4.2],
+    'Relative Value': [1.5, 1.3, 1.1, 1.0, 1.1]
+  }
+};
+
+const chartLineVisible = [true, true, true, true, true];
+
+// Health detail metrics per model: [name, value, percentile, score, on]
+const healthMetrics = {
+  'Cash Flow Health': [
+    ['Asset Efficiency', '31.5%', 97.5, 4.9, true],
+    ['Asset Turnover', '0.8x', 54.9, 2.7, true],
+    ['Capital Expenditures Coverage', '1.8x', 35.2, 1.8, true],
+    ['Operating Cash Flow Margin', '40.9%', 95.2, 4.8, true],
+    ['Cash Ratio', '1.2x', 70.0, 3.5, true],
+    ['Cash / Total Capital', '3.0%', 16.3, 0.8, true],
+    ['Current Ratio', '2.0x', 65.4, 3.3, true],
+    ['Total Debt / Total Capital', '1.6%', 11.0, 4.5, true],
+    ['Debt / Equity', '16.1%', 31.2, 3.4, true],
+    ['Levered Free Cash Flow Margin', '18.2%', 81.6, 4.1, true],
+    ['FCF / OCF', '44.5%', 15.1, 0.8, true]
+  ],
+  'Growth Health': [
+    ['EPS Diluted Cumulative Growth (1Y)', '137.0%', 85.3, 4.3, true],
+    ['EPS Diluted Cumulative Growth (3Y)', '268.5%', 88.9, 4.4, true],
+    ['Diluted EPS (Cont. Ops) Growth', '34.4%', 60.0, 3.0, true],
+    ['EPS Trend Score', '100.0%', 100.0, 5.0, true],
+    ['FCF Levered Cumulative Growth (1Y)', '22.1%', 47.3, 2.4, true],
+    ['FCF Levered Cumulative Growth (3Y)', '71.0%', 63.6, 3.2, true],
+    ['Levered Free Cash Flow Growth', '0.7%', 46.0, 2.3, true],
+    ['FCF Levered Trend Score', '75.0%', 75.0, 3.8, true],
+    ['Gross Profit Cumulative Growth (1Y)', '53.4%', 77.5, 3.9, true],
+    ['Gross Profit Cumulative Growth (3Y)', '145.7%', 77.6, 3.9, true],
+    ['Gross Profit Growth', '18.0%', 74.9, 3.7, true]
+  ],
+  'Price Momentum': [
+    ['Price % of 52 Week High', '98.8%', 98.9, 4.9, true],
+    ['1 Month Price Total Return', '22.6%', 90.4, 4.5, true],
+    ['1 Week Price Total Return', '0.8%', 67.7, 3.4, true],
+    ['1 Year Price Total Return', '113.4%', 95.3, 4.8, true],
+    ['2 Week Price Total Return', '8.6%', 79.7, 4.0, true],
+    ['2 Year Price Total Return', '101.9%', 91.3, 4.6, true],
+    ['3 Month Price Total Return', '3.4%', 66.6, 3.3, true],
+    ['3 Week Price Total Return', '16.4%', 87.7, 4.4, true],
+    ['3 Year Price Total Return', '234.8%', 97.5, 4.9, true],
+    ['4 Year Price Total Return', '192.7%', 96.0, 4.8, true],
+    ['5 Year Price Total Return', '200.7%', 97.3, 4.9, true]
+  ],
+  'Profitability Health': [
+    ['Cash Return on Invested Capital', '17.5%', 82.0, 4.1, true],
+    ['EBITDA Margin', '37.3%', 93.7, 4.7, true],
+    ['Pre-tax Income Margin', '39.4%', 97.4, 4.9, true],
+    ['Fixed Asset Turnover', '1.8x', 15.2, 0.8, true],
+    ['Gross Profit Margin', '59.7%', 70.8, 3.5, true],
+    ['Inventory Turnover', '-', null, null, true],
+    ['Net Income to Common Margin', '32.8%', 97.5, 4.9, true],
+    ['Net Income to Company', '132.2 B', 100.0, 5.0, true],
+    ['Operating Income Margin', '32.0%', 96.9, 4.8, true],
+    ['Return on Capital', '36.3%', 93.8, 4.7, true],
+    ['Return on Assets', '25.3%', 100.0, 5.0, true]
+  ],
+  'Relative Value': [
+    ['Earnings Yield', '2.7%', 19.7, 1.0, true],
+    ['EV / EBIT', '31.3x', 86.0, 0.7, true],
+    ['EV / EBIT Growth Ratio', '1.8', 82.1, 0.9, true],
+    ['EV / EBITDA', '26.9x', 90.9, 0.5, true],
+    ['EV / EBITDA Growth Ratio', '1.6', 84.2, 0.8, true],
+    ['EV / Invested Capital', '8.5x', 96.0, 0.2, true],
+    ['EV / IC Growth Ratio', '0.8', 87.8, 0.6, true],
+    ['EV / Revenue', '10.0x', 95.1, 0.2, true],
+    ['EV / Revenue Growth Ratio', '0.9', 86.9, 0.7, true],
+    ['Free Cash Flow Yield', '1.8%', 35.9, 1.8, true],
+    ['Market Cap', '4,161.3 B', 100.0, 5.0, true]
+  ]
+};
+
+// ===================== STATE =====================
+// Prototype plan state: 'free' | 'paid'. Mirrored to <html data-plan> so CSS and JS can branch on it.
+let plan = 'paid';
+
+function setPlan(next) {
+  plan = next === 'free' ? 'free' : 'paid';
+  document.documentElement.dataset.plan = plan;
+  const toggle = document.getElementById('planToggle');
+  toggle.dataset.plan = plan;
+  toggle.querySelectorAll('.plan-toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.planOption === plan);
+  });
+}
+
+// ===================== INIT =====================
+function init() {
+  setPlan(plan);
+  healthModels.forEach(h => { h.score = recalcHealthScore(h.name); });
+  renderHealthRows();
+  renderHealthChart();
+  renderChartLegend();
+  setupStickyObserver();
+  updateOverallHealthScore();
+}
+
+// ===================== TOOLTIP =====================
+function toggleTooltip(btn) {
+  const tip = btn.querySelector('.range-tooltip');
+  const wasVisible = tip.classList.contains('visible');
+  document.querySelectorAll('.range-tooltip.visible').forEach(t => t.classList.remove('visible'));
+  if (!wasVisible) tip.classList.add('visible');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.range-tooltip-btn')) {
+    document.querySelectorAll('.range-tooltip.visible').forEach(t => t.classList.remove('visible'));
+  }
+});
+
+// ===================== HEALTH ROWS =====================
+function renderHealthRows() {
+  const container = document.getElementById('healthRows');
+  container.innerHTML = '';
+  healthModels.forEach((hm, i) => {
+    const pct = (hm.score / 5) * 100;
+    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const row = document.createElement('div');
+    row.className = 'health-row';
+    row.onclick = () => openHealthDetail(i);
+    row.innerHTML = `
+      <div class="health-name">${hm.name}</div>
+      <div class="health-bar-container">
+        <div class="health-bar-fill" style="width:${pct}%; background:${color}"></div>
+      </div>
+      <div class="health-score-val" style="color:${color}">${hm.score.toFixed(1)}</div>
+      <div class="health-chevron">
+        <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ===================== HEALTH CHART =====================
+function renderHealthChart() {
+  const canvas = document.getElementById('healthChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 2;
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width;
+  const H = rect.height;
+  const padL = 28, padR = 12, padT = 8, padB = 24;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 0.5;
+  for (let v = 0; v <= 5; v++) {
+    const y = padT + chartH - (v / 5) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + chartW, y);
+    ctx.stroke();
+
+    // Y labels
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.font = '9px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toString(), padL - 6, y + 3);
+  }
+
+  // X labels
+  const years = healthTimeline.years;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.font = '9px -apple-system, sans-serif';
+  years.forEach((yr, i) => {
+    const x = padL + (i / (years.length - 1)) * chartW;
+    ctx.fillText(yr.toString(), x, H - 4);
+  });
+
+  // Draw lines
+  const modelNames = Object.keys(healthTimeline.data);
+  modelNames.forEach((name, mi) => {
+    if (!chartLineVisible[mi]) return;
+
+    const data = healthTimeline.data[name];
+    const color = healthColors[mi];
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+
+    data.forEach((val, di) => {
+      const x = padL + (di / (years.length - 1)) * chartW;
+      const y = padT + chartH - (val / 5) * chartH;
+      if (di === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Draw dots
+    data.forEach((val, di) => {
+      const x = padL + (di / (years.length - 1)) * chartW;
+      const y = padT + chartH - (val / 5) * chartH;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  });
+}
+
+function renderChartLegend() {
+  const container = document.getElementById('chartLegend');
+  container.innerHTML = '';
+  const modelNames = Object.keys(healthTimeline.data);
+  modelNames.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = `chart-legend-item ${chartLineVisible[i] ? '' : 'off'}`;
+    item.innerHTML = `<div class="chart-legend-dot" style="background:${healthColors[i]}"></div>${name}`;
+    item.onclick = () => {
+      chartLineVisible[i] = !chartLineVisible[i];
+      item.classList.toggle('off', !chartLineVisible[i]);
+      renderHealthChart();
+    };
+    container.appendChild(item);
+  });
+}
+
+// ===================== STICKY HEADER =====================
+function setupStickyObserver() {
+  const scrollEl = document.getElementById('scrollContent');
+  const sentinel = document.getElementById('heroSentinel');
+  const stickyEl = document.getElementById('stickyHeader');
+
+  if (!scrollEl || !sentinel) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      stickyEl.classList.toggle('visible', !entry.isIntersecting);
+    });
+  }, {
+    root: scrollEl,
+    threshold: 0
+  });
+  observer.observe(sentinel);
+}
+
+// ===================== HEALTH DETAIL =====================
+let activeHealthModel = 0;
+
+let healthDetailScrollOnOpen = false;
+
+function openHealthDetail(idx) {
+  activeHealthModel = idx;
+  healthDetailScrollOnOpen = true;
+  const screen = document.getElementById('healthDetail');
+  renderHealthDetailContent();
+
+  document.getElementById('mainScreen').classList.add('pushed');
+  screen.classList.add('visible');
+}
+
+function closeHealthDetail() {
+  document.getElementById('mainScreen').classList.remove('pushed');
+  document.getElementById('healthDetail').classList.remove('visible');
+}
+
+function recalcHealthScore(categoryName) {
+  const metrics = healthMetrics[categoryName] || [];
+  const active = metrics.filter(m => m[4] && m[3] !== null);
+  if (active.length === 0) return 0;
+  const sum = active.reduce((s, m) => s + m[3], 0);
+  return sum / active.length;
+}
+
+function toggleHealthMetric(categoryName, metricIdx) {
+  const metrics = healthMetrics[categoryName];
+  const onCount = metrics.filter(m => m[4]).length;
+  if (onCount <= 1 && metrics[metricIdx][4]) return;
+  metrics[metricIdx][4] = !metrics[metricIdx][4];
+  const isOn = metrics[metricIdx][4];
+
+  const hmIdx = healthModels.findIndex(h => h.name === categoryName);
+  healthModels[hmIdx].score = recalcHealthScore(categoryName);
+
+  // Update row visually without full re-render
+  const rows = document.querySelectorAll('.hmetric-row');
+  const row = rows[metricIdx];
+  if (row) {
+    row.classList.toggle('off', !isOn);
+    const check = row.querySelector('.hmetric-check');
+    check.classList.toggle('on', isOn);
+  }
+
+  // Update active chip score
+  const activeChip = document.querySelector(`[data-chip="${hmIdx}"]`);
+  if (activeChip) {
+    const score = healthModels[hmIdx].score;
+    const color = score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    activeChip.querySelector('.hdchip-score').textContent = score.toFixed(1);
+    activeChip.querySelector('.hdchip-score').style.color = color;
+  }
+
+  renderHealthRows();
+  updateOverallHealthScore();
+}
+
+function updateOverallHealthScore() {
+  const avg = healthModels.reduce((s, h) => s + h.score, 0) / healthModels.length;
+  const score = Math.round(avg * 10) / 10;
+  const color = score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)';
+  const colorHex = score >= 4 ? '#0ECB81' : score >= 3 ? '#ffab00' : '#E23636';
+  const circumference = 2 * Math.PI * 32;
+  const dashLen = (score / 5) * circumference;
+
+  document.querySelector('.ring-gauge-score').textContent = score.toFixed(1);
+  document.getElementById('healthTag').textContent = ['Weak', 'Fair', 'Good', 'Great', 'Excellent'][Math.min(5, Math.max(1, Math.round(score))) - 1];
+  const progressCircle = document.querySelectorAll('.ring-gauge-svg circle')[1];
+  progressCircle.setAttribute('stroke', colorHex);
+  progressCircle.setAttribute('stroke-dasharray', `${dashLen.toFixed(1)} ${circumference.toFixed(2)}`);
+  document.getElementById('stickyHealth').textContent = score.toFixed(1) + '/5';
+}
+
+const expandedMetrics = new Set();
+
+function toggleMetricChart(ri) {
+  const wrap = document.getElementById('metricChart' + ri);
+  if (!wrap) return;
+  const row = wrap.closest('.hmetric-row');
+  const chevron = row.querySelector('.hmetric-expand');
+
+  if (expandedMetrics.has(ri)) {
+    expandedMetrics.delete(ri);
+    wrap.classList.remove('open');
+    chevron.classList.remove('open');
+  } else {
+    expandedMetrics.add(ri);
+    wrap.classList.add('open');
+    chevron.classList.add('open');
+    const hm = healthModels[activeHealthModel];
+    const metric = healthMetrics[hm.name][ri];
+    setTimeout(() => drawMetricChart('metricCanvas' + ri, metric[0], metric[3]), 100);
+  }
+}
+
+function scoreToColor(score) {
+  const s = Math.max(0, Math.min(5, score));
+  if (s >= 3.5) {
+    const t = (s - 3.5) / 1.5;
+    return `rgb(${Math.round(255 - 241*t)},${Math.round(171 + 32*t)},${Math.round(129*t)})`;
+  }
+  const t = s / 3.5;
+  return `rgb(${Math.round(226 + 29*t)},${Math.round(54 + 117*t)},${Math.round(54 - 54*t)})`;
+}
+
+function generateMetricHistory(name, currentScore) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+  h = Math.abs(h);
+  function sv(i) { return Math.abs(((h * (i+1) * 2654435761) >> 16) & 0xFFFF) / 65535; }
+
+  const n = 12;
+  const points = [];
+  const startVal = Math.max(0.5, Math.min(4.5, currentScore + (sv(0) - 0.5) * 2.5));
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const base = startVal + (currentScore - startVal) * t;
+    const noise = (sv(i + 1) - 0.5) * 0.8 * (1 - t * 0.3);
+    points.push(Math.max(0.2, Math.min(5, base + noise)));
+  }
+  points[n - 1] = currentScore;
+  return points;
+}
+
+function drawMetricChart(canvasId, name, currentScore) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 2;
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0) return;
+
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+
+  const W = rect.width, H = rect.height;
+  const padL = 22, padR = 6, padT = 6, padB = 18;
+  const chartW = W - padL - padR, chartH = H - padT - padB;
+  ctx.clearRect(0, 0, W, H);
+
+  const history = generateMetricHistory(name, currentScore);
+
+  for (let v = 0; v <= 5; v++) {
+    const y = padT + chartH - (v / 5) * chartH;
+    ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.font = '8px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toString(), padL - 4, y + 3);
+  }
+
+  const labels = ['2021', '2022', '2023', '2024', '2025', '2026'];
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.font = '8px -apple-system, sans-serif';
+  labels.forEach((lbl, li) => {
+    const x = padL + (li / (labels.length - 1)) * chartW;
+    ctx.fillText(lbl, x, H - 4);
+  });
+
+  for (let i = 0; i < history.length - 1; i++) {
+    const x1 = padL + (i / (history.length - 1)) * chartW;
+    const y1 = padT + chartH - (history[i] / 5) * chartH;
+    const x2 = padL + ((i + 1) / (history.length - 1)) * chartW;
+    const y2 = padT + chartH - (history[i + 1] / 5) * chartH;
+    ctx.strokeStyle = scoreToColor((history[i] + history[i + 1]) / 2);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  }
+
+  history.forEach((val, i) => {
+    const x = padL + (i / (history.length - 1)) * chartW;
+    const y = padT + chartH - (val / 5) * chartH;
+    ctx.fillStyle = scoreToColor(val);
+    ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+  });
+}
+
+function renderHealthDetailContent() {
+  const container = document.getElementById('healthDetailContent');
+
+  // Save chips scroll position before re-render
+  const oldChipsWrap = container.querySelector('.health-detail-chips');
+  const savedScroll = oldChipsWrap ? oldChipsWrap.scrollLeft : 0;
+
+  // Chips
+  let chipsHTML = '<div class="health-detail-chips">';
+  healthModels.forEach((hm, i) => {
+    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const active = i === activeHealthModel;
+    chipsHTML += `
+      <div class="health-detail-chip ${active ? 'active' : ''}" data-chip="${i}" onclick="activeHealthModel=${i}; renderHealthDetailContent()">
+        <div class="hdchip-top">
+          <div class="hdchip-score" style="color:${color}">${hm.score.toFixed(1)}</div>
+          ${active ? '<div class="hdchip-check"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' : ''}
+        </div>
+        <div class="hdchip-name">${hm.name}</div>
+      </div>`;
+  });
+  chipsHTML += '</div>';
+
+  // Metrics table
+  const hm = healthModels[activeHealthModel];
+  const metrics = healthMetrics[hm.name] || [];
+  const checkSVG = '<svg viewBox="0 0 12 10" fill="none"><path d="M1 5L4.5 8.5L11 1.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  const chevronDownSVG = '<svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  expandedMetrics.clear();
+
+  let tableHTML = `
+    <div class="detail-section">
+      <div class="detail-table">`;
+
+  metrics.forEach((row, ri) => {
+    const isOn = row[4];
+    const pctVal = row[2] !== null ? row[2].toFixed(1) + '%' : '-';
+    const scoreVal = row[3] !== null ? row[3].toFixed(1) : '-';
+    const scoreColor = row[3] !== null ? (row[3] >= 4 ? 'var(--green)' : row[3] >= 2.5 ? 'var(--yellow)' : 'var(--red)') : 'var(--text-tertiary)';
+    const hasScore = row[3] !== null;
+    tableHTML += `
+      <div class="hmetric-row ${isOn ? '' : 'off'}">
+        <div class="hmetric-main" onclick="toggleMetricChart(${ri})">
+          <div class="hmetric-check ${isOn ? 'on' : ''}" onclick="event.stopPropagation(); toggleHealthMetric('${hm.name}', ${ri})">${checkSVG}</div>
+          <div class="hmetric-info">
+            <div class="hmetric-name">${row[0]}</div>
+            <div class="hmetric-sub">Value: ${row[1]} · Percentile: ${pctVal}</div>
+          </div>
+          <div class="hmetric-score" style="color:${scoreColor}">${scoreVal}</div>
+          ${hasScore ? `<div class="hmetric-expand">${chevronDownSVG}</div>` : '<div style="width:24px;flex-shrink:0"></div>'}
+        </div>
+        ${hasScore ? `<div class="hmetric-chart-wrap" id="metricChart${ri}"><canvas id="metricCanvas${ri}"></canvas></div>` : ''}
+      </div>`;
+  });
+
+  tableHTML += '</div></div><div class="bottom-pad"></div>';
+
+  container.innerHTML = chipsHTML + tableHTML;
+
+  const newChipsWrap = container.querySelector('.health-detail-chips');
+  if (healthDetailScrollOnOpen) {
+    healthDetailScrollOnOpen = false;
+    requestAnimationFrame(() => {
+      const activeChip = container.querySelector(`[data-chip="${activeHealthModel}"]`);
+      if (newChipsWrap && activeChip) {
+        const scrollLeft = activeChip.offsetLeft - newChipsWrap.offsetWidth / 2 + activeChip.offsetWidth / 2;
+        newChipsWrap.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+      }
+    });
+  } else if (newChipsWrap) {
+    newChipsWrap.scrollLeft = savedScroll;
+  }
+}
+
+// ===================== START =====================
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
