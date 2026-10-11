@@ -923,7 +923,7 @@ function renderHealthRows() {
   container.innerHTML = '';
   healthModels.forEach((hm, i) => {
     const pct = (hm.score / 5) * 100;
-    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const color = healthLevelColor(hm.score);
     const row = document.createElement('div');
     row.className = 'health-row';
     row.onclick = () => openHealthDetail(i);
@@ -1207,7 +1207,7 @@ function toggleHealthMetric(categoryName, metricIdx) {
   const activeChip = document.querySelector(`[data-chip="${hmIdx}"]`);
   if (activeChip) {
     const score = healthModels[hmIdx].score;
-    const color = score >= 4 ? 'var(--green)' : score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const color = healthLevelColor(score);
     activeChip.querySelector('.hdchip-score').textContent = score.toFixed(1);
     activeChip.querySelector('.hdchip-score').style.color = color;
   }
@@ -1219,6 +1219,11 @@ function toggleHealthMetric(categoryName, metricIdx) {
 
 const HEALTH_LEVELS = ['Weak', 'Fair', 'Good', 'Great', 'Excellent'];
 const HEALTH_LEVEL_COLORS = ['#E0574C', '#EC9A4C', '#D4B03A', '#7CC860', '#4FA83D'];
+
+// Color for any health score, same 5 levels as the summary scale (score rounded to the nearest level)
+function healthLevelColor(score) {
+  return HEALTH_LEVEL_COLORS[Math.min(5, Math.max(1, Math.round(score))) - 1];
+}
 
 function updateOverallHealthScore() {
   const avg = healthModels.reduce((s, h) => s + h.score, 0) / healthModels.length;
@@ -1271,13 +1276,7 @@ function toggleMetricChart(ri) {
 }
 
 function scoreToColor(score) {
-  const s = Math.max(0, Math.min(5, score));
-  if (s >= 3.5) {
-    const t = (s - 3.5) / 1.5;
-    return `rgb(${Math.round(255 - 241*t)},${Math.round(171 + 32*t)},${Math.round(129*t)})`;
-  }
-  const t = s / 3.5;
-  return `rgb(${Math.round(226 + 29*t)},${Math.round(54 + 117*t)},${Math.round(54 - 54*t)})`;
+  return healthLevelColor(Math.max(0, Math.min(5, score)));
 }
 
 function generateMetricHistory(name, currentScore) {
@@ -1367,7 +1366,7 @@ function renderHealthDetailContent() {
   // Chips
   let chipsHTML = '<div class="health-detail-chips">';
   healthModels.forEach((hm, i) => {
-    const color = hm.score >= 4 ? 'var(--green)' : hm.score >= 3 ? 'var(--yellow)' : 'var(--red)';
+    const color = healthLevelColor(hm.score);
     const active = i === activeHealthModel;
     chipsHTML += `
       <div class="health-detail-chip ${active ? 'active' : ''}" data-chip="${i}" onclick="activeHealthModel=${i}; renderHealthDetailContent()">
@@ -1396,7 +1395,7 @@ function renderHealthDetailContent() {
     const isOn = row[4];
     const pctVal = row[2] !== null ? row[2].toFixed(1) + '%' : '-';
     const scoreVal = row[3] !== null ? row[3].toFixed(1) : '-';
-    const scoreColor = row[3] !== null ? (row[3] >= 4 ? 'var(--green)' : row[3] >= 2.5 ? 'var(--yellow)' : 'var(--red)') : 'var(--text-tertiary)';
+    const scoreColor = row[3] !== null ? healthLevelColor(row[3]) : 'var(--text-tertiary)';
     const hasScore = row[3] !== null;
     tableHTML += `
       <div class="hmetric-row ${isOn ? '' : 'off'}">
