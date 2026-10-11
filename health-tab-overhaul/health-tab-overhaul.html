@@ -296,30 +296,30 @@
   .history-block {
     margin: 0 -16px 8px;
   }
+  /* Range picker - matches the Overview chart timeframe row */
   .range-seg {
     display: flex;
-    margin: 0 16px 14px;
-    padding: 2px;
-    background: #F2F2F5;
-    border-radius: 9px;
+    justify-content: space-between;
+    margin: 12px 16px 0;
   }
   .range-seg-btn {
-    flex: 1;
     height: 28px;
+    min-width: 48px;
+    padding: 0 12px;
     border: none;
     background: transparent;
-    border-radius: 7px;
+    border-radius: 14px;
     font-family: var(--font);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 400;
+    color: #4B5563;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background 0.2s, color 0.2s;
   }
   .range-seg-btn.active {
-    background: #FFFFFF;
+    background: #F0F0F2;
     color: var(--text-primary);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.04);
+    font-weight: 700;
   }
   .history-chart {
     position: relative;
@@ -718,7 +718,7 @@
           <div class="tab-content" id="contentHealth">
             <div class="tab-section-title">Financial Health
               <button class="range-tooltip-btn" onclick="toggleTooltip(this)">i
-                <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the Information Technology sector and operating in Developed economic markets.</div>
+                <div class="range-tooltip"><strong>How is Financial Health calculated?</strong>Financial Health is determined by ranking the company on over 100 factors against companies in the <b>Information Technology</b> sector and operating in <b>Developed</b> economic markets.</div>
               </button>
             </div>
             <div class="section-card">
@@ -746,11 +746,11 @@
 
             <div class="tab-section-title">Financial Health History</div>
             <div class="history-block">
-              <div class="range-seg" id="rangeSeg"></div>
               <div class="history-chart" id="historyChart">
                 <canvas id="healthChart"></canvas>
                 <div class="chart-scrub" id="chartScrub"></div>
               </div>
+              <div class="range-seg" id="rangeSeg"></div>
               <div class="chart-legend" id="chartLegend"></div>
             </div>
 
