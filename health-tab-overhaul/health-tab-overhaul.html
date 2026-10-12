@@ -1328,13 +1328,13 @@ function renderLatestPeriod() {
     const sub = isCategoryEdited(hm.name) ? editedSubtitle(hm.name) : `${metrics.filter(m => m[3] !== null).length} metrics`;
     // Range labels sit under the band's ends; a narrow band pushes them apart so they never collide
     let loX = lpPos(lo), hiX = lpPos(hi);
-    if (hiX - loX < 30) { const mid = Math.min(Math.max((loX + hiX) / 2, 15), 85); loX = mid - 15; hiX = mid + 15; }
+    if (hiX - loX < 14) { const mid = Math.min(Math.max((loX + hiX) / 2, 7), 93); loX = mid - 7; hiX = mid + 7; }
     // Labels near an edge align to it instead of centering on the band end
     const endStyle = (x, side) => x < 10 ? 'left:0;transform:none' : x > 90 ? 'right:0;left:auto;transform:none' : `left:${x}%`;
     const range = locked
-      ? `<div class="lp-track lp-locked-track" onclick="event.stopPropagation(); showPaywall(event)"></div><div class="lp-ends"><span class="lo cap" style="left:0;transform:none">0</span><span class="hi cap" style="right:0;left:auto;transform:none">5</span></div>`
+      ? `<div class="lp-track lp-locked-track" onclick="event.stopPropagation(); showPaywall(event)"></div><div class="lp-ends"><span class="lo cap" style="left:0;transform:none">0.0</span><span class="hi cap" style="right:0;left:auto;transform:none">5.0</span></div>`
       : `<div class="lp-track"><span class="lp-band" style="left:${lpPos(lo)}%;width:${lpPos(hi) - lpPos(lo)}%;background:${color}"></span><span class="lp-dot" style="left:${lpPos(hm.score)}%;background:${color}"></span></div>
-         <div class="lp-ends"><span class="lo" style="${endStyle(loX)}">Low ${lo.toFixed(1)}</span><span class="hi" style="${endStyle(hiX)}">High ${hi.toFixed(1)}</span></div>`;
+         <div class="lp-ends"><span class="lo" style="${endStyle(loX)}">${lo.toFixed(1)}</span><span class="hi" style="${endStyle(hiX)}">${hi.toFixed(1)}</span></div>`;
     const kids = metrics.map((m, i) => {
       const has = m[3] !== null;
       const score = !has ? '' : locked ? lockSlot() : `<span style="color:${healthLevelColor(m[3])}">${m[3].toFixed(1)}</span>`;
