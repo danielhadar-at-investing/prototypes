@@ -412,8 +412,11 @@
   .lock-num svg { width: 11px; height: 14px; display: block; }
   .health-score-val .lock-num svg, .hmetric-score .lock-num svg { width: 12px; height: 15px; }
   .hmetric-score .lock-num { justify-content: flex-end; width: 100%; }
+  .lock-slot { position: relative; display: inline-block; cursor: pointer; }
+  .lock-slot .ph { visibility: hidden; }
+  .lock-slot svg { position: absolute; left: 50%; top: 50%; width: 12px; height: 15px; transform: translate(-50%, -50%); }
   .mchart-box { position: relative; }
-  html[data-plan="free"] .mchart-box canvas { filter: blur(5px); opacity: 0.7; }
+  .mchart-box.locked canvas { filter: blur(5px); opacity: 0.7; }
   .mchart-lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .mchart-lock svg { width: 20px; height: 25px; }
   .mcta-label { display: inline-flex; align-items: center; gap: 6px; }
@@ -1103,8 +1106,10 @@ function setPlan(next) {
 // Free plan: the overall gauge and Growth Health stay open; everything else shows the lock
 const LOCKED_CATEGORIES = ['Cash Flow Health', 'Price Momentum', 'Profitability Health', 'Relative Value'];
 const isFree = () => plan === 'free';
+const lineShown = mi => chartLineVisible[mi] && !catLocked(healthModels[mi].name);
 const catLocked = name => isFree() && LOCKED_CATEGORIES.includes(name);
 const LOCK_SVG = '<svg viewBox="0 0 12 15" fill="none"><path d="M3 6.5V4.5a3 3 0 0 1 6 0v2" stroke="#FF6B00" stroke-width="1.7"/><rect x="0.5" y="6" width="11" height="8.5" rx="2" fill="#FF6B00"/></svg>';
+const lockSlot = () => `<span class="lock-slot" onclick="event.stopPropagation(); showPaywall(event)"><span class="ph">0.0</span>${LOCK_SVG}</span>`;
 const lockNum = () => `<span class="lock-num" onclick="event.stopPropagation(); showPaywall(event)">${LOCK_SVG}</span>`;
 const PRO_SHIELD = '<svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M7 0L13.5 2.5V7C13.5 11.5 10.5 14.5 7 16C3.5 14.5 0.5 11.5 0.5 7V2.5L7 0Z" fill="#1A1A2E"/><text x="7" y="11.5" text-anchor="middle" font-size="9" font-weight="800" fill="#ef8c43" font-family="-apple-system,sans-serif">P</text></svg>';
 
@@ -1134,7 +1139,7 @@ const SCORE_PRESETS = {
   Great:     { 'Cash Flow Health': 4.1, 'Growth Health': 4.0, 'Price Momentum': 4.4, 'Profitability Health': 4.8, 'Relative Value': 3.6 },
   Excellent: { 'Cash Flow Health': 4.8, 'Growth Health': 4.8, 'Price Momentum': 4.9, 'Profitability Health': 4.9, 'Relative Value': 4.6 }
 };
-let scorePreset = 'Good';
+let scorePreset = 'Great';
 const baseMetrics = {};   // name -> [{ score, pct, rel }]
 const baseCatScore = {};  // name -> real category score (history is shifted by the preset's difference)
 
@@ -1207,6 +1212,7 @@ function init() {
   renderChartLegend();
   setupChartScrub();
   updateOverallHealthScore();
+  if (SCORE_PRESETS[scorePreset]) applyScorePreset(scorePreset);
 }
 
 // ===================== TOOLTIP =====================
@@ -1249,7 +1255,7 @@ function renderHealthRows() {
         <div class="health-name">${hm.name}</div>
         ${isCategoryEdited(hm.name) ? `<div class="health-sub">${editedSubtitle(hm.name)}</div>` : ''}
       </div>
-      <div class="health-score-val" style="color:${color}">${catLocked(hm.name) ? lockNum() : hm.score.toFixed(1)}</div>
+      <div class="health-score-val" style="color:${color}">${catLocked(hm.name) ? lockSlot() : hm.score.toFixed(1)}</div>
       <div class="health-chevron"><svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     </div>`;
   }).join('');
@@ -1301,7 +1307,6 @@ function renderRangeSeg() {
 }
 
 function setChartRange(years) {
-  if (isFree()) { showPaywall(window.event); return; }
   chartRangeYears = years;
   chartHoverIdx = null;
   document.getElementById('chartScrub').classList.remove('visible');
@@ -1372,7 +1377,7 @@ function renderHealthChart() {
 
   // Lines
   series.forEach((data, mi) => {
-    if (!chartLineVisible[mi] || isFree()) return;
+    if (!lineShown(mi)) return;
     const color = healthColors[mi];
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
@@ -1399,7 +1404,7 @@ function renderHealthChart() {
     ctx.lineTo(x, padT + chartH);
     ctx.stroke();
     series.forEach((data, mi) => {
-      if (!chartLineVisible[mi]) return;
+      if (!lineShown(mi)) return;
       const y = yAt(data[chartHoverIdx]);
       ctx.fillStyle = '#FFFFFF';
       ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
@@ -1424,7 +1429,7 @@ function setupChartScrub() {
     renderHealthChart();
 
     const d = historyDate(start + chartHoverIdx);
-    const rows = names.map((name, mi) => chartLineVisible[mi]
+    const rows = names.map((name, mi) => lineShown(mi)
       ? `<div class="chart-scrub-row"><span class="chart-scrub-dot" style="background:${healthColors[mi]}"></span><span>${name}</span><b>${series[mi][chartHoverIdx].toFixed(1)}</b></div>`
       : '').join('');
     scrub.innerHTML = `<div class="chart-scrub-date">${MONTHS_SHORT[d.month]} ${d.year}</div>${rows}`;
@@ -1446,7 +1451,6 @@ function setupChartScrub() {
   // tapping anywhere outside the chart dismisses it.
   let dragging = false;
   canvas.addEventListener('pointerdown', e => {
-    if (isFree()) { showPaywall(e); return; }
     dragging = true;
     canvas.setPointerCapture(e.pointerId);
     update(e.clientX);
@@ -1465,13 +1469,13 @@ function renderChartLegend() {
   Object.keys(CAT_HISTORY).forEach((name, i) => {
     const color = healthColors[i];
     const item = document.createElement('div');
-    item.className = `chart-legend-item ${chartLineVisible[i] && !isFree() ? '' : 'off'}`;
+    item.className = `chart-legend-item ${lineShown(i) ? '' : 'off'}`;
     item.style.setProperty('--chip-color', color);
     item.textContent = name;
     item.onclick = e => {
-      if (isFree()) { showPaywall(e); return; }
+      if (catLocked(name)) { showPaywall(e); return; }
       // Keep at least one line visible
-      if (chartLineVisible[i] && chartLineVisible.filter(Boolean).length === 1) return;
+      if (lineShown(i) && healthModels.filter((_, k) => lineShown(k)).length === 1) return;
       chartLineVisible[i] = !chartLineVisible[i];
       item.classList.toggle('off', !chartLineVisible[i]);
       renderHealthChart();
@@ -1837,7 +1841,7 @@ function renderHealthDetailContent() {
     chipsHTML += `
       <div class="health-detail-chip ${active ? 'active' : ''}" data-chip="${i}" onclick="activeHealthModel=${i}; renderHealthDetailContent()">
         <div class="hdchip-top">
-          <div class="hdchip-score" style="color:${color}">${catLocked(hm.name) ? lockNum() : hm.score.toFixed(1)}</div>
+          <div class="hdchip-score" style="color:${color}">${catLocked(hm.name) ? lockSlot() : hm.score.toFixed(1)}</div>
         </div>
         <div class="hdchip-name">${hm.name}</div>
       </div>`;
@@ -1868,12 +1872,12 @@ function renderHealthDetailContent() {
           <div class="hmetric-check ${hasScore && isOn ? 'on' : ''}" ${hasScore ? `onclick="event.stopPropagation(); toggleHealthMetric('${hm.name}', ${ri})"` : ''}>${checkSVG}</div>
           <div class="hmetric-info">
             <div class="hmetric-name">${row[0]}</div>
-            <div class="hmetric-sub">${hasScore ? `Value: <b>${isFree() ? lockNum() : row[1]}</b> · Percentile: <b>${isFree() ? lockNum() : pctVal}</b>` : 'No data available'}</div>
+            <div class="hmetric-sub">${hasScore ? `Value: <b>${catLocked(hm.name) ? lockNum() : row[1]}</b> · Percentile: <b>${catLocked(hm.name) ? lockNum() : pctVal}</b>` : 'No data available'}</div>
           </div>
-          <div class="hmetric-score" style="color:${scoreColor}">${hasScore && isFree() ? lockNum() : scoreVal}</div>
+          <div class="hmetric-score" style="color:${scoreColor}">${hasScore && catLocked(hm.name) ? lockSlot() : scoreVal}</div>
           ${hasScore ? `<div class="hmetric-expand">${chevronDownSVG}</div>` : '<div style="width:24px;flex-shrink:0"></div>'}
         </div>
-        ${hasScore ? `<div class="hmetric-chart-wrap" id="metricChart${ri}"><div class="mchart-box"><canvas id="metricCanvas${ri}"></canvas>${isFree() ? `<div class="mchart-lock" onclick="event.stopPropagation(); showPaywall(event)">${LOCK_SVG}</div>` : ''}</div>${metricPreview(hm.name, ri)}</div>` : ''}
+        ${hasScore ? `<div class="hmetric-chart-wrap" id="metricChart${ri}"><div class="mchart-box ${catLocked(hm.name) ? 'locked' : ''}"><canvas id="metricCanvas${ri}"></canvas>${catLocked(hm.name) ? `<div class="mchart-lock" onclick="event.stopPropagation(); showPaywall(event)">${LOCK_SVG}</div>` : ''}</div>${metricPreview(hm.name, ri)}</div>` : ''}
       </div>`;
   });
 
@@ -1965,12 +1969,12 @@ function metricPreview(cat, ri) {
   const m = metricModel(cat, ri), f = n => fmtV(n, m.pv);
   const first = m.avg ? [`${m.avg.n}y average`, f(m.avg.v)] : ['Peer median', m.peerMedian !== null ? f(m.peerMedian) : '-'];
   const sec = m.sector.Sector || {};
-  const lk = v => isFree() ? lockNum() : v;
+  const locked = catLocked(cat), lk = v => locked ? lockNum() : v;
   return `<div class="mfacts">
     <div class="mfact"><div class="k">${first[0]}</div><div class="v">${lk(first[1])}</div></div>
     <div class="mfact"><div class="k">Sector median</div><div class="v">${lk(sec.median || '-')}</div></div>
     <div class="mfact"><div class="k">Peer rank</div><div class="v">${lk(m.rank ? `#${m.rank} of ${m.ranked}` : '-')}</div></div></div>
-    <button class="mcta" onclick="event.stopPropagation(); ${isFree() ? 'showPaywall(event)' : `openMetricPage('${cat}', ${ri})`}"><span class="mcta-label">Full analysis${isFree() ? PRO_SHIELD : ''}</span> <svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+    <button class="mcta" onclick="event.stopPropagation(); ${locked ? 'showPaywall(event)' : `openMetricPage('${cat}', ${ri})`}"><span class="mcta-label">Full analysis${locked ? PRO_SHIELD : ''}</span> <svg width="7" height="12" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
 }
 
 function mpChart(points, pv) {
