@@ -1189,7 +1189,6 @@ const SCORE_PRESETS = {
 };
 let scorePreset = 'Great';
 const baseMetrics = {};   // name -> [{ score, pct, rel }]
-const baseCatScore = {};  // name -> real category score (history is shifted by the preset's difference)
 
 function snapshotBaseData() {
   Object.keys(healthMetrics).forEach(name => {
@@ -1199,8 +1198,6 @@ function snapshotBaseData() {
       const rel = s === null ? null : Math.abs(p / 20 - s) < 0.3 ? 'direct' : Math.abs((100 - p) / 20 - s) < 0.3 ? 'inverse' : null;
       return { score: s, pct: p, rel };
     });
-    const sc = baseMetrics[name].filter(b => b.score !== null);
-    baseCatScore[name] = sc.reduce((sum, b) => sum + b.score, 0) / sc.length;
   });
 }
 
@@ -1398,7 +1395,8 @@ function seriesAt(pts, t) {
   return pts.at(-1)[1];
 }
 function historySeries(name, mi) {
-  const shift = healthModels[mi].score - baseCatScore[name];
+  // Measured from web's last stored score so the line always ends exactly on the live score
+  const shift = healthModels[mi].score - CAT_HISTORY[name].at(-1)[1];
   const out = [];
   for (let i = 0; i <= HISTORY_MONTHS; i++) {
     out.push(Math.max(0, Math.min(5, seriesAt(CAT_HISTORY[name], monthTs(i)) + shift * i / HISTORY_MONTHS)));
