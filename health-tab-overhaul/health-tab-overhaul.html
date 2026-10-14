@@ -734,7 +734,7 @@
   /* (?) variant of the section tooltip button */
   .range-tooltip-btn.q { font-style: normal; font-size: 12px; }
 
-  /* Latest Period: category score inside the range of its metric scores; expands to the metrics */
+  /* Score Breakdown: category score inside the range of its metric scores; expands to the metrics */
   .lp-title { margin-top: 20px; }
   .health-rows.lp-list { margin: 0; }
   .lp-cat { position: relative; }
@@ -934,9 +934,9 @@
               <div class="chart-legend" id="chartLegend"></div>
             </div>
 
-            <div class="tab-section-title lp-title">Latest Period
+            <div class="tab-section-title lp-title">Score Breakdown
               <button class="range-tooltip-btn q" onclick="toggleTooltip(this)">?
-                <div class="range-tooltip"><strong>Latest Period</strong>Each category's current score, shown against the spread of its metric scores from lowest to highest. Expand a category to see every metric and choose which ones count toward its score.</div>
+                <div class="range-tooltip"><strong>Score Breakdown</strong>Each bar runs from the category's weakest metric score to its strongest. The dot is the category score, the average of its metrics. A wide bar means the metrics point in different directions. Tap a category to see every metric and choose which ones count toward its score.</div>
               </button>
             </div>
             <div class="health-rows lp-list" id="latestPeriod"></div>
@@ -1307,7 +1307,7 @@ function renderHealthRows() {
   renderLatestPeriod();
 }
 
-// ===================== LATEST PERIOD =====================
+// ===================== SCORE BREAKDOWN =====================
 // Same metric selection as the metrics screen: a checkbox here or there changes the category score everywhere
 const lpOpen = new Set();
 const lpPos = v => Math.min(100, Math.max(0, v / 5 * 100));
