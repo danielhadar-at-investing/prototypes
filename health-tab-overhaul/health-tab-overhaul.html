@@ -1322,7 +1322,7 @@ function renderLatestPeriod() {
     const metrics = healthMetrics[hm.name];
     const active = metrics.filter(m => m[4] && m[3] !== null).map(m => m[3]);
     const lo = Math.min(...active), hi = Math.max(...active);
-    const sub = isCategoryEdited(hm.name) ? editedSubtitle(hm.name) : `${metrics.filter(m => m[3] !== null).length} metrics`;
+    const sub = isCategoryEdited(hm.name) ? editedSubtitle(hm.name).replace('Custom · ', '') : `${metrics.filter(m => m[3] !== null).length} metrics`;
     // Range labels sit under the band's ends; a narrow band pushes them apart so they never collide
     let loX = lpPos(lo), hiX = lpPos(hi);
     if (hiX - loX < 14) { const mid = Math.min(Math.max((loX + hiX) / 2, 7), 93); loX = mid - 7; hiX = mid + 7; }
