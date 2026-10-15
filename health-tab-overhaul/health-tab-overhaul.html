@@ -490,8 +490,7 @@
   .mp-header.scrolled .detail-title { opacity: 1; }
   .mp-header { border-bottom-color: transparent; transition: border-color .2s; }
   .mp-header.scrolled { border-bottom-color: var(--border); }
-  .mp-hero { padding: 4px 16px 0; }
-  .mp-eyebrow { font-size: 12px; font-weight: 500; color: #8A8F98; }
+  .mp-hero { padding: 8px 16px 0; }
   .mp-hero h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; line-height: 1.2; margin-top: 2px; color: var(--text-primary); }
   .mp-desc { font-size: 14px; line-height: 1.45; color: #4B5563; margin-top: 6px; }
   .mp-kpis { display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 16px; background: #F5F5F7; border-radius: 14px; }
@@ -2120,7 +2119,7 @@ function renderMetricPage(resetScroll = true) {
   const lv = healthLevelColor(m.score), level = HEALTH_LEVELS[Math.min(5, Math.max(1, Math.round(m.score))) - 1];
   const screen = document.getElementById('metricPage'), keep = screen.scrollTop;
   document.getElementById('mpTitle').textContent = m.name;
-  let h = `<div class="mp-hero"><div class="mp-eyebrow">${m.cat} · Apple</div><h1>${m.name}</h1><p class="mp-desc">${m.d.desc}</p>
+  let h = `<div class="mp-hero"><h1>${m.name}</h1><p class="mp-desc">${m.d.desc}</p>
     <div class="mp-kpis"><div class="mp-kpi"><div class="k">Value</div><div class="v">${m.row[1]}</div></div>
       <div class="mp-kpi"><div class="k">Percentile</div><div class="v">${m.pct.toFixed(1)}%</div></div>
       <div class="mp-kpi"><div class="k">Score</div><div class="v" style="color:${lv}">${m.score.toFixed(1)}<small>${level}</small></div></div></div>
