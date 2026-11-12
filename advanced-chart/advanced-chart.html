@@ -476,27 +476,29 @@ svg { display: block; }
 .ch-l3 .vol-v { color: var(--text-primary); font-variant-numeric: tabular-nums; }
 .ch-l3::before { content: ""; width: 2px; height: 12px; border-radius: 1px; background: var(--gray-1); }
 
-/* "Back to latest bar" (TradingView style): over the volume pane, just left of the price axis;
+/* The two "put the view back" buttons are one family: white circle, 1px divider border, same shadow, primary icon, 2px stroke.
+   They share one center line (60px above the container bottom = 36px above the plot bottom).
+   "Back to latest bar" (TradingView style): the bigger one (40), over the volume pane just left of the price axis;
    only visible while the view is scrolled away from the latest bar */
-.latest-btn {
-  position: absolute; right: 70px; bottom: 38px;
-  width: 44px; height: 44px; border-radius: 10px;
+.latest-btn, .zoom-btn {
+  position: absolute; border-radius: 50%;
   background: var(--bg-primary); border: 1px solid var(--divider);
-  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  box-shadow: 0 1px 4px rgba(0,0,0,.14);
   display: flex; align-items: center; justify-content: center;
   color: var(--icon-primary); z-index: 3;
   opacity: 0; pointer-events: none;
   transition: opacity .15s ease, transform .15s, background .15s;
 }
-.latest-btn.show { opacity: 1; pointer-events: auto; }
-.latest-btn:active { transform: scale(.94); background: var(--bg-secondary); }
-.latest-btn svg { width: 22px; height: 22px; }
-/* zoom to default: 28px circle in the bottom-right corner of the plot; only while the bar count differs from the orientation default */
-.zoom-btn { position: absolute; right: 10px; bottom: 28px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg-primary); border: .5px solid var(--divider); box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; color: var(--icon-secondary); z-index: 3; opacity: 0; pointer-events: none; transition: opacity .15s ease, background .15s; }
-.zoom-btn::after { content: ""; position: absolute; inset: -8px; }
-.zoom-btn.show { opacity: 1; pointer-events: auto; }
-.zoom-btn:active { background: var(--bg-secondary); }
-.zoom-btn svg { width: 18px; height: 18px; }
+.latest-btn.show, .zoom-btn.show { opacity: 1; pointer-events: auto; }
+.latest-btn:active, .zoom-btn:active { transform: scale(.94); background: var(--bg-secondary); }
+.latest-btn svg, .zoom-btn svg { stroke-width: 2; }
+.latest-btn { right: 72px; bottom: 40px; width: 40px; height: 40px; }
+.latest-btn svg { width: 20px; height: 20px; }
+/* zoom to default: the smaller one (30), centered in the price axis column (outside the plot, so it hides no candles);
+   y labels are dropped in its band so it never covers a number; only while the bar count differs from the orientation default */
+.zoom-btn { right: 17px; bottom: 45px; width: 30px; height: 30px; }
+.zoom-btn::after { content: ""; position: absolute; inset: -7px; }   /* 44pt hit area */
+.zoom-btn svg { width: 16px; height: 16px; }
 /* popover cards (event details, in-drawer menus) - normal light app UI */
 .pop {
   position: absolute; z-index: 6; width: 260px;
@@ -1525,7 +1527,7 @@ Chart.prototype.draw = function () {
     const cr = this.root.querySelector('.ch-cmprow'); const crB = cr && cr.offsetParent ? cr.getBoundingClientRect().bottom - svg.getBoundingClientRect().top : 0;
     const minTagY = Math.max(yMin + 10, crB + 12);
     for (let k = 0; k < tagItems.length; k++) { const lim = k ? tagItems[k - 1].y + 21 : minTagY; if (tagItems[k].y < lim) tagItems[k].y = lim; }
-    const maxY = plotBottom - 44;   /* above the zoom / latest buttons in the bottom-right corner */
+    const maxY = plotBottom - 66;   /* tag stays above the zoom button band in the price axis */
     for (let k = tagItems.length - 1; k >= 0; k--) { const lim = k === tagItems.length - 1 ? maxY : tagItems[k + 1].y - 21; if (tagItems[k].y > lim) tagItems[k].y = lim; }
   }
   const cmpTags = tagItems.map(it => `<g class="tag cmp"><rect x="${plotW + 3}" y="${(r(it.y) - 9.5).toFixed(1)}" width="${AX - 6}" height="19" rx="4" style="fill:${it.color}"/><text x="${plotW + AX / 2}" y="${(r(it.y) + 3.5).toFixed(1)}" text-anchor="middle">${it.text}</text></g>`).join('');
@@ -1540,7 +1542,7 @@ Chart.prototype.draw = function () {
     const y = r(yAt(v)) + .5;
     if (y < yMin || y > yMax || (!cmpPct && v < 0)) continue;   /* a zoomed-out price axis shows no negative prices */
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
-    if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the zoom button (kept even while it is hidden, so labels never jump) */
+    if (y > plotBottom - 60) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the zoom button (kept even while it is hidden, so labels never jump) */
     if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
   }
 
