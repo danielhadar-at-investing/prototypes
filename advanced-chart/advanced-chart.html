@@ -478,7 +478,7 @@ svg { display: block; }
 
 /* The two "put the view back" buttons are one family: white circle, 1px divider border, same shadow, primary icon, 2px stroke.
    They share one center line (60px above the container bottom = 36px above the plot bottom).
-   "Back to latest bar" (TradingView style): the bigger one (40), over the volume pane just left of the price axis;
+   "Back to latest bar" (TradingView style): same size as zoom to default (36), over the volume pane just left of the price axis;
    only visible while the view is scrolled away from the latest bar */
 .latest-btn, .zoom-btn {
   position: absolute; border-radius: 50%;
@@ -491,15 +491,12 @@ svg { display: block; }
 }
 .latest-btn.show, .zoom-btn.show { opacity: 1; pointer-events: auto; }
 .latest-btn:active, .zoom-btn:active { transform: scale(.94); background: var(--bg-secondary); }
-.latest-btn svg { stroke-width: 2; }
-.zoom-btn svg { stroke-width: 2; }
-.latest-btn { right: 72px; bottom: 40px; width: 40px; height: 40px; }
-.latest-btn svg { width: 20px; height: 20px; }
-/* zoom to default: the smaller one (30), centered in the price axis column (outside the plot, so it hides no candles);
+.latest-btn svg, .zoom-btn svg { width: 20px; height: 20px; stroke-width: 2; }
+.latest-btn { right: 72px; bottom: 42px; width: 36px; height: 36px; }   /* 8px left of the price axis */
+/* zoom to default (36), centered in the price axis column (outside the plot, so it hides no candles);
    y labels are dropped in its band so it never covers a number; only while the bar count differs from the orientation default */
-.zoom-btn { right: 17px; bottom: 45px; width: 30px; height: 30px; }
-.zoom-btn::after { content: ""; position: absolute; inset: -7px; }   /* 44pt hit area */
-.zoom-btn svg { width: 18px; height: 18px; }
+.zoom-btn { right: 14px; bottom: 42px; width: 36px; height: 36px; }   /* centered in the 64px price axis column */
+.zoom-btn::after { content: ""; position: absolute; inset: -4px; }   /* 44pt hit area */
 /* popover cards (event details, in-drawer menus) - normal light app UI */
 .pop {
   position: absolute; z-index: 6; width: 260px;
@@ -1528,7 +1525,7 @@ Chart.prototype.draw = function () {
     const cr = this.root.querySelector('.ch-cmprow'); const crB = cr && cr.offsetParent ? cr.getBoundingClientRect().bottom - svg.getBoundingClientRect().top : 0;
     const minTagY = Math.max(yMin + 10, crB + 12);
     for (let k = 0; k < tagItems.length; k++) { const lim = k ? tagItems[k - 1].y + 21 : minTagY; if (tagItems[k].y < lim) tagItems[k].y = lim; }
-    const maxY = plotBottom - 66;   /* tag stays above the zoom button band in the price axis */
+    const maxY = plotBottom - 70;   /* tag stays above the zoom button band in the price axis */
     for (let k = tagItems.length - 1; k >= 0; k--) { const lim = k === tagItems.length - 1 ? maxY : tagItems[k + 1].y - 21; if (tagItems[k].y > lim) tagItems[k].y = lim; }
   }
   const cmpTags = tagItems.map(it => `<g class="tag cmp"><rect x="${plotW + 3}" y="${(r(it.y) - 9.5).toFixed(1)}" width="${AX - 6}" height="19" rx="4" style="fill:${it.color}"/><text x="${plotW + AX / 2}" y="${(r(it.y) + 3.5).toFixed(1)}" text-anchor="middle">${it.text}</text></g>`).join('');
@@ -1543,7 +1540,7 @@ Chart.prototype.draw = function () {
     const y = r(yAt(v)) + .5;
     if (y < yMin || y > yMax || (!cmpPct && v < 0)) continue;   /* a zoomed-out price axis shows no negative prices */
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
-    if (y > plotBottom - 60) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the zoom button (kept even while it is hidden, so labels never jump) */
+    if (y > plotBottom - 64) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the zoom button (kept even while it is hidden, so labels never jump) */
     if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
   }
 
