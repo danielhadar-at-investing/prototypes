@@ -743,10 +743,16 @@ svg { display: block; }
 .cl-opt svg { width: 24px; height: 24px; }
 .dt-lvgrid { padding-top: 8px; }
 .dt-sep { width: 1px; height: 22px; background: var(--divider); margin: 0 3px; flex-shrink: 0; }
-.dt-text { position: absolute; z-index: 9; display: none; align-items: center; gap: 6px; padding: 6px; border-radius: 12px; background: var(--bg-primary); box-shadow: 0 4px 16px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.1); }
+/* Inline text box (Text Annotation / Anchored Text / Callout), like the web chart: sits on the text itself, blue 1.5px border,
+   16px type so iOS never zooms into the field, plus a V button to confirm (Enter also confirms; empty + V cancels) */
+.dt-text { position: absolute; z-index: 13; display: none; align-items: center; gap: 6px; }
 .dt-text.on { display: flex; }
-.dt-text input { width: 160px; height: 34px; border: 0; border-radius: 8px; background: var(--bg-secondary); padding: 0 10px; font: inherit; font-size: 15px; color: var(--text-primary); outline: none; }
-.dt-text-done { height: 34px; padding: 0 12px; border-radius: 8px; background: var(--text-active); color: #FFF; font-size: 14px; font-weight: 600; }
+.dt-text input { width: 120px; min-width: 120px; max-width: 220px; height: 32px; box-sizing: border-box; border: 1.5px solid var(--text-active); border-radius: 6px; background: var(--bg-primary); padding: 0 8px; font: inherit; font-size: 16px; font-weight: 510; color: var(--text-primary); outline: none; box-shadow: 0 2px 8px rgba(37,99,235,.15); }
+.dt-text input::placeholder { color: var(--text-secondary); font-weight: 400; }
+.dt-text-done { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--text-active); color: #FFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,.16); position: relative; }
+.dt-text-done::after { content: ""; position: absolute; inset: -6px; }   /* 44pt hit area */
+.dt-text-done svg { width: 18px; height: 18px; }
+.dt-text-done:active { transform: scale(.94); }
 .dt-sb { padding: 4px 0 8px; }
 .dt-seg { margin: 6px var(--margin) 4px; }
 .dt-seg .seg-opt { height: 52px; }
@@ -4083,7 +4089,7 @@ function dtPlaceUp(chart, p, canceled) {
   if (pl.m.hk === 'free') { if (pl.pts.length >= 2) dtCommit(pl.pts); else { pl.pts = []; chart.draw(); } return; }
   const q = pl.prev || dtSnap(chart, p); pl.prev = null; pl.pts.push(q);
   if (pl.m.hk === 'poly') { if (pl.pts.length >= 30) { dtPolyDone(); return; } dtBanner(); chart.draw(); return; }
-  if (pl.m.text && pl.pts.length === pl.m.text) { pl.awaitText = true; dtBanner(); chart.draw(); dtTextOpen(chart, q); return; }
+  if (pl.m.text && pl.pts.length === pl.m.text) { pl.awaitText = true; dtBanner(); chart.draw(); dtTextOpen(chart, q, { center: pl.name === 'Callout' }); return; }
   if (pl.pts.length >= pl.m.n) { dtCommit(pl.pts); return; }
   dtBanner(); chart.draw();
 }
@@ -4106,22 +4112,48 @@ function dtCommit(pts, text) {
   markDirty(); renderBadges(); rerenderLayers(); dtActive().draw();
 }
 /* inline text field for text tools (Enter or Done commits, empty cancels) */
-function dtTextOpen(chart, q) {
+/* Inline text box. Placing: opens on the tapped point, V commits the drawing. Editing (toolbar Text): opens on the drawing's
+   own text, prefilled, V saves. Callout text is centered on its point; the others start at it. */
+function dtTextOpen(chart, q, opt) {
+  opt = opt || {};
   const area = chart.root.querySelector('.chart-area'); let el = area.querySelector('.dt-text');
   if (!el) {
     el = document.createElement('div'); el.className = 'dt-text';
-    el.innerHTML = `<input type="text" placeholder="Add text" enterkeyhint="done" autocomplete="off" aria-label="Text"><button class="dt-text-done">Done</button>`;
+    el.innerHTML = `<input type="text" placeholder="Add text" enterkeyhint="done" autocomplete="off" aria-label="Text"><button class="dt-text-done" aria-label="Done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></button>`;
     area.appendChild(el);
-    const done = () => { const pl = DRW.placing; if (!pl) return; const v = el.querySelector('input').value.trim(); if (!v) { dtCancelPlacing(); return; } dtCommit(pl.pts, v); };
-    el.querySelector('button').addEventListener('click', e => { e.stopPropagation(); done(); });
-    el.querySelector('input').addEventListener('keydown', e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') dtCancelPlacing(); });
+    const inp = el.querySelector('input');
+    const fit = () => { inp.style.width = Math.min(220, Math.max(120, inp.value.length * 9.6 + 20)) + 'px'; };
+    inp.addEventListener('input', fit); el._fit = fit;
+    el.querySelector('button').addEventListener('pointerdown', e => e.preventDefault());   /* keep the keyboard up until V is handled */
+    el.querySelector('button').addEventListener('click', e => { e.stopPropagation(); el._done && el._done(); });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') el._done && el._done(); if (e.key === 'Escape') el._cancel && el._cancel(); });
   }
-  const g = chart.geom, x = clamp(g.xAt(q.b) - 8, 6, Math.max(6, g.plotW - 230)), y = clamp(g.yAt(q.p) + 12, 50, Math.max(50, g.plotBottom - 56));
-  el.style.left = x + 'px'; el.style.top = y + 'px';
-  el.querySelector('input').value = ''; el.classList.add('on');
-  setTimeout(() => { try { el.querySelector('input').focus(); } catch (_) {} }, 30);
+  const inp = el.querySelector('input');
+  el._done = opt.onDone || (() => { const pl = DRW.placing; if (!pl) return; const v = inp.value.trim(); if (!v) { dtCancelPlacing(); return; } dtCommit(pl.pts, v); });
+  el._cancel = opt.onCancel || dtCancelPlacing;
+  inp.value = opt.value || ''; el._fit();
+  const g = chart.geom, w = parseFloat(inp.style.width) + 38;
+  const px = g.xAt(q.b), py = g.yAt(q.p);
+  const x0 = opt.center ? px - (w - 38) / 2 : px - 9;   /* the box's text lands on the drawing's text */
+  const top = opt.center ? py - 11 : py - 22;
+  el.style.left = clamp(x0, 6, Math.max(6, g.plotW - w - 6)) + 'px';
+  el.style.top = clamp(top, 40, Math.max(40, g.plotBottom - 40)) + 'px';
+  el.classList.add('on');
+  setTimeout(() => { try { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } catch (_) {} }, 30);
 }
-function dtTextClose() { document.querySelectorAll('.dt-text.on').forEach(el => { el.classList.remove('on'); const i = el.querySelector('input'); if (i) i.blur(); }); }
+function dtTextClose() { document.querySelectorAll('.dt-text.on').forEach(el => { el.classList.remove('on'); el._done = el._cancel = null; const i = el.querySelector('input'); if (i) i.blur(); }); }
+/* toolbar Text on a selected text drawing: edit in place instead of a sheet */
+function dtTextEdit(D, m) {
+  const chart = dtActive(), k = Math.max(0, (m.text || 1) - 1), q = D.pts[k] || D.pts[0];
+  dtTextOpen(chart, q, { value: D.text || '', center: D.name === 'Callout',
+    onDone: () => { const v = document.querySelector('.dt-text.on input').value.trim(); dtTextClose(); if (v) { D.text = v; dtApply(); } },
+    onCancel: () => dtTextClose() });
+}
+/* editing: a tap anywhere outside the box saves and closes it (placing keeps its own flow) */
+document.addEventListener('pointerdown', e => {
+  const el = document.querySelector('.dt-text.on'); if (!el || DRW.placing || el.contains(e.target)) return;
+  el._done && el._done();
+}, true);
 function dtSchedule(chart) { if (!chart._dtRaf) chart._dtRaf = requestAnimationFrame(() => { chart._dtRaf = 0; chart.draw(); }); }
 
 /* ---- selection + dragging ---- */
@@ -4214,7 +4246,7 @@ function dtSyncBar() {
     if (DRW.placing && chart === dtActive()) {   /* rotation keeps an in-progress placement: banner and text field follow the active chart */
       if (!bn) dtBanner();
       const tf = document.querySelector('.dt-text.on');
-      if (DRW.placing.awaitText && tf && !root.contains(tf)) { const v = tf.querySelector('input').value; dtTextClose(); dtTextOpen(chart, DRW.placing.pts[DRW.placing.pts.length - 1]); root.querySelector('.dt-text input').value = v; }
+      if (DRW.placing.awaitText && tf && !root.contains(tf)) { const v = tf.querySelector('input').value; dtTextClose(); dtTextOpen(chart, DRW.placing.pts[DRW.placing.pts.length - 1], { center: DRW.placing.name === 'Callout' }); root.querySelector('.dt-text input').value = v; }
     }   /* position only: rebuilding the banner mid-tap would drop the Cancel click */
     if (!el) { el = document.createElement('div'); el.className = 'dt-bar'; el.setAttribute('role', 'toolbar'); area.appendChild(el); el.addEventListener('click', e => { const b = e.target.closest('[data-dt]'); if (b) { e.stopPropagation(); dtBarAction(b.dataset.dt); } }); }
     const show = !!(D && !D.hidden && !DRW.placing && chart === dtActive() && !(DRW.drag && DRW.drag.moved) && chart.geom && !chart.geom.pct);
@@ -4233,6 +4265,7 @@ function dtBarAction(a) {
   if (a === 'close') { dtSelect(null); return; }
   if (a === 'trash') { dtDelete(D.id, true); return; }
   if (a === 'color') { if (DT_LEVELS[D.name]) dtOpenLevels(D); else openColorSheet({ color: D.st.c || '', onPick: c => { D.st.c = c; dtApply(); } }); return; }
+  if (a === 'text') { dtTextEdit(D, m); return; }
   dtOpenSheet(a, D, m);
 }
 /* multi-color tools: a sheet listing every level with its value and swatch; a swatch opens the palette as an inner screen with Back */
