@@ -197,6 +197,7 @@ svg { display: block; }
 .layout-btn .layout-name { font-size: 14px; font-weight: 510; letter-spacing: -.2px; max-width: 48px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 2px; }
 .layout-btn .layout-name:empty, .layout-btn .layout-name:empty + .chev { display: none; }
 #viewLandscape .layout-btn .layout-name { max-width: 110px; }
+#viewPortrait .layout-btn .layout-name, #viewPortrait .layout-btn .chev { display: none; }   /* portrait: no room for the name once the settings cog joined the bar; the active layout shows in landscape and in the Layouts drawer */
 /* layouts list rows */
 .lay-row { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 6px var(--margin); position: relative; transition: background .15s; }
 .lay-row:active { background: rgba(128,128,128,.1); }
@@ -488,28 +489,15 @@ svg { display: block; }
   transition: opacity .15s ease, transform .15s, background .15s;
 }
 .latest-btn.show { opacity: 1; pointer-events: auto; }
-.chart-module.settings-open .latest-btn { opacity: 0; pointer-events: none; }   /* keep clear of the settings popover */
 .latest-btn:active { transform: scale(.94); background: var(--bg-secondary); }
 .latest-btn svg { width: 22px; height: 22px; }
-.gear-btn {
-  position: absolute; right: 10px; bottom: 28px;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--bg-primary); border: .5px solid var(--divider);
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--icon-secondary); z-index: 3;
-}
-.gear-btn::after { content: ""; position: absolute; inset: -8px; }   /* 44pt hit area */
-/* zoom to default: same 28px circle, 8px above the cog; only while the bar count differs from the orientation default */
-.zoom-btn { position: absolute; right: 10px; bottom: 64px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg-primary); border: .5px solid var(--divider); box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; color: var(--icon-secondary); z-index: 3; opacity: 0; pointer-events: none; transition: opacity .15s ease, background .15s; }
+/* zoom to default: 28px circle in the bottom-right corner of the plot; only while the bar count differs from the orientation default */
+.zoom-btn { position: absolute; right: 10px; bottom: 28px; width: 28px; height: 28px; border-radius: 50%; background: var(--bg-primary); border: .5px solid var(--divider); box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; align-items: center; justify-content: center; color: var(--icon-secondary); z-index: 3; opacity: 0; pointer-events: none; transition: opacity .15s ease, background .15s; }
 .zoom-btn::after { content: ""; position: absolute; inset: -8px; }
 .zoom-btn.show { opacity: 1; pointer-events: auto; }
-.chart-module.settings-open .zoom-btn { opacity: 0; pointer-events: none; }
 .zoom-btn:active { background: var(--bg-secondary); }
 .zoom-btn svg { width: 18px; height: 18px; }
-.gear-btn:active { background: var(--bg-secondary); }
-.gear-btn svg { width: 18px; height: 18px; }
-/* popover cards (settings, event details) - normal light app UI */
+/* popover cards (event details, in-drawer menus) - normal light app UI */
 .pop {
   position: absolute; z-index: 6; width: 260px;
   background: var(--bg-primary); border-radius: 12px;
@@ -519,7 +507,6 @@ svg { display: block; }
   pointer-events: none; transition: opacity .16s var(--ease-ios), transform .2s var(--ease-spring);
 }
 .pop.open { opacity: 1; transform: none; pointer-events: auto; }
-.pop-head { font-size: 11px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--text-secondary); padding: 2px 14px 6px; }
 .set-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; padding: 0 14px; }   /* one cell height for every row, single-line rows centered */
 .set-main { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .set-label { font-size: 14px; font-weight: 400; color: var(--text-primary); }
@@ -528,7 +515,6 @@ svg { display: block; }
 .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #FFF; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s var(--ease-ios); }
 .sw.on { background: var(--accent-orange); }
 .sw.on::after { transform: translateX(16px); }
-.settings-pop { right: 10px; bottom: 62px; }
 .set-div { height: .5px; background: var(--divider); margin: 4px 0; }
 .set-row.set-action .set-label { color: var(--text-primary); }
 .set-row.set-action svg { width: 14px; height: 14px; color: var(--text-secondary); }
@@ -734,6 +720,16 @@ svg { display: block; }
 .sheet.drawer.h-dtlv { height: min(560px, 94%); }
 .sheet.drawer.h-dtlv .sheet-body { display: flex; flex-direction: column; overflow: hidden; }
 .sheet.dt-levels .sheet-title { padding: 0 52px 8px; }
+/* chart settings drawer (top bar cog): switches + actions; Chart layout is an inner screen with Back */
+.sheet.drawer.h-settings { height: min(510px, 94%); }   /* hugs the root screen; Chart layout fits inside the same height */
+.sheet.drawer.h-settings .sheet-body { display: flex; flex-direction: column; overflow: hidden; }
+.sheet.set-sheet .sheet-title { padding: 0 52px 8px; }
+.is-row.destructive .is-chev { color: var(--red-down); }   /* Reset chart: label and chevron in red */
+.cl-row { display: flex; align-items: center; gap: 8px; padding: 0 var(--margin) 10px; }
+.cl-n { width: 20px; flex-shrink: 0; font-size: 15px; font-weight: 510; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.cl-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.iv-chip.cl-opt { width: 56px; min-width: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.cl-opt svg { width: 24px; height: 24px; }
 .dt-lvgrid { padding-top: 8px; }
 .dt-sep { width: 1px; height: 22px; background: var(--divider); margin: 0 3px; flex-shrink: 0; }
 .dt-text { position: absolute; z-index: 9; display: none; align-items: center; gap: 6px; padding: 6px; border-radius: 12px; background: var(--bg-primary); box-shadow: 0 4px 16px rgba(0,0,0,.16), 0 0 0 .5px rgba(0,0,0,.1); }
@@ -1353,7 +1349,7 @@ const ICO = {
    CHART MODULE MARKUP (shared by portrait + landscape)
    ============================================================ */
 function chartModuleHTML(id, land) {
-  /* Portrait: top bar = [back][SNDK][+] | (empty center) | [save][layouts] | separator | [bell][camera]; bottom bar = [interval][type][pencil][layers][close].
+  /* Portrait: top bar = [back][SNDK][+] | (empty center) | [save][layouts] | separator | [bell][camera] | separator | [settings]; bottom bar = [interval][type][pencil][layers][close].
      Landscape merges both into one bar in that order. */
   const plusBtn   = `<button class="tb-btn" data-act="add" aria-label="Add symbol">${ICO.plus}</button>`;
   const bellBtn   = `<button class="tb-btn" data-act="alert" aria-label="Create alert">${ICO.bell}</button>`;
@@ -1361,6 +1357,7 @@ function chartModuleHTML(id, land) {
   const saveBtn   = `<button class="tb-btn save-btn" data-act="save-layout" aria-label="Save layout">${ICO.floppy}<span class="save-dot"></span></button>`;
   const folderBtn = `<button class="tb-btn layout-btn" data-act="layouts" aria-label="Layouts">${ICO.folder}<span class="layout-name"></span>${ICO.chev}</button>`;
   const cameraBtn = `<button class="tb-btn" data-act="camera" aria-label="Share a screenshot">${ICO.camera}</button>`;
+  const cogBtn    = `<button class="tb-btn" data-act="settings" aria-label="Chart settings">${ICO.cog}</button>`;   /* own section at the far right: opens the Settings drawer */
   const symBtn    = `<button class="tb-btn tb-text tb-sym" data-act="symbol">SNDK</button>`;
   const ivBtn     = `<button class="tb-btn tb-text" data-act="interval" aria-label="Interval and date range"><span class="interval-label">${state.interval}</span></button>`;
   const typeBtn   = `<button class="tb-btn" data-act="type" aria-label="Chart type"><span class="type-icon">${ICO.candle}</span></button>`;
@@ -1371,8 +1368,8 @@ function chartModuleHTML(id, land) {
   const div       = `<span class="tb-div"></span>`;
 
   const topBar = land
-    ? `<div class="chart-toolbar top">${backBtn}${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}</div>`
-    : `<div class="chart-toolbar top three"><div class="tb-l">${backBtn}${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}</div></div>`;
+    ? `<div class="chart-toolbar top">${backBtn}${symBtn}${plusBtn}${div}${ivBtn}${typeBtn}${div}${pencilBtn}${indBtn}${layersBtn}<div class="tb-spacer"></div>${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}${sep}${cogBtn}</div>`
+    : `<div class="chart-toolbar top three"><div class="tb-l">${backBtn}${symBtn}${plusBtn}</div><div class="tb-c"></div><div class="tb-r">${saveBtn}${folderBtn}${sep}${bellBtn}${cameraBtn}${sep}${cogBtn}</div></div>`;
   const bottomBar = land ? '' :
     `<div class="chart-toolbar bottom spread">${ivBtn}${typeBtn}${pencilBtn}${indBtn}${layersBtn}</div>`;
   const logo = logoHTML('SNDK', 20).replace('class="sym-logo"', 'class="sym-logo ch-logo" aria-hidden="true"');
@@ -1393,8 +1390,6 @@ function chartModuleHTML(id, land) {
       <div class="chart-head">${header}</div>
       <button class="latest-btn" data-act="latest" aria-label="Scroll to latest bar">${ICO.chevrons}</button>
       <button class="zoom-btn" data-act="zoom-default" aria-label="Zoom to default">${ICO.zoomReset}</button>
-      <button class="gear-btn" data-act="settings" aria-label="Chart settings">${ICO.cog}</button>
-      <div class="pop settings-pop"></div>
       <div class="pop ev-card"></div>
       <div class="an-wrap"><button class="an-pill" data-act="analyze"><span class="an-badge">AI</span>Analyze Chart</button></div>
     </div>
@@ -1414,7 +1409,6 @@ function Chart(root, land) {
   this.head = root.querySelector('.chart-head');
   this.pxEl = root.querySelector('.live-px');
   this.chgEl = root.querySelector('.live-chg');
-  this.settingsEl = root.querySelector('.settings-pop');
   this.evCard = root.querySelector('.ev-card');
   this.evOpen = null;
   this.latestBtn = root.querySelector('.latest-btn');
@@ -1530,7 +1524,7 @@ Chart.prototype.draw = function () {
     const cr = this.root.querySelector('.ch-cmprow'); const crB = cr && cr.offsetParent ? cr.getBoundingClientRect().bottom - svg.getBoundingClientRect().top : 0;
     const minTagY = Math.max(yMin + 10, crB + 12);
     for (let k = 0; k < tagItems.length; k++) { const lim = k ? tagItems[k - 1].y + 21 : minTagY; if (tagItems[k].y < lim) tagItems[k].y = lim; }
-    const maxY = plotBottom - 44;   /* above the gear / latest buttons in the bottom-right corner */
+    const maxY = plotBottom - 44;   /* above the zoom / latest buttons in the bottom-right corner */
     for (let k = tagItems.length - 1; k >= 0; k--) { const lim = k === tagItems.length - 1 ? maxY : tagItems[k + 1].y - 21; if (tagItems[k].y > lim) tagItems[k].y = lim; }
   }
   const cmpTags = tagItems.map(it => `<g class="tag cmp"><rect x="${plotW + 3}" y="${(r(it.y) - 9.5).toFixed(1)}" width="${AX - 6}" height="19" rx="4" style="fill:${it.color}"/><text x="${plotW + AX / 2}" y="${(r(it.y) + 3.5).toFixed(1)}" text-anchor="middle">${it.text}</text></g>`).join('');
@@ -1545,7 +1539,7 @@ Chart.prototype.draw = function () {
     const y = r(yAt(v)) + .5;
     if (y < yMin || y > yMax || (!cmpPct && v < 0)) continue;   /* a zoomed-out price axis shows no negative prices */
     grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`;
-    if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the gear / reset buttons */
+    if (y > plotBottom - 40) { grid += `<line class="grid" x1="0" x2="${plotW}" y1="${y}" y2="${y}"/>`; continue; }   /* no label under the zoom button (kept even while it is hidden, so labels never jump) */
     if (!nearTag(y)) ylab += `<text class="ax ylab" x="${plotW + 8}" y="${y + 4}">${cmpPct ? fmtPct(v) : fmt(v)}</text>`;
   }
 
@@ -1827,7 +1821,6 @@ Chart.prototype.createAlert = function () {
 /* ---- Event card ---- */
 Chart.prototype.openEvent = function (k) {
   const ev = EVENTS[k]; if (!ev) return;
-  this.closeSettings();
   this.evOpen = k;
   this.evCard.innerHTML =
     `<div class="ev-title"><span class="ev-dot ${ev.type}">${ev.type}</span>${ev.title}</div>` +
@@ -1847,7 +1840,7 @@ Chart.prototype.placeEvent = function () {
 };
 Chart.prototype.closeEvent = function () { this.evOpen = null; this.evCard.classList.remove('open'); };
 
-/* ---- Settings popover ---- */
+/* ---- Settings drawer (top bar cog) ---- */
 const SETTINGS_ROWS = [
   ['extended', 'Extended hours', 'Intraday timeframes only'],
   ['events', 'Events', 'Dividends, splits, earnings, news'],
@@ -1855,17 +1848,48 @@ const SETTINGS_ROWS = [
   ['invert', 'Invert scale', ''],
   ['countdown', 'Countdown to bar close', '']
 ];
-Chart.prototype.renderSettings = function () {
-  this.settingsEl.innerHTML = `<div class="pop-head">Settings</div>` + SETTINGS_ROWS.map(([k, label, sub]) =>
-    `<div class="set-row" data-set="${k}"><div class="set-main"><span class="set-label">${label}</span>${sub ? `<span class="set-sub">${sub}</span>` : ''}</div><span class="sw ${state.settings[k] ? 'on' : ''}"></span></div>`).join('') +
-    `<div class="set-div"></div><div class="set-row set-action danger" data-setact="reset"><span class="set-label">Reset chart</span>${ICO.chevSm}</div>`;
-};
-Chart.prototype.openSettings = function () { this.closeEvent(); this.renderSettings(); this.settingsEl.classList.add('open'); this.root.classList.add('settings-open'); };
-Chart.prototype.closeSettings = function () { this.settingsEl.classList.remove('open'); this.root.classList.remove('settings-open'); };
+/* Chart layout (as the web): pane count -> split variants. Visual only, the prototype chart stays single-pane */
+const CHART_LAYOUTS = [['1', ['1']], ['2', ['2c', '2r']], ['3', ['3c', '3r', '3l', '3t']], ['4', ['4g', '4c', '4r']]];
+const CL_NAMES = { '1': 'Single chart', '2c': '2 charts side by side', '2r': '2 charts stacked', '3c': '3 charts side by side', '3r': '3 charts stacked',
+  '3l': '1 large chart left, 2 stacked right', '3t': '1 large chart on top, 2 below', '4g': '4 charts in a grid', '4c': '4 charts side by side', '4r': '4 charts stacked' };
+const CL_LINES = { '1': '', '2c': 'M12 4v16', '2r': 'M3 12h18', '3c': 'M9 4v16M15 4v16', '3r': 'M3 9.33h18M3 14.67h18', '3l': 'M12 4v16M12 12h9',
+  '3t': 'M3 12h18M12 12v8', '4g': 'M12 4v16M3 12h18', '4c': 'M7.5 4v16M12 4v16M16.5 4v16', '4r': 'M3 8h18M3 12h18M3 16h18' };
+let chartLayout = '1';
+const clIcon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/>${CL_LINES[k] ? `<path d="${CL_LINES[k]}"/>` : ''}</svg>`;
+function settingsMainHTML() {
+  const chev = `<span class="is-chev">${ICO.chevSm}</span>`;
+  return `<div class="is-grp">${SETTINGS_ROWS.map(([k, label, sub]) =>
+      `<div class="row is-row" data-set="${k}"><div class="row-main"><span class="is-lbl">${label}</span>${sub ? `<span class="row-sub">${sub}</span>` : ''}</div><button class="sw ${state.settings[k] ? 'on' : ''}" aria-label="${label}"></button></div>`).join('')}</div>` +
+    `<div class="is-grp"><div class="row is-row" data-setact="layout"><span class="is-lbl">Chart layout</span>${chev}</div>` +
+    `<div class="row is-row destructive" data-setact="reset"><span class="is-lbl">Reset chart</span>${chev}</div>` +
+    `<div class="row is-row" data-setact="legacy"><span class="is-lbl">Switch to the old chart</span>${chev}</div></div>`;
+}
+function settingsLayoutHTML() {
+  return `<div class="iv-title">Layout</div>` + CHART_LAYOUTS.map(([n, opts]) =>
+    `<div class="cl-row"><span class="cl-n">${n}</span><div class="cl-opts">${opts.map(o => `<button class="iv-chip cl-opt ${o === chartLayout ? 'active' : ''}" data-setlay="${o}" aria-label="${CL_NAMES[o]}">${clIcon(o)}</button>`).join('')}</div></div>`).join('');
+}
+function openSettingsDrawer() {
+  Object.values(charts).forEach(c => c.closeEvent());
+  openSheet(`<button class="is-back" data-setact="back" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></svg>Back</button><span id="setTitle">Settings</span>`,
+    `<div class="is-screens"><div class="is-screen is-main" id="setMain">${settingsMainHTML()}</div><div class="is-screen is-sub" id="setSub">${settingsLayoutHTML()}</div></div>`, null, 'settings');
+  sheetEl.classList.add('set-sheet');
+}
+function settingsInner(on) {
+  sheetEl.classList.toggle('is-inner', on);
+  document.getElementById('setTitle').textContent = on ? 'Chart layout' : 'Settings';
+  if (on) document.getElementById('setSub').scrollTop = 0;
+}
+function settingsAction(a) {
+  if (a === 'layout') { settingsInner(true); return; }
+  if (a === 'back') { settingsInner(false); return; }
+  closeOverlays();
+  if (a === 'reset') { const c = charts[state.orientation]; Object.values(charts).forEach(x => { x.pz = null; }); c.scrollToLatest(); c.draw(); return; }
+  if (a === 'legacy') toast('Closes this chart, opens the legacy chart');
+}
 function toggleSetting(k) {
   state.settings[k] = !state.settings[k];
   markDirty();
-  Object.values(charts).forEach(c => { if (c.settingsEl.classList.contains('open')) c.renderSettings(); });
+  sheetEl.querySelectorAll(`[data-set="${k}"] .sw`).forEach(sw => sw.classList.toggle('on', state.settings[k]));   /* the drawer stays open, the chart behind updates live */
   if (k === 'events' && !state.settings.events) Object.values(charts).forEach(c => c.closeEvent());
   drawAll();
 }
@@ -2173,7 +2197,7 @@ Chart.prototype.bind = function () {
     if (!self.geom) return;
     const badge = e.target.closest && e.target.closest('[data-ev]');
     if (badge) { self.openEvent(+badge.dataset.ev); return; }   /* badge tap: card, no gesture */
-    self.closeEvent(); self.closeSettings(); self.cancelScroll();
+    self.closeEvent(); self.cancelScroll();
     clearTimeout(self._pillT); self.hidePill();   /* a new touch cancels a lingering Create alert pill */
     const p = local(e);
     /* drawings: placing mode takes every touch (no pan, pinch or long press); a selected drawing's handle or body starts a drag */
@@ -3175,18 +3199,20 @@ function openAnalyze() {
   }, 900);
 }
 
-/* Popover interactions: settings switches, event card CTA, tap-away dismiss */
+/* Settings drawer rows, event card CTA, tap-away dismiss */
 document.addEventListener('click', e => {
   const row = e.target.closest('[data-set]');
   if (row) { toggleSetting(row.dataset.set); return; }
   const sa = e.target.closest('[data-setact]');
-  if (sa) { const c = charts[state.orientation]; c.closeSettings(); Object.values(charts).forEach(x => { x.pz = null; }); c.scrollToLatest(); c.draw(); return; }
+  if (sa) { settingsAction(sa.dataset.setact); return; }
+  const sl = e.target.closest('[data-setlay]');
+  if (sl) { chartLayout = sl.dataset.setlay; sheetEl.querySelectorAll('[data-setlay]').forEach(b => b.classList.toggle('active', b === sl)); return; }
   const cta = e.target.closest('[data-evcta]');
   if (cta) { toast(cta.dataset.evcta); Object.values(charts).forEach(c => c.closeEvent()); }
 });
 document.addEventListener('pointerdown', e => {
-  if (e.target.closest && e.target.closest('.pop, .gear-btn, .zoom-btn, [data-ev], .chart-svg')) return;
-  Object.values(charts).forEach(c => { c.closeEvent(); c.closeSettings(); });
+  if (e.target.closest && e.target.closest('.pop, .zoom-btn, [data-ev], .chart-svg')) return;
+  Object.values(charts).forEach(c => c.closeEvent());
 });
 
 /* ============================================================
@@ -4320,7 +4346,7 @@ document.addEventListener('click', e => {
     case 'zoom-default': charts[state.orientation].zoomToDefault(); break;
     case 'layers-panel': openLayersDrawer('drawings'); break;
     case 'legend-toggle': state.legendOpen = !state.legendOpen; renderLegend(); drawAll(); break;
-    case 'settings':   { const c = charts[state.orientation]; if (c.settingsEl.classList.contains('open')) c.closeSettings(); else c.openSettings(); } break;
+    case 'settings':   openSettingsDrawer(); break;
     case 'analyze':    openAnalyze(); break;
   }
 });
