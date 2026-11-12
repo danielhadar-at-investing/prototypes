@@ -725,6 +725,7 @@ svg { display: block; }
 .sheet.drawer.h-settings .sheet-body { display: flex; flex-direction: column; overflow: hidden; }
 .sheet.set-sheet .sheet-title { padding: 0 52px 8px; }
 .is-row.destructive .is-chev { color: var(--red-down); }   /* Reset chart: label and chevron in red */
+.is-row.legacy .is-lbl { font-weight: 600; }   /* Switch to the old chart: bold */
 .cl-row { display: flex; align-items: center; gap: 8px; padding: 0 var(--margin) 10px; }
 .cl-n { width: 20px; flex-shrink: 0; font-size: 15px; font-weight: 510; font-variant-numeric: tabular-nums; color: var(--text-primary); }
 .cl-opts { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1859,10 +1860,10 @@ const clIcon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 function settingsMainHTML() {
   const chev = `<span class="is-chev">${ICO.chevSm}</span>`;
   return `<div class="is-grp">${SETTINGS_ROWS.map(([k, label, sub]) =>
-      `<div class="row is-row" data-set="${k}"><div class="row-main"><span class="is-lbl">${label}</span>${sub ? `<span class="row-sub">${sub}</span>` : ''}</div><button class="sw ${state.settings[k] ? 'on' : ''}" aria-label="${label}"></button></div>`).join('')}</div>` +
-    `<div class="is-grp"><div class="row is-row" data-setact="layout"><span class="is-lbl">Chart layout</span>${chev}</div>` +
-    `<div class="row is-row destructive" data-setact="reset"><span class="is-lbl">Reset chart</span>${chev}</div>` +
-    `<div class="row is-row" data-setact="legacy"><span class="is-lbl">Switch to the old chart</span>${chev}</div></div>`;
+      `<div class="row is-row" data-set="${k}"><div class="row-main"><span class="is-lbl">${label}</span>${sub ? `<span class="row-sub">${sub}</span>` : ''}</div><button class="sw ${state.settings[k] ? 'on' : ''}" aria-label="${label}"></button></div>`).join('')}` +
+    `<div class="row is-row" data-setact="layout"><span class="is-lbl">Chart layout</span>${chev}</div>` +
+    `<div class="row is-row legacy" data-setact="legacy"><span class="is-lbl">Switch to the old chart</span>${chev}</div>` +
+    `<div class="row is-row destructive" data-setact="reset"><span class="is-lbl">Reset chart</span>${chev}</div></div>`;   /* one list, same inset hairline between every row */
 }
 function settingsLayoutHTML() {
   return `<div class="iv-title">Layout</div>` + CHART_LAYOUTS.map(([n, opts]) =>
