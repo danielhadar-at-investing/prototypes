@@ -136,8 +136,8 @@ svg { display: block; }
 #viewLandscape .an-wrap { right: 70px; }
 .an-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  height: 28px; padding: 0 10px 0 7px;   /* center y=18, same as header row 1 (panel y 8 to 28); 4px below the top bar line */
-  border-radius: 10px; border: 1.5px solid var(--text-primary);
+  height: 28px; padding: 0 10px 0 6px;   /* center y=18, same as header row 1 (panel y 8 to 28); 4px below the top bar line */
+  border-radius: 10px; border: 1px solid var(--text-primary);   /* 1px (web ships 1.5px) and 6px left padding (web ships 4px): badge no longer crowds the border */
   background: var(--bg-primary);
   font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap;   /* same type as the company name */
   transition: transform .15s, opacity .15s;
